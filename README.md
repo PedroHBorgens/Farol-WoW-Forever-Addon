@@ -34,11 +34,11 @@ By default the addon follows your client language: **Portuguese** on `ptBR`/`ptP
 
 Run `/wf version` in game. The Interface number it prints goes on the first line of the `.toc` file:
 
-- `WoWForeverInfo.toc` — used by older clients (default **30300**, WotLK 3.3.5a)
-- `WoWForeverInfo_Vanilla.toc` — Classic Era (11507)
+- `WoWForeverInfo.toc` — default — **16001** (WoW Forever, client 1.60.1)
+- `WoWForeverInfo_Vanilla.toc` — WoW Forever and Classic Era (16001, 11507)
 - `WoWForeverInfo_Mainline.toc` — Retail (110205)
 
-Modern clients pick the `.toc` with the matching suffix; older clients only read the first one.
+Clients pick the `.toc` with the matching suffix and fall back to the default one. If a future WoW Forever patch marks the addon as incompatible, update the number from the login screen version (e.g. 1.60.1 → 16001).
 
 ## Security
 

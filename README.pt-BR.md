@@ -35,11 +35,11 @@ a escolha fica salva.
 
 Rode `/wf version` no jogo. O número de Interface que aparecer vai na primeira linha do `.toc`:
 
-- `WoWForeverInfo.toc` — usado por clientes antigos (padrão **30300**, WotLK 3.3.5a)
-- `WoWForeverInfo_Vanilla.toc` — Classic Era (11507)
+- `WoWForeverInfo.toc` — padrão — **16001** (WoW Forever, cliente 1.60.1)
+- `WoWForeverInfo_Vanilla.toc` — WoW Forever e Classic Era (16001, 11507)
 - `WoWForeverInfo_Mainline.toc` — Retail (110205)
 
-Clientes modernos escolhem o `.toc` com sufixo correspondente; clientes antigos leem só o primeiro.
+O cliente escolhe o `.toc` com o sufixo correspondente e, se não houver, usa o padrão. Se um patch futuro do WoW Forever marcar o addon como incompatível, atualize o número a partir da versão da tela de login (ex.: 1.60.1 → 16001).
 
 ## Segurança
 

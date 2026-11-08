@@ -18,7 +18,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - **Hover** the bar for a detailed tooltip: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
 
 ### Appearance
-- Scale 50–200%, background opacity, border, **vertical layout**, **hide in combat** and **hide in instances**.
+- Scale 50–200%, **text size**, **icon size**, background opacity, border, **vertical layout**, **hide in combat** and **hide in instances**.
 
 ### Clock alarms
 - Up to **10 alarms**, using **local** or **server** time, with an optional name.
@@ -60,7 +60,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 - **Passe o mouse** na barra para ver um tooltip detalhado: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.
 
 ### Aparência
-- Escala de 50 a 200%, opacidade do fundo, borda, **barra vertical**, **esconder em combate** e **esconder em instâncias**.
+- Escala de 50 a 200%, **tamanho do texto**, **tamanho dos ícones**, opacidade do fundo, borda, **barra vertical**, **esconder em combate** e **esconder em instâncias**.
 
 ### Alarmes do relógio
 - Até **10 alarmes**, com hora **local** ou do **servidor** e um nome opcional.

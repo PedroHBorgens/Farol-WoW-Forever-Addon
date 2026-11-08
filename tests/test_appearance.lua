@@ -30,7 +30,7 @@ return {
         local lines = 0
         for _ in string.gmatch(text._text, "[^\n]+") do lines = lines + 1 end
         T.eq(lines, 6, "six default items")
-        T.eq(bar(H)._h, 6 * 14 + 14)
+        T.eq(bar(H)._h, 6 * 17 + 14, "line height = biggest of text (11) and icon (14) + 3")
         H:slash("aparencia vertical")
         T.hasnt(H.env.FarolFrame._fontStrings[1]._text, "\n"); T.eq(bar(H)._h, 26)
     end },
@@ -68,6 +68,23 @@ return {
         T.eq(H.sounds, 1)
     end },
 
+    { "text and icon sizes: commands, limits, bar height and quick buttons", function(T, Mock)
+        local H = Mock.new():login()
+        local text = H.env.FarolFrame._fontStrings[1]
+        T.eq(text._fontSize, 11, "default text size"); T.eq(bar(H)._h, 26, "default height unchanged")
+        T.has(text._text, ":14:14:", "default icon size")
+        H:slash("aparencia texto 18"); T.eq(text._fontSize, 18); T.eq(H.env.FarolDB.fontSize, 18)
+        H:slash("aparencia icones 24"); T.has(H.env.FarolFrame._fontStrings[1]._text, ":24:24:")
+        T.eq(H.env.FarolDB.icons, true, "'icones 24' sets the size, does not toggle icons")
+        T.eq(bar(H)._h, 24 + 3 + 9, "bar grows with the biggest element")
+        T.eq(H.env.FarolLootButton._w, 28, "quick buttons follow the icon size")
+        H:slash("aparencia texto 30"); T.has(H:lastMsg(), "tamanho de texto inválido"); T.eq(H.env.FarolDB.fontSize, 18)
+        H:slash("aparencia icone 8"); T.has(H:lastMsg(), "tamanho de ícone inválido"); T.eq(H.env.FarolDB.iconSize, 24)
+        H:slash("aparencia icones"); T.eq(H.env.FarolDB.icons, false, "'icones' alone still toggles")
+        local H2 = Mock.new():login({ fontSize = 99, iconSize = 7.5 })
+        T.eq(H2.env.FarolDB.fontSize, 11); T.eq(H2.env.FarolDB.iconSize, 14, "invalid saved sizes fixed")
+    end },
+
     { "appearance window: steppers, checkboxes and restore defaults", function(T, Mock)
         local H = Mock.new({ locale = "enUS" }):login()
         H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
@@ -83,12 +100,19 @@ return {
         for _ = 1, 15 do H:click(H.env.FarolAppScaleUp) end
         T.eq(H.env.FarolDB.scale, 2, "stops at 200%"); T.eq(H:text(window.scale.value), "200%")
         H:click(H.env.FarolAppBgDown); T.eq(H:text(window.bg.value), "60%")
+        T.eq(H:text(window.font.value), "11"); T.eq(H:text(window.icon.value), "14")
+        for _ = 1, 20 do H:click(H.env.FarolAppFontUp) end
+        T.eq(H.env.FarolDB.fontSize, 24, "text stops at 24"); T.eq(H:text(window.font.value), "24")
+        H:click(H.env.FarolAppIconDown); T.eq(H.env.FarolDB.iconSize, 12, "icons step by 2")
+        for _ = 1, 10 do H:click(H.env.FarolAppIconDown) end
+        T.eq(H.env.FarolDB.iconSize, 10, "icons stop at 10")
         H:check(H.env.FarolApp_vertical, true); T.eq(H.env.FarolDB.vertical, true)
         H:check(H.env.FarolApp_hideCombat, true); T.eq(H.env.FarolDB.hideCombat, true)
         T.eq(H:text(H.env.FarolApp_hideInstance.label), "Hide in dungeons, raids, arenas and battlegrounds")
         H:click(H.env.FarolAppReset)
         local db = H.env.FarolDB
         T.eq(db.scale, 1); T.eq(db.bgAlpha, 0.7); T.eq(db.vertical, false); T.eq(db.hideCombat, false)
+        T.eq(db.fontSize, 11); T.eq(db.iconSize, 14)
         T.eq(H.env.FarolApp_vertical._checked, false, "window refreshed")
     end },
 }

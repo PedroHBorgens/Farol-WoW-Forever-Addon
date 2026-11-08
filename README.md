@@ -93,13 +93,15 @@ after a `/reload` inside that minute (this avoids false alarms).
 Open **Appearance...** in the options menu (or `/farol appearance`):
 
 - **Scale** 50%–200% and **background opacity** 0%–100% (0% = only the text floats on screen), with [-]/[+] buttons.
+- **Text size** 8–24 and **icon size** 10–32, separately (scale enlarges everything together). The bar and the
+  quick buttons next to it adjust automatically.
 - **Vertical bar**: one item per line.
 - **Show border** on/off, **show icons on the bar** (one per item) and **show the warning history button** and **show the loot button**.
 - **Hide in combat** (comes back when the fight ends) and **hide in dungeons, raids, arenas and battlegrounds**.
   Alarms and warnings keep working while the bar is hidden.
 - **Restore defaults** puts everything back.
 
-Commands: `/farol appearance scale 120`, `/farol appearance bg 40`, `/farol appearance vertical`,
+Commands: `/farol appearance scale 120`, `/farol appearance bg 40`, `/farol appearance text 14`, `/farol appearance icons 20`, `/farol appearance vertical`,
 `/farol appearance border`, `/farol appearance combat`, `/farol appearance instance`, `/farol appearance default`.
 
 ## Durability and bag warnings

@@ -10,6 +10,9 @@ local _, ns = ...
 
 local SCALE_MIN, SCALE_MAX, SCALE_STEP = 50, 200, 10  -- em %
 local BG_MIN, BG_MAX, BG_STEP = 0, 100, 10            -- em %
+local FONT_MIN, FONT_MAX, FONT_STEP = 8, 24, 1
+local ICON_MIN, ICON_MAX, ICON_STEP = 10, 32, 2
+local FONT_DEFAULT, ICON_DEFAULT = 11, 14
 
 local Appearance = {}
 ns.Appearance = Appearance
@@ -23,6 +26,12 @@ local STRINGS = {
         app_title     = "Aparência",
         app_scale     = "Escala:",
         app_bg        = "Fundo:",
+        app_font      = "Texto:",
+        app_icon      = "Ícones:",
+        app_set_font  = "tamanho do texto: %d.",
+        app_set_icon  = "tamanho dos ícones: %d.",
+        app_bad_font  = "tamanho de texto inválido: use de 8 a 24.",
+        app_bad_icon  = "tamanho de ícone inválido: use de 10 a 32.",
         app_vertical  = "Barra vertical (um item por linha)",
         app_border    = "Mostrar borda",
         app_combat    = "Esconder em combate",
@@ -38,7 +47,7 @@ local STRINGS = {
         app_restored  = "aparência restaurada ao padrão.",
         app_bad_scale = "escala inválida: use de 50 a 200 (%).",
         app_bad_bg    = "fundo inválido: use de 0 a 100 (%).",
-        app_usage     = "uso: /farol aparencia escala N || fundo N || vertical || borda || icones || botao || botaosaques || combate || instancia || padrao",
+        app_usage     = "uso: /farol aparencia escala N || fundo N || texto N || icones N || vertical || borda || icones || botao || botaosaques || combate || instancia || padrao",
         opt_appearance = "Aparência...",
         help_appearance = "  /farol aparencia     - abrir a janela de aparência (escala, fundo, vertical, esconder em combate)",
     },
@@ -46,6 +55,12 @@ local STRINGS = {
         app_title     = "Appearance",
         app_scale     = "Scale:",
         app_bg        = "Background:",
+        app_font      = "Text:",
+        app_icon      = "Icons:",
+        app_set_font  = "text size: %d.",
+        app_set_icon  = "icon size: %d.",
+        app_bad_font  = "invalid text size: use 8 to 24.",
+        app_bad_icon  = "invalid icon size: use 10 to 32.",
         app_vertical  = "Vertical bar (one item per line)",
         app_border    = "Show border",
         app_combat    = "Hide in combat",
@@ -61,7 +76,7 @@ local STRINGS = {
         app_restored  = "appearance restored to defaults.",
         app_bad_scale = "invalid scale: use 50 to 200 (%).",
         app_bad_bg    = "invalid background: use 0 to 100 (%).",
-        app_usage     = "usage: /farol appearance scale N || bg N || vertical || border || icons || button || lootbutton || combat || instance || default",
+        app_usage     = "usage: /farol appearance scale N || bg N || text N || icons N || vertical || border || icons || button || lootbutton || combat || instance || default",
         opt_appearance = "Appearance...",
         help_appearance = "  /farol appearance   - open the appearance window (scale, background, vertical, hide in combat)",
     },
@@ -135,6 +150,29 @@ local function StepBg(direction)
     SetBgPercent(Clamp(Percent(DB().bgAlpha) + direction * BG_STEP, BG_MIN, BG_MAX))
 end
 
+local function SetSize(key, value, low, high, okKey, badKey)
+    value = tonumber(value)
+    if not value or value ~= math.floor(value) or value < low or value > high then
+        Print(T(badKey))
+        return false
+    end
+    DB()[key] = value
+    Apply()
+    Print(string.format(T(okKey), value))
+    return true
+end
+
+local function SetFontSize(value) return SetSize("fontSize", value, FONT_MIN, FONT_MAX, "app_set_font", "app_bad_font") end
+local function SetIconSize(value) return SetSize("iconSize", value, ICON_MIN, ICON_MAX, "app_set_icon", "app_bad_icon") end
+
+local function StepFont(direction)
+    SetFontSize(Clamp(DB().fontSize + direction * FONT_STEP, FONT_MIN, FONT_MAX))
+end
+
+local function StepIcon(direction)
+    SetIconSize(Clamp(DB().iconSize + direction * ICON_STEP, ICON_MIN, ICON_MAX))
+end
+
 local function SetToggle(key, value)
     DB()[key] = value
     Apply()
@@ -146,6 +184,7 @@ local function RestoreDefaults()
     db.scale, db.bgAlpha, db.border = 1, 0.7, true
     db.vertical, db.hideCombat, db.hideInstance = false, false, false
     db.icons, db.warnButton, db.lootButton = true, true, true
+    db.fontSize, db.iconSize = FONT_DEFAULT, ICON_DEFAULT
     Apply()
     Print(T("app_restored"))
 end
@@ -178,7 +217,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolAppearance", UIParent, ns.backdropTemplate)
-    frame:SetSize(470, 350)
+    frame:SetSize(470, 410)
     frame:SetPoint("CENTER", 0, 40)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -202,9 +241,11 @@ local function CreateWindow()
 
     frame.scale = StepperRow(frame, -54, "FarolAppScale", StepScale)
     frame.bg = StepperRow(frame, -84, "FarolAppBg", StepBg)
+    frame.font = StepperRow(frame, -114, "FarolAppFont", StepFont)
+    frame.icon = StepperRow(frame, -144, "FarolAppIcon", StepIcon)
 
     frame.checks = {}
-    local y = -110
+    local y = -170
     for _, key in ipairs({ "icons", "vertical", "border", "warnButton", "lootButton", "hideCombat", "hideInstance" }) do
         local check = CreateFrame("CheckButton", "FarolApp_" .. key, frame, "UICheckButtonTemplate")
         check:SetSize(24, 24)
@@ -236,6 +277,10 @@ RefreshWindow = function()
     window.scale.value:SetText(Percent(db.scale) .. "%")
     window.bg.label:SetText(T("app_bg"))
     window.bg.value:SetText(Percent(db.bgAlpha) .. "%")
+    window.font.label:SetText(T("app_font"))
+    window.font.value:SetText(tostring(db.fontSize))
+    window.icon.label:SetText(T("app_icon"))
+    window.icon.value:SetText(tostring(db.iconSize))
     for key, check in pairs(window.checks) do
         check.label:SetText(T(TOGGLES[key]))
         check:SetChecked(db[key])
@@ -259,6 +304,8 @@ end
 local WORDS = {
     escala = "scale", scale = "scale",
     fundo = "bg", bg = "bg", background = "bg",
+    texto = "font", fonte = "font", font = "font", text = "font",
+    icone = "iconsize", icon = "iconsize", tamicone = "iconsize", iconsize = "iconsize",
     vertical = "vertical",
     borda = "border", border = "border",
     combate = "hideCombat", combat = "hideCombat",
@@ -279,6 +326,10 @@ function Appearance.HandleCommand(rest)
         SetScalePercent(value)
     elseif action == "bg" then
         SetBgPercent(value)
+    elseif action == "font" then
+        SetFontSize(value)
+    elseif action == "iconsize" or (action == "icons" and value ~= "") then
+        SetIconSize(value) -- "icones 20" = tamanho; "icones" sozinho = liga/desliga
     elseif action == "reset" then
         RestoreDefaults()
     elseif action then

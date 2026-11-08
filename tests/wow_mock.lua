@@ -81,6 +81,8 @@ function Frame:GetScale() return self._scale or 1 end
 function Frame:SetBackdropColor(r, g, b, a) self._bgAlpha = a end
 function Frame:SetBackdropBorderColor(r, g, b, a) self._borderAlpha = a end
 function Frame:SetJustifyH(justify) self._justify = justify end
+function Frame:GetFont() return self._fontPath or "Fonts\\FRIZQT__.TTF", self._fontSize or 10, "" end
+function Frame:SetFont(path, size) self._fontPath, self._fontSize = path, size end
 
 local function NewObject(env, kind, name)
     local object = { _scripts = {}, _events = {}, _kind = kind, _name = name, _shown = true, _env = env }

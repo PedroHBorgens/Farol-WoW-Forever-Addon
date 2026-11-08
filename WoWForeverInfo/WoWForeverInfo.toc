@@ -1,0 +1,8 @@
+## Interface: 30300
+## Title: WoW Forever Info
+## Notes: Painel com FPS, latência, coordenadas e ouro. Gratuito e de código aberto.
+## Author: PedroHBorgens
+## Version: 1.0.0
+## SavedVariables: WoWForeverInfoDB
+
+Core.lua

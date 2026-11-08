@@ -25,6 +25,8 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 |---------------------|--------------------------------------------------------|
 | `/farol`            | Mostra/oculta o painel |
 | `/farol menu`       | Abre o menu de opções (ou clique direito no painel) |
+| `/farol saque`      | Abre a janela de últimos saques |
+| `/farol saque limpar`| Apaga o histórico de saques deste personagem |
 | `/farol alarme`     | Abre a janela de alarmes |
 | `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
 | `/farol soneca`     | Adia o alarme que está tocando (tempo configurado, padrão 5 min) |
@@ -81,6 +83,21 @@ Comandos no chat:
 
 Os alarmes só tocam com o jogo aberto. Um alarme não dispara no mesmo minuto em que foi criado, nem
 depois de um `/reload` dentro desse minuto (isso evita alarmes falsos).
+
+## Janela de últimos saques
+
+Uma janela separada que lista os itens que **você** saqueou ou recebeu, do mais novo para o mais antigo.
+
+- Abra pelo botão **Saques...** no menu de opções, ou digite `/farol saque`.
+- **Mostrar 5 / 10 / 15 / 20** — escolha quantos itens recentes aparecem.
+- **Filtro de qualidade** — marque Inferior, Comum, Incomum, Raro, Épico e Lendário+ (nomes e cores vêm do próprio jogo).
+- Cada linha mostra o ícone, o link do item colorido, a quantidade e a hora. Passe o mouse para ver o tooltip
+  do item; **Shift+clique** coloca o link na sua caixa de chat (você decide se envia).
+- O histórico é salvo **por personagem** (últimos 100 itens). **Limpar** apaga tudo.
+
+Ele lê só as mensagens de saque do próprio jogo sobre **você** ("Você recebe saque: …"), usando os textos do
+cliente, então funciona em qualquer idioma. O saque de outros jogadores é ignorado. Em algumas situações de
+instância/combate o cliente moderno pode esconder o conteúdo do chat dos addons; esses itens simplesmente não são registrados.
 
 ## Itens da barra
 
@@ -145,7 +162,7 @@ Segurança da informação é a primeira regra deste projeto:
 - **Nada sai do seu computador.** O addon não usa `SendAddonMessage`, chat ou qualquer canal para enviar dados.
 - **Nenhum código externo é executado.** Sem `loadstring`/`RunScript`; comandos aceitam só palavras fixas.
 - **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
-- **Dados salvos são validados.** `FarolDB` guarda apenas a posição, o estado do painel, o idioma, os itens visíveis e seus alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o tempo da soneca), e é
+- **Dados salvos são validados.** `FarolDB` guarda apenas a posição, o estado do painel, o idioma, os itens visíveis e seus alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o tempo da soneca). `FarolCharDB` (por personagem) guarda só links de item validados do seu histórico de saques, e é
   verificado ao carregar — um arquivo corrompido ou adulterado volta para os valores padrão.
 - **Baixe só da fonte oficial** (este repositório). Addons são texto Lua: você pode ler todo o código em `Core.lua`.
 

@@ -333,6 +333,7 @@ end
 local function IsSecret(v)
     return issecretvalue ~= nil and issecretvalue(v) or false
 end
+ns.IsSecret = IsSecret
 
 local function FormatMoney(copper)
     copper = tonumber(copper) or 0
@@ -876,6 +877,7 @@ local function SetLang(lang)
     UpdateText()
     RefreshOptions()
     if ns.Alarm then ns.Alarm.Refresh() end
+    if ns.Loot then ns.Loot.Refresh() end
 end
 
 local function SetItemVisible(key, value)
@@ -972,6 +974,9 @@ local function BuildControls(parent, top)
     set.reset:SetPoint("TOPLEFT", 20, y)
     set.alarms = CreateButton(parent, 150, function() ns.Alarm.ToggleWindow() end)
     set.alarms:SetPoint("TOPLEFT", 176, y)
+    y = y - 26
+    set.loot = CreateButton(parent, 150, function() ns.Loot.ToggleWindow() end)
+    set.loot:SetPoint("TOPLEFT", 20, y)
     y = y - 30
 
     controlSets[#controlSets + 1] = set
@@ -1000,6 +1005,7 @@ RefreshOptions = function()
         end
         set.reset:SetText(T("opt_reset"))
         set.alarms:SetText(T("opt_alarms"))
+        set.loot:SetText(T("opt_loot"))
     end
 end
 
@@ -1092,7 +1098,9 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         local saved = FarolDB
         db = SanitizeDB(saved)
         db.alarms = ns.Alarm.Sanitize(type(saved) == "table" and saved.alarms or nil)
+        db.loot = ns.Loot.SanitizeSettings(type(saved) == "table" and saved.loot or nil)
         FarolDB = db
+        FarolCharDB = ns.Loot.SanitizeHistory(FarolCharDB) -- histórico de saques deste personagem
         ApplyPosition()
         ApplyVisibility()
         pcall(RegisterSettingsPanel) -- se a API de configurações mudar, o addon continua funcionando
@@ -1120,7 +1128,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -1180,6 +1188,8 @@ SlashCmdList["FAROL"] = function(msg)
         end
     elseif cmd == "alarme" or cmd == "alarmes" or cmd == "alarm" or cmd == "alarms" then
         ns.Alarm.HandleCommand(rest)
+    elseif cmd == "saque" or cmd == "saques" or cmd == "loot" then
+        ns.Loot.HandleCommand(rest)
     elseif cmd == "soneca" or cmd == "snooze" then
         ns.Alarm.Snooze(rest) -- "/farol soneca 10" adia só desta vez por 10 min
     elseif cmd == "parar" or cmd == "stop" then

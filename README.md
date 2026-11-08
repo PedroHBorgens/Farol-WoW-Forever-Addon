@@ -25,6 +25,8 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 |---------------------|--------------------------------------------------------|
 | `/farol`            | Show/hide the panel |
 | `/farol menu`       | Open the options menu (or right-click the panel) |
+| `/farol loot`       | Open the recent loot window |
+| `/farol loot clear` | Clear this character's loot history |
 | `/farol alarm`      | Open the alarms window |
 | `/farol alarm add 07:30`| Create an alarm (see below) |
 | `/farol snooze`     | Snooze the ringing alarm (configured time, default 5 min) |
@@ -81,6 +83,21 @@ Chat commands:
 
 Alarms only ring while the game is open. An alarm is not triggered in the same minute it is created or
 after a `/reload` inside that minute (this avoids false alarms).
+
+## Recent loot window
+
+A separate window listing the items **you** looted or received, newest first.
+
+- Open it with **Loot...** in the options menu, or type `/farol loot`.
+- **Show 5 / 10 / 15 / 20** — choose how many recent items to list.
+- **Quality filter** — tick Poor, Common, Uncommon, Rare, Epic and Legendary+ (names and colors come from the game).
+- Each row shows the item icon, the colored item link, the quantity and the time. Hover for the item tooltip;
+  **Shift-click** puts the link in your chat box (you decide whether to send it).
+- History is saved **per character** (last 100 items). **Clear** erases it.
+
+It reads only the game's own loot messages about **you** ("You receive loot: …"), using the client's text,
+so it works in any language. Other players' loot is ignored. In some instance/combat situations the
+modern client may hide chat contents from addons; those items are simply not recorded.
 
 ## Bar items
 
@@ -143,7 +160,7 @@ Information security is this project's first rule:
 - **Nothing leaves your computer.** The addon never uses `SendAddonMessage`, chat or any other channel to send data.
 - **No external code is executed.** No `loadstring`/`RunScript`; commands only accept fixed words.
 - **No automation.** It only reads and displays information; it never plays for you (which would break server rules).
-- **Saved data is validated.** `FarolDB` only stores the panel's position, state, language, visible items and your alarms (time, clock type, on/off, a cleaned-up name and the snooze time), and is
+- **Saved data is validated.** `FarolDB` only stores the panel's position, state, language, visible items and your alarms (time, clock type, on/off, a cleaned-up name and the snooze time). `FarolCharDB` (per character) stores only validated item links from your loot history, and is
   checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official source** (this repository). Addons are plain Lua text: you can read all of it in `Core.lua`.
 

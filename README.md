@@ -113,6 +113,26 @@ your screen and in your own chat** (nothing is sent to anyone), with the game's 
   (durability 5–50%, bags 0–10 slots), turn the sound off or test it.
 - Commands: `/farol warn durab 25`, `/farol warn bags 4`, `/farol warn durab off`, `/farol warn sound off`.
 
+### Talents and spell ranks
+
+- **Unspent talent points:** "You have 2 unspent talent point(s)." Warns at login and for each new point.
+- **Lower-rank spells on your action bars:** "Fireball (Rank 3) — you already know Rank 5". Farol reads your
+  spellbook and bars and warns once per spell until you replace it. It **never** changes your bars for you
+  (that would be automation): you drag the new rank yourself.
+- These two never warn in the middle of a fight; they wait until combat ends.
+- `/farol warn status` shows what Farol can read on your client (unspent points and the function used, and
+  lower-rank spells found). Turn them off with `/farol warn talents off` / `/farol warn ranks off`.
+
+### Silence or remind me in 30 minutes
+
+Every warning opens a small window with two choices:
+
+- **Silence**: the warning stays quiet and only comes back if the situation changes (e.g. you repair and the
+  durability drops again, or you gain a new talent point).
+- **Remind in 30 min**: if the problem is still there in 30 minutes, the warning shows up again.
+
+Several warnings at once are shown one at a time. Chat: `/farol warn silence`, `/farol warn remind`.
+
 ## Recent loot window
 
 A separate window listing the items **you** looted or received, newest first.

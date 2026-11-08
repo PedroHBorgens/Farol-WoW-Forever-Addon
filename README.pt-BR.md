@@ -113,6 +113,26 @@ tela e no seu chat** (nada é enviado a ninguém), com o som de checagem de pron
   (durabilidade 5–50%, bolsas 0–10 espaços), desligar o som ou testar.
 - Comandos: `/farol aviso durab 25`, `/farol aviso bolsas 4`, `/farol aviso durab off`, `/farol aviso som off`.
 
+### Talentos e graus de magia
+
+- **Pontos de talento não gastos:** "Você tem 2 ponto(s) de talento para gastar." Avisa ao entrar e a cada ponto novo.
+- **Magias de grau antigo nas barras de ação:** "Bola de Fogo (Grau 3) — você já tem o Grau 5". O Farol lê seu
+  grimório e suas barras e avisa uma vez por magia até você trocar. Ele **nunca** mexe nas suas barras (isso seria
+  automação): quem arrasta o grau novo é você.
+- Esses dois avisos nunca aparecem no meio da luta; esperam o combate acabar.
+- `/farol aviso status` mostra o que o Farol consegue ler no seu cliente (pontos não gastos e a função usada, e as
+  magias de grau antigo encontradas). Para desligar: `/farol aviso talentos off` / `/farol aviso graus off`.
+
+### Silenciar ou lembrar em 30 minutos
+
+Cada aviso abre uma janelinha com duas opções:
+
+- **Silenciar**: o aviso fica quieto e só volta se a situação mudar (ex.: você reparou e a durabilidade caiu de
+  novo, ou ganhou um ponto de talento novo).
+- **Lembrar em 30 min**: se o problema continuar daqui a 30 minutos, o aviso aparece de novo.
+
+Vários avisos ao mesmo tempo aparecem um de cada vez. No chat: `/farol aviso silenciar`, `/farol aviso lembrar`.
+
 ## Janela de últimos saques
 
 Uma janela separada que lista os itens que **você** saqueou ou recebeu, do mais novo para o mais antigo.

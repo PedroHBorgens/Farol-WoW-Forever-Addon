@@ -25,7 +25,9 @@ jobs:
 
       - name: Read add-on version
         id: version
-        run: echo "version=$(grep -m1 '^## Version:' Farol/Farol_Mainline.toc | sed 's/## Version: //' | tr -d '\r')" >> "$GITHUB_OUTPUT"
+        run: |
+          version=$(grep -m1 '^## Version:' Farol/Farol_Mainline.toc | sed 's/## Version: //' | tr -d '\r')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Build package (only the Farol folder)
         run: |

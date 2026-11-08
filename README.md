@@ -29,6 +29,7 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 | `/farol loot clear` | Clear this character's loot history |
 | `/farol session reset`| Restart session gold, gold/h, XP/h and time |
 | `/farol warn`       | Open the warnings window (durability and bags) |
+| `/farol appearance` | Open the appearance window (scale, background, vertical, hide in combat) |
 | `/farol alarm`      | Open the alarms window |
 | `/farol alarm add 07:30`| Create an alarm (see below) |
 | `/farol snooze`     | Snooze the ringing alarm (configured time, default 5 min) |
@@ -85,6 +86,20 @@ Chat commands:
 
 Alarms only ring while the game is open. An alarm is not triggered in the same minute it is created or
 after a `/reload` inside that minute (this avoids false alarms).
+
+## Appearance
+
+Open **Appearance...** in the options menu (or `/farol appearance`):
+
+- **Scale** 50%–200% and **background opacity** 0%–100% (0% = only the text floats on screen), with [-]/[+] buttons.
+- **Vertical bar**: one item per line.
+- **Show border** on/off.
+- **Hide in combat** (comes back when the fight ends) and **hide in dungeons, raids, arenas and battlegrounds**.
+  Alarms and warnings keep working while the bar is hidden.
+- **Restore defaults** puts everything back.
+
+Commands: `/farol appearance scale 120`, `/farol appearance bg 40`, `/farol appearance vertical`,
+`/farol appearance border`, `/farol appearance combat`, `/farol appearance instance`, `/farol appearance default`.
 
 ## Durability and bag warnings
 

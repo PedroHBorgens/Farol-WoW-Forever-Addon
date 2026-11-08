@@ -1,5 +1,5 @@
 --[[
-  WoW Forever Info
+  Farol — barra de informações para WoW Forever (não oficial, não afiliado à Blizzard)
   Painel na tela com FPS, latência, memória, coordenadas, zona, velocidade, durabilidade, bolsas,
   ouro, ouro da sessão, XP, horário, tempo de sessão, amigos e guilda — você escolhe o que aparece.
   On-screen info bar with selectable items. (PT / EN)
@@ -13,7 +13,7 @@
 ]]
 
 local ADDON_NAME = ...
-local PREFIX = "|cff33ccffWoW Forever Info|r: "
+local PREFIX = "|cff33ccffFarol|r: "
 local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 
 -- Itens da barra, na ordem em que aparecem.
@@ -29,7 +29,7 @@ local ITEM_DEFAULTS = {
     clock = false, playtime = false, friends = false, guild = false,
 }
 
--- Nomes aceitos nos comandos /wfi show|hide (português e inglês).
+-- Nomes aceitos nos comandos /farol show|hide (português e inglês).
 local ITEM_ALIASES = {
     fps = "fps",
     ms = "ms", ping = "ms", latencia = "ms", latency = "ms",
@@ -68,14 +68,14 @@ local VALID_LANGS = { auto = true, pt = true, en = true }
 local STRINGS = {
     pt = {
         help_title   = "comandos:",
-        help_toggle  = "  /wfi                 - mostrar/ocultar o painel",
-        help_lock    = "  /wfi lock            - travar/destravar o painel (arraste com o botão esquerdo)",
-        help_reset   = "  /wfi reset           - voltar o painel à posição padrão",
-        help_show    = "  /wfi show <item>     - mostrar um item na barra",
-        help_hide    = "  /wfi hide <item>     - esconder um item da barra",
-        help_items   = "  /wfi itens           - listar os itens e o que está visível",
-        help_version = "  /wfi version         - mostrar a versão do cliente e o número de Interface",
-        help_lang    = "  /wfi lang pt|en|auto - escolher o idioma (auto = idioma do cliente)",
+        help_toggle  = "  /farol               - mostrar/ocultar o painel",
+        help_lock    = "  /farol lock          - travar/destravar o painel (arraste com o botão esquerdo)",
+        help_reset   = "  /farol reset         - voltar o painel à posição padrão",
+        help_show    = "  /farol show <item>   - mostrar um item na barra",
+        help_hide    = "  /farol hide <item>   - esconder um item da barra",
+        help_items   = "  /farol itens         - listar os itens e o que está visível",
+        help_version = "  /farol version       - mostrar a versão do cliente e o número de Interface",
+        help_lang    = "  /farol lang pt|en|auto - escolher o idioma (auto = idioma do cliente)",
         shown        = "painel visível.",
         hidden       = "painel oculto.",
         locked       = "painel travado.",
@@ -85,12 +85,12 @@ local STRINGS = {
         version_hint = "use esse número na linha '## Interface:' do arquivo .toc.",
         lang_set     = "idioma: Português.",
         lang_auto    = "idioma: automático (segue o cliente).",
-        lang_usage   = "uso: /wfi lang pt | en | auto",
-        item_usage   = "uso: /wfi show|hide",
+        lang_usage   = "uso: /farol lang pt | en | auto",
+        item_usage   = "uso: /farol show|hide",
         item_on      = "%s: |cff00ff00visível|r",
         item_off     = "%s: |cffff3333escondido|r",
         items_title  = "itens da barra:",
-        none_shown   = "WoW Forever Info — /wfi show <item>",
+        none_shown   = "Farol — /farol show <item>",
         name_fps = "FPS",              cmd_fps = "fps",
         name_ms = "Latência",          cmd_ms = "ms",
         name_mem = "Memória",          cmd_mem = "mem",
@@ -139,10 +139,10 @@ local STRINGS = {
         tt_no_gear   = "Nenhum item com durabilidade equipado.",
         tt_gold      = "Ouro",
         tt_drag      = "Arraste para mover.",
-        tt_locked    = "Painel travado (/wfi lock).",
-        tt_help      = "/wfi ajuda — lista de comandos",
+        tt_locked    = "Painel travado (/farol lock).",
+        tt_help      = "/farol ajuda — lista de comandos",
         tt_slot      = "Espaço %d",
-        help_menu    = "  /wfi menu            - abrir o menu de opções (ou clique direito no painel)",
+        help_menu    = "  /farol menu          - abrir o menu de opções (ou clique direito no painel)",
         opt_items    = "Itens da barra",
         opt_general  = "Geral",
         opt_shown    = "Mostrar painel",
@@ -154,14 +154,14 @@ local STRINGS = {
     },
     en = {
         help_title   = "commands:",
-        help_toggle  = "  /wfi                 - show/hide the panel",
-        help_lock    = "  /wfi lock            - lock/unlock the panel (drag with left mouse button)",
-        help_reset   = "  /wfi reset           - move the panel back to its default position",
-        help_show    = "  /wfi show <item>     - show an item on the bar",
-        help_hide    = "  /wfi hide <item>     - hide an item from the bar",
-        help_items   = "  /wfi items           - list items and which are visible",
-        help_version = "  /wfi version         - show the client version and Interface number",
-        help_lang    = "  /wfi lang pt|en|auto - choose the language (auto = client language)",
+        help_toggle  = "  /farol               - show/hide the panel",
+        help_lock    = "  /farol lock          - lock/unlock the panel (drag with left mouse button)",
+        help_reset   = "  /farol reset         - move the panel back to its default position",
+        help_show    = "  /farol show <item>   - show an item on the bar",
+        help_hide    = "  /farol hide <item>   - hide an item from the bar",
+        help_items   = "  /farol items         - list items and which are visible",
+        help_version = "  /farol version       - show the client version and Interface number",
+        help_lang    = "  /farol lang pt|en|auto - choose the language (auto = client language)",
         shown        = "panel shown.",
         hidden       = "panel hidden.",
         locked       = "panel locked.",
@@ -171,12 +171,12 @@ local STRINGS = {
         version_hint = "use this number on the '## Interface:' line of the .toc file.",
         lang_set     = "language: English.",
         lang_auto    = "language: automatic (follows the client).",
-        lang_usage   = "usage: /wfi lang pt | en | auto",
-        item_usage   = "usage: /wfi show|hide",
+        lang_usage   = "usage: /farol lang pt | en | auto",
+        item_usage   = "usage: /farol show|hide",
         item_on      = "%s: |cff00ff00shown|r",
         item_off     = "%s: |cffff3333hidden|r",
         items_title  = "bar items:",
-        none_shown   = "WoW Forever Info — /wfi show <item>",
+        none_shown   = "Farol — /farol show <item>",
         name_fps = "FPS",              cmd_fps = "fps",
         name_ms = "Latency",           cmd_ms = "ms",
         name_mem = "Memory",           cmd_mem = "mem",
@@ -225,10 +225,10 @@ local STRINGS = {
         tt_no_gear   = "No equipped items with durability.",
         tt_gold      = "Gold",
         tt_drag      = "Drag to move.",
-        tt_locked    = "Panel locked (/wfi lock).",
-        tt_help      = "/wfi help — list of commands",
+        tt_locked    = "Panel locked (/farol lock).",
+        tt_help      = "/farol help — list of commands",
         tt_slot      = "Slot %d",
-        help_menu    = "  /wfi menu            - open the options menu (or right-click the panel)",
+        help_menu    = "  /farol menu          - open the options menu (or right-click the panel)",
         opt_items    = "Bar items",
         opt_general  = "General",
         opt_shown    = "Show panel",
@@ -643,7 +643,7 @@ local ITEM_TEXT = {
 -- Clientes modernos exigem o template "BackdropTemplate" para usar SetBackdrop; os antigos não o possuem.
 local backdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
-local frame = CreateFrame("Frame", "WoWForeverInfoFrame", UIParent, backdropTemplate)
+local frame = CreateFrame("Frame", "FarolFrame", UIParent, backdropTemplate)
 frame:SetSize(330, 26)
 frame:SetFrameStrata("MEDIUM")
 frame:SetClampedToScreen(true)
@@ -670,7 +670,7 @@ local function SavePosition()
     local point, _, relPoint, x, y = frame:GetPoint()
     db.point, db.relPoint = point, relPoint
     db.x, db.y = math.floor(x + 0.5), math.floor(y + 0.5)
-    WoWForeverInfoDB = db
+    FarolDB = db
 end
 
 local function ApplyPosition()
@@ -719,7 +719,7 @@ local function AddPair(label, value)
 end
 
 local function FillTooltip()
-    GameTooltip:AddLine("WoW Forever Info", 0.2, 0.8, 1)
+    GameTooltip:AddLine("Farol", 0.2, 0.8, 1)
 
     local fps = Safe(GetFPS)
     AddPair("FPS", fps and tostring(fps) or "--")
@@ -868,7 +868,7 @@ end
 
 ---------------------------------------------------------------------------
 -- Menu de opções (caixinhas para marcar)
--- Os mesmos controles aparecem na janela própria (/wfi menu, clique direito)
+-- Os mesmos controles aparecem na janela própria (/farol menu, clique direito)
 -- e na lista de AddOns das configurações do jogo.
 ---------------------------------------------------------------------------
 
@@ -877,7 +877,7 @@ local widgetCount = 0
 
 local function NextName(kind)
     widgetCount = widgetCount + 1
-    return "WoWForeverInfo" .. kind .. widgetCount
+    return "Farol" .. kind .. widgetCount
 end
 
 local function IsChecked(button)
@@ -986,7 +986,7 @@ end
 local optionsWindow
 
 local function CreateOptionsWindow()
-    local window = CreateFrame("Frame", "WoWForeverInfoOptions", UIParent, backdropTemplate)
+    local window = CreateFrame("Frame", "FarolOptions", UIParent, backdropTemplate)
     window:SetFrameStrata("DIALOG")
     window:SetPoint("CENTER")
     window:SetClampedToScreen(true)
@@ -1007,7 +1007,7 @@ local function CreateOptionsWindow()
 
     local title = window:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOP", 0, -18)
-    title:SetText("WoW Forever Info")
+    title:SetText("Farol")
 
     local close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -6, -6)
@@ -1016,7 +1016,7 @@ local function CreateOptionsWindow()
     window:SetSize(350, -bottom + 12)
 
     window:SetScript("OnShow", RefreshOptions)
-    tinsert(UISpecialFrames, "WoWForeverInfoOptions") -- ESC fecha a janela
+    tinsert(UISpecialFrames, "FarolOptions") -- ESC fecha a janela
     window:Hide()
     return window
 end
@@ -1033,11 +1033,11 @@ end
 -- Também aparece em Esc > Opções > AddOns (clientes modernos) ou Interface > AddOns (antigos).
 local function RegisterSettingsPanel()
     local panel = CreateFrame("Frame")
-    panel.name = "WoW Forever Info"
+    panel.name = "Farol"
 
     local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", 16, -16)
-    title:SetText("WoW Forever Info")
+    title:SetText("Farol")
 
     BuildControls(panel, -46)
     panel:SetScript("OnShow", RefreshOptions)
@@ -1068,8 +1068,8 @@ frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" then
         if arg1 ~= ADDON_NAME then return end
-        db = SanitizeDB(WoWForeverInfoDB)
-        WoWForeverInfoDB = db
+        db = SanitizeDB(FarolDB)
+        FarolDB = db
         ApplyPosition()
         ApplyVisibility()
         pcall(RegisterSettingsPanel) -- se a API de configurações mudar, o addon continua funcionando
@@ -1091,7 +1091,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
 end)
 
 ---------------------------------------------------------------------------
--- Comandos: /wfi
+-- Comandos: /farol
 ---------------------------------------------------------------------------
 
 local function ShowHelp()
@@ -1122,9 +1122,8 @@ local function SetItem(alias, visible)
     Print(string.format(visible and T("item_on") or T("item_off"), T("name_" .. key)))
 end
 
-SLASH_WOWFOREVERINFO1 = "/wfi"
-SLASH_WOWFOREVERINFO2 = "/wfinfo"
-SlashCmdList["WOWFOREVERINFO"] = function(msg)
+SLASH_FAROL1 = "/farol"
+SlashCmdList["FAROL"] = function(msg)
     if not db then return end
     -- Aceita só palavras simples (letras); qualquer outra coisa mostra a ajuda.
     local cmd, arg = string.match(msg or "", "^%s*(%a*)%s*(%a*)")

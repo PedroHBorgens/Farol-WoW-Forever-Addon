@@ -1,47 +1,51 @@
-# WoW Forever Info
+# Farol
 
 **Português** | [English](README.md)
 
-Addon **gratuito e de código aberto** para WoW Forever: mostra um painel pequeno e arrastável com
+**Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · ouro · ouro da sessão · XP · horário · tempo de sessão · amigos · guilda** — você escolhe o que aparece.
 Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens aparecem na barra.
 
 ## Instalação
 
+> **Vindo do "WoW Forever Info"?** O addon mudou de nome. Apague a pasta antiga
+> `Interface/AddOns/WoWForeverInfo` antes de instalar o `Farol`. As configurações antigas não são
+> levadas junto (é só marcar seus itens de novo no menu), e o comando agora é `/farol`.
+
 1. Baixe este repositório (botão **Code → Download ZIP**).
-2. Copie a pasta `WoWForeverInfo` para `World of Warcraft/_forever_/Interface/AddOns/`
-   (a pasta final deve ser `_forever_/Interface/AddOns/WoWForeverInfo/Core.lua`).
+2. Copie a pasta `Farol` para `World of Warcraft/_forever_/Interface/AddOns/`
+   (a pasta final deve ser `_forever_/Interface/AddOns/Farol/Core.lua`).
    Outros clientes usam a própria pasta, como `_retail_` ou `_classic_era_`.
-3. Na tela de personagens, clique em **AddOns** e ative **WoW Forever Info**.
+3. Na tela de personagens, clique em **AddOns** e ative **Farol**.
    Se aparecer "desatualizado", marque **Carregar AddOns desatualizados**.
 
 ## Comandos
 
-| Comando           | O que faz                                              |
-|-------------------|--------------------------------------------------------|
-| `/wfi`            | Mostra/oculta o painel |
-| `/wfi menu`       | Abre o menu de opções (ou clique direito no painel) |
-| `/wfi lock`       | Trava/destrava o painel (arraste com o botão esquerdo) |
-| `/wfi reset`      | Volta o painel para a posição padrão |
-| `/wfi show <item>`| Mostra um item na barra |
-| `/wfi hide <item>`| Esconde um item da barra |
-| `/wfi itens`      | Lista os itens e o que está visível |
-| `/wfi ajuda`      | Lista todos os comandos |
-| `/wfi version`    | Mostra a versão do cliente e o número de **Interface** |
-| `/wfi lang pt`    | Interface em português |
-| `/wfi lang en`    | Interface em inglês |
-| `/wfi lang auto`  | Segue o idioma do cliente (padrão) |
+| Comando             | O que faz |
+|---------------------|--------------------------------------------------------|
+| `/farol`            | Mostra/oculta o painel |
+| `/farol menu`       | Abre o menu de opções (ou clique direito no painel) |
+| `/farol lock`       | Trava/destrava o painel (arraste com o botão esquerdo) |
+| `/farol reset`      | Volta o painel para a posição padrão |
+| `/farol show <item>`| Mostra um item na barra |
+| `/farol hide <item>`| Esconde um item da barra |
+| `/farol itens`      | Lista os itens e o que está visível |
+| `/farol ajuda`      | Lista todos os comandos |
+| `/farol version`    | Mostra a versão do cliente e o número de **Interface** |
+| `/farol lang pt`    | Interface em português |
+| `/farol lang en`    | Interface em inglês |
+| `/farol lang auto`  | Segue o idioma do cliente (padrão) |
 
 ## Menu de opções
 
 Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um destes jeitos:
 
 - **Clique direito** no painel
-- Digite `/wfi menu`
-- **Esc → Opções → AddOns → WoW Forever Info**
+- Digite `/farol menu`
+- **Esc → Opções → AddOns → Farol**
 
 No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, escolhe o idioma (Auto / Português /
-English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/wfi menu` para trazê-lo de volta.
+English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/farol menu` para trazê-lo de volta.
 
 ## Itens da barra
 
@@ -65,7 +69,7 @@ Os seis primeiros vêm ligados; os outros começam desligados — marque no menu
 | Amigos online    | Quantidade de amigos online (WoW + Battle.net)            | `amigos`        | desligado  |
 | Guilda online    | Quantidade de membros da guilda online (some sem guilda)  | `guilda`        | desligado  |
 
-Exemplo: `/wfi hide ouro` esconde o ouro; `/wfi show ouro` mostra de volta. Também funcionam
+Exemplo: `/farol hide ouro` esconde o ouro; `/farol show ouro` mostra de volta. Também funcionam
 `mostrar`/`esconder` e os nomes em inglês (`zone`, `gold`, `bags`…). Suas escolhas ficam salvas.
 
 **Tooltip:** passe o mouse no painel para ver todos os detalhes de uma vez — latência local/mundo,
@@ -77,17 +81,17 @@ WoW / Battle.net, e mais.
 ## Idioma
 
 Por padrão o addon usa o idioma do seu cliente: **português** em clientes `ptBR`/`ptPT`
-e **inglês** em todos os outros. Você pode trocar a qualquer momento com `/wfi lang pt` ou `/wfi lang en`;
+e **inglês** em todos os outros. Você pode trocar a qualquer momento com `/farol lang pt` ou `/farol lang en`;
 a escolha fica salva.
 
 ## Descobrindo a versão do seu cliente
 
-Rode `/wfi version` no jogo. O número de Interface que aparecer vai na primeira linha do `.toc`:
+Rode `/farol version` no jogo. O número de Interface que aparecer vai na primeira linha do `.toc`:
 
-- `WoWForeverInfo_Mainline.toc` — **WoW Forever** (16001) e Retail. **É este o arquivo que o WoW Forever lê.**
-- `WoWForeverInfo_Camelot.toc` — reserva específica do WoW Forever (16001)
-- `WoWForeverInfo_Vanilla.toc` — Classic Era (11507)
-- `WoWForeverInfo.toc` — padrão para qualquer outro cliente
+- `Farol_Mainline.toc` — **WoW Forever** (16001) e Retail. **É este o arquivo que o WoW Forever lê.**
+- `Farol_Camelot.toc` — reserva específica do WoW Forever (16001)
+- `Farol_Vanilla.toc` — Classic Era (11507)
+- `Farol.toc` — padrão para qualquer outro cliente
 
 O cliente escolhe o `.toc` com o sufixo correspondente e, se não houver, usa o padrão. Se um patch futuro do
 WoW Forever marcar o addon como incompatível, atualize o número no `_Mainline.toc` a partir da versão da tela
@@ -106,7 +110,7 @@ Segurança da informação é a primeira regra deste projeto:
 - **Nada sai do seu computador.** O addon não usa `SendAddonMessage`, chat ou qualquer canal para enviar dados.
 - **Nenhum código externo é executado.** Sem `loadstring`/`RunScript`; comandos aceitam só palavras fixas.
 - **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
-- **Dados salvos são validados.** `WoWForeverInfoDB` guarda apenas a posição, o estado do painel, o idioma e os itens visíveis, e é
+- **Dados salvos são validados.** `FarolDB` guarda apenas a posição, o estado do painel, o idioma e os itens visíveis, e é
   verificado ao carregar — um arquivo corrompido ou adulterado volta para os valores padrão.
 - **Baixe só da fonte oficial** (este repositório). Addons são texto Lua: você pode ler todo o código em `Core.lua`.
 

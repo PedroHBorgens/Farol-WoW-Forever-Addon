@@ -443,22 +443,62 @@ local function TraitsUnspent()
     return total
 end
 
+-- Pontos gastos em uma árvore. A ordem dos valores de GetTalentTabInfo muda entre versões:
+--   clássico: nome, ícone, pontosGastos, ...       (1º valor é texto)
+--   Wrath+:   id, nome, descrição, ícone, pontosGastos, ...   (1º valor é número)
+local function TabPointsSpent(tab)
+    local r1, _, r3, _, r5 = GetTalentTabInfo(tab)
+    local spent
+    if type(r1) == "string" then spent = r3 else spent = r5 end
+    return type(spent) == "number" and spent or nil
+end
+
+-- Estimativa de reserva: no sistema clássico ganha-se 1 ponto por nível a partir do 10
+-- (51 no nível 60). Pontos esperados − pontos gastos. Bônus do Forever que dão pontos extras
+-- só fazem esta conta avisar A MENOS, nunca a mais.
+local function TabsEstimate()
+    if not (GetNumTalentTabs and GetTalentTabInfo and UnitLevel) then return nil end
+    local tabs = GetNumTalentTabs()
+    if type(tabs) ~= "number" or tabs < 1 then return nil end
+    local spent = 0
+    for tab = 1, tabs do
+        local points = TabPointsSpent(tab)
+        if not points then return nil end
+        spent = spent + points
+    end
+    local expected = math.max(0, UnitLevel("player") - 9)
+    return math.max(0, expected - spent)
+end
+
 local TALENT_SOURCES = {
     { "UnitCharacterPoints", function() return UnitCharacterPoints and UnitCharacterPoints("player") end },
     { "GetUnspentTalentPoints", function() return GetUnspentTalentPoints and GetUnspentTalentPoints() end },
     { "GetNumUnspentTalents", function() return GetNumUnspentTalents and GetNumUnspentTalents() end },
     { "C_Traits", function() return C_ClassTalents and C_Traits and TraitsUnspent() end },
+    { "estimativa/estimate", TabsEstimate },
 }
 
--- Devolve (pontos, nome da função usada) ou nil se nenhuma funcionar neste cliente.
+-- Lê uma fonte: devolve número, "não existe" (nil) ou erro.
+local function ReadSource(source)
+    local ok, points = pcall(source[2])
+    if ok and type(points) == "number" and not ns.IsSecret(points) and points >= 0 and points <= 100 then
+        return points
+    end
+    return nil, ok and "nil" or "erro"
+end
+
+-- Consulta TODAS as fontes e usa o maior valor: uma função que existe mas sempre devolve 0
+-- (de outro sistema de talentos) não esconde mais os pontos encontrados por outra fonte.
+-- Devolve (pontos, nome da fonte) ou nil se nenhuma funcionar neste cliente.
 local function UnspentTalents()
+    local best, bestSource
     for _, source in ipairs(TALENT_SOURCES) do
-        local ok, points = pcall(source[2])
-        if ok and type(points) == "number" and not ns.IsSecret(points) and points >= 0 then
-            return points, source[1]
+        local points = ReadSource(source)
+        if points and (not best or points > best) then
+            best, bestSource = points, source[1]
         end
     end
-    return nil
+    return best, bestSource
 end
 
 local function CheckTalents(now)
@@ -872,6 +912,21 @@ local function PrintStatus()
     else
         Print(T("warn_status_notal"))
     end
+    -- Detalhe de cada fonte (para diagnosticar clientes diferentes, como o WoW Forever).
+    for _, entry in ipairs(TALENT_SOURCES) do
+        local value, why = ReadSource(entry)
+        Print(string.format("    %s: %s", entry[1], value and tostring(value) or (why or "-")))
+    end
+    if GetNumTalentTabs and GetTalentTabInfo then
+        local ok, tabs = pcall(GetNumTalentTabs)
+        local spent = {}
+        for tab = 1, (ok and type(tabs) == "number" and tabs or 0) do
+            local okTab, points = pcall(TabPointsSpent, tab)
+            spent[#spent + 1] = okTab and tostring(points) or "erro"
+        end
+        Print(string.format("    GetTalentTabInfo: %s", table.concat(spent, " / ")))
+    end
+    Print(string.format("    UnitLevel: %s", tostring(UnitLevel and UnitLevel("player"))))
     local ok, outdated = pcall(FindOutdatedSpells)
     outdated = ok and outdated or {}
     Print(string.format(T("warn_status_ranks"), #outdated))

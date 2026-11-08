@@ -121,8 +121,9 @@ tela e no seu chat** (nada é enviado a ninguém), com o som de checagem de pron
   grimório e suas barras e avisa uma vez por magia até você trocar. Ele **nunca** mexe nas suas barras (isso seria
   automação): quem arrasta o grau novo é você.
 - Esses dois avisos nunca aparecem no meio da luta; esperam o combate acabar.
-- `/farol aviso status` mostra o que o Farol consegue ler no seu cliente (pontos não gastos e a função usada, e as
-  magias de grau antigo encontradas). Para desligar: `/farol aviso talentos off` / `/farol aviso graus off`.
+- `/farol aviso status` mostra o que o Farol consegue ler no seu cliente: os pontos não gastos, o resultado de **cada**
+  fonte de talentos (o nome da função do jogo mudou entre versões do WoW, então o Farol consulta todas e usa o maior
+  valor, além de uma estimativa pelo nível: nível − 9 menos os pontos gastos) e as magias de grau antigo encontradas. Para desligar: `/farol aviso talentos off` / `/farol aviso graus off`.
 
 ### Silenciar ou lembrar em 30 minutos
 

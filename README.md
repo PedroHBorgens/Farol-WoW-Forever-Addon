@@ -121,8 +121,9 @@ your screen and in your own chat** (nothing is sent to anyone), with the game's 
   spellbook and bars and warns once per spell until you replace it. It **never** changes your bars for you
   (that would be automation): you drag the new rank yourself.
 - These two never warn in the middle of a fight; they wait until combat ends.
-- `/farol warn status` shows what Farol can read on your client (unspent points and the function used, and
-  lower-rank spells found). Turn them off with `/farol warn talents off` / `/farol warn ranks off`.
+- `/farol warn status` shows what Farol can read on your client: the unspent points, the result of **each**
+  talent source (the game function name changed between WoW versions, so Farol asks all of them and uses the
+  highest value, plus a level-based estimate: level − 9 minus points spent), and lower-rank spells found. Turn them off with `/farol warn talents off` / `/farol warn ranks off`.
 
 ### Silence or remind me in 30 minutes
 

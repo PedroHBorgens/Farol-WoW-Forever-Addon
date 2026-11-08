@@ -33,7 +33,42 @@ return {
         }
         H2:update(1)
         T.has(H2:lastMsg(), "Você tem 3 ponto(s) de talento")
-        H2:slash("aviso status"); T.has(H2.strip(H2.msgs[#H2.msgs - 1]), "talentos: 3 ponto(s) não gasto(s) (função: C_Traits)")
+        H2:slash("aviso status")
+        T.has(H2.strip(table.concat(H2.msgs, "/")), "talentos: 3 ponto(s) não gasto(s) (função: C_Traits)")
+    end },
+
+    { "a talent function that always returns 0 no longer hides real unspent points", function(T, Mock)
+        -- Cenário provável do WoW Forever: existe uma função de outro sistema que sempre devolve 0.
+        local H = Mock.new():login(); fixGear(H)
+        H.env.GetUnspentTalentPoints = function() return 0 end
+        H.env.GetNumTalentTabs = function() return 3 end
+        local spent = { 10, 8, 0 } -- 18 pontos gastos no nível 30 (21 esperados) = 3 sobrando
+        H.env.GetTalentTabInfo = function(tab) return "Árvore " .. tab, 135, spent[tab], "file" end
+        H:update(1)
+        T.has(H:lastMsg(), "Você tem 3 ponto(s) de talento para gastar.")
+        H:slash("aviso status")
+        local status = H.strip(table.concat(H.msgs, "/"))
+        T.has(status, "talentos: 3 ponto(s) não gasto(s) (função: estimativa/estimate)")
+        T.has(status, "GetUnspentTalentPoints: 0")
+        T.has(status, "UnitCharacterPoints: nil")
+        T.has(status, "GetTalentTabInfo: 10 / 8 / 0")
+        T.has(status, "UnitLevel: 30")
+    end },
+
+    { "talent estimate reads both GetTalentTabInfo layouts and never goes negative", function(T, Mock)
+        local H = Mock.new({ locale = "enUS" }):login(); fixGear(H)
+        H.env.GetUnspentTalentPoints = nil
+        H.env.GetNumTalentTabs = function() return 3 end
+        -- formato Wrath+: id, nome, descrição, ícone, pontosGastos
+        H.env.GetTalentTabInfo = function(tab) return 160 + tab, "Tree", "desc", 135, ({ 5, 5, 5 })[tab] end
+        H:update(1)
+        T.has(H:lastMsg(), "You have 6 unspent talent point(s).", "21 expected - 15 spent")
+        local H2 = Mock.new():login(); fixGear(H2)
+        H2.env.GetUnspentTalentPoints = nil
+        H2.env.GetNumTalentTabs = function() return 3 end
+        H2.env.GetTalentTabInfo = function() return "Árvore", 135, 20 end -- 60 gastos (bônus do Forever)
+        H2:update(1)
+        T.eq(H2.warnSounds, 0, "more points spent than expected: no false warning")
     end },
 
     { "lower-rank spell on the bar is reported with the best known rank", function(T, Mock)

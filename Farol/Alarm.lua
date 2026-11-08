@@ -3,7 +3,8 @@
 
   * Até 10 alarmes, cada um com hora local ou do servidor, nome opcional e liga/desliga.
   * Quando toca: som + mensagem no chat SÓ PARA VOCÊ (nada é enviado ao servidor ou a outros
-    jogadores), repetindo a cada 30 s até você apertar "Soneca" (5 min) ou "Parar".
+    jogadores), repetindo a cada 30 s até você apertar "Soneca" ou "Parar".
+  * Tempo da soneca configurável de 1 a 60 minutos (padrão 5).
   * Funciona mesmo com o painel escondido.
 
   Segurança: o nome do alarme é limpo (sem códigos "|" de cor/link/textura, sem caracteres de
@@ -14,7 +15,7 @@ local _, ns = ...
 
 local MAX_ALARMS = 10
 local REPEAT_SECONDS = 30
-local SNOOZE_SECONDS = 5 * 60
+local SNOOZE_MIN, SNOOZE_MAX = 1, 60 -- limites da soneca, em minutos
 local MAX_LABEL_CHARS = 30
 local ICON = "|TInterface\\Icons\\INV_Misc_PocketWatch_01:14:14|t"
 
@@ -37,7 +38,11 @@ local STRINGS = {
         al_local      = "Local",
         al_server     = "Servidor",
         al_ringing    = "Alarme!",
-        al_snooze_btn = "Soneca (5 min)",
+        al_snooze_btn = "Soneca (%d min)",
+        al_snooze_label = "Tempo da soneca:",
+        al_snooze_unit = "min",
+        al_snooze_set = "soneca configurada para %d min.",
+        al_bad_snooze = "tempo de soneca inválido: use de 1 a 60 minutos.",
         al_stop_btn   = "Parar",
         al_chat_hint  = "— /farol soneca ou /farol parar",
         al_added      = "alarme adicionado: %s",
@@ -55,8 +60,8 @@ local STRINGS = {
         al_more       = "+%d tocando",
         tt_alarms     = "Alarmes ativos",
         help_alarm    = "  /farol alarme        - abrir a janela de alarmes",
-        help_alarm2   = "  /farol alarme add 07:30 [local|servidor] [nome] | lista | remover N | ativar N | desativar N",
-        help_alarm3   = "  /farol soneca | /farol parar - adiar 5 min ou parar o alarme que está tocando",
+        help_alarm2   = "  /farol alarme add 07:30 [local|servidor] [nome] | lista | remover N | ativar N | desativar N | soneca MIN",
+        help_alarm3   = "  /farol soneca [MIN] | /farol parar - adiar (tempo configurado ou MIN) ou parar o alarme",
     },
     en = {
         al_title      = "Alarms",
@@ -69,7 +74,11 @@ local STRINGS = {
         al_local      = "Local",
         al_server     = "Server",
         al_ringing    = "Alarm!",
-        al_snooze_btn = "Snooze (5 min)",
+        al_snooze_btn = "Snooze (%d min)",
+        al_snooze_label = "Snooze time:",
+        al_snooze_unit = "min",
+        al_snooze_set = "snooze set to %d min.",
+        al_bad_snooze = "invalid snooze time: use 1 to 60 minutes.",
         al_stop_btn   = "Stop",
         al_chat_hint  = "— /farol snooze or /farol stop",
         al_added      = "alarm added: %s",
@@ -87,8 +96,8 @@ local STRINGS = {
         al_more       = "+%d ringing",
         tt_alarms     = "Active alarms",
         help_alarm    = "  /farol alarm         - open the alarms window",
-        help_alarm2   = "  /farol alarm add 07:30 [local|server] [name] | list | remove N | on N | off N",
-        help_alarm3   = "  /farol snooze | /farol stop - delay 5 min or stop the ringing alarm",
+        help_alarm2   = "  /farol alarm add 07:30 [local|server] [name] | list | remove N | on N | off N | snooze MIN",
+        help_alarm3   = "  /farol snooze [MIN] | /farol stop - delay (configured time or MIN) or stop the alarm",
     },
 }
 
@@ -199,6 +208,19 @@ end
 -- Tocar o alarme
 ---------------------------------------------------------------------------
 
+-- Converte e valida minutos de soneca (número inteiro de 1 a 60); nil se inválido.
+local function ValidSnooze(value)
+    value = tonumber(value)
+    if value and value == math.floor(value) and value >= SNOOZE_MIN and value <= SNOOZE_MAX then
+        return value
+    end
+    return nil
+end
+
+local function SnoozeMinutes()
+    return ValidSnooze(DB().snoozeMinutes) or 5
+end
+
 local ringing = {}   -- alarmes tocando agora: { alarm = ..., nextAt = GetTime() }
 local armed = {}     -- [alarm] = true quando pode disparar (fora do minuto marcado)
 local popup          -- janelinha com Soneca / Parar (criada sob demanda)
@@ -247,7 +269,7 @@ local function CreatePopup()
     frame.snooze = CreateFrame("Button", "FarolAlarmSnooze", frame, "UIPanelButtonTemplate")
     frame.snooze:SetSize(130, 22)
     frame.snooze:SetPoint("BOTTOMLEFT", 20, 16)
-    frame.snooze:SetScript("OnClick", function() Alarm.Snooze() end)
+    frame.snooze:SetScript("OnClick", function() Alarm.Snooze() end) -- usa o tempo configurado
 
     frame.stop = CreateFrame("Button", "FarolAlarmStop", frame, "UIPanelButtonTemplate")
     frame.stop:SetSize(130, 22)
@@ -272,7 +294,7 @@ local function UpdatePopup()
     local text = Describe(active[1].alarm)
     if #active > 1 then text = text .. "  " .. string.format(T("al_more"), #active - 1) end
     popup.text:SetText(text)
-    popup.snooze:SetText(T("al_snooze_btn"))
+    popup.snooze:SetText(string.format(T("al_snooze_btn"), SnoozeMinutes()))
     popup.stop:SetText(T("al_stop_btn"))
     popup:Show()
 end
@@ -291,15 +313,33 @@ local function StopAlarm(alarm)
     UpdatePopup()
 end
 
-function Alarm.Snooze()
+local function SetSnoozeMinutes(value)
+    local minutes = ValidSnooze(value)
+    if not minutes then Print(T("al_bad_snooze")) return false end
+    DB().snoozeMinutes = minutes
+    Print(string.format(T("al_snooze_set"), minutes))
+    UpdatePopup()
+    if RefreshWindow then RefreshWindow() end
+    return true
+end
+
+-- minutes: opcional, adia só desta vez por esse tempo; sem ele, usa o tempo configurado.
+function Alarm.Snooze(minutes)
     if #ringing == 0 then Print(T("al_none_ringing")) return end
-    local nextAt = GetTime() + SNOOZE_SECONDS
+    if minutes ~= nil and minutes ~= "" then
+        minutes = ValidSnooze(string.match(tostring(minutes), "^%s*(%d+)"))
+        if not minutes then Print(T("al_bad_snooze")) return end
+    else
+        minutes = SnoozeMinutes()
+    end
+    local seconds = minutes * 60
+    local nextAt = GetTime() + seconds
     for _, entry in ipairs(ringing) do
         entry.nextAt = nextAt
         entry.snoozed = true
     end
     UpdatePopup()
-    Print(string.format(T("al_snoozed"), FormatClock(time() + SNOOZE_SECONDS)))
+    Print(string.format(T("al_snoozed"), FormatClock(time() + seconds)))
 end
 
 function Alarm.Stop()
@@ -521,7 +561,25 @@ local function CreateWindow()
     frame.test:SetPoint("TOPLEFT", 150, addY - 62)
     frame.test:SetScript("OnClick", function() pcall(PlayAlarmSound) end)
 
-    frame:SetHeight(-(addY - 62) + 40)
+    -- Tempo da soneca (minutos).
+    frame.snoozeLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.snoozeLabel:SetPoint("TOPLEFT", 20, addY - 100)
+    frame.snoozeBox = CreateFrame("EditBox", "FarolAlarmSnoozeMinutes", frame, "InputBoxTemplate")
+    frame.snoozeBox:SetSize(28, 20)
+    frame.snoozeBox:SetPoint("LEFT", frame.snoozeLabel, "RIGHT", 10, 0)
+    frame.snoozeBox:SetAutoFocus(false)
+    frame.snoozeBox:SetNumeric(true)
+    frame.snoozeBox:SetMaxLetters(2)
+    local function SaveSnooze(box)
+        if not SetSnoozeMinutes(box:GetText()) then RefreshWindow() end -- inválido: volta ao valor salvo
+        box:ClearFocus()
+    end
+    frame.snoozeBox:SetScript("OnEnterPressed", SaveSnooze)
+    frame.snoozeBox:SetScript("OnEscapePressed", function(box) RefreshWindow(); box:ClearFocus() end)
+    frame.snoozeUnit = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    frame.snoozeUnit:SetPoint("LEFT", frame.snoozeBox, "RIGHT", 6, 0)
+
+    frame:SetHeight(-(addY - 100) + 40)
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolAlarms") -- ESC fecha
     frame:Hide()
@@ -550,6 +608,9 @@ RefreshWindow = function()
     window.labelHint:SetText(T("al_label_ph"))
     window.add:SetText(T("al_add"))
     window.test:SetText(T("al_test"))
+    window.snoozeLabel:SetText(T("al_snooze_label"))
+    window.snoozeUnit:SetText(T("al_snooze_unit") .. "  (1-60, Enter)")
+    if not window.snoozeBox:HasFocus() then window.snoozeBox:SetText(tostring(SnoozeMinutes())) end
 end
 
 function Alarm.ToggleWindow()
@@ -572,6 +633,7 @@ local SUB = {
     remove = "remove", remover = "remove", apagar = "remove", del = "remove", delete = "remove",
     on = "on", ativar = "on", enable = "on",
     off = "off", desativar = "off", disable = "off",
+    soneca = "snooze", snooze = "snooze",
 }
 local SERVER_WORDS = { servidor = true, server = true, jogo = true, game = true, s = true }
 local LOCAL_WORDS = { ["local"] = true, l = true }
@@ -604,5 +666,7 @@ function Alarm.HandleCommand(rest)
         SetEnabled(string.match(args, "^(%d+)"), true)
     elseif sub == "off" then
         SetEnabled(string.match(args, "^(%d+)"), false)
+    elseif sub == "snooze" then
+        SetSnoozeMinutes(string.match(args, "^(%d+)"))
     end
 end

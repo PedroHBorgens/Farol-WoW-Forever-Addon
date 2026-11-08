@@ -57,6 +57,7 @@ local DEFAULTS = {
     y = -20,
     lang = "auto", -- "auto" (segue o idioma do cliente), "pt" ou "en"
     serverTime = false, -- relógio mostra o horário do servidor em vez do local
+    snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
 }
 
 local VALID_LANGS = { auto = true, pt = true, en = true }
@@ -297,6 +298,8 @@ local function SanitizeDB(saved)
     if not VALID_POINTS[clean.point] then clean.point = DEFAULTS.point end
     if not VALID_POINTS[clean.relPoint] then clean.relPoint = DEFAULTS.relPoint end
     if not VALID_LANGS[clean.lang] then clean.lang = DEFAULTS.lang end
+    local snooze = clean.snoozeMinutes
+    if snooze ~= math.floor(snooze) or snooze < 1 or snooze > 60 then clean.snoozeMinutes = DEFAULTS.snoozeMinutes end
 
     -- Limita deslocamentos a valores razoáveis.
     local limit = 5000
@@ -1178,7 +1181,7 @@ SlashCmdList["FAROL"] = function(msg)
     elseif cmd == "alarme" or cmd == "alarmes" or cmd == "alarm" or cmd == "alarms" then
         ns.Alarm.HandleCommand(rest)
     elseif cmd == "soneca" or cmd == "snooze" then
-        ns.Alarm.Snooze()
+        ns.Alarm.Snooze(rest) -- "/farol soneca 10" adia só desta vez por 10 min
     elseif cmd == "parar" or cmd == "stop" then
         ns.Alarm.Stop()
     elseif cmd == "version" or cmd == "versao" then

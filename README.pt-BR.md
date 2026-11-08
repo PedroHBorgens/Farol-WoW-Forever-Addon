@@ -169,6 +169,21 @@ Segurança da informação é a primeira regra deste projeto:
 
 Encontrou um problema de segurança? Abra uma issue sem incluir dados pessoais, senhas ou informações da sua conta.
 
+## Testes
+
+O addon tem testes automáticos que rodam **fora do jogo**, em Lua 5.1 (a mesma versão do cliente do WoW),
+usando um simulador simples da API do WoW (`tests/wow_mock.lua`). Eles cobrem a barra nos clientes WoW Forever
+e 3.3.5a, os valores bloqueados (secret values), o menu de opções, os alarmes e a soneca, a janela de saques,
+os arquivos `.toc`, e uma varredura que falha se o código algum dia usar APIs de automação, de mensagens ou de
+execução de código.
+
+```
+lua5.1 tests/run.lua
+```
+
+O GitHub Actions roda os testes a cada push e pull request (`.github/workflows/tests.yml`) e anexa a cada
+execução um pacote `Farol-<versão>` pronto para instalar (aba Actions → a execução → *Artifacts*).
+
 ## Publicando no CurseForge
 
 O texto da página está em [`assets/curseforge-description.md`](assets/curseforge-description.md) e o avatar do

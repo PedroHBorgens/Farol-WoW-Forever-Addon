@@ -16,6 +16,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install Lua 5.1 (same version as the WoW client)
         run: sudo apt-get update && sudo apt-get install -y lua5.1

@@ -1,3 +1,10 @@
 .DS_Store
 Thumbs.db
 *.zip
+
+# Nunca versionar segredos (ex.: token da API do CurseForge), chaves ou certificados
+.env
+.env.*
+!.env.example
+*.pem
+*.key

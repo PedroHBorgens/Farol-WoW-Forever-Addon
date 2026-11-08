@@ -94,7 +94,7 @@ Abra **Aparência...** no menu de opções (ou `/farol aparencia`):
 
 - **Escala** de 50% a 200% e **opacidade do fundo** de 0% a 100% (0% = só o texto flutuando na tela), com botões [-]/[+].
 - **Barra vertical**: um item por linha.
-- **Mostrar borda**, **mostrar ícones na barra** (um por item) e **mostrar o botão do histórico de avisos**.
+- **Mostrar borda**, **mostrar ícones na barra** (um por item) e **mostrar o botão do histórico de avisos** e **mostrar o botão de saques**.
 - **Esconder em combate** (volta quando a luta acaba) e **esconder em masmorras, raides, arenas e campos de batalha**.
   Os alarmes e os avisos continuam funcionando com a barra escondida.
 - **Restaurar padrão** volta tudo ao normal.
@@ -147,7 +147,8 @@ Os **10 últimos avisos** (com data e hora) ficam guardados por personagem. Para
 
 Uma janela separada que lista os itens que **você** saqueou ou recebeu, do mais novo para o mais antigo.
 
-- Abra pelo botão **Saques...** no menu de opções, ou digite `/farol saque`.
+- Abra pelo **botão de bolsa ao lado da barra** (um número verde mostra os itens saqueados desde a última vez
+  que você abriu), pelo botão **Saques...** no menu de opções, ou com `/farol saque`.
 - Menu **Mostrar** — 5, 10, 15 ou 20 itens recentes.
 - Menu **Qualidade** — marque Inferior, Comum, Incomum, Raro, Épico e Lendário+ (nomes e cores vêm do próprio jogo), ou use *Marcar todas* / *Desmarcar todas*.
 - **Redimensionável** — arraste a alça do canto; a lista acompanha a largura e rola com a roda do mouse quando não cabe tudo. O tamanho fica salvo.

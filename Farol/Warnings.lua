@@ -284,12 +284,13 @@ local function UpdateButton()
     if not db or not ns.frame then return end
     if not db.warnButton then
         if historyButton then historyButton:Hide() end
+        ns.LayoutQuickButtons()
         return
     end
     if not historyButton then
         historyButton = CreateFrame("Button", "FarolWarnHistoryButton", ns.frame)
         historyButton:SetSize(18, 18)
-        historyButton:SetPoint("LEFT", ns.frame, "RIGHT", 2, 0)
+        table.insert(ns.quickButtons, historyButton)
         historyButton.icon = historyButton:CreateTexture(nil, "ARTWORK")
         historyButton.icon:SetAllPoints()
         historyButton.icon:SetTexture(HISTORY_ICON)
@@ -310,6 +311,7 @@ local function UpdateButton()
     end
     historyButton.badge:SetText(unread > 0 and tostring(unread) or "")
     historyButton:Show()
+    ns.LayoutQuickButtons()
 end
 Warnings.UpdateButton = UpdateButton
 

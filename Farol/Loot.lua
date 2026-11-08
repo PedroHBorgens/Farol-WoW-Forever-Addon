@@ -48,6 +48,9 @@ local STRINGS = {
         loot_uncheck_all = "Desmarcar todas",
         loot_scroll   = "%d–%d de %d",
         opt_loot      = "Saques...",
+        loot_button_tip = "Últimos saques",
+        loot_button_new = "%d item(ns) novo(s) — clique para ver",
+        loot_button_none = "Clique para ver",
         help_loot     = "  /farol saque [limpar] - abrir a janela de últimos saques (ou apagar o histórico)",
     },
     en = {
@@ -67,6 +70,9 @@ local STRINGS = {
         loot_uncheck_all = "Uncheck all",
         loot_scroll   = "%d–%d of %d",
         opt_loot      = "Loot...",
+        loot_button_tip = "Recent loot",
+        loot_button_new = "%d new item(s) — click to view",
+        loot_button_none = "Click to view",
         help_loot     = "  /farol loot [clear]  - open the recent loot window (or clear the history)",
     },
 }
@@ -204,12 +210,61 @@ end
 
 local RefreshWindow -- definida abaixo
 
+---------------------------------------------------------------------------
+-- Botão rápido ao lado da barra (abre a janela de saques)
+---------------------------------------------------------------------------
+
+local LOOT_ICON = "Interface\\Icons\\INV_Misc_Bag_10"
+local unseen = 0  -- itens saqueados desde a última vez que a janela foi aberta
+local lootButton
+local window      -- janela de saques (criada sob demanda, mais abaixo)
+
+local function UpdateButton()
+    local db = ns.GetDB()
+    if not db or not ns.frame then return end
+    if not db.lootButton then
+        if lootButton then lootButton:Hide() end
+        ns.LayoutQuickButtons()
+        return
+    end
+    if not lootButton then
+        lootButton = CreateFrame("Button", "FarolLootButton", ns.frame)
+        lootButton:SetSize(18, 18)
+        lootButton.icon = lootButton:CreateTexture(nil, "ARTWORK")
+        lootButton.icon:SetAllPoints()
+        lootButton.icon:SetTexture(LOOT_ICON)
+        lootButton.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        lootButton.badge = lootButton:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        lootButton.badge:SetPoint("BOTTOMRIGHT", 4, -2)
+        lootButton.badge:SetTextColor(0.3, 1, 0.3)
+        lootButton:RegisterForClicks("LeftButtonUp")
+        lootButton:SetScript("OnClick", function() Loot.ToggleWindow() end)
+        lootButton:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(T("loot_button_tip"))
+            GameTooltip:AddLine(unseen > 0 and string.format(T("loot_button_new"), unseen) or T("loot_button_none"),
+                0.8, 0.8, 0.8)
+            GameTooltip:Show()
+        end)
+        lootButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        table.insert(ns.quickButtons, lootButton)
+    end
+    lootButton.badge:SetText(unseen > 0 and tostring(unseen) or "")
+    lootButton:Show()
+    ns.LayoutQuickButtons()
+end
+Loot.UpdateButton = UpdateButton
+
 local function Record(link, count)
     if not ValidLink(link) then return end
     history[#history + 1] = { link = link, count = count, q = QualityOf(link), t = time() }
     while #history > HISTORY_MAX do table.remove(history, 1) end
     if FarolCharDB then FarolCharDB.items = history end
     if RefreshWindow then RefreshWindow() end
+    if not (window and window:IsShown()) then
+        unseen = unseen + 1
+        UpdateButton()
+    end
 end
 
 local function OnLootMessage(text)
@@ -249,7 +304,6 @@ end)
 -- Janela
 ---------------------------------------------------------------------------
 
-local window
 
 local function QualityName(q)
     if q == 5 then return T("loot_legend_plus") end
@@ -558,7 +612,11 @@ local function CreateWindow()
     end)
     frame:SetScript("OnSizeChanged", function() RefreshWindow() end)
 
-    frame:SetScript("OnShow", function() RefreshWindow() end)
+    frame:SetScript("OnShow", function()
+        unseen = 0 -- abriu a janela: itens novos foram vistos
+        UpdateButton()
+        RefreshWindow()
+    end)
     frame:SetScript("OnHide", CloseDropdown)
     tinsert(UISpecialFrames, "FarolLoot") -- ESC fecha
     frame:Hide()

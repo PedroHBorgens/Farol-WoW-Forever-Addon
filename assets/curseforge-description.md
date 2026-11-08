@@ -32,7 +32,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - **History of the last 10 warnings**: button next to the bar (with unread counter), key binding or `/farol history`.
 
 ### Recent loot window
-- Shows the last **5 / 10 / 15 / 20** items you looted (dropdown).
+- Shows the last **5 / 10 / 15 / 20** items you looted (dropdown). Quick **bag button** next to the bar with a new-items counter.
 - **Quality filter** dropdown (Poor → Legendary+), item tooltips, shift-click to link.
 - **Resizable** window with mouse-wheel scrolling. History saved per character.
 
@@ -74,7 +74,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 - **Histórico dos 10 últimos avisos**: botão ao lado da barra (com contador de novos), atalho de teclado ou `/farol historico`.
 
 ### Janela de últimos saques
-- Mostra os últimos **5 / 10 / 15 / 20** itens que você saqueou (menu suspenso).
+- Mostra os últimos **5 / 10 / 15 / 20** itens que você saqueou (menu suspenso). **Botão de bolsa** ao lado da barra, com contador de itens novos.
 - Menu de **filtro de qualidade** (Inferior → Lendário+), tooltip dos itens, Shift+clique para linkar.
 - Janela **redimensionável**, com rolagem pela roda do mouse. Histórico salvo por personagem.
 

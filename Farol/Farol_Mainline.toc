@@ -1,0 +1,12 @@
+## Interface: 16001, 120100, 120105
+## Title: Farol
+## Notes: Customizable info bar: FPS, latency, coords, zone, durability, bags, gold, XP, clock and more for WoW Forever. Free, open source, not affiliated with Blizzard.
+## Notes-ptBR: Barra de informações personalizável: FPS, latência, coordenadas, zona, durabilidade, bolsas, ouro, XP, horário e mais para WoW Forever. Gratuito, código aberto, não afiliado à Blizzard.
+## Author: PedroHBorgens
+## Version: 2.3.0
+## SavedVariables: FarolDB
+## SavedVariablesPerCharacter: FarolCharDB
+
+Core.lua
+Alarm.lua
+Loot.lua

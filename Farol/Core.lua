@@ -20,13 +20,14 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags",
-    "gold", "session", "xp", "clock", "playtime", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "clock", "playtime", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
 local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
+    goldh = false, xph = false,
     clock = false, playtime = false, friends = false, guild = false,
 }
 
@@ -42,6 +43,8 @@ local ITEM_ALIASES = {
     bolsas = "bags", bags = "bags", bolsa = "bags", bag = "bags",
     ouro = "gold", gold = "gold",
     sessao = "session", session = "session",
+    xph = "xph", xphora = "xph", xpperhour = "xph",
+    ouroh = "goldh", ourohora = "goldh", goldh = "goldh", goldperhour = "goldh",
     xp = "xp", experiencia = "xp", experience = "xp",
     hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
     tempo = "playtime", playtime = "playtime", played = "playtime",
@@ -103,6 +106,8 @@ local STRINGS = {
         name_bags = "Bolsas",          cmd_bags = "bolsas",
         name_gold = "Ouro",            cmd_gold = "ouro",
         name_session = "Ouro da sessão", cmd_session = "sessao",
+        name_goldh = "Ouro por hora",  cmd_goldh = "ouroh",
+        name_xph = "XP por hora",      cmd_xph = "xph",
         name_xp = "Experiência (XP)",  cmd_xp = "xp",
         name_clock = "Horário",        cmd_clock = "hora",
         name_playtime = "Tempo de sessão", cmd_playtime = "tempo",
@@ -113,6 +118,8 @@ local STRINGS = {
         label_speed  = "Vel",
         label_bags   = "Bolsas",
         label_session = "Sessão",
+        label_goldh  = "Ouro/h",
+        label_xph    = "XP/h",
         label_playtime = "Jogando",
         label_friends = "Amigos",
         label_guild  = "Guilda",
@@ -121,6 +128,13 @@ local STRINGS = {
         tt_speed     = "Velocidade",
         tt_bags      = "Bolsas (livres / total)",
         tt_session   = "Ouro na sessão",
+        tt_goldh     = "Ouro por hora",
+        tt_xph       = "XP por hora",
+        tt_tolevel   = "Próximo nível em",
+        tt_rate_wait = "calculando... (1 min)",
+        session_reset = "sessão zerada: ouro, XP e tempo recomeçam agora.",
+        help_session = "  /farol sessao zerar  - recomeçar a contagem de ouro, XP e tempo da sessão",
+        opt_session_reset = "Zerar sessão",
         tt_xp        = "Experiência",
         tt_rested    = "Descansado",
         tt_maxlevel  = "Nível máximo",
@@ -190,6 +204,8 @@ local STRINGS = {
         name_bags = "Bags",            cmd_bags = "bags",
         name_gold = "Gold",            cmd_gold = "gold",
         name_session = "Session gold", cmd_session = "session",
+        name_goldh = "Gold per hour",  cmd_goldh = "goldh",
+        name_xph = "XP per hour",      cmd_xph = "xph",
         name_xp = "Experience (XP)",   cmd_xp = "xp",
         name_clock = "Clock",          cmd_clock = "clock",
         name_playtime = "Session time", cmd_playtime = "playtime",
@@ -200,6 +216,8 @@ local STRINGS = {
         label_speed  = "Speed",
         label_bags   = "Bags",
         label_session = "Session",
+        label_goldh  = "Gold/h",
+        label_xph    = "XP/h",
         label_playtime = "Played",
         label_friends = "Friends",
         label_guild  = "Guild",
@@ -208,6 +226,13 @@ local STRINGS = {
         tt_speed     = "Speed",
         tt_bags      = "Bags (free / total)",
         tt_session   = "Gold this session",
+        tt_goldh     = "Gold per hour",
+        tt_xph       = "XP per hour",
+        tt_tolevel   = "Next level in",
+        tt_rate_wait = "calculating... (1 min)",
+        session_reset = "session reset: gold, XP and time start counting now.",
+        help_session = "  /farol session reset - restart the session gold, XP and time counters",
+        opt_session_reset = "Reset session",
         tt_xp        = "Experience",
         tt_rested    = "Rested",
         tt_maxlevel  = "Max level",
@@ -432,13 +457,36 @@ local function ScanDurability()
     end
 end
 
--- Estado da sessão (desde que você entrou no jogo ou deu /reload).
-local session = { startMoney = nil, startTime = nil }
+-- Estado da sessão (desde que você entrou no jogo, deu /reload ou zerou a sessão).
+local session = { startMoney = nil, startTime = nil, xpGained = 0 }
+local RATE_MIN_SECONDS = 60 -- taxas por hora só aparecem depois de 1 minuto (evita números absurdos)
+
+-- Soma o XP ganho desde a última leitura, inclusive quando o personagem sobe de nível.
+local function SampleXP()
+    local level = UnitLevel("player")
+    local cur, max = UnitXP("player"), UnitXPMax("player")
+    if type(cur) ~= "number" or type(max) ~= "number" or IsSecret(cur) or IsSecret(max) then return end
+    if session.lastXP then
+        if level > session.lastLevel then
+            session.xpGained = session.xpGained + math.max(0, session.lastMax - session.lastXP) + cur
+        elseif cur > session.lastXP then
+            session.xpGained = session.xpGained + (cur - session.lastXP)
+        end
+    end
+    session.lastXP, session.lastMax, session.lastLevel = cur, max, level
+end
+
+local function ResetSession()
+    session.startMoney = GetMoney()
+    session.startTime = GetTime()
+    session.xpGained = 0
+    session.lastXP = nil
+    pcall(SampleXP)
+end
 
 local function StartSession()
     if session.startTime then return end
-    session.startMoney = GetMoney()
-    session.startTime = GetTime()
+    ResetSession()
 end
 
 local function GetMemoryMB()
@@ -562,6 +610,31 @@ local function FormatMoneyDelta(delta)
     return RED .. "-|r" .. FormatMoneyShort(-delta)
 end
 
+-- 45200 -> "45.2k", 1250000 -> "1.3M"
+local function FormatBig(n)
+    if n >= 1000000 then return string.format("%.1fM", n / 1000000) end
+    if n >= 1000 then return string.format("%.1fk", n / 1000) end
+    return tostring(math.floor(n + 0.5))
+end
+
+-- XP por hora e segundos até o próximo nível (nil enquanto não há dados suficientes).
+local function GetXPRate()
+    local seconds = GetSessionSeconds()
+    if not seconds or seconds < RATE_MIN_SECONDS or session.xpGained <= 0 then return nil end
+    local perSecond = session.xpGained / seconds
+    local cur, max = GetXPInfo()
+    local toLevel = cur and (max - cur) / perSecond or nil
+    return perSecond * 3600, toLevel
+end
+
+-- Ouro (em cobre) por hora; negativo quando você gastou mais do que ganhou.
+local function GetGoldRate()
+    local seconds = GetSessionSeconds()
+    local delta = GetSessionMoney()
+    if not seconds or not delta or seconds < RATE_MIN_SECONDS then return nil end
+    return delta / seconds * 3600
+end
+
 -- No 3.3.5a as coordenadas dependem do mapa "ativo"; ao trocar de zona,
 -- voltamos o mapa para a zona atual (sem mexer se o jogador estiver com o mapa aberto).
 local function ResetMapToCurrentZone()
@@ -637,6 +710,20 @@ local ITEM_TEXT = {
             clock = clock .. " |TInterface\\Icons\\INV_Misc_PocketWatch_01:12:12|t" -- há alarme ativo
         end
         return clock
+    end,
+    xph = function()
+        if not GetXPInfo() then return nil end -- nível máximo: o item some
+        local perHour, toLevel = GetXPRate()
+        if not perHour then return T("label_xph") .. " --" end
+        local text = T("label_xph") .. " " .. FormatBig(perHour)
+        if toLevel then text = text .. " · " .. FormatDuration(toLevel) end
+        return text
+    end,
+    goldh = function()
+        local perHour = GetGoldRate()
+        if not perHour then return T("label_goldh") .. " --" end
+        local copper = perHour >= 0 and math.floor(perHour) or -math.floor(-perHour)
+        return T("label_goldh") .. " " .. FormatMoneyDelta(copper)
     end,
     playtime = function()
         local seconds = GetSessionSeconds()
@@ -783,8 +870,15 @@ local function FillTooltip()
     GameTooltip:AddLine(" ")
     local money = Safe(GetMoney)
     AddPair(T("tt_gold"), money and FormatMoney(money) or "--")
+    local goldRate = Safe(GetGoldRate)
     local delta = Safe(GetSessionMoney)
     if delta then AddPair(T("tt_session"), FormatMoneyDelta(delta)) end
+    if goldRate then
+        local copper = goldRate >= 0 and math.floor(goldRate) or -math.floor(-goldRate)
+        AddPair(T("tt_goldh"), FormatMoneyDelta(copper))
+    else
+        AddPair(T("tt_goldh"), T("tt_rate_wait"))
+    end
     local free, total = Safe(GetBagSpace)
     if free then AddPair(T("tt_bags"), string.format("%d / %d", free, total)) end
 
@@ -802,6 +896,15 @@ local function FillTooltip()
     AddPair(T("tt_clock_local"), Safe(GetClockText, false) or "--")
     AddPair(T("tt_clock_server"), Safe(GetClockText, true) or "--")
     if ns.Alarm then pcall(ns.Alarm.AddTooltipLines, AddPair) end
+    if Safe(GetXPInfo) then
+        local perHour, toLevel = Safe(GetXPRate)
+        if perHour then
+            AddPair(T("tt_xph"), FormatBig(perHour))
+            if toLevel then AddPair(T("tt_tolevel"), FormatDuration(toLevel)) end
+        else
+            AddPair(T("tt_xph"), T("tt_rate_wait"))
+        end
+    end
     local seconds = Safe(GetSessionSeconds)
     if seconds then AddPair(T("tt_playtime"), FormatDuration(seconds)) end
 
@@ -836,6 +939,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
     elapsedSinceUpdate = elapsedSinceUpdate + elapsed
     if elapsedSinceUpdate >= UPDATE_INTERVAL then
         elapsedSinceUpdate = 0
+        pcall(SampleXP) -- mede o XP antes de redesenhar, para a taxa não ficar atrasada
         UpdateText()
         if db.items.guild then RequestGuildRoster() end
         if TooltipIsOurs() then ShowTooltip(self) end -- mantém o tooltip atualizado
@@ -979,6 +1083,12 @@ local function BuildControls(parent, top)
     y = y - 26
     set.loot = CreateButton(parent, 150, function() ns.Loot.ToggleWindow() end)
     set.loot:SetPoint("TOPLEFT", 20, y)
+    set.sessionReset = CreateButton(parent, 150, function()
+        ResetSession()
+        UpdateText()
+        Print(T("session_reset"))
+    end)
+    set.sessionReset:SetPoint("TOPLEFT", 176, y)
     y = y - 30
 
     controlSets[#controlSets + 1] = set
@@ -1008,6 +1118,7 @@ RefreshOptions = function()
         set.reset:SetText(T("opt_reset"))
         set.alarms:SetText(T("opt_alarms"))
         set.loot:SetText(T("opt_loot"))
+        set.sessionReset:SetText(T("opt_session_reset"))
     end
 end
 
@@ -1093,6 +1204,7 @@ frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 frame:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+frame:RegisterEvent("PLAYER_XP_UPDATE")
 
 frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" then
@@ -1117,6 +1229,8 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         ScanDurability()
     elseif event == "ZONE_CHANGED_NEW_AREA" then
         ResetMapToCurrentZone()
+    elseif event == "PLAYER_XP_UPDATE" then
+        pcall(SampleXP)
     elseif event == "UPDATE_INVENTORY_DURABILITY" or event == "PLAYER_EQUIPMENT_CHANGED" then
         ScanDurability()
     end
@@ -1130,7 +1244,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -1190,6 +1304,10 @@ SlashCmdList["FAROL"] = function(msg)
         end
     elseif cmd == "alarme" or cmd == "alarmes" or cmd == "alarm" or cmd == "alarms" then
         ns.Alarm.HandleCommand(rest)
+    elseif (cmd == "sessao" or cmd == "session") and (arg == "zerar" or arg == "reset") then
+        ResetSession()
+        UpdateText()
+        Print(T("session_reset"))
     elseif cmd == "saque" or cmd == "saques" or cmd == "loot" then
         ns.Loot.HandleCommand(rest)
     elseif cmd == "soneca" or cmd == "snooze" then

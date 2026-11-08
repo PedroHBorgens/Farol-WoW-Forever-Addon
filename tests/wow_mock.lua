@@ -153,10 +153,11 @@ function Mock.new(opts)
     env.GetInventoryItemLink = function(_, slot) if slot == 1 then return "[Elmo]" end end
     env.GetUnitSpeed = function() return 0, 7 end
     env.NUM_BAG_SLOTS = 4
-    env.UnitXP = function() return 6200 end
-    env.UnitXPMax = function() return 10000 end
-    env.GetXPExhaustion = function() return 1500 end
-    env.UnitLevel = function() return 30 end
+    H.xp = { cur = 6200, max = 10000, level = 30, rested = 1500 } -- os testes podem alterar
+    env.UnitXP = function() return H.xp.cur end
+    env.UnitXPMax = function() return H.xp.max end
+    env.GetXPExhaustion = function() return H.xp.rested end
+    env.UnitLevel = function() return H.xp.level end
     env.GetMaxPlayerLevel = function() return 60 end
     env.BNGetNumFriends = function() return 10, 5 end
     env.IsInGuild = function() return true end

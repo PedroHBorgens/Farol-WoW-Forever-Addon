@@ -27,6 +27,7 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 | `/farol menu`       | Abre o menu de opções (ou clique direito no painel) |
 | `/farol saque`      | Abre a janela de últimos saques |
 | `/farol saque limpar`| Apaga o histórico de saques deste personagem |
+| `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h e tempo |
 | `/farol alarme`     | Abre a janela de alarmes |
 | `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
 | `/farol soneca`     | Adia o alarme que está tocando (tempo configurado, padrão 5 min) |
@@ -104,6 +105,9 @@ instância/combate o cliente moderno pode esconder o conteúdo do chat dos addon
 
 Os seis primeiros vêm ligados; os outros começam desligados — marque no menu.
 
+Os itens de sessão (ouro da sessão, ouro/h, XP/h, tempo de sessão) contam desde que você entrou ou deu `/reload`.
+Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por exemplo, ao trocar de lugar de farm).
+
 | Item             | Mostra                                                    | Nome no comando | Padrão     |
 |------------------|-----------------------------------------------------------|-----------------|------------|
 | FPS              | Quadros por segundo (verde ≥ 50, amarelo ≥ 25)            | `fps`           | ligado     |
@@ -116,7 +120,9 @@ Os seis primeiros vêm ligados; os outros começam desligados — marque no menu
 | Bolsas           | Espaços livres / total (vermelho com 2 ou menos)          | `bolsas`        | desligado  |
 | Ouro             | Dinheiro do personagem                                    | `ouro`          | ligado     |
 | Ouro da sessão   | Quanto ganhou ou gastou desde que entrou / `/reload`      | `sessao`        | desligado  |
+| Ouro por hora    | Ouro da sessão por hora (vermelho quando negativo)        | `ouroh`         | desligado  |
 | Experiência (XP) | % de XP e bônus descansado (some no nível máximo)         | `xp`            | desligado  |
+| XP por hora      | XP/h e tempo até o próximo nível (após 1 min de sessão)   | `xph`           | desligado  |
 | Horário          | Hora local, ou do servidor (opção no menu)                | `hora`          | desligado  |
 | Tempo de sessão  | Quanto tempo está jogando desde que entrou / `/reload`    | `tempo`         | desligado  |
 | Amigos online    | Quantidade de amigos online (WoW + Battle.net)            | `amigos`        | desligado  |

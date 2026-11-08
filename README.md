@@ -27,6 +27,7 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 | `/farol menu`       | Open the options menu (or right-click the panel) |
 | `/farol loot`       | Open the recent loot window |
 | `/farol loot clear` | Clear this character's loot history |
+| `/farol session reset`| Restart session gold, gold/h, XP/h and time |
 | `/farol alarm`      | Open the alarms window |
 | `/farol alarm add 07:30`| Create an alarm (see below) |
 | `/farol snooze`     | Snooze the ringing alarm (configured time, default 5 min) |
@@ -104,6 +105,9 @@ modern client may hide chat contents from addons; those items are simply not rec
 
 The first six items are on by default; the others start off — tick them in the menu.
 
+Session items (session gold, gold/h, XP/h, session time) count from login or `/reload`. Use **Reset session**
+in the menu, or `/farol session reset`, to restart them (e.g. when you move to a new farming spot).
+
 | Item            | Shows                                                  | Command name | Default |
 |-----------------|--------------------------------------------------------|--------------|---------|
 | FPS             | Frames per second (green ≥ 50, yellow ≥ 25)            | `fps`        | on      |
@@ -116,7 +120,9 @@ The first six items are on by default; the others start off — tick them in the
 | Bags            | Free / total bag slots (red at 2 or fewer)             | `bags`       | off     |
 | Gold            | Money on your character                                | `gold`       | on      |
 | Session gold    | Gold gained or spent since login / `/reload`           | `session`    | off     |
+| Gold per hour   | Session gold per hour (red when negative)              | `goldh`      | off     |
 | Experience (XP) | XP % and rested bonus (hidden at max level)            | `xp`         | off     |
+| XP per hour     | XP/h and time to next level (after 1 min of session)   | `xph`        | off     |
 | Clock           | Local time, or server time (menu option)               | `clock`      | off     |
 | Session time    | How long you've been playing since login / `/reload`   | `playtime`   | off     |
 | Friends online  | Count of online WoW + Battle.net friends               | `friends`    | off     |

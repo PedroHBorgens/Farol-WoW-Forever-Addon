@@ -50,6 +50,7 @@ local SUITES = {
     "test_options",
     "test_alarms",
     "test_loot",
+    "test_rates",
 }
 
 local passed, failed = 0, 0

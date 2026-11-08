@@ -21,6 +21,10 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - Up to **10 alarms**, using **local** or **server** time, with an optional name.
 - Plays a game sound and posts a message **only in your own chat**, every 30 seconds, until you click **Snooze** (1–60 min, configurable) or **Stop**.
 
+### Durability and bag warnings
+- One-time warning on screen and in your chat when gear durability drops below 20% or your bags are almost full / full.
+- Configurable limits and sound; never repeats while the number flickers.
+
 ### Recent loot window
 - Shows the last **5 / 10 / 15 / 20** items you looted (dropdown).
 - **Quality filter** dropdown (Poor → Legendary+), item tooltips, shift-click to link.
@@ -52,6 +56,10 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 ### Alarmes do relógio
 - Até **10 alarmes**, com hora **local** ou do **servidor** e um nome opcional.
 - Toca um som do jogo e mostra uma mensagem **só no seu chat**, a cada 30 segundos, até você clicar em **Soneca** (1–60 min, configurável) ou **Parar**.
+
+### Avisos de durabilidade e bolsas
+- Aviso único na tela e no seu chat quando a durabilidade cai abaixo de 20% ou as bolsas estão quase cheias / cheias.
+- Limites e som configuráveis; não fica repetindo quando o número oscila.
 
 ### Janela de últimos saques
 - Mostra os últimos **5 / 10 / 15 / 20** itens que você saqueou (menu suspenso).

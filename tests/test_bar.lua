@@ -2,7 +2,7 @@
 -- Info bar: compatibility, language, items, tooltip, secret values, saved data.
 
 local ALL_ITEMS = { "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags",
-                    "gold", "session", "xp", "clock", "playtime", "friends", "guild" }
+                    "gold", "session", "goldh", "xp", "xph", "clock", "playtime", "friends", "guild" }
 
 return {
     { "loads on WoW Forever and shows the default items", function(T, Mock)
@@ -53,6 +53,7 @@ return {
         T.eq(db.items.gold, true, "invalid value -> default")
         T.eq(db.items.evil, nil, "unknown keys dropped")
         T.eq(db.items.xp, false, "new items default to off")
+        T.eq(db.items.xph, false); T.eq(db.items.goldh, false)
     end },
 
     { "show/hide items by command (PT and EN names) and list them", function(T, Mock)
@@ -66,7 +67,7 @@ return {
         T.has(H:bar(), "/farol show <item>", "hint when every item is hidden")
     end },
 
-    { "all 15 items render with correct values", function(T, Mock)
+    { "all 17 items render with correct values", function(T, Mock)
         local H = Mock.new():login()
         for _, key in ipairs(ALL_ITEMS) do H:slash("show " .. key) end
         H:update(3725)
@@ -74,6 +75,7 @@ return {
         T.has(bar, "Vel 100%"); T.has(bar, "Bolsas 6/80"); T.has(bar, "Sessão +0c")
         T.has(bar, "XP 62% +15%"); T.has(bar, "Jogando 1h 02m")
         T.has(bar, "Amigos 8"); T.has(bar, "Guilda 12"); T.has(bar, "Mem ")
+        T.has(bar, "Ouro/h +0c"); T.has(bar, "XP/h --", "no XP gained yet")
         H:slash("alarme add 06:00"); H:update(1)
         T.ok(string.find(H.env.FarolFrame._fontStrings[1]._text, "PocketWatch", 1, true), "clock shows the alarm icon")
     end },

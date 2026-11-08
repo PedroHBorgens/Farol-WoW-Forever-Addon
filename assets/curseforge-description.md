@@ -12,7 +12,7 @@
 **Farol** (Portuguese for *lighthouse*) shows the information you care about in one small, movable bar.
 
 ### Info bar — pick what you see
-FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · Gold · Session gold · XP & rested · Clock (local or server) · Session time · Friends online · Guild online
+FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · Gold · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · Clock (local or server) · Session time · Friends online · Guild online
 
 - **Right-click** the bar (or `/farol menu`) to tick the items you want.
 - **Hover** the bar for a detailed tooltip: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
@@ -44,7 +44,7 @@ English and Brazilian Portuguese (follows your client, or `/farol lang en|pt`).
 **Farol** mostra as informações que importam numa barra pequena e móvel.
 
 ### Barra de informações — você escolhe o que aparece
-FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · Ouro · Ouro da sessão · XP e descansado · Horário (local ou do servidor) · Tempo de sessão · Amigos online · Guilda online
+FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · Ouro · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · Horário (local ou do servidor) · Tempo de sessão · Amigos online · Guilda online
 
 - **Clique direito** na barra (ou `/farol menu`) e marque os itens que quiser.
 - **Passe o mouse** na barra para ver um tooltip detalhado: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.

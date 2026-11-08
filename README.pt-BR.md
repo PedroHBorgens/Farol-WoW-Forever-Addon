@@ -168,6 +168,14 @@ Segurança da informação é a primeira regra deste projeto:
 
 Encontrou um problema de segurança? Abra uma issue sem incluir dados pessoais, senhas ou informações da sua conta.
 
+## Publicando no CurseForge
+
+O texto da página está em [`assets/curseforge-description.md`](assets/curseforge-description.md) e o avatar do
+projeto em [`assets/farol-icon-400.png`](assets/farol-icon-400.png). Envie um ZIP que tenha na raiz só a pasta
+`Farol`, e selecione a versão do jogo do WoW Forever (1.60.1).
+
+O ícone do jogo (`Farol/Media/Farol.tga`, que aparece na lista de AddOns) é uma arte original feita para este projeto.
+
 ## Conformidade com a política de addons da Blizzard
 
 Este addon segue a [Política de Desenvolvimento de AddOns da Blizzard](https://us.forums.blizzard.com/en/wow/t/ui-add-on-development-policy/24534):

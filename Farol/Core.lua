@@ -13,6 +13,7 @@
 ]]
 
 local ADDON_NAME, ns = ... -- ns: tabela compartilhada com Alarm.lua
+local ICON = "|TInterface\\AddOns\\Farol\\Media\\Farol:16:16|t" -- ícone do addon (Media/Farol.tga)
 local PREFIX = "|cff33ccffFarol|r: "
 local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 
@@ -278,6 +279,7 @@ local function T(key)
 end
 
 ns.T = T
+ns.ICON = ICON
 ns.Print = Print
 ns.GetDB = function() return db end
 
@@ -736,7 +738,7 @@ local function AddPair(label, value)
 end
 
 local function FillTooltip()
-    GameTooltip:AddLine("Farol", 0.2, 0.8, 1)
+    GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
 
     local fps = Safe(GetFPS)
     AddPair("FPS", fps and tostring(fps) or "--")
@@ -1034,7 +1036,7 @@ local function CreateOptionsWindow()
 
     local title = window:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOP", 0, -18)
-    title:SetText("Farol")
+    title:SetText(ICON .. " Farol")
 
     local close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -6, -6)
@@ -1064,7 +1066,7 @@ local function RegisterSettingsPanel()
 
     local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", 16, -16)
-    title:SetText("Farol")
+    title:SetText(ICON .. " Farol")
 
     BuildControls(panel, -46)
     panel:SetScript("OnShow", RefreshOptions)

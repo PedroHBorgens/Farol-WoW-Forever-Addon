@@ -166,6 +166,14 @@ Information security is this project's first rule:
 
 Found a security issue? Open an issue without including personal data, passwords or account details.
 
+## Publishing on CurseForge
+
+The page text is in [`assets/curseforge-description.md`](assets/curseforge-description.md) and the project
+avatar in [`assets/farol-icon-400.png`](assets/farol-icon-400.png). Upload a ZIP whose root contains only the
+`Farol` folder, and select the WoW Forever game version (1.60.1).
+
+The in-game icon (`Farol/Media/Farol.tga`, shown in the AddOns list) is original artwork made for this project.
+
 ## Blizzard add-on policy compliance
 
 This addon follows Blizzard's [UI Add-On Development Policy](https://us.forums.blizzard.com/en/wow/t/ui-add-on-development-policy/24534):

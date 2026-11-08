@@ -4,7 +4,8 @@
   * Registra os itens que VOCÊ saqueia ou recebe, lendo a mensagem de saque que o próprio jogo
     mostra no seu chat ("Você recebe saque: ..."). Usa os textos do cliente, então funciona em
     qualquer idioma.
-  * Janela separada da barra: escolha ver os últimos 5, 10, 15 ou 20 itens e filtre por qualidade.
+  * Janela separada da barra, redimensionável: menus suspensos para ver os últimos 5, 10, 15 ou 20
+    itens e filtrar por qualidade.
   * Histórico salvo por personagem (até 100 itens).
 
   Segurança: só lê mensagens de saque do próprio jogador; nada é enviado a ninguém. Os links salvos
@@ -17,7 +18,10 @@ local HISTORY_MAX = 100
 local COUNT_OPTIONS = { 5, 10, 15, 20 }
 local QUALITY_KEYS = { 0, 1, 2, 3, 4, 5 } -- 5 = Lendário ou acima (artefato, herança...)
 local ROW_HEIGHT = 22
-local LIST_TOP = -150
+local LIST_TOP = -84      -- onde a lista começa (abaixo dos filtros)
+local FOOTER_H = 62       -- espaço do rodapé (dica, Limpar, alça)
+local DEFAULT_W, DEFAULT_H = 420, 380
+local MIN_W, MIN_H, MAX_W, MAX_H = 380, 220, 900, 900
 
 local Loot = {}
 ns.Loot = Loot
@@ -36,7 +40,13 @@ local STRINGS = {
         loot_filtered = "Nenhum item com esse filtro.",
         loot_cleared  = "histórico de saques apagado.",
         loot_legend_plus = "Lendário+",
-        loot_hint     = "Mouse: detalhes do item · Shift+clique: link no chat",
+        loot_hint     = "Mouse: detalhes · Shift+clique: link · Roda: rolar",
+        loot_all      = "Todas",
+        loot_none     = "Nenhuma",
+        loot_n_selected = "%d selecionadas",
+        loot_check_all = "Marcar todas",
+        loot_uncheck_all = "Desmarcar todas",
+        loot_scroll   = "%d–%d de %d",
         opt_loot      = "Saques...",
         help_loot     = "  /farol saque [limpar] - abrir a janela de últimos saques (ou apagar o histórico)",
     },
@@ -49,7 +59,13 @@ local STRINGS = {
         loot_filtered = "No items match this filter.",
         loot_cleared  = "loot history cleared.",
         loot_legend_plus = "Legendary+",
-        loot_hint     = "Hover: item details · Shift-click: link in chat",
+        loot_hint     = "Hover: details · Shift-click: link · Wheel: scroll",
+        loot_all      = "All",
+        loot_none     = "None",
+        loot_n_selected = "%d selected",
+        loot_check_all = "Check all",
+        loot_uncheck_all = "Uncheck all",
+        loot_scroll   = "%d–%d of %d",
         opt_loot      = "Loot...",
         help_loot     = "  /farol loot [clear]  - open the recent loot window (or clear the history)",
     },
@@ -88,9 +104,13 @@ local function ValidCount(n)
 end
 
 function Loot.SanitizeSettings(saved)
-    local clean = { count = 10, qualities = {} }
+    local clean = { count = 10, qualities = {}, w = DEFAULT_W, h = DEFAULT_H }
     if type(saved) ~= "table" then saved = {} end
     if ValidCount(saved.count) then clean.count = saved.count end
+    -- Tamanho da janela: só números dentro dos limites.
+    local w, h = tonumber(saved.w), tonumber(saved.h)
+    if w and w == w and w >= MIN_W and w <= MAX_W then clean.w = math.floor(w) end
+    if h and h == h and h >= MIN_H and h <= MAX_H then clean.h = math.floor(h) end
     local savedQ = type(saved.qualities) == "table" and saved.qualities or {}
     for _, q in ipairs(QUALITY_KEYS) do
         clean.qualities[q] = savedQ[q] ~= false -- padrão: todas visíveis
@@ -251,13 +271,195 @@ local function Passes(entry, qualities)
     return qualities[q]
 end
 
+---------------------------------------------------------------------------
+-- Menu suspenso próprio (dropdown)
+-- Feito do zero em vez do UIDropDownMenu da Blizzard, que está obsoleto nos clientes modernos
+-- e é conhecido por causar "taint". Funciona igual em qualquer versão.
+---------------------------------------------------------------------------
+
+local openList -- lista de dropdown aberta no momento (só uma por vez)
+
+-- Clique fora da lista fecha a lista.
+local catcher = CreateFrame("Button", nil, UIParent)
+catcher:SetAllPoints(UIParent)
+catcher:SetFrameStrata("FULLSCREEN_DIALOG")
+catcher:EnableMouse(true)
+catcher:Hide()
+
+local function CloseDropdown()
+    if openList then openList:Hide() end
+    openList = nil
+    catcher:Hide()
+end
+catcher:SetScript("OnClick", CloseDropdown)
+
+-- getItems() devolve { { text=, checked=, r=, g=, b=, onClick=, keepOpen= }, ... }
+local function CreateDropdown(parent, name, width, getItems)
+    local button = CreateFrame("Button", name, parent, "UIPanelButtonTemplate")
+    button:SetSize(width, 22)
+    local arrow = button:CreateTexture(nil, "OVERLAY")
+    arrow:SetTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Up")
+    arrow:SetSize(18, 18)
+    arrow:SetPoint("RIGHT", -2, 0)
+    local label = button:GetFontString()
+    if label then
+        label:ClearAllPoints()
+        label:SetPoint("LEFT", 8, 0)
+        label:SetPoint("RIGHT", arrow, "LEFT", -2, 0)
+        label:SetJustifyH("LEFT")
+    end
+
+    local list = CreateFrame("Frame", name .. "List", UIParent, ns.backdropTemplate)
+    list:SetFrameStrata("FULLSCREEN_DIALOG")
+    list:SetFrameLevel(catcher:GetFrameLevel() + 10)
+    list:SetClampedToScreen(true)
+    if list.SetBackdrop then
+        list:SetBackdrop({
+            bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tile = true, tileSize = 16, edgeSize = 12,
+            insets = { left = 3, right = 3, top = 3, bottom = 3 },
+        })
+        list:SetBackdropColor(0, 0, 0, 0.95)
+    end
+    list.entries = {}
+    list:Hide()
+
+    local function Populate()
+        local items = getItems()
+        local entryWidth = math.max(width, 150)
+        for i, item in ipairs(items) do
+            local entry = list.entries[i]
+            if not entry then
+                entry = CreateFrame("Button", name .. "Entry" .. i, list)
+                entry:SetHeight(18)
+                local hl = entry:CreateTexture(nil, "HIGHLIGHT")
+                hl:SetAllPoints()
+                hl:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+                hl:SetBlendMode("ADD")
+                entry.check = entry:CreateTexture(nil, "OVERLAY")
+                entry.check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+                entry.check:SetSize(16, 16)
+                entry.check:SetPoint("LEFT", 2, 0)
+                entry.text = entry:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+                entry.text:SetPoint("LEFT", 22, 0)
+                entry.text:SetJustifyH("LEFT")
+                list.entries[i] = entry
+            end
+            entry:SetWidth(entryWidth - 12)
+            entry:SetPoint("TOPLEFT", 6, -6 - (i - 1) * 18)
+            entry.text:SetText(item.text)
+            entry.text:SetTextColor(item.r or 1, item.g or 1, item.b or 1)
+            if item.checked then entry.check:Show() else entry.check:Hide() end
+            entry:SetScript("OnClick", function()
+                item.onClick()
+                if item.keepOpen then Populate() else CloseDropdown() end
+            end)
+            entry:Show()
+        end
+        for i = #items + 1, #list.entries do list.entries[i]:Hide() end
+        list:SetSize(entryWidth, #items * 18 + 12)
+    end
+
+    button:SetScript("OnClick", function()
+        if openList == list then CloseDropdown() return end
+        CloseDropdown()
+        Populate()
+        list:ClearAllPoints()
+        list:SetPoint("TOPLEFT", button, "BOTTOMLEFT", 0, -2)
+        list:Show()
+        catcher:Show()
+        openList = list
+    end)
+    button:SetScript("OnHide", function() if openList == list then CloseDropdown() end end)
+    return button
+end
+
+---------------------------------------------------------------------------
+-- Janela (redimensionável)
+---------------------------------------------------------------------------
+
+local scrollOffset = 0
+
+local function CountItems()
+    local items = {}
+    for _, n in ipairs(COUNT_OPTIONS) do
+        items[#items + 1] = {
+            text = tostring(n),
+            checked = Settings().count == n,
+            onClick = function()
+                Settings().count = n
+                scrollOffset = 0
+                RefreshWindow()
+            end,
+        }
+    end
+    return items
+end
+
+local function QualityItems()
+    local qualities = Settings().qualities
+    local items = {}
+    for _, q in ipairs(QUALITY_KEYS) do
+        local r, g, b = QualityColor(q)
+        items[#items + 1] = {
+            text = QualityName(q), r = r, g = g, b = b,
+            checked = qualities[q], keepOpen = true, -- multi-seleção: a lista fica aberta
+            onClick = function()
+                qualities[q] = not qualities[q]
+                scrollOffset = 0
+                RefreshWindow()
+            end,
+        }
+    end
+    for _, entry in ipairs({ { "loot_check_all", true }, { "loot_uncheck_all", false } }) do
+        items[#items + 1] = {
+            text = "|cffaaaaaa" .. T(entry[1]) .. "|r", keepOpen = true,
+            onClick = function()
+                for _, q in ipairs(QUALITY_KEYS) do qualities[q] = entry[2] end
+                scrollOffset = 0
+                RefreshWindow()
+            end,
+        }
+    end
+    return items
+end
+
+-- Texto do botão de qualidade: "Todas", "Nenhuma", até 2 nomes, ou "N selecionadas".
+local function QualitySummary()
+    local qualities = Settings().qualities
+    local names, count = {}, 0
+    for _, q in ipairs(QUALITY_KEYS) do
+        if qualities[q] then
+            count = count + 1
+            names[#names + 1] = QualityName(q)
+        end
+    end
+    if count == #QUALITY_KEYS then return T("loot_all") end
+    if count == 0 then return T("loot_none") end
+    if count <= 2 then return table.concat(names, ", ") end
+    return string.format(T("loot_n_selected"), count)
+end
+
+local function SetResizeLimits(frame)
+    if frame.SetResizeBounds then
+        frame:SetResizeBounds(MIN_W, MIN_H, MAX_W, MAX_H) -- clientes modernos
+    else
+        if frame.SetMinResize then frame:SetMinResize(MIN_W, MIN_H) end
+        if frame.SetMaxResize then frame:SetMaxResize(MAX_W, MAX_H) end
+    end
+end
+
 local function CreateWindow()
+    local settings = Settings()
     local frame = CreateFrame("Frame", "FarolLoot", UIParent, ns.backdropTemplate)
-    frame:SetWidth(390)
+    frame:SetSize(settings.w, settings.h)
     frame:SetPoint("CENTER", -40, 0)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
     frame:SetMovable(true)
+    frame:SetResizable(true)
+    SetResizeLimits(frame)
     frame:EnableMouse(true)
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving)
@@ -276,43 +478,16 @@ local function CreateWindow()
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -6, -6)
 
-    -- Quantidade: 5 / 10 / 15 / 20
+    -- Linha de filtros: Mostrar [10 ▼]   Qualidade [Todas ▼]
     frame.showLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    frame.showLabel:SetPoint("TOPLEFT", 20, -50)
-    frame.countButtons = {}
-    for i, n in ipairs(COUNT_OPTIONS) do
-        local button = CreateFrame("Button", "FarolLootCount" .. n, frame, "UIPanelButtonTemplate")
-        button:SetSize(40, 22)
-        button:SetPoint("TOPLEFT", 90 + (i - 1) * 44, -45)
-        button:SetText(tostring(n))
-        button:SetScript("OnClick", function()
-            Settings().count = n
-            RefreshWindow()
-        end)
-        frame.countButtons[n] = button
-    end
-    frame.clear = CreateFrame("Button", "FarolLootClear", frame, "UIPanelButtonTemplate")
-    frame.clear:SetSize(80, 22)
-    frame.clear:SetPoint("TOPRIGHT", -24, -45)
-    frame.clear:SetScript("OnClick", function() Loot.Clear() end)
+    frame.showLabel:SetPoint("TOPLEFT", 20, -52)
+    frame.countDropdown = CreateDropdown(frame, "FarolLootCount", 64, CountItems)
+    frame.countDropdown:SetPoint("LEFT", frame.showLabel, "RIGHT", 6, 0)
 
-    -- Filtro de qualidade (2 linhas de 3)
     frame.qualityLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    frame.qualityLabel:SetPoint("TOPLEFT", 20, -78)
-    frame.qualityChecks = {}
-    for i, q in ipairs(QUALITY_KEYS) do
-        local column, row = (i - 1) % 3, math.floor((i - 1) / 3)
-        local check = CreateFrame("CheckButton", "FarolLootQuality" .. q, frame, "UICheckButtonTemplate")
-        check:SetSize(24, 24)
-        check:SetPoint("TOPLEFT", 20 + column * 120, -94 - row * 24)
-        check.label = check:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        check.label:SetPoint("LEFT", check, "RIGHT", 2, 0)
-        check:SetScript("OnClick", function(self)
-            Settings().qualities[q] = self:GetChecked() and true or false
-            RefreshWindow()
-        end)
-        frame.qualityChecks[q] = check
-    end
+    frame.qualityLabel:SetPoint("LEFT", frame.countDropdown, "RIGHT", 14, 0)
+    frame.qualityDropdown = CreateDropdown(frame, "FarolLootQuality", 150, QualityItems)
+    frame.qualityDropdown:SetPoint("LEFT", frame.qualityLabel, "RIGHT", 6, 0)
 
     frame.empty = frame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
     frame.empty:SetPoint("TOPLEFT", 24, LIST_TOP - 4)
@@ -321,20 +496,21 @@ local function CreateWindow()
     frame.rows = {}
     for i = 1, COUNT_OPTIONS[#COUNT_OPTIONS] do
         local row = CreateFrame("Button", nil, frame)
-        row:SetSize(350, ROW_HEIGHT - 2)
+        row:SetHeight(ROW_HEIGHT - 2)
         row:SetPoint("TOPLEFT", 20, LIST_TOP - (i - 1) * ROW_HEIGHT)
+        row:SetPoint("RIGHT", frame, "RIGHT", -20, 0)
         row:RegisterForClicks("LeftButtonUp")
         row.icon = row:CreateTexture(nil, "ARTWORK")
         row.icon:SetSize(18, 18)
         row.icon:SetPoint("LEFT", 0, 0)
-        row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        row.text:SetPoint("LEFT", row.icon, "RIGHT", 6, 0)
-        row.text:SetWidth(240)
-        row.text:SetJustifyH("LEFT")
-        if row.text.SetWordWrap then row.text:SetWordWrap(false) end
         row.info = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
         row.info:SetPoint("RIGHT", 0, 0)
         row.info:SetJustifyH("RIGHT")
+        row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        row.text:SetPoint("LEFT", row.icon, "RIGHT", 6, 0)
+        row.text:SetPoint("RIGHT", row.info, "LEFT", -8, 0) -- acompanha a largura da janela
+        row.text:SetJustifyH("LEFT")
+        if row.text.SetWordWrap then row.text:SetWordWrap(false) end
         row:SetScript("OnEnter", function(self)
             if not self.link then return end
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -349,9 +525,41 @@ local function CreateWindow()
         frame.rows[i] = row
     end
 
+    -- Rodapé: dica, posição da rolagem, Limpar e alça de redimensionar.
     frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    frame.hint:SetPoint("BOTTOMLEFT", 22, 20)
+    frame.hint:SetPoint("RIGHT", frame, "RIGHT", -120, 0)
+    frame.hint:SetJustifyH("LEFT")
+    frame.scrollInfo = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    frame.scrollInfo:SetPoint("BOTTOMLEFT", frame.hint, "TOPLEFT", 0, 4)
+    frame.clear = CreateFrame("Button", "FarolLootClear", frame, "UIPanelButtonTemplate")
+    frame.clear:SetSize(80, 22)
+    frame.clear:SetPoint("BOTTOMRIGHT", -30, 16)
+    frame.clear:SetScript("OnClick", function() Loot.Clear() end)
+
+    local grip = CreateFrame("Button", "FarolLootResize", frame)
+    grip:SetSize(16, 16)
+    grip:SetPoint("BOTTOMRIGHT", -8, 8)
+    grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    grip:SetScript("OnMouseDown", function() frame:StartSizing("BOTTOMRIGHT") end)
+    grip:SetScript("OnMouseUp", function()
+        frame:StopMovingOrSizing()
+        settings.w = math.floor(frame:GetWidth() + 0.5)
+        settings.h = math.floor(frame:GetHeight() + 0.5)
+    end)
+
+    -- Roda do mouse rola a lista quando nem tudo cabe.
+    frame:EnableMouseWheel(true)
+    frame:SetScript("OnMouseWheel", function(_, delta)
+        scrollOffset = scrollOffset - delta
+        RefreshWindow()
+    end)
+    frame:SetScript("OnSizeChanged", function() RefreshWindow() end)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
+    frame:SetScript("OnHide", CloseDropdown)
     tinsert(UISpecialFrames, "FarolLoot") -- ESC fecha
     frame:Hide()
     return frame
@@ -364,15 +572,10 @@ RefreshWindow = function()
     window.title:SetText(T("loot_title"))
     window.showLabel:SetText(T("loot_show"))
     window.qualityLabel:SetText(T("loot_quality"))
+    window.countDropdown:SetText(tostring(settings.count))
+    window.qualityDropdown:SetText(QualitySummary())
     window.clear:SetText(T("loot_clear"))
-    for n, button in pairs(window.countButtons) do
-        if n == settings.count then button:LockHighlight() else button:UnlockHighlight() end
-    end
-    for q, check in pairs(window.qualityChecks) do
-        check.label:SetText(QualityName(q))
-        check.label:SetTextColor(QualityColor(q))
-        check:SetChecked(settings.qualities[q])
-    end
+    window.hint:SetText(T("loot_hint"))
 
     -- Os N mais recentes que passam no filtro, do mais novo para o mais antigo.
     local shown = {}
@@ -382,9 +585,16 @@ RefreshWindow = function()
         if Passes(history[i], settings.qualities) then shown[#shown + 1] = history[i] end
     end
 
+    -- Quantas linhas cabem na altura atual (o resto é acessado rolando).
+    local available = (window:GetHeight() or settings.h) + LIST_TOP - FOOTER_H
+    local fit = math.max(1, math.floor(available / ROW_HEIGHT))
+    local maxOffset = math.max(0, #shown - fit)
+    if scrollOffset > maxOffset then scrollOffset = maxOffset end
+    if scrollOffset < 0 then scrollOffset = 0 end
+
     for i, row in ipairs(window.rows) do
-        local entry = shown[i]
-        if entry and i <= settings.count then
+        local entry = shown[i + scrollOffset]
+        if entry and i <= fit then
             row.link = entry.link
             row.icon:SetTexture(IconOf(entry.link))
             row.text:SetText(entry.link)
@@ -398,19 +608,20 @@ RefreshWindow = function()
         end
     end
 
+    if #shown > fit then
+        window.scrollInfo:SetText(string.format(T("loot_scroll"),
+            scrollOffset + 1, math.min(scrollOffset + fit, #shown), #shown))
+        window.scrollInfo:Show()
+    else
+        window.scrollInfo:Hide()
+    end
+
     if #shown == 0 then
         window.empty:SetText(#history == 0 and T("loot_empty") or T("loot_filtered"))
         window.empty:Show()
     else
         window.empty:Hide()
     end
-
-    local listRows = math.max(#shown, 1)
-    local bottom = LIST_TOP - listRows * ROW_HEIGHT
-    window.hint:ClearAllPoints()
-    window.hint:SetPoint("TOPLEFT", 22, bottom - 8)
-    window.hint:SetText(T("loot_hint"))
-    window:SetHeight(-bottom + 44)
 end
 
 function Loot.ToggleWindow()

@@ -223,6 +223,7 @@ local function CreateWindow()
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolAppearance") -- ESC fecha
+    ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
 end

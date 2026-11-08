@@ -38,7 +38,7 @@ jobs:
           cp LICENSE dist/Farol/LICENSE.txt
 
       - name: Upload package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Farol-${{ steps.version.outputs.version }}
           path: dist/

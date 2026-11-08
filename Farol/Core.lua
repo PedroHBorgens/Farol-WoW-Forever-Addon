@@ -851,6 +851,7 @@ local ITEM_ICONS = {
     guild = "INV_Shirt_GuildTabard_01",
 }
 ns.ITEM_ICONS = ITEM_ICONS
+ns.ITEM_ORDER = ITEM_ORDER -- ordem padrão; a ordem escolhida pelo jogador fica em db.order
 
 local function IconTag(key)
     local icon = ITEM_ICONS[key]
@@ -861,7 +862,7 @@ end
 
 local function UpdateText()
     local parts = {}
-    for _, key in ipairs(ITEM_ORDER) do
+    for _, key in ipairs(db.order or ITEM_ORDER) do -- ordem escolhida pelo jogador
         if db.items[key] then
             local ok, value = pcall(ITEM_TEXT[key])
             if not ok then value = "--" end
@@ -1045,6 +1046,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 ns.ApplyAppearance = function() ApplyAppearance() end
+ns.UpdateText = function() UpdateText() end
 
 -- Botões rápidos ao lado da barra (histórico de avisos, saques...), na ordem em que foram criados.
 -- Os visíveis ficam encostados um no outro; se um some, o próximo encosta no anterior.
@@ -1114,12 +1116,14 @@ local function SetLang(lang)
     if ns.Loot then ns.Loot.Refresh() end
     if ns.Warnings then ns.Warnings.Refresh() end
     if ns.Appearance then ns.Appearance.Refresh() end
+    if ns.Order then ns.Order.Refresh() end
 end
 
 local function SetItemVisible(key, value)
     db.items[key] = value
     UpdateText()
     RefreshOptions()
+    if ns.Order then ns.Order.Refresh() end -- atualiza o "escondido" na janela de ordem
 end
 
 ---------------------------------------------------------------------------
@@ -1224,6 +1228,9 @@ local function BuildControls(parent, top)
     set.warnings:SetPoint("TOPLEFT", 20, y)
     set.appearance = CreateButton(parent, 150, function() ns.Appearance.ToggleWindow() end)
     set.appearance:SetPoint("TOPLEFT", 176, y)
+    y = y - 26
+    set.order = CreateButton(parent, 150, function() ns.Order.ToggleWindow() end)
+    set.order:SetPoint("TOPLEFT", 20, y)
     y = y - 30
 
     controlSets[#controlSets + 1] = set
@@ -1256,6 +1263,7 @@ RefreshOptions = function()
         set.sessionReset:SetText(T("opt_session_reset"))
         set.warnings:SetText(T("opt_warnings"))
         set.appearance:SetText(T("opt_appearance"))
+        set.order:SetText(T("opt_order"))
     end
 end
 
@@ -1356,6 +1364,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         db.alarms = ns.Alarm.Sanitize(type(saved) == "table" and saved.alarms or nil)
         db.loot = ns.Loot.SanitizeSettings(type(saved) == "table" and saved.loot or nil)
         db.warnings = ns.Warnings.Sanitize(type(saved) == "table" and saved.warnings or nil)
+        db.order = ns.Order.Sanitize(type(saved) == "table" and saved.order or nil)
         FarolDB = db
         local savedChar = FarolCharDB
         FarolCharDB = ns.Loot.SanitizeHistory(savedChar) -- histórico de saques deste personagem
@@ -1396,7 +1405,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_warn", "help_history", "help_appearance",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_warn", "help_history", "help_appearance", "help_order",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -1456,6 +1465,8 @@ SlashCmdList["FAROL"] = function(msg)
         end
     elseif cmd == "alarme" or cmd == "alarmes" or cmd == "alarm" or cmd == "alarms" then
         ns.Alarm.HandleCommand(rest)
+    elseif cmd == "ordem" or cmd == "order" then
+        ns.Order.HandleCommand(rest)
     elseif cmd == "aparencia" or cmd == "appearance" or cmd == "look" then
         ns.Appearance.HandleCommand(rest)
     elseif cmd == "historico" or cmd == "history" then

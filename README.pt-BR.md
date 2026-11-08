@@ -31,6 +31,7 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 | `/farol aviso`      | Abre a janela de avisos (durabilidade e bolsas) |
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, vertical, esconder em combate) |
+| `/farol ordem`      | Escolhe a ordem das informações na barra |
 | `/farol alarme`     | Abre a janela de alarmes |
 | `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
 | `/farol soneca`     | Adia o alarme que está tocando (tempo configurado, padrão 5 min) |
@@ -189,6 +190,10 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | Tempo de sessão  | Quanto tempo está jogando desde que entrou / `/reload`    | `tempo`         | desligado  |
 | Amigos online    | Quantidade de amigos online (WoW + Battle.net)            | `amigos`        | desligado  |
 | Guilda online    | Quantidade de membros da guilda online (some sem guilda)  | `guilda`        | desligado  |
+
+**Ordem:** abra **Ordem...** no menu de opções (ou `/farol ordem`) e use as setas [▲]/[▼] para mover cada item;
+a barra muda na hora (também no modo vertical). Os itens escondidos aparecem em cinza, para você já deixar a posição
+pronta. **Restaurar ordem padrão** (ou `/farol ordem padrao`) desfaz tudo.
 
 Exemplo: `/farol hide ouro` esconde o ouro; `/farol show ouro` mostra de volta. Também funcionam
 `mostrar`/`esconder` e os nomes em inglês (`zone`, `gold`, `bags`…). Suas escolhas ficam salvas.

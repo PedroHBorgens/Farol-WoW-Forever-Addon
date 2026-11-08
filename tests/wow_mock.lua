@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua" }
 
 local function noop() end
 
@@ -68,6 +68,8 @@ function Frame:SetScale(scale) self._scale = scale end
 local raiseCounter = 0
 function Frame:Raise() raiseCounter = raiseCounter + 1; self._raisedAt = raiseCounter end
 function Frame:SetToplevel(value) self._toplevel = value end
+function Frame:Enable() self._disabled = false end
+function Frame:Disable() self._disabled = true end
 function Frame:HookScript(name, fn)
     local original = self._scripts[name]
     self._scripts[name] = function(...)

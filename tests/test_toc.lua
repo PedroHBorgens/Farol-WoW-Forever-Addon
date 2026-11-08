@@ -63,7 +63,7 @@ return {
             "LootSlot", "ConfirmLootSlot", "RollOnLoot", "SetCVar", "RepairAllItems",
             "PickupSpell", "PickupAction", "PlaceAction", "SetBinding",
         }
-        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua" }) do
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua" }) do
             local code = read("Farol/" .. file)
             code = string.gsub(code, "%-%-%[%[.-%]%]", "") -- comentários de bloco
             code = string.gsub(code, "%-%-[^\n]*", "")     -- comentários de linha

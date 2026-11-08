@@ -22,8 +22,9 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - Plays a game sound and posts a message **only in your own chat**, every 30 seconds, until you click **Snooze** (1–60 min, configurable) or **Stop**.
 
 ### Recent loot window
-- Shows the last **5 / 10 / 15 / 20** items you looted.
-- **Quality filter** (Poor → Legendary+), item tooltips, shift-click to link. History saved per character.
+- Shows the last **5 / 10 / 15 / 20** items you looted (dropdown).
+- **Quality filter** dropdown (Poor → Legendary+), item tooltips, shift-click to link.
+- **Resizable** window with mouse-wheel scrolling. History saved per character.
 
 ### Languages
 English and Brazilian Portuguese (follows your client, or `/farol lang en|pt`).
@@ -53,8 +54,9 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 - Toca um som do jogo e mostra uma mensagem **só no seu chat**, a cada 30 segundos, até você clicar em **Soneca** (1–60 min, configurável) ou **Parar**.
 
 ### Janela de últimos saques
-- Mostra os últimos **5 / 10 / 15 / 20** itens que você saqueou.
-- **Filtro de qualidade** (Inferior → Lendário+), tooltip dos itens, Shift+clique para linkar. Histórico salvo por personagem.
+- Mostra os últimos **5 / 10 / 15 / 20** itens que você saqueou (menu suspenso).
+- Menu de **filtro de qualidade** (Inferior → Lendário+), tooltip dos itens, Shift+clique para linkar.
+- Janela **redimensionável**, com rolagem pela roda do mouse. Histórico salvo por personagem.
 
 ### Idiomas
 Português do Brasil e inglês (segue o idioma do cliente, ou `/farol lang pt|en`).

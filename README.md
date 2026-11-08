@@ -89,8 +89,9 @@ after a `/reload` inside that minute (this avoids false alarms).
 A separate window listing the items **you** looted or received, newest first.
 
 - Open it with **Loot...** in the options menu, or type `/farol loot`.
-- **Show 5 / 10 / 15 / 20** — choose how many recent items to list.
-- **Quality filter** — tick Poor, Common, Uncommon, Rare, Epic and Legendary+ (names and colors come from the game).
+- **Show** dropdown — 5, 10, 15 or 20 recent items.
+- **Quality** dropdown — tick Poor, Common, Uncommon, Rare, Epic and Legendary+ (names and colors come from the game), or use *Check all* / *Uncheck all*.
+- **Resizable** — drag the corner grip; the list follows the width and scrolls with the mouse wheel when it doesn't fit. The size is saved.
 - Each row shows the item icon, the colored item link, the quantity and the time. Hover for the item tooltip;
   **Shift-click** puts the link in your chat box (you decide whether to send it).
 - History is saved **per character** (last 100 items). **Clear** erases it.

@@ -89,8 +89,9 @@ depois de um `/reload` dentro desse minuto (isso evita alarmes falsos).
 Uma janela separada que lista os itens que **você** saqueou ou recebeu, do mais novo para o mais antigo.
 
 - Abra pelo botão **Saques...** no menu de opções, ou digite `/farol saque`.
-- **Mostrar 5 / 10 / 15 / 20** — escolha quantos itens recentes aparecem.
-- **Filtro de qualidade** — marque Inferior, Comum, Incomum, Raro, Épico e Lendário+ (nomes e cores vêm do próprio jogo).
+- Menu **Mostrar** — 5, 10, 15 ou 20 itens recentes.
+- Menu **Qualidade** — marque Inferior, Comum, Incomum, Raro, Épico e Lendário+ (nomes e cores vêm do próprio jogo), ou use *Marcar todas* / *Desmarcar todas*.
+- **Redimensionável** — arraste a alça do canto; a lista acompanha a largura e rola com a roda do mouse quando não cabe tudo. O tamanho fica salvo.
 - Cada linha mostra o ícone, o link do item colorido, a quantidade e a hora. Passe o mouse para ver o tooltip
   do item; **Shift+clique** coloca o link na sua caixa de chat (você decide se envia).
 - O histórico é salvo **por personagem** (últimos 100 itens). **Limpar** apaga tudo.

@@ -112,6 +112,28 @@ Segurança da informação é a primeira regra deste projeto:
 
 Encontrou um problema de segurança? Abra uma issue sem incluir dados pessoais, senhas ou informações da sua conta.
 
+## Conformidade com a política de addons da Blizzard
+
+Este addon segue a [Política de Desenvolvimento de AddOns da Blizzard](https://us.forums.blizzard.com/en/wow/t/ui-add-on-development-policy/24534):
+
+| Regra da política | Este addon |
+|---|---|
+| Deve ser gratuito | ✅ Gratuito, licença MIT — sem versão paga nem funções pagas |
+| Código visível (sem ofuscação) | ✅ Lua simples e comentado em `Core.lua` |
+| Sem propaganda ou pedidos de doação | ✅ Nenhum, nem no jogo nem neste repositório |
+| Não pode prejudicar o desempenho do servidor | ✅ O único pedido ao servidor é a lista da guilda, no máximo 1 vez por minuto e só com o item Guilda ligado (o mesmo que a janela de Guilda do jogo faz) |
+| Não pode automatizar o jogo | ✅ Usa só a API oficial de addons para **ler e mostrar** informações; nunca lança magias, move, seleciona alvos, compra, vende ou manda mensagens |
+| Deve seguir os Termos de Uso / EULA | ✅ Sem programas externos, sem leitura de memória, sem injeção — não é um `.exe` |
+
+**Não é afiliado à Blizzard Entertainment.** World of Warcraft e WoW Forever são marcas da Blizzard Entertainment, Inc.
+
+### Como evitar banimento
+
+- O que dá ban são **bots, programas de automação, "unlockers", ferramentas de memória/injeção e exploits** — não addons Lua comuns como este.
+- Evite programas que apertam teclas por você (ex.: macros de AutoHotkey); eles podem gerar ban por "automação de terceiros".
+- Nunca rode um `.exe` que diga ser addon. Addon de verdade é só arquivo de texto `.lua`/`.toc`/`.xml`.
+- Baixe só deste repositório (ou das releases oficiais dele) e nunca digite sua senha fora do launcher oficial da Battle.net.
+
 ## Licença
 
 MIT — use, modifique e distribua livremente. Veja `LICENSE`.

@@ -110,6 +110,28 @@ Information security is this project's first rule:
 
 Found a security issue? Open an issue without including personal data, passwords or account details.
 
+## Blizzard add-on policy compliance
+
+This addon follows Blizzard's [UI Add-On Development Policy](https://us.forums.blizzard.com/en/wow/t/ui-add-on-development-policy/24534):
+
+| Policy rule | This addon |
+|---|---|
+| Must be free | ✅ Free, MIT license — no paid version, no paid features |
+| Code must be visible (no obfuscation) | ✅ Plain, commented Lua in `Core.lua` |
+| No ads or donation requests | ✅ None, in game or in this repository |
+| Must not hurt realm performance | ✅ Only server request is the guild roster, at most once a minute and only if the Guild item is on (the same thing the game's own Guild window does) |
+| Must not automate gameplay | ✅ Uses only the official addon API to **read and display** information; it never casts, moves, targets, buys, sells or sends chat |
+| Must follow the Terms of Use / EULA | ✅ No external programs, no memory reading, no injection — it is not a `.exe` |
+
+**Not affiliated with Blizzard Entertainment.** World of Warcraft and WoW Forever are trademarks of Blizzard Entertainment, Inc.
+
+### How to stay safe from bans
+
+- What gets accounts banned is **bots, automation software, unlockers, memory/injection tools and exploits** — not regular Lua addons like this one.
+- Avoid key-automation tools (e.g. AutoHotkey macros that press keys for you); they can trigger "third-party automation" bans.
+- Never run an `.exe` that claims to be an addon. Real addons are only `.lua`/`.toc`/`.xml` text files.
+- Download only from this repository (or its official releases), and never type your password anywhere but the official Battle.net launcher.
+
 ## License
 
 MIT — free to use, modify and distribute. See `LICENSE`.

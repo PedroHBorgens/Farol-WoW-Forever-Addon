@@ -3,7 +3,7 @@
 **Português** | [English](README.md)
 
 Addon **gratuito e de código aberto** para WoW Forever: mostra um painel pequeno e arrastável com
-**FPS · latência · coordenadas · zona · durabilidade · ouro**.
+**FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · ouro · ouro da sessão · XP · horário · tempo de sessão · amigos · guilda** — você escolhe o que aparece.
 Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens aparecem na barra.
 
 ## Instalação
@@ -40,25 +40,39 @@ Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um des
 - Digite `/wfi menu`
 - **Esc → Opções → AddOns → WoW Forever Info**
 
-No menu você escolhe os itens da barra, mostra/trava o painel, escolhe o idioma (Auto / Português /
+No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, escolhe o idioma (Auto / Português /
 English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/wfi menu` para trazê-lo de volta.
 
 ## Itens da barra
 
-| Item     | Mostra                                                  | Nome nos comandos |
-|----------|---------------------------------------------------------|-------------------|
-| FPS      | Quadros por segundo (verde ≥ 50, amarelo ≥ 25)          | `fps`             |
-| Latência | A maior entre latência local/mundo (verde ≤ 100 ms)     | `ms`              |
-| Coords   | Sua posição no mapa (`--` dentro de instâncias)         | `coords`          |
-| Zona     | Nome da zona atual                                      | `zona`            |
-| Durab.   | Sua peça **mais danificada** (vermelho abaixo de 20%)   | `durab`           |
-| Ouro     | Dinheiro do personagem                                  | `ouro`            |
+Os seis primeiros vêm ligados; os outros começam desligados — marque no menu.
+
+| Item             | Mostra                                                    | Nome no comando | Padrão     |
+|------------------|-----------------------------------------------------------|-----------------|------------|
+| FPS              | Quadros por segundo (verde ≥ 50, amarelo ≥ 25)            | `fps`           | ligado     |
+| Latência         | A maior entre latência local/mundo (verde ≤ 100 ms)       | `ms`            | ligado     |
+| Memória          | Memória Lua total (interface + addons)                    | `mem`           | desligado  |
+| Coordenadas      | Sua posição no mapa (`--` dentro de instâncias)           | `coords`        | ligado     |
+| Zona             | Nome da zona atual                                        | `zona`          | ligado     |
+| Velocidade       | Velocidade de movimento (100% = correndo normal)          | `vel`           | desligado  |
+| Durabilidade     | Sua peça **mais danificada** (vermelho abaixo de 20%)     | `durab`         | ligado     |
+| Bolsas           | Espaços livres / total (vermelho com 2 ou menos)          | `bolsas`        | desligado  |
+| Ouro             | Dinheiro do personagem                                    | `ouro`          | ligado     |
+| Ouro da sessão   | Quanto ganhou ou gastou desde que entrou / `/reload`      | `sessao`        | desligado  |
+| Experiência (XP) | % de XP e bônus descansado (some no nível máximo)         | `xp`            | desligado  |
+| Horário          | Hora local, ou do servidor (opção no menu)                | `hora`          | desligado  |
+| Tempo de sessão  | Quanto tempo está jogando desde que entrou / `/reload`    | `tempo`         | desligado  |
+| Amigos online    | Quantidade de amigos online (WoW + Battle.net)            | `amigos`        | desligado  |
+| Guilda online    | Quantidade de membros da guilda online (some sem guilda)  | `guilda`        | desligado  |
 
 Exemplo: `/wfi hide ouro` esconde o ouro; `/wfi show ouro` mostra de volta. Também funcionam
-`mostrar`/`esconder` e os nomes em inglês (`zone`, `gold`). Suas escolhas ficam salvas.
+`mostrar`/`esconder` e os nomes em inglês (`zone`, `gold`, `bags`…). Suas escolhas ficam salvas.
 
-**Tooltip:** passe o mouse no painel para ver latência local/mundo, subzona, cada peça danificada com a
-durabilidade, e mais.
+**Tooltip:** passe o mouse no painel para ver todos os detalhes de uma vez — latência local/mundo,
+subzona, cada peça danificada, XP exato e descansado, hora local *e* do servidor, amigos separados por
+WoW / Battle.net, e mais.
+
+**Privacidade:** os itens de amigos e guilda leem só **quantidades**; nenhum nome é lido ou guardado.
 
 ## Idioma
 

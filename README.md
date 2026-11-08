@@ -3,7 +3,7 @@
 [Português](README.pt-BR.md) | **English**
 
 A **free and open-source** addon for WoW Forever: a small, draggable on-screen panel showing
-**FPS · latency · coordinates · zone · durability · gold**.
+**FPS · latency · memory · coordinates · zone · speed · durability · bags · gold · session gold · XP · clock · session time · friends · guild** — you pick what shows.
 Hover the panel for a detailed tooltip, and choose which items appear on the bar.
 
 ## Installation
@@ -40,24 +40,38 @@ Tick or untick each item — no commands needed. Open it in any of these ways:
 - Type `/wfi menu`
 - **Esc → Options → AddOns → WoW Forever Info**
 
-The menu lets you choose bar items, show/lock the panel, pick the language (Auto / Português / English)
+The menu lets you choose bar items, show/lock the panel, switch the clock to server time, pick the language (Auto / Português / English)
 and reset the position. Press **Esc** to close it. If you hide the panel, use `/wfi menu` to bring it back.
 
 ## Bar items
 
-| Item     | Shows                                              | Name in commands |
-|----------|----------------------------------------------------|------------------|
-| FPS      | Frames per second (green ≥ 50, yellow ≥ 25)        | `fps`            |
-| Latency  | Highest of home/world latency (green ≤ 100 ms)     | `ms`             |
-| Coords   | Your map position (`--` inside instances)          | `coords`         |
-| Zone     | Current zone name                                  | `zone`           |
-| Durab.   | Your **most damaged** item (red below 20%)         | `durab`          |
-| Gold     | Money on your character                            | `gold`           |
+The first six items are on by default; the others start off — tick them in the menu.
+
+| Item            | Shows                                                  | Command name | Default |
+|-----------------|--------------------------------------------------------|--------------|---------|
+| FPS             | Frames per second (green ≥ 50, yellow ≥ 25)            | `fps`        | on      |
+| Latency         | Highest of home/world latency (green ≤ 100 ms)         | `ms`         | on      |
+| Memory          | Total Lua memory (UI + addons)                         | `mem`        | off     |
+| Coordinates     | Your map position (`--` inside instances)              | `coords`     | on      |
+| Zone            | Current zone name                                      | `zone`       | on      |
+| Speed           | Movement speed (100% = normal running)                 | `speed`      | off     |
+| Durability      | Your **most damaged** item (red below 20%)             | `durab`      | on      |
+| Bags            | Free / total bag slots (red at 2 or fewer)             | `bags`       | off     |
+| Gold            | Money on your character                                | `gold`       | on      |
+| Session gold    | Gold gained or spent since login / `/reload`           | `session`    | off     |
+| Experience (XP) | XP % and rested bonus (hidden at max level)            | `xp`         | off     |
+| Clock           | Local time, or server time (menu option)               | `clock`      | off     |
+| Session time    | How long you've been playing since login / `/reload`   | `playtime`   | off     |
+| Friends online  | Count of online WoW + Battle.net friends               | `friends`    | off     |
+| Guild online    | Count of online guild members (hidden without a guild) | `guild`      | off     |
 
 Example: `/wfi hide gold` hides gold; `/wfi show gold` brings it back. Portuguese names also work
-(`zona`, `ouro`, `durabilidade`). Your choices are saved.
+(`zona`, `ouro`, `bolsas`, `hora`…). Your choices are saved.
 
-**Tooltip:** hover the panel to see home/world latency, subzone, every damaged item with its durability, and more.
+**Tooltip:** hover the panel to see every detail at once — home/world latency, subzone, each damaged
+item, exact XP and rested, local *and* server time, friends split by WoW / Battle.net, and more.
+
+**Privacy:** friends and guild items only read **counts**; no names are read or stored.
 
 ## Language
 

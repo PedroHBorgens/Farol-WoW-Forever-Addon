@@ -1,7 +1,8 @@
 --[[
   WoW Forever Info
-  Painel na tela com FPS, latência, coordenadas, zona, durabilidade e ouro.
-  On-screen panel with FPS, latency, coordinates, zone, durability and gold. (PT / EN)
+  Painel na tela com FPS, latência, memória, coordenadas, zona, velocidade, durabilidade, bolsas,
+  ouro, ouro da sessão, XP, horário, tempo de sessão, amigos e guilda — você escolhe o que aparece.
+  On-screen info bar with selectable items. (PT / EN)
 
   Princípios de segurança deste addon:
     * Não usa loadstring/RunScript nem executa código vindo de chat, arquivos ou outros jogadores.
@@ -16,16 +17,35 @@ local PREFIX = "|cff33ccffWoW Forever Info|r: "
 local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 
 -- Itens da barra, na ordem em que aparecem.
-local ITEM_ORDER = { "fps", "ms", "coords", "zone", "durab", "gold" }
+local ITEM_ORDER = {
+    "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags",
+    "gold", "session", "xp", "clock", "playtime", "friends", "guild",
+}
+
+-- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
+local ITEM_DEFAULTS = {
+    fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
+    mem = false, speed = false, bags = false, session = false, xp = false,
+    clock = false, playtime = false, friends = false, guild = false,
+}
 
 -- Nomes aceitos nos comandos /wfi show|hide (português e inglês).
 local ITEM_ALIASES = {
     fps = "fps",
     ms = "ms", ping = "ms", latencia = "ms", latency = "ms",
+    mem = "mem", memoria = "mem", memory = "mem",
     coords = "coords", coord = "coords", coordenadas = "coords", coordinates = "coords",
     zona = "zone", zone = "zone",
+    vel = "speed", velocidade = "speed", speed = "speed",
     durab = "durab", dur = "durab", durabilidade = "durab", durability = "durab",
+    bolsas = "bags", bags = "bags", bolsa = "bags", bag = "bags",
     ouro = "gold", gold = "gold",
+    sessao = "session", session = "session",
+    xp = "xp", experiencia = "xp", experience = "xp",
+    hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
+    tempo = "playtime", playtime = "playtime", played = "playtime",
+    amigos = "friends", friends = "friends",
+    guilda = "guild", guild = "guild",
 }
 
 local DEFAULTS = {
@@ -36,6 +56,7 @@ local DEFAULTS = {
     x = 0,
     y = -20,
     lang = "auto", -- "auto" (segue o idioma do cliente), "pt" ou "en"
+    serverTime = false, -- relógio mostra o horário do servidor em vez do local
 }
 
 local VALID_LANGS = { auto = true, pt = true, en = true }
@@ -65,18 +86,49 @@ local STRINGS = {
         lang_set     = "idioma: Português.",
         lang_auto    = "idioma: automático (segue o cliente).",
         lang_usage   = "uso: /wfi lang pt | en | auto",
-        item_usage   = "uso: /wfi show|hide fps | ms | coords | zona | durab | ouro",
+        item_usage   = "uso: /wfi show|hide",
         item_on      = "%s: |cff00ff00visível|r",
         item_off     = "%s: |cffff3333escondido|r",
         items_title  = "itens da barra:",
         none_shown   = "WoW Forever Info — /wfi show <item>",
-        name_fps     = "FPS",
-        name_ms      = "Latência (ms)",
-        name_coords  = "Coordenadas (coords)",
-        name_zone    = "Zona (zona)",
-        name_durab   = "Durabilidade (durab)",
-        name_gold    = "Ouro (ouro)",
+        name_fps = "FPS",              cmd_fps = "fps",
+        name_ms = "Latência",          cmd_ms = "ms",
+        name_mem = "Memória",          cmd_mem = "mem",
+        name_coords = "Coordenadas",   cmd_coords = "coords",
+        name_zone = "Zona",            cmd_zone = "zona",
+        name_speed = "Velocidade",     cmd_speed = "vel",
+        name_durab = "Durabilidade",   cmd_durab = "durab",
+        name_bags = "Bolsas",          cmd_bags = "bolsas",
+        name_gold = "Ouro",            cmd_gold = "ouro",
+        name_session = "Ouro da sessão", cmd_session = "sessao",
+        name_xp = "Experiência (XP)",  cmd_xp = "xp",
+        name_clock = "Horário",        cmd_clock = "hora",
+        name_playtime = "Tempo de sessão", cmd_playtime = "tempo",
+        name_friends = "Amigos online", cmd_friends = "amigos",
+        name_guild = "Guilda online",  cmd_guild = "guilda",
         label_durab  = "Dur",
+        label_mem    = "Mem",
+        label_speed  = "Vel",
+        label_bags   = "Bolsas",
+        label_session = "Sessão",
+        label_playtime = "Jogando",
+        label_friends = "Amigos",
+        label_guild  = "Guilda",
+        opt_servertime = "Horário do servidor",
+        tt_mem       = "Memória Lua (interface + addons)",
+        tt_speed     = "Velocidade",
+        tt_bags      = "Bolsas (livres / total)",
+        tt_session   = "Ouro na sessão",
+        tt_xp        = "Experiência",
+        tt_rested    = "Descansado",
+        tt_maxlevel  = "Nível máximo",
+        tt_clock_local  = "Hora local",
+        tt_clock_server = "Hora do servidor",
+        tt_playtime  = "Tempo de sessão",
+        tt_friends   = "Amigos online",
+        tt_friends_value = "WoW %d / Battle.net %d",
+        tt_guild     = "Guilda online",
+        tt_noguild   = "Sem guilda",
         tt_latency   = "Latência",
         tt_lat_value = "local %d ms / mundo %d ms",
         tt_coords    = "Coordenadas",
@@ -120,18 +172,49 @@ local STRINGS = {
         lang_set     = "language: English.",
         lang_auto    = "language: automatic (follows the client).",
         lang_usage   = "usage: /wfi lang pt | en | auto",
-        item_usage   = "usage: /wfi show|hide fps | ms | coords | zone | durab | gold",
+        item_usage   = "usage: /wfi show|hide",
         item_on      = "%s: |cff00ff00shown|r",
         item_off     = "%s: |cffff3333hidden|r",
         items_title  = "bar items:",
         none_shown   = "WoW Forever Info — /wfi show <item>",
-        name_fps     = "FPS",
-        name_ms      = "Latency (ms)",
-        name_coords  = "Coordinates (coords)",
-        name_zone    = "Zone (zone)",
-        name_durab   = "Durability (durab)",
-        name_gold    = "Gold (gold)",
+        name_fps = "FPS",              cmd_fps = "fps",
+        name_ms = "Latency",           cmd_ms = "ms",
+        name_mem = "Memory",           cmd_mem = "mem",
+        name_coords = "Coordinates",   cmd_coords = "coords",
+        name_zone = "Zone",            cmd_zone = "zone",
+        name_speed = "Speed",          cmd_speed = "speed",
+        name_durab = "Durability",     cmd_durab = "durab",
+        name_bags = "Bags",            cmd_bags = "bags",
+        name_gold = "Gold",            cmd_gold = "gold",
+        name_session = "Session gold", cmd_session = "session",
+        name_xp = "Experience (XP)",   cmd_xp = "xp",
+        name_clock = "Clock",          cmd_clock = "clock",
+        name_playtime = "Session time", cmd_playtime = "playtime",
+        name_friends = "Friends online", cmd_friends = "friends",
+        name_guild = "Guild online",   cmd_guild = "guild",
         label_durab  = "Dur",
+        label_mem    = "Mem",
+        label_speed  = "Speed",
+        label_bags   = "Bags",
+        label_session = "Session",
+        label_playtime = "Played",
+        label_friends = "Friends",
+        label_guild  = "Guild",
+        opt_servertime = "Server time",
+        tt_mem       = "Lua memory (UI + addons)",
+        tt_speed     = "Speed",
+        tt_bags      = "Bags (free / total)",
+        tt_session   = "Gold this session",
+        tt_xp        = "Experience",
+        tt_rested    = "Rested",
+        tt_maxlevel  = "Max level",
+        tt_clock_local  = "Local time",
+        tt_clock_server = "Server time",
+        tt_playtime  = "Session time",
+        tt_friends   = "Friends online",
+        tt_friends_value = "WoW %d / Battle.net %d",
+        tt_guild     = "Guild online",
+        tt_noguild   = "No guild",
         tt_latency   = "Latency",
         tt_lat_value = "home %d ms / world %d ms",
         tt_coords    = "Coordinates",
@@ -220,7 +303,7 @@ local function SanitizeDB(saved)
         if type(value) == "boolean" then
             clean.items[key] = value
         else
-            clean.items[key] = true -- padrão: visível
+            clean.items[key] = ITEM_DEFAULTS[key] -- padrão do item
         end
     end
 
@@ -335,6 +418,136 @@ local function ScanDurability()
     end
 end
 
+-- Estado da sessão (desde que você entrou no jogo ou deu /reload).
+local session = { startMoney = nil, startTime = nil }
+
+local function StartSession()
+    if session.startTime then return end
+    session.startMoney = GetMoney()
+    session.startTime = GetTime()
+end
+
+local function GetMemoryMB()
+    return (collectgarbage("count") or 0) / 1024 -- leitura barata, sem travar o jogo
+end
+
+local function GetSpeedPercent()
+    local current, run = GetUnitSpeed("player")
+    local base = BASE_MOVEMENT_SPEED or 7
+    local speed = (current and current > 0) and current or run or 0
+    return speed / base * 100
+end
+
+local function GetBagSpace()
+    local getFree = (C_Container and C_Container.GetContainerNumFreeSlots) or GetContainerNumFreeSlots
+    local getSlots = (C_Container and C_Container.GetContainerNumSlots) or GetContainerNumSlots
+    if not getFree or not getSlots then return nil end
+    local free, total = 0, 0
+    for bag = 0, (NUM_BAG_SLOTS or 4) do
+        local slots = getSlots(bag) or 0
+        local bagFree, family = getFree(bag)
+        if slots > 0 and (family == nil or family == 0) then -- só bolsas comuns
+            free = free + (bagFree or 0)
+            total = total + slots
+        end
+    end
+    if total == 0 then return nil end
+    return free, total
+end
+
+local function GetSessionMoney()
+    if not session.startMoney then return nil end
+    return GetMoney() - session.startMoney
+end
+
+local function GetXPInfo()
+    if IsPlayerAtEffectiveMaxLevel and IsPlayerAtEffectiveMaxLevel() then return nil end
+    if GetMaxPlayerLevel and UnitLevel("player") >= GetMaxPlayerLevel() then return nil end
+    local cur, max = UnitXP("player"), UnitXPMax("player")
+    if not cur or not max or max <= 0 then return nil end
+    local rested = (GetXPExhaustion and GetXPExhaustion()) or 0
+    return cur, max, rested
+end
+
+local function GetClockText(server)
+    if server and GetGameTime then
+        local hour, minute = GetGameTime()
+        return string.format("%02d:%02d", hour, minute)
+    end
+    return date("%H:%M")
+end
+
+local function GetSessionSeconds()
+    if not session.startTime then return nil end
+    return GetTime() - session.startTime
+end
+
+local function FormatDuration(seconds)
+    seconds = math.floor(seconds or 0)
+    local hours = math.floor(seconds / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    if hours > 0 then return string.format("%dh %02dm", hours, minutes) end
+    return string.format("%dm", minutes)
+end
+
+local function GetFriendsOnline()
+    local wow = 0
+    if C_FriendList and C_FriendList.GetNumOnlineFriends then
+        wow = C_FriendList.GetNumOnlineFriends() or 0
+    elseif GetNumFriends then
+        local _, online = GetNumFriends()
+        wow = online or 0
+    end
+    local bnet = 0
+    if BNGetNumFriends then
+        local _, online = BNGetNumFriends()
+        bnet = online or 0
+    end
+    return wow, bnet -- só contagens: nenhum nome é lido ou guardado
+end
+
+local function GetGuildOnline()
+    if not (IsInGuild and IsInGuild()) then return nil end
+    local total, online = GetNumGuildMembers()
+    if online == nil then -- clientes antigos devolvem só o total
+        online = 0
+        for i = 1, total or 0 do
+            local isOnline = select(9, GetGuildRosterInfo(i))
+            if isOnline then online = online + 1 end
+        end
+    end
+    return online, total
+end
+
+-- A lista da guilda só atualiza quando pedida; pedimos no máximo a cada 60 s.
+local lastRosterRequest = -60
+local function RequestGuildRoster()
+    if not (IsInGuild and IsInGuild()) then return end
+    local now = GetTime()
+    if now - lastRosterRequest < 60 then return end
+    lastRosterRequest = now
+    local request = (C_GuildInfo and C_GuildInfo.GuildRoster) or GuildRoster
+    if request then request() end
+end
+
+-- Versão curta: omite unidades zeradas à esquerda (ex.: "45s 20c" em vez de "0g 45s 20c").
+local function FormatMoneyShort(copper)
+    local gold = math.floor(copper / 10000)
+    local silver = math.floor((copper % 10000) / 100)
+    local cop = copper % 100
+    if gold > 0 then
+        return string.format("|cffffd700%dg|r |cffc7c7cf%ds|r", gold, silver)
+    elseif silver > 0 then
+        return string.format("|cffc7c7cf%ds|r |cffeda55f%dc|r", silver, cop)
+    end
+    return string.format("|cffeda55f%dc|r", cop)
+end
+
+local function FormatMoneyDelta(delta)
+    if delta >= 0 then return GREEN .. "+|r" .. FormatMoneyShort(delta) end
+    return RED .. "-|r" .. FormatMoneyShort(-delta)
+end
+
 -- No 3.3.5a as coordenadas dependem do mapa "ativo"; ao trocar de zona,
 -- voltamos o mapa para a zona atual (sem mexer se o jogador estiver com o mapa aberto).
 local function ResetMapToCurrentZone()
@@ -375,6 +588,51 @@ local ITEM_TEXT = {
     end,
     gold = function()
         return FormatMoney(GetMoney())
+    end,
+    mem = function()
+        local mb = GetMemoryMB()
+        return string.format("%s %s%.0f MB|r", T("label_mem"), ColorLowIsGood(mb, 150, 400), mb)
+    end,
+    speed = function()
+        local pct = GetSpeedPercent()
+        if IsSecret(pct) then return "--" end
+        return string.format("%s %d%%", T("label_speed"), math.floor(pct + 0.5))
+    end,
+    bags = function()
+        local free, total = GetBagSpace()
+        if not free then return nil end
+        return string.format("%s %s%d|r/%d", T("label_bags"), ColorHighIsGood(free, 9, 3), free, total)
+    end,
+    session = function()
+        local delta = GetSessionMoney()
+        if not delta then return nil end
+        return T("label_session") .. " " .. FormatMoneyDelta(delta)
+    end,
+    xp = function()
+        local cur, max, rested = GetXPInfo()
+        if not cur then return nil end -- nível máximo: o item some
+        local textXP = string.format("XP %d%%", math.floor(cur / max * 100))
+        if rested > 0 then
+            textXP = textXP .. string.format(" |cff4da6ff+%d%%|r", math.floor(rested / max * 100))
+        end
+        return textXP
+    end,
+    clock = function()
+        return GetClockText(db.serverTime)
+    end,
+    playtime = function()
+        local seconds = GetSessionSeconds()
+        if not seconds then return nil end
+        return T("label_playtime") .. " " .. FormatDuration(seconds)
+    end,
+    friends = function()
+        local wow, bnet = GetFriendsOnline()
+        return string.format("%s %d", T("label_friends"), wow + bnet)
+    end,
+    guild = function()
+        local online = GetGuildOnline()
+        if not online then return nil end -- sem guilda: o item some
+        return string.format("%s %d", T("label_guild"), online)
     end,
 }
 
@@ -469,6 +727,9 @@ local function FillTooltip()
     local _, home, world = Safe(GetLatency)
     AddPair(T("tt_latency"), home and string.format(T("tt_lat_value"), home, world) or "--")
 
+    local mb = Safe(GetMemoryMB)
+    AddPair(T("tt_mem"), mb and string.format("%.1f MB", mb) or "--")
+
     local x, y = GetCoords()
     AddPair(T("tt_coords"), x and string.format("%.1f, %.1f", x * 100, y * 100) or "--, --")
 
@@ -477,6 +738,8 @@ local function FillTooltip()
     if sub and sub ~= "" and sub ~= zone then
         AddPair(T("tt_subzone"), sub)
     end
+    local speed = Safe(GetSpeedPercent)
+    AddPair(T("tt_speed"), (speed and not IsSecret(speed)) and string.format("%d%%", math.floor(speed + 0.5)) or "--")
 
     GameTooltip:AddLine(" ")
     if durability.lowest then
@@ -501,6 +764,31 @@ local function FillTooltip()
     GameTooltip:AddLine(" ")
     local money = Safe(GetMoney)
     AddPair(T("tt_gold"), money and FormatMoney(money) or "--")
+    local delta = Safe(GetSessionMoney)
+    if delta then AddPair(T("tt_session"), FormatMoneyDelta(delta)) end
+    local free, total = Safe(GetBagSpace)
+    if free then AddPair(T("tt_bags"), string.format("%d / %d", free, total)) end
+
+    local cur, max, rested = Safe(GetXPInfo)
+    if cur then
+        AddPair(T("tt_xp"), string.format("%d / %d (%d%%)", cur, max, math.floor(cur / max * 100)))
+        if rested and rested > 0 then
+            AddPair(T("tt_rested"), string.format("%d (%d%%)", rested, math.floor(rested / max * 100)))
+        end
+    else
+        AddPair(T("tt_xp"), T("tt_maxlevel"))
+    end
+
+    GameTooltip:AddLine(" ")
+    AddPair(T("tt_clock_local"), Safe(GetClockText, false) or "--")
+    AddPair(T("tt_clock_server"), Safe(GetClockText, true) or "--")
+    local seconds = Safe(GetSessionSeconds)
+    if seconds then AddPair(T("tt_playtime"), FormatDuration(seconds)) end
+
+    local wow, bnet = Safe(GetFriendsOnline)
+    AddPair(T("tt_friends"), wow and string.format(T("tt_friends_value"), wow, bnet) or "--")
+    local gOnline, gTotal = Safe(GetGuildOnline)
+    AddPair(T("tt_guild"), gOnline and string.format("%d / %d", gOnline, gTotal or 0) or T("tt_noguild"))
 
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(db.locked and T("tt_locked") or T("tt_drag"), 0.6, 0.6, 0.6)
@@ -529,6 +817,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
     if elapsedSinceUpdate >= UPDATE_INTERVAL then
         elapsedSinceUpdate = 0
         UpdateText()
+        if db.items.guild then RequestGuildRoster() end
         if TooltipIsOurs() then ShowTooltip(self) end -- mantém o tooltip atualizado
     end
 end)
@@ -551,6 +840,12 @@ end
 
 local function SetLocked(value)
     db.locked = value
+    RefreshOptions()
+end
+
+local function SetServerTime(value)
+    db.serverTime = value
+    UpdateText()
     RefreshOptions()
 end
 
@@ -595,10 +890,10 @@ local function CreateHeader(parent, y)
     return header
 end
 
-local function CreateCheck(parent, y, onClick)
+local function CreateCheck(parent, x, y, onClick)
     local check = CreateFrame("CheckButton", NextName("Check"), parent, "UICheckButtonTemplate")
     check:SetSize(24, 24)
-    check:SetPoint("TOPLEFT", 20, y)
+    check:SetPoint("TOPLEFT", x, y)
     check.label = check:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     check.label:SetPoint("LEFT", check, "RIGHT", 4, 0)
     check:SetScript("OnClick", function(self) onClick(IsChecked(self)) end)
@@ -623,17 +918,23 @@ local function BuildControls(parent, top)
 
     set.itemsHeader = CreateHeader(parent, y)
     y = y - 20
-    for _, key in ipairs(ITEM_ORDER) do
-        set.items[key] = CreateCheck(parent, y, function(value) SetItemVisible(key, value) end)
-        y = y - 26
+    -- Duas colunas para caber todos os itens.
+    local perColumn = math.ceil(#ITEM_ORDER / 2)
+    for index, key in ipairs(ITEM_ORDER) do
+        local column = (index > perColumn) and 1 or 0
+        local row = (index - 1) % perColumn
+        set.items[key] = CreateCheck(parent, 20 + column * 165, y - row * 26,
+            function(value) SetItemVisible(key, value) end)
     end
+    y = y - perColumn * 26
 
     y = y - 10
     set.generalHeader = CreateHeader(parent, y)
     y = y - 20
-    set.shown = CreateCheck(parent, y, SetShown)
+    set.shown = CreateCheck(parent, 20, y, SetShown)
+    set.locked = CreateCheck(parent, 185, y, SetLocked)
     y = y - 26
-    set.locked = CreateCheck(parent, y, SetLocked)
+    set.serverTime = CreateCheck(parent, 20, y, SetServerTime)
     y = y - 36
 
     set.langHeader = CreateHeader(parent, y)
@@ -665,13 +966,15 @@ RefreshOptions = function()
         set.generalHeader:SetText(T("opt_general"))
         set.langHeader:SetText(T("opt_lang"))
         for key, check in pairs(set.items) do
-            check.label:SetText((string.gsub(T("name_" .. key), "%s*%b()", "")))
+            check.label:SetText(T("name_" .. key))
             check:SetChecked(db.items[key])
         end
         set.shown.label:SetText(T("opt_shown"))
         set.shown:SetChecked(db.shown)
         set.locked.label:SetText(T("opt_locked"))
         set.locked:SetChecked(db.locked)
+        set.serverTime.label:SetText(T("opt_servertime"))
+        set.serverTime:SetChecked(db.serverTime)
         for lang, button in pairs(set.langs) do
             if lang == db.lang then button:LockHighlight() else button:UnlockHighlight() end
         end
@@ -710,7 +1013,7 @@ local function CreateOptionsWindow()
     close:SetPoint("TOPRIGHT", -6, -6)
 
     local _, bottom = BuildControls(window, -46)
-    window:SetSize(310, -bottom + 12)
+    window:SetSize(350, -bottom + 12)
 
     window:SetScript("OnShow", RefreshOptions)
     tinsert(UISpecialFrames, "WoWForeverInfoOptions") -- ESC fecha a janela
@@ -776,6 +1079,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
     if not db then return end
 
     if event == "PLAYER_ENTERING_WORLD" then
+        StartSession()
         ResetMapToCurrentZone()
         ScanDurability()
     elseif event == "ZONE_CHANGED_NEW_AREA" then
@@ -801,14 +1105,17 @@ end
 local function ListItems()
     Print(T("items_title"))
     for _, key in ipairs(ITEM_ORDER) do
-        Print("  " .. string.format(db.items[key] and T("item_on") or T("item_off"), T("name_" .. key)))
+        local name = T("name_" .. key) .. " (" .. T("cmd_" .. key) .. ")"
+        Print("  " .. string.format(db.items[key] and T("item_on") or T("item_off"), name))
     end
 end
 
 local function SetItem(alias, visible)
     local key = ITEM_ALIASES[alias] -- só nomes da lista fixa são aceitos
     if not key then
-        Print(T("item_usage"))
+        local names = {}
+        for _, k in ipairs(ITEM_ORDER) do names[#names + 1] = T("cmd_" .. k) end
+        Print(T("item_usage") .. " " .. table.concat(names, " | "))
         return
     end
     SetItemVisible(key, visible)

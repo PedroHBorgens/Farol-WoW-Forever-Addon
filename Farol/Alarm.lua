@@ -60,8 +60,8 @@ local STRINGS = {
         al_more       = "+%d tocando",
         tt_alarms     = "Alarmes ativos",
         help_alarm    = "  /farol alarme        - abrir a janela de alarmes",
-        help_alarm2   = "  /farol alarme add 07:30 [local|servidor] [nome] | lista | remover N | ativar N | desativar N | soneca MIN",
-        help_alarm3   = "  /farol soneca [MIN] | /farol parar - adiar (tempo configurado ou MIN) ou parar o alarme",
+        help_alarm2   = "  /farol alarme add 07:30 [local||servidor] [nome] || lista || remover N || ativar N || desativar N || soneca MIN",
+        help_alarm3   = "  /farol soneca [MIN] || /farol parar - adiar (tempo configurado ou MIN) ou parar o alarme",
     },
     en = {
         al_title      = "Alarms",
@@ -96,8 +96,8 @@ local STRINGS = {
         al_more       = "+%d ringing",
         tt_alarms     = "Active alarms",
         help_alarm    = "  /farol alarm         - open the alarms window",
-        help_alarm2   = "  /farol alarm add 07:30 [local|server] [name] | list | remove N | on N | off N | snooze MIN",
-        help_alarm3   = "  /farol snooze [MIN] | /farol stop - delay (configured time or MIN) or stop the alarm",
+        help_alarm2   = "  /farol alarm add 07:30 [local||server] [name] || list || remove N || on N || off N || snooze MIN",
+        help_alarm3   = "  /farol snooze [MIN] || /farol stop - delay (configured time or MIN) or stop the alarm",
     },
 }
 

@@ -77,7 +77,7 @@ local STRINGS = {
         help_hide    = "  /farol hide <item>   - esconder um item da barra",
         help_items   = "  /farol itens         - listar os itens e o que está visível",
         help_version = "  /farol version       - mostrar a versão do cliente e o número de Interface",
-        help_lang    = "  /farol lang pt|en|auto - escolher o idioma (auto = idioma do cliente)",
+        help_lang    = "  /farol lang pt||en||auto - escolher o idioma (auto = idioma do cliente)",
         shown        = "painel visível.",
         hidden       = "painel oculto.",
         locked       = "painel travado.",
@@ -87,8 +87,8 @@ local STRINGS = {
         version_hint = "use esse número na linha '## Interface:' do arquivo .toc.",
         lang_set     = "idioma: Português.",
         lang_auto    = "idioma: automático (segue o cliente).",
-        lang_usage   = "uso: /farol lang pt | en | auto",
-        item_usage   = "uso: /farol show|hide",
+        lang_usage   = "uso: /farol lang pt || en || auto",
+        item_usage   = "uso: /farol show||hide",
         item_on      = "%s: |cff00ff00visível|r",
         item_off     = "%s: |cffff3333escondido|r",
         items_title  = "itens da barra:",
@@ -164,7 +164,7 @@ local STRINGS = {
         help_hide    = "  /farol hide <item>   - hide an item from the bar",
         help_items   = "  /farol items         - list items and which are visible",
         help_version = "  /farol version       - show the client version and Interface number",
-        help_lang    = "  /farol lang pt|en|auto - choose the language (auto = client language)",
+        help_lang    = "  /farol lang pt||en||auto - choose the language (auto = client language)",
         shown        = "panel shown.",
         hidden       = "panel hidden.",
         locked       = "panel locked.",
@@ -174,8 +174,8 @@ local STRINGS = {
         version_hint = "use this number on the '## Interface:' line of the .toc file.",
         lang_set     = "language: English.",
         lang_auto    = "language: automatic (follows the client).",
-        lang_usage   = "usage: /farol lang pt | en | auto",
-        item_usage   = "usage: /farol show|hide",
+        lang_usage   = "usage: /farol lang pt || en || auto",
+        item_usage   = "usage: /farol show||hide",
         item_on      = "%s: |cff00ff00shown|r",
         item_off     = "%s: |cffff3333hidden|r",
         items_title  = "bar items:",
@@ -1149,7 +1149,7 @@ local function SetItem(alias, visible)
     if not key then
         local names = {}
         for _, k in ipairs(ITEM_ORDER) do names[#names + 1] = T("cmd_" .. k) end
-        Print(T("item_usage") .. " " .. table.concat(names, " | "))
+        Print(T("item_usage") .. " " .. table.concat(names, " || ")) -- "||" = barra literal no chat do WoW
         return
     end
     SetItemVisible(key, visible)

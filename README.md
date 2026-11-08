@@ -167,6 +167,20 @@ Information security is this project's first rule:
 
 Found a security issue? Open an issue without including personal data, passwords or account details.
 
+## Tests
+
+The add-on has automated tests that run **outside the game**, on Lua 5.1 (the same version the WoW client
+uses), against a small mock of the WoW API (`tests/wow_mock.lua`). They cover the bar on WoW Forever and
+3.3.5a clients, secret values, the options menu, alarms and snooze, the loot window, the `.toc` files, and a
+scan that fails if the code ever uses automation, messaging or dynamic-code APIs.
+
+```
+lua5.1 tests/run.lua
+```
+
+GitHub Actions runs them on every push and pull request (`.github/workflows/tests.yml`) and attaches an
+install-ready `Farol-<version>` package to each run (Actions tab → the run → *Artifacts*).
+
 ## Publishing on CurseForge
 
 The page text is in [`assets/curseforge-description.md`](assets/curseforge-description.md) and the project

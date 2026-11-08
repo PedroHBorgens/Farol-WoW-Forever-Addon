@@ -1,0 +1,43 @@
+name: Tests
+
+# Roda os testes a cada push e pull request, e gera o pacote do addon pronto para instalar.
+# Runs the tests on every push and pull request, and builds an install-ready add-on package.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua 5.1 (same version as the WoW client)
+        run: sudo apt-get update && sudo apt-get install -y lua5.1
+
+      - name: Run tests
+        run: lua5.1 tests/run.lua
+
+      - name: Read add-on version
+        id: version
+        run: |
+          version=$(grep -m1 '^## Version:' Farol/Farol_Mainline.toc | sed 's/## Version: //' | tr -d '\r')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build package (only the Farol folder)
+        run: |
+          mkdir -p dist
+          cp -r Farol dist/Farol
+          cp LICENSE dist/Farol/LICENSE.txt
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Farol-${{ steps.version.outputs.version }}
+          path: dist/
+          retention-days: 30

@@ -1,0 +1,322 @@
+--[[
+  Simulador mínimo da API do World of Warcraft para testar o Farol fora do jogo.
+  Minimal World of Warcraft API mock used to test Farol outside the game.
+
+  Cada teste cria um ambiente isolado com Mock.new{ ... }:
+    mode   = "forever" (padrão: cliente moderno do WoW Forever) | "wotlk" (3.3.5a, APIs antigas)
+    locale = "ptBR" | "enUS" ...
+    secret = true  -> simula "secret values" do Midnight (valores bloqueados pelo jogo)
+
+  O addon é carregado nesse ambiente (setfenv no Lua 5.1), então nada vaza entre testes.
+]]
+
+local Mock = {}
+
+local ADDON_DIR = "Farol/"
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua" }
+
+local function noop() end
+
+---------------------------------------------------------------------------
+-- Frames
+---------------------------------------------------------------------------
+
+local Frame = {}
+
+function Frame:SetScript(name, fn) self._scripts[name] = fn end
+function Frame:GetScript(name) return self._scripts[name] end
+function Frame:RegisterEvent(name) self._events[name] = true end
+function Frame:UnregisterEvent(name) self._events[name] = nil end
+
+function Frame:Show()
+    if self._shown then return end
+    self._shown = true
+    if self._scripts.OnShow then self._scripts.OnShow(self) end
+end
+function Frame:Hide()
+    if not self._shown then return end
+    self._shown = false
+    if self._scripts.OnHide then self._scripts.OnHide(self) end
+end
+function Frame:IsShown() return self._shown end
+function Frame:IsVisible() return self._shown end
+
+function Frame:SetSize(w, h) self._w, self._h = w, h end
+function Frame:SetWidth(w) self._w = w end
+function Frame:SetHeight(h) self._h = h end
+function Frame:GetWidth() return self._w or 0 end
+function Frame:GetHeight() return self._h or 0 end
+function Frame:GetPoint() return "CENTER", nil, "CENTER", 12.3, -4.6 end
+function Frame:GetFrameLevel() return 1 end
+
+function Frame:SetText(text)
+    self._text = text
+    if self._fontString then self._fontString._text = text end
+end
+function Frame:GetText() return self._text end
+function Frame:GetStringWidth() return 150 end
+function Frame:SetTextColor(r, g, b) self._color = { r, g, b } end
+
+function Frame:SetChecked(value) self._checked = value and true or false end
+function Frame:GetChecked() return self._checked and 1 or nil end -- como o 3.3.5a: 1/nil
+function Frame:LockHighlight() self._highlight = true end
+function Frame:UnlockHighlight() self._highlight = false end
+function Frame:HasFocus() return false end
+function Frame:SetTexture(texture) self._texture = texture end
+
+local function NewObject(env, kind, name)
+    local object = { _scripts = {}, _events = {}, _kind = kind, _name = name, _shown = true, _env = env }
+    return setmetatable(object, {
+        __index = function(_, key)
+            local method = Frame[key]
+            if method then return method end
+            -- Outros métodos do WoW (SetPoint, SetBackdrop...) viram no-op; campos comuns ficam nil.
+            if type(key) == "string" and string.match(key, "^%u") then return noop end
+            return nil
+        end,
+    })
+end
+
+function Frame:CreateFontString()
+    local fs = NewObject(self._env, "FontString")
+    self._fontStrings = self._fontStrings or {}
+    table.insert(self._fontStrings, fs)
+    return fs
+end
+function Frame:CreateTexture() return NewObject(self._env, "Texture") end
+function Frame:GetFontString()
+    self._fontString = self._fontString or NewObject(self._env, "FontString")
+    return self._fontString
+end
+
+---------------------------------------------------------------------------
+-- Ambiente
+---------------------------------------------------------------------------
+
+function Mock.new(opts)
+    opts = opts or {}
+    local mode = opts.mode or "forever"
+    local env = setmetatable({}, { __index = _G })
+    env._G = env
+
+    local H = { env = env, msgs = {}, frames = {}, now = 1000, clock = { hour = 7, min = 29 } }
+
+    -- Chat e frames
+    env.DEFAULT_CHAT_FRAME = { AddMessage = function(_, msg) table.insert(H.msgs, msg) end }
+    env.UIParent = NewObject(env, "Frame", "UIParent")
+    env.CreateFrame = function(kind, name, parent, template)
+        local frame = NewObject(env, kind, name)
+        frame._template = template
+        table.insert(H.frames, frame)
+        if name then env[name] = frame end
+        return frame
+    end
+    env.UISpecialFrames = {}
+    env.tinsert = table.insert
+    env.wipe = function(t) for k in pairs(t) do t[k] = nil end return t end
+    env.SlashCmdList = {}
+    env.InCombatLockdown = function() return false end
+    env.GetLocale = function() return opts.locale or "ptBR" end
+
+    -- Tooltip
+    local tooltip = { lines = {} }
+    function tooltip:SetOwner(owner) self.owner = owner end
+    function tooltip:ClearLines() self.lines = {} end
+    function tooltip:AddLine(text) table.insert(self.lines, text) end
+    function tooltip:AddDoubleLine(a, b) table.insert(self.lines, a .. " = " .. b) end
+    function tooltip:SetHyperlink(link) self.link = link end
+    function tooltip:Show() self.shown = true end
+    function tooltip:Hide() self.shown = false end
+    function tooltip:IsShown() return self.shown end
+    function tooltip:IsOwned(frame) return self.owner == frame end
+    env.GameTooltip = tooltip
+
+    -- Tempo
+    env.GetTime = function() return H.now end
+    env.time = os.time
+    env.date = function(fmt, t)
+        if fmt == "*t" then return { hour = H.clock.hour, min = H.clock.min } end
+        return os.date(fmt, t)
+    end
+    env.GetGameTime = function() return 21, 5 end
+
+    -- Personagem e mundo
+    env.GetFramerate = function() return 60.2 end
+    env.GetMoney = function() return H.money or 1234567 end
+    env.GetRealZoneText = function() return "Floresta de Elwynn" end
+    env.GetSubZoneText = function() return "Vale Norte" end
+    H.durability = { [1] = { 50, 100 }, [5] = { 15, 100 }, [16] = { 100, 100 } }
+    env.GetInventoryItemDurability = function(slot)
+        local d = H.durability[slot]
+        if d then return d[1], d[2] end
+    end
+    env.GetInventoryItemLink = function(_, slot) if slot == 1 then return "[Elmo]" end end
+    env.GetUnitSpeed = function() return 0, 7 end
+    env.NUM_BAG_SLOTS = 4
+    env.UnitXP = function() return 6200 end
+    env.UnitXPMax = function() return 10000 end
+    env.GetXPExhaustion = function() return 1500 end
+    env.UnitLevel = function() return 30 end
+    env.GetMaxPlayerLevel = function() return 60 end
+    env.BNGetNumFriends = function() return 10, 5 end
+    env.IsInGuild = function() return true end
+    H.rosterRequests = 0
+
+    -- Sons e itens
+    H.sounds = 0
+    env.PlaySound = function() H.sounds = H.sounds + 1 end
+    env.LOOT_ITEM_SELF = "Você recebe saque: %s."
+    env.LOOT_ITEM_SELF_MULTIPLE = "Você recebe saque: %sx%d."
+    env.LOOT_ITEM_PUSHED_SELF = "Você recebe o item: %s."
+    env.LOOT_ITEM_PUSHED_SELF_MULTIPLE = "Você recebe o item: %sx%d."
+    local qualityNames = { "Inferior", "Comum", "Incomum", "Raro", "Épico", "Lendário", "Artefato", "Herança" }
+    for i = 0, 7 do env["ITEM_QUALITY" .. i .. "_DESC"] = qualityNames[i + 1] end
+    env.GetItemQualityColor = function() return 1, 0.5, 0 end
+    H.itemQuality = { [19019] = 5, [2589] = 1 }
+    env.HandleModifiedItemClick = function(link) H.clickedLink = link end
+
+    if mode == "wotlk" then
+        -- Cliente 3.3.5a: APIs antigas, sem C_* modernos.
+        env.GetBuildInfo = function() return "3.3.5", "12340", "Jun 24 2010" end
+        env.GetNetStats = function() return 1, 2, 87 end
+        env.GetPlayerMapPosition = function() return 0.453, 0.611 end
+        env.SetMapToCurrentZone = noop
+        env.GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end
+        env.GetContainerNumFreeSlots = function(bag) return bag == 0 and 2 or 1, 0 end
+        env.GetItemInfo = function(link)
+            local id = tonumber(string.match(link, "Hitem:(%d+)"))
+            return "item", link, H.itemQuality[id]
+        end
+        env.GetItemIcon = function(id) return "icon" .. id end
+        env.GetNumFriends = function() return 7, 3 end
+        env.GetNumGuildMembers = function() return 3 end
+        env.GetGuildRosterInfo = function(i) return nil, nil, nil, nil, nil, nil, nil, nil, i ~= 2 end
+        env.GuildRoster = function() H.rosterRequests = H.rosterRequests + 1 end
+        env.InterfaceOptions_AddCategory = function(panel) H.settingsPanel = panel end
+    else
+        -- Cliente moderno (WoW Forever / Midnight).
+        env.GetBuildInfo = function() return "1.60.1", "70862", "Nov 6 2026", 16001 end
+        env.GetNetStats = function() return 1, 2, 40, 60 end
+        env.BackdropTemplateMixin = {}
+        env.SOUNDKIT = { RAID_WARNING = 8959 }
+        env.C_Map = {
+            GetBestMapForUnit = function() return 1 end,
+            GetPlayerMapPosition = function()
+                return { GetXY = function() return 0.45, 0.61 end }
+            end,
+        }
+        env.C_Container = {
+            GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end,
+            GetContainerNumFreeSlots = function(bag) return bag == 0 and 2 or 1, 0 end,
+        }
+        env.C_Item = {
+            GetItemQualityByID = function(link)
+                return H.itemQuality[tonumber(string.match(link, "Hitem:(%d+)"))]
+            end,
+            GetItemIconByID = function(id) return "icon" .. id end,
+        }
+        env.C_FriendList = { GetNumOnlineFriends = function() return 3 end }
+        env.GetNumGuildMembers = function() return 80, 12 end
+        env.C_GuildInfo = { GuildRoster = function() H.rosterRequests = H.rosterRequests + 1 end }
+        env.Settings = {
+            RegisterCanvasLayoutCategory = function(panel, name)
+                H.settingsPanel = panel
+                return { name = name }
+            end,
+            RegisterAddOnCategory = function(category) H.settingsCategory = category end,
+        }
+    end
+
+    if opts.secret then
+        -- Simula valores bloqueados: o número 15 (durabilidade) é "secreto" e a zona dá erro.
+        env.issecretvalue = function(v) return v == 15 end
+        env.GetRealZoneText = function() error("blocked by the game") end
+    end
+
+    ---------------------------------------------------------------------------
+    -- Ajudantes para os testes
+    ---------------------------------------------------------------------------
+
+    function H:load()
+        local ns = {}
+        for _, file in ipairs(ADDON_FILES) do
+            local chunk, err
+            if setfenv then
+                chunk, err = loadfile(ADDON_DIR .. file)
+                if chunk then setfenv(chunk, env) end
+            else
+                chunk, err = loadfile(ADDON_DIR .. file, "t", env)
+            end
+            assert(chunk, err)
+            chunk("Farol", ns)
+        end
+        self.ns = ns
+        return self
+    end
+
+    function H:event(name, ...)
+        for _, frame in ipairs(self.frames) do
+            if frame._events[name] and frame._scripts.OnEvent then
+                frame._scripts.OnEvent(frame, name, ...)
+            end
+        end
+    end
+
+    -- Carrega o addon e simula a entrada no mundo.
+    function H:login(savedDB, savedCharDB)
+        env.FarolDB = savedDB
+        env.FarolCharDB = savedCharDB
+        self:load()
+        self:event("ADDON_LOADED", "Farol")
+        self:event("PLAYER_ENTERING_WORLD")
+        return self
+    end
+
+    -- Avança o relógio e roda OnUpdate dos frames visíveis (como o jogo faz).
+    function H:update(seconds)
+        self.now = self.now + seconds
+        for _, frame in ipairs(self.frames) do
+            if frame._shown and frame._scripts.OnUpdate then
+                frame._scripts.OnUpdate(frame, seconds)
+            end
+        end
+    end
+
+    function H:slash(text) env.SlashCmdList.FAROL(text) end
+
+    -- Mostra o texto como o chat do WoW: tira códigos de cor/ícone/link e "||" vira "|".
+    function H.strip(text)
+        text = tostring(text or "")
+        text = string.gsub(text, "||", "\1")
+        text = string.gsub(text, "|c%x%x%x%x%x%x%x%x", "")
+        text = string.gsub(text, "|cnIQ%d:", "")
+        text = string.gsub(text, "|r", "")
+        text = string.gsub(text, "|T[^|]*|t", "")
+        text = string.gsub(text, "|Hitem:[^|]*|h", "")
+        text = string.gsub(text, "|h", "")
+        text = string.gsub(text, "\1", "|")
+        return text
+    end
+
+    function H:bar() return H.strip(env.FarolFrame._fontStrings[1]._text) end
+    function H:lastMsg() return H.strip(self.msgs[#self.msgs]) end
+    function H:click(button, mouse) button._scripts.OnClick(button, mouse or "LeftButton") end
+    function H:check(checkButton, value)
+        checkButton._checked = value
+        self:click(checkButton)
+    end
+    function H:text(object) return H.strip(object._text) end
+
+    -- Frames por tipo, na ordem de criação.
+    function H:framesOf(kind)
+        local list = {}
+        for _, frame in ipairs(self.frames) do
+            if frame._kind == kind then table.insert(list, frame) end
+        end
+        return list
+    end
+
+    return H
+end
+
+return Mock

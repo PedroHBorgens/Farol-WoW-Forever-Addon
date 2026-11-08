@@ -25,6 +25,10 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 |---------------------|--------------------------------------------------------|
 | `/farol`            | Mostra/oculta o painel |
 | `/farol menu`       | Abre o menu de opções (ou clique direito no painel) |
+| `/farol alarme`     | Abre a janela de alarmes |
+| `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
+| `/farol soneca`     | Adia o alarme que está tocando por 5 minutos |
+| `/farol parar`      | Para o alarme que está tocando |
 | `/farol lock`       | Trava/destrava o painel (arraste com o botão esquerdo) |
 | `/farol reset`      | Volta o painel para a posição padrão |
 | `/farol show <item>`| Mostra um item na barra |
@@ -46,6 +50,33 @@ Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um des
 
 No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, escolhe o idioma (Auto / Português /
 English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/farol menu` para trazê-lo de volta.
+
+## Alarmes do relógio
+
+Crie até **10 alarmes**, cada um com **hora local** ou **hora do servidor (do jogo)**, e um nome opcional.
+
+- Abra a janela pelo botão **Alarmes...** no menu de opções, ou digite `/farol alarme`.
+- Digite hora e minutos, clique em **Local/Servidor** para escolher o relógio, dê um nome se quiser e clique em **Adicionar**.
+- Marque ou desmarque um alarme para ativar/desativar; **X** apaga. **Testar som** toca o som do alarme.
+
+Quando o alarme dispara, ele toca um som e mostra uma mensagem **só na sua janela de chat** — nada é
+enviado ao servidor ou a outros jogadores — e aparece uma janelinha com **Soneca (5 min)** e **Parar**.
+Ele **repete a cada 30 segundos** até você apertar soneca ou parar. Um alarme ativado volta a tocar no dia seguinte.
+Os alarmes funcionam mesmo com o painel escondido, e o item Horário mostra um ícone de relógio quando há alarme ativo.
+
+Comandos no chat:
+
+| Comando                                              | O que faz                                      |
+|------------------------------------------------------|------------------------------------------------|
+| `/farol alarme add 07:30`                            | Alarme às 07:30 (hora local)                   |
+| `/farol alarme add 22:15 servidor Raide`             | Alarme às 22:15 do servidor com o nome "Raide" |
+| `/farol alarme lista`                                | Lista os alarmes com seus números              |
+| `/farol alarme ativar 2` / `/farol alarme desativar 2` | Ativa / desativa o alarme número 2           |
+| `/farol alarme remover 2`                            | Apaga o alarme número 2                        |
+| `/farol soneca` / `/farol parar`                     | Adia 5 minutos / para o alarme tocando         |
+
+Os alarmes só tocam com o jogo aberto. Um alarme não dispara no mesmo minuto em que foi criado, nem
+depois de um `/reload` dentro desse minuto (isso evita alarmes falsos).
 
 ## Itens da barra
 
@@ -110,7 +141,7 @@ Segurança da informação é a primeira regra deste projeto:
 - **Nada sai do seu computador.** O addon não usa `SendAddonMessage`, chat ou qualquer canal para enviar dados.
 - **Nenhum código externo é executado.** Sem `loadstring`/`RunScript`; comandos aceitam só palavras fixas.
 - **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
-- **Dados salvos são validados.** `FarolDB` guarda apenas a posição, o estado do painel, o idioma e os itens visíveis, e é
+- **Dados salvos são validados.** `FarolDB` guarda apenas a posição, o estado do painel, o idioma, os itens visíveis e seus alarmes (hora, tipo de relógio, ligado/desligado e um nome já limpo), e é
   verificado ao carregar — um arquivo corrompido ou adulterado volta para os valores padrão.
 - **Baixe só da fonte oficial** (este repositório). Addons são texto Lua: você pode ler todo o código em `Core.lua`.
 

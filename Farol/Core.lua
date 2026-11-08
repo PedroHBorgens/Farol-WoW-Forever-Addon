@@ -12,7 +12,7 @@
     * Cada leitura de dados é isolada (pcall): se o jogo bloquear algo, aparece "--", nunca um erro.
 ]]
 
-local ADDON_NAME = ...
+local ADDON_NAME, ns = ... -- ns: tabela compartilhada com Alarm.lua
 local PREFIX = "|cff33ccffFarol|r: "
 local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 
@@ -149,6 +149,7 @@ local STRINGS = {
         opt_locked   = "Travar posição",
         opt_lang     = "Idioma",
         opt_reset    = "Resetar posição",
+        opt_alarms   = "Alarmes...",
         opt_hint     = "Marque o que deseja ver na barra.",
         tt_rightclick = "Clique direito: opções.",
     },
@@ -235,10 +236,13 @@ local STRINGS = {
         opt_locked   = "Lock position",
         opt_lang     = "Language",
         opt_reset    = "Reset position",
+        opt_alarms   = "Alarms...",
         opt_hint     = "Tick what you want to see on the bar.",
         tt_rightclick = "Right-click: options.",
     },
 }
+
+ns.STRINGS = STRINGS
 
 local VALID_POINTS = {
     TOPLEFT = true, TOP = true, TOPRIGHT = true,
@@ -271,6 +275,10 @@ local function T(key)
     local lang = STRINGS[CurrentLang()] or STRINGS.en
     return lang[key] or STRINGS.en[key] or key
 end
+
+ns.T = T
+ns.Print = Print
+ns.GetDB = function() return db end
 
 -- Garante que SavedVariables tenham só os tipos/valores esperados.
 -- Um arquivo corrompido ou editado à mão nunca quebra o addon.
@@ -618,7 +626,11 @@ local ITEM_TEXT = {
         return textXP
     end,
     clock = function()
-        return GetClockText(db.serverTime)
+        local clock = GetClockText(db.serverTime)
+        if ns.Alarm and ns.Alarm.HasEnabled() then
+            clock = clock .. " |TInterface\\Icons\\INV_Misc_PocketWatch_01:12:12|t" -- há alarme ativo
+        end
+        return clock
     end,
     playtime = function()
         local seconds = GetSessionSeconds()
@@ -642,6 +654,7 @@ local ITEM_TEXT = {
 
 -- Clientes modernos exigem o template "BackdropTemplate" para usar SetBackdrop; os antigos não o possuem.
 local backdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
+ns.backdropTemplate = backdropTemplate
 
 local frame = CreateFrame("Frame", "FarolFrame", UIParent, backdropTemplate)
 frame:SetSize(330, 26)
@@ -782,6 +795,7 @@ local function FillTooltip()
     GameTooltip:AddLine(" ")
     AddPair(T("tt_clock_local"), Safe(GetClockText, false) or "--")
     AddPair(T("tt_clock_server"), Safe(GetClockText, true) or "--")
+    if ns.Alarm then pcall(ns.Alarm.AddTooltipLines, AddPair) end
     local seconds = Safe(GetSessionSeconds)
     if seconds then AddPair(T("tt_playtime"), FormatDuration(seconds)) end
 
@@ -858,6 +872,7 @@ local function SetLang(lang)
     db.lang = lang
     UpdateText()
     RefreshOptions()
+    if ns.Alarm then ns.Alarm.Refresh() end
 end
 
 local function SetItemVisible(key, value)
@@ -950,8 +965,10 @@ local function BuildControls(parent, top)
     end
     y = y - 36
 
-    set.reset = CreateButton(parent, 160, function() ResetPosition() end)
+    set.reset = CreateButton(parent, 150, function() ResetPosition() end)
     set.reset:SetPoint("TOPLEFT", 20, y)
+    set.alarms = CreateButton(parent, 150, function() ns.Alarm.ToggleWindow() end)
+    set.alarms:SetPoint("TOPLEFT", 176, y)
     y = y - 30
 
     controlSets[#controlSets + 1] = set
@@ -979,6 +996,7 @@ RefreshOptions = function()
             if lang == db.lang then button:LockHighlight() else button:UnlockHighlight() end
         end
         set.reset:SetText(T("opt_reset"))
+        set.alarms:SetText(T("opt_alarms"))
     end
 end
 
@@ -1068,7 +1086,9 @@ frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" then
         if arg1 ~= ADDON_NAME then return end
-        db = SanitizeDB(FarolDB)
+        local saved = FarolDB
+        db = SanitizeDB(saved)
+        db.alarms = ns.Alarm.Sanitize(type(saved) == "table" and saved.alarms or nil)
         FarolDB = db
         ApplyPosition()
         ApplyVisibility()
@@ -1097,7 +1117,8 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_version", "help_lang" }) do
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3",
+                           "help_version", "help_lang" }) do
         Print(T(key))
     end
 end
@@ -1127,6 +1148,7 @@ SlashCmdList["FAROL"] = function(msg)
     if not db then return end
     -- Aceita só palavras simples (letras); qualquer outra coisa mostra a ajuda.
     local cmd, arg = string.match(msg or "", "^%s*(%a*)%s*(%a*)")
+    local rest = string.match(msg or "", "^%s*%a*%s*(.-)%s*$") or "" -- usado pelos alarmes (aceita 07:30 e nomes)
     cmd, arg = string.lower(cmd or ""), string.lower(arg or "")
 
     if cmd == "" then
@@ -1153,6 +1175,12 @@ SlashCmdList["FAROL"] = function(msg)
         else
             Print(T("lang_usage"))
         end
+    elseif cmd == "alarme" or cmd == "alarmes" or cmd == "alarm" or cmd == "alarms" then
+        ns.Alarm.HandleCommand(rest)
+    elseif cmd == "soneca" or cmd == "snooze" then
+        ns.Alarm.Snooze()
+    elseif cmd == "parar" or cmd == "stop" then
+        ns.Alarm.Stop()
     elseif cmd == "version" or cmd == "versao" then
         local version, build, date, interface = GetBuildInfo()
         -- Clientes muito antigos não retornam o 4º valor; deduzimos pela versão.

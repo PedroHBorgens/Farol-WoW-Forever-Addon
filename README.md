@@ -25,6 +25,10 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 |---------------------|--------------------------------------------------------|
 | `/farol`            | Show/hide the panel |
 | `/farol menu`       | Open the options menu (or right-click the panel) |
+| `/farol alarm`      | Open the alarms window |
+| `/farol alarm add 07:30`| Create an alarm (see below) |
+| `/farol snooze`     | Snooze the ringing alarm for 5 minutes |
+| `/farol stop`       | Stop the ringing alarm |
 | `/farol lock`       | Lock/unlock the panel (drag with left mouse button) |
 | `/farol reset`      | Move the panel back to its default position |
 | `/farol show <item>`| Show an item on the bar |
@@ -46,6 +50,33 @@ Tick or untick each item — no commands needed. Open it in any of these ways:
 
 The menu lets you choose bar items, show/lock the panel, switch the clock to server time, pick the language (Auto / Português / English)
 and reset the position. Press **Esc** to close it. If you hide the panel, use `/farol menu` to bring it back.
+
+## Clock alarms
+
+Create up to **10 alarms**, each using **local time** or **server (game) time**, with an optional name.
+
+- Open the window with **Alarms...** in the options menu, or type `/farol alarm`.
+- Type the hour and minutes, click **Local/Server** to choose the clock, give it a name if you like, and click **Add**.
+- Tick or untick an alarm to enable/disable it; **X** deletes it. **Test sound** plays the alarm sound.
+
+When an alarm goes off it plays a sound and posts a message **only in your own chat window** — nothing is
+sent to the server or other players — and a small window appears with **Snooze (5 min)** and **Stop**.
+It **repeats every 30 seconds** until you snooze or stop it. An enabled alarm rings again the next day.
+Alarms work even when the panel is hidden, and the Clock item shows a watch icon while any alarm is on.
+
+Chat commands:
+
+| Command                                        | What it does                                  |
+|------------------------------------------------|-----------------------------------------------|
+| `/farol alarm add 07:30`                       | Alarm at 07:30 (local time)                   |
+| `/farol alarm add 22:15 server Raid`           | Alarm at 22:15 server time named "Raid"       |
+| `/farol alarm list`                            | List alarms with their numbers                |
+| `/farol alarm on 2` / `/farol alarm off 2`     | Enable / disable alarm number 2               |
+| `/farol alarm remove 2`                        | Delete alarm number 2                         |
+| `/farol snooze` / `/farol stop`                | Snooze 5 minutes / stop the ringing alarm     |
+
+Alarms only ring while the game is open. An alarm is not triggered in the same minute it is created or
+after a `/reload` inside that minute (this avoids false alarms).
 
 ## Bar items
 
@@ -108,7 +139,7 @@ Information security is this project's first rule:
 - **Nothing leaves your computer.** The addon never uses `SendAddonMessage`, chat or any other channel to send data.
 - **No external code is executed.** No `loadstring`/`RunScript`; commands only accept fixed words.
 - **No automation.** It only reads and displays information; it never plays for you (which would break server rules).
-- **Saved data is validated.** `FarolDB` only stores the panel's position, state, language and visible items, and is
+- **Saved data is validated.** `FarolDB` only stores the panel's position, state, language, visible items and your alarms (time, clock type, on/off and a cleaned-up name), and is
   checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official source** (this repository). Addons are plain Lua text: you can read all of it in `Core.lua`.
 

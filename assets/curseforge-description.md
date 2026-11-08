@@ -27,6 +27,9 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 ### Durability and bag warnings
 - One-time warning on screen and in your chat when gear durability drops below 20% or your bags are almost full / full.
 - Configurable limits and sound; never repeats while the number flickers.
+- **Unspent talent points** and **lower-rank spells on your action bars** (never changes your bars for you).
+- Each warning lets you **Silence** it or get a **reminder in 30 minutes**.
+- **History of the last 10 warnings**: button next to the bar (with unread counter), key binding or `/farol history`.
 
 ### Recent loot window
 - Shows the last **5 / 10 / 15 / 20** items you looted (dropdown).
@@ -66,6 +69,9 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 ### Avisos de durabilidade e bolsas
 - Aviso único na tela e no seu chat quando a durabilidade cai abaixo de 20% ou as bolsas estão quase cheias / cheias.
 - Limites e som configuráveis; não fica repetindo quando o número oscila.
+- **Pontos de talento não gastos** e **magias de grau antigo na barra de ações** (nunca mexe nas suas barras).
+- Cada aviso deixa você **Silenciar** ou ser **lembrado em 30 minutos**.
+- **Histórico dos 10 últimos avisos**: botão ao lado da barra (com contador de novos), atalho de teclado ou `/farol historico`.
 
 ### Janela de últimos saques
 - Mostra os últimos **5 / 10 / 15 / 20** itens que você saqueou (menu suspenso).

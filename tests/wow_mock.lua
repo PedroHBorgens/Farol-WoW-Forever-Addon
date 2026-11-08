@@ -184,6 +184,22 @@ function Mock.new(opts)
     end
     env.UIErrorsFrame = { AddMessage = function(_, text) H.screen = text end }
     H.bagFree = { [0] = 2, 1, 1, 1, 1 } -- espaços livres por bolsa (total 6 de 80)
+
+    -- Talentos, grimório e barras de ação (os testes podem alterar)
+    H.talentPoints = 0
+    H.spells = { [133] = { "Bola de Fogo", 1 }, [143] = { "Bola de Fogo", 2 }, [145] = { "Bola de Fogo", 3 },
+                 [116] = { "Seta de Gelo", 1 }, [118] = { "Polimorfia", nil } }
+    H.book = { 133, 143, 145, 116, 118 }  -- magias conhecidas
+    H.actions = {}                         -- [espaço] = { "spell", id }
+    env.HasAction = function(slot) return H.actions[slot] ~= nil end
+    env.GetActionInfo = function(slot)
+        local action = H.actions[slot]
+        if action then return action[1], action[2] end
+    end
+    local function rankText(id, word)
+        local spell = H.spells[id]
+        return spell and spell[2] and (word .. " " .. spell[2]) or ""
+    end
     env.LOOT_ITEM_SELF = "Você recebe saque: %s."
     env.LOOT_ITEM_SELF_MULTIPLE = "Você recebe saque: %sx%d."
     env.LOOT_ITEM_PUSHED_SELF = "Você recebe o item: %s."
@@ -212,6 +228,19 @@ function Mock.new(opts)
         env.GetGuildRosterInfo = function(i) return nil, nil, nil, nil, nil, nil, nil, nil, i ~= 2 end
         env.GuildRoster = function() H.rosterRequests = H.rosterRequests + 1 end
         env.InterfaceOptions_AddCategory = function(panel) H.settingsPanel = panel end
+        env.UnitCharacterPoints = function() return H.talentPoints, 0 end
+        env.GetSpellInfo = function(id)
+            local spell = H.spells[id]
+            if spell then return spell[1], rankText(id, "Rank") end
+        end
+        env.BOOKTYPE_SPELL = "spell"
+        env.GetNumSpellTabs = function() return 1 end
+        env.GetSpellTabInfo = function() return "Geral", nil, 0, #H.book end
+        env.GetSpellName = function(index)
+            local id = H.book[index]
+            local spell = H.spells[id]
+            if spell then return spell[1], rankText(id, "Rank") end
+        end
     else
         -- Cliente moderno (WoW Forever / Midnight).
         env.GetBuildInfo = function() return "1.60.1", "70862", "Nov 6 2026", 16001 end
@@ -243,6 +272,21 @@ function Mock.new(opts)
                 return { name = name }
             end,
             RegisterAddOnCategory = function(category) H.settingsCategory = category end,
+        }
+        env.GetUnspentTalentPoints = function() return H.talentPoints end
+        env.Enum = { SpellBookSpellBank = { Player = 0 } }
+        env.C_Spell = {
+            GetSpellName = function(id) local spell = H.spells[id]; return spell and spell[1] end,
+            GetSpellSubtext = function(id) return rankText(id, "Grau") end,
+        }
+        env.C_SpellBook = {
+            GetNumSpellBookSkillLines = function() return 1 end,
+            GetSpellBookSkillLineInfo = function() return { itemIndexOffset = 0, numSpellBookItems = #H.book } end,
+            GetSpellBookItemInfo = function(index)
+                local id = H.book[index]
+                local spell = H.spells[id]
+                if spell then return { spellID = id, name = spell[1], subName = rankText(id, "Grau") } end
+            end,
         }
     end
 

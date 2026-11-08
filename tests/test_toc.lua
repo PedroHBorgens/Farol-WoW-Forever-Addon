@@ -61,6 +61,7 @@ return {
             "SecureActionButton", "hooksecurefunc", "setfenv", "getfenv", "C_Timer", "DoEmote",
             "AcceptTrade", "PickupItem", "UseContainerItem", "BuyMerchant", "SellItem", "InviteUnit",
             "LootSlot", "ConfirmLootSlot", "RollOnLoot", "SetCVar", "RepairAllItems",
+            "PickupSpell", "PickupAction", "PlaceAction", "SetBinding",
         }
         for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua" }) do
             local code = read("Farol/" .. file)

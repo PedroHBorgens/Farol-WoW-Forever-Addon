@@ -29,6 +29,7 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 | `/farol loot clear` | Clear this character's loot history |
 | `/farol session reset`| Restart session gold, gold/h, XP/h and time |
 | `/farol warn`       | Open the warnings window (durability and bags) |
+| `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, vertical, hide in combat) |
 | `/farol alarm`      | Open the alarms window |
 | `/farol alarm add 07:30`| Create an alarm (see below) |
@@ -93,7 +94,7 @@ Open **Appearance...** in the options menu (or `/farol appearance`):
 
 - **Scale** 50%–200% and **background opacity** 0%–100% (0% = only the text floats on screen), with [-]/[+] buttons.
 - **Vertical bar**: one item per line.
-- **Show border** on/off.
+- **Show border** on/off, **show icons on the bar** (one per item) and **show the warning history button**.
 - **Hide in combat** (comes back when the fight ends) and **hide in dungeons, raids, arenas and battlegrounds**.
   Alarms and warnings keep working while the bar is hidden.
 - **Restore defaults** puts everything back.
@@ -112,6 +113,35 @@ your screen and in your own chat** (nothing is sent to anyone), with the game's 
 - Open **Warnings...** in the options menu (or `/farol warn`) to turn each warning on/off, change the limits
   (durability 5–50%, bags 0–10 slots), turn the sound off or test it.
 - Commands: `/farol warn durab 25`, `/farol warn bags 4`, `/farol warn durab off`, `/farol warn sound off`.
+
+### Talents and spell ranks
+
+- **Unspent talent points:** "You have 2 unspent talent point(s)." Warns at login and for each new point.
+- **Lower-rank spells on your action bars:** "Fireball (Rank 3) — you already know Rank 5". Farol reads your
+  spellbook and bars and warns once per spell until you replace it. It **never** changes your bars for you
+  (that would be automation): you drag the new rank yourself.
+- These two never warn in the middle of a fight; they wait until combat ends.
+- `/farol warn status` shows what Farol can read on your client (unspent points and the function used, and
+  lower-rank spells found). Turn them off with `/farol warn talents off` / `/farol warn ranks off`.
+
+### Silence or remind me in 30 minutes
+
+Every warning opens a small window with two choices:
+
+- **Silence**: the warning stays quiet and only comes back if the situation changes (e.g. you repair and the
+  durability drops again, or you gain a new talent point).
+- **Remind in 30 min**: if the problem is still there in 30 minutes, the warning shows up again.
+
+Several warnings at once are shown one at a time. Chat: `/farol warn silence`, `/farol warn remind`.
+
+### Warning history
+
+The **last 10 warnings** (with date and time) are kept per character. Open them by:
+
+- clicking the **note button next to the bar**: a red number shows how many new warnings you haven't seen;
+- a **key binding** of your choice: Esc → Options → Keybindings → AddOns → Farol (uses the game's official
+  `Bindings.xml`; it only opens the window);
+- `/farol history`, or **History...** in the Warnings window.
 
 ## Recent loot window
 

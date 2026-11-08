@@ -232,6 +232,7 @@ local function CreatePopup()
     frame.remind:SetSize(150, 22)
     frame.remind:SetPoint("BOTTOMRIGHT", -22, 16)
     frame.remind:SetScript("OnClick", function() Warnings.Respond(true) end)
+    ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
 end
@@ -771,6 +772,7 @@ local function CreateWindow()
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolWarnings") -- ESC fecha
+    ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
 end
@@ -852,6 +854,7 @@ local function CreateHistoryWindow()
         RefreshHistory()
     end)
     tinsert(UISpecialFrames, "FarolWarnHistory") -- ESC fecha
+    ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
 end

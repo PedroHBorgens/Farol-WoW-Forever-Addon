@@ -276,6 +276,7 @@ local function CreatePopup()
     frame.stop:SetPoint("BOTTOMRIGHT", -20, 16)
     frame.stop:SetScript("OnClick", function() Alarm.Stop() end)
 
+    ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
 end
@@ -582,6 +583,7 @@ local function CreateWindow()
     frame:SetHeight(-(addY - 100) + 40)
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolAlarms") -- ESC fecha
+    ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
 end

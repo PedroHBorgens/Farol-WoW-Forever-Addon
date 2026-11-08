@@ -315,6 +315,16 @@ end
 
 ns.T = T
 ns.ICON = ICON
+
+-- Janelas do Farol ficam na mesma camada de desenho; sem isto, uma janela recém-aberta pode
+-- ficar atrás de outra (ex.: Alarmes atrás do menu). Toda janela aberta vem para a frente, e
+-- clicar em qualquer uma a traz para a frente (como as janelas do próprio jogo).
+function ns.MakeToplevel(frame)
+    if frame.SetToplevel then frame:SetToplevel(true) end
+    if frame.HookScript then
+        frame:HookScript("OnShow", function(self) self:Raise() end)
+    end
+end
 ns.Print = Print
 ns.GetDB = function() return db end
 
@@ -1264,6 +1274,7 @@ local function CreateOptionsWindow()
 
     window:SetScript("OnShow", RefreshOptions)
     tinsert(UISpecialFrames, "FarolOptions") -- ESC fecha a janela
+    ns.MakeToplevel(window) -- abre na frente e vem para a frente ao clicar
     window:Hide()
     return window
 end

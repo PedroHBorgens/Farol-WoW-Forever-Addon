@@ -619,6 +619,7 @@ local function CreateWindow()
     end)
     frame:SetScript("OnHide", CloseDropdown)
     tinsert(UISpecialFrames, "FarolLoot") -- ESC fecha
+    ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
 end

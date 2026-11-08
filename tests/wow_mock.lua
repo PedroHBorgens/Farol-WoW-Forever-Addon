@@ -64,6 +64,17 @@ function Frame:UnlockHighlight() self._highlight = false end
 function Frame:HasFocus() return false end
 function Frame:SetTexture(texture) self._texture = texture end
 function Frame:SetScale(scale) self._scale = scale end
+-- Camadas: Raise() registra a ordem em que a janela veio para a frente (maior = mais na frente).
+local raiseCounter = 0
+function Frame:Raise() raiseCounter = raiseCounter + 1; self._raisedAt = raiseCounter end
+function Frame:SetToplevel(value) self._toplevel = value end
+function Frame:HookScript(name, fn)
+    local original = self._scripts[name]
+    self._scripts[name] = function(...)
+        if original then original(...) end
+        fn(...)
+    end
+end
 function Frame:SetPoint(point, relativeTo) self._anchor = type(relativeTo) == "table" and relativeTo or nil end
 function Frame:ClearAllPoints() self._anchor = nil end
 function Frame:GetScale() return self._scale or 1 end

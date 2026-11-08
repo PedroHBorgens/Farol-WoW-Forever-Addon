@@ -35,6 +35,22 @@ return {
         T.hasnt(H.env.FarolFrame._fontStrings[1]._text, "\n"); T.eq(bar(H)._h, 26)
     end },
 
+    { "vertical bar uses the real text height measured by the game", function(T, Mock)
+        local H = Mock.new():login()
+        for _, key in ipairs({ "mem", "speed", "bags", "session", "goldh", "xp", "xph", "clock", "playtime", "friends" }) do
+            H:slash("show " .. key)
+        end
+        H.env.FarolFrame._fontStrings[1]._stringHeight = 190 -- 16 linhas como no jogo (~12 px cada)
+        H:slash("aparencia vertical")
+        T.eq(bar(H)._h, 190 + 16, "frame follows the real text height, not the estimate")
+        local first = H.env.FarolWarnHistoryButton
+        T.eq(first._anchorPoint, "TOPLEFT", "quick buttons go to the top corner")
+        T.eq(first._anchor, H.env.FarolFrame)
+        T.eq(H.env.FarolLootButton._anchor, first, "second button next to the first")
+        H:slash("aparencia vertical")
+        T.eq(first._anchorPoint, "LEFT", "horizontal: back to the side")
+    end },
+
     { "hide in combat: hides on entering combat and comes back after", function(T, Mock)
         local H = Mock.new():login()
         H:event("PLAYER_REGEN_DISABLED"); T.ok(bar(H):IsShown(), "option off: stays visible")

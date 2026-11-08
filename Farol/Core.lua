@@ -887,7 +887,14 @@ local function UpdateText()
             widest = math.max(widest, measure:GetStringWidth() or 0)
         end
         frame:SetWidth(math.max(80, widest + 20))
-        frame:SetHeight(#parts * LineHeight() + 14)
+        -- Altura real medida pelo jogo; a estimativa por linha fica só como reserva
+        -- (o jogo desenha as linhas mais baixas que a estimativa, e a moldura sobrava).
+        local measured = text:GetStringHeight()
+        if type(measured) == "number" and measured > 0 then
+            frame:SetHeight(math.ceil(measured) + 16)
+        else
+            frame:SetHeight(#parts * LineHeight() + 14)
+        end
     else
         text:SetJustifyH("CENTER")
         text:SetText(table.concat(parts, "   "))
@@ -1056,7 +1063,11 @@ function ns.LayoutQuickButtons()
     for _, button in ipairs(ns.quickButtons) do
         if button:IsShown() then
             button:ClearAllPoints()
-            button:SetPoint("LEFT", anchor, "RIGHT", 2, 0)
+            if anchor == frame and db.vertical then
+                button:SetPoint("TOPLEFT", frame, "TOPRIGHT", 2, -4) -- barra vertical: no canto de cima
+            else
+                button:SetPoint("LEFT", anchor, "RIGHT", 2, 0)
+            end
             button:SetSize(db.iconSize + 4, db.iconSize + 4) -- acompanha o tamanho dos ícones
             anchor = button
         end

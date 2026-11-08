@@ -77,7 +77,11 @@ function Frame:HookScript(name, fn)
         fn(...)
     end
 end
-function Frame:SetPoint(point, relativeTo) self._anchor = type(relativeTo) == "table" and relativeTo or nil end
+function Frame:SetPoint(point, relativeTo)
+    self._anchor = type(relativeTo) == "table" and relativeTo or nil
+    self._anchorPoint = point
+end
+function Frame:GetStringHeight() return self._stringHeight end -- os testes podem definir
 function Frame:ClearAllPoints() self._anchor = nil end
 function Frame:GetScale() return self._scale or 1 end
 function Frame:SetBackdropColor(r, g, b, a) self._bgAlpha = a end

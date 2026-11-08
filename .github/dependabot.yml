@@ -1,0 +1,7 @@
+version: 2
+updates:
+  # Mantém as GitHub Actions do workflow de testes atualizadas (correções de segurança)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

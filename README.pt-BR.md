@@ -3,7 +3,8 @@
 **Português** | [English](README.md)
 
 Addon **gratuito e de código aberto** para WoW Forever: mostra um painel pequeno e arrastável com
-**FPS · latência · coordenadas · ouro**.
+**FPS · latência · coordenadas · zona · durabilidade · ouro**.
+Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens aparecem na barra.
 
 ## Instalação
 
@@ -21,10 +22,31 @@ Addon **gratuito e de código aberto** para WoW Forever: mostra um painel pequen
 | `/wfi`            | Mostra/oculta o painel |
 | `/wfi lock`       | Trava/destrava o painel (arraste com o botão esquerdo) |
 | `/wfi reset`      | Volta o painel para a posição padrão |
+| `/wfi show <item>`| Mostra um item na barra |
+| `/wfi hide <item>`| Esconde um item da barra |
+| `/wfi itens`      | Lista os itens e o que está visível |
+| `/wfi ajuda`      | Lista todos os comandos |
 | `/wfi version`    | Mostra a versão do cliente e o número de **Interface** |
 | `/wfi lang pt`    | Interface em português |
 | `/wfi lang en`    | Interface em inglês |
 | `/wfi lang auto`  | Segue o idioma do cliente (padrão) |
+
+## Itens da barra
+
+| Item     | Mostra                                                  | Nome nos comandos |
+|----------|---------------------------------------------------------|-------------------|
+| FPS      | Quadros por segundo (verde ≥ 50, amarelo ≥ 25)          | `fps`             |
+| Latência | A maior entre latência local/mundo (verde ≤ 100 ms)     | `ms`              |
+| Coords   | Sua posição no mapa (`--` dentro de instâncias)         | `coords`          |
+| Zona     | Nome da zona atual                                      | `zona`            |
+| Durab.   | Sua peça **mais danificada** (vermelho abaixo de 20%)   | `durab`           |
+| Ouro     | Dinheiro do personagem                                  | `ouro`            |
+
+Exemplo: `/wfi hide ouro` esconde o ouro; `/wfi show ouro` mostra de volta. Também funcionam
+`mostrar`/`esconder` e os nomes em inglês (`zone`, `gold`). Suas escolhas ficam salvas.
+
+**Tooltip:** passe o mouse no painel para ver latência local/mundo, subzona, cada peça danificada com a
+durabilidade, e mais.
 
 ## Idioma
 
@@ -58,7 +80,7 @@ Segurança da informação é a primeira regra deste projeto:
 - **Nada sai do seu computador.** O addon não usa `SendAddonMessage`, chat ou qualquer canal para enviar dados.
 - **Nenhum código externo é executado.** Sem `loadstring`/`RunScript`; comandos aceitam só palavras fixas.
 - **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
-- **Dados salvos são validados.** `WoWForeverInfoDB` guarda apenas a posição, o estado do painel e o idioma, e é
+- **Dados salvos são validados.** `WoWForeverInfoDB` guarda apenas a posição, o estado do painel, o idioma e os itens visíveis, e é
   verificado ao carregar — um arquivo corrompido ou adulterado volta para os valores padrão.
 - **Baixe só da fonte oficial** (este repositório). Addons são texto Lua: você pode ler todo o código em `Core.lua`.
 

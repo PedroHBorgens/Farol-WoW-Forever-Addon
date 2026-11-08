@@ -3,7 +3,8 @@
 [Português](README.pt-BR.md) | **English**
 
 A **free and open-source** addon for WoW Forever: a small, draggable on-screen panel showing
-**FPS · latency · coordinates · gold**.
+**FPS · latency · coordinates · zone · durability · gold**.
+Hover the panel for a detailed tooltip, and choose which items appear on the bar.
 
 ## Installation
 
@@ -21,10 +22,30 @@ A **free and open-source** addon for WoW Forever: a small, draggable on-screen p
 | `/wfi`            | Show/hide the panel |
 | `/wfi lock`       | Lock/unlock the panel (drag with left mouse button) |
 | `/wfi reset`      | Move the panel back to its default position |
+| `/wfi show <item>`| Show an item on the bar |
+| `/wfi hide <item>`| Hide an item from the bar |
+| `/wfi items`      | List items and which are visible |
+| `/wfi help`       | List all commands |
 | `/wfi version`    | Show the client version and **Interface** number |
 | `/wfi lang en`    | English interface |
 | `/wfi lang pt`    | Portuguese interface |
 | `/wfi lang auto`  | Follow the client language (default) |
+
+## Bar items
+
+| Item     | Shows                                              | Name in commands |
+|----------|----------------------------------------------------|------------------|
+| FPS      | Frames per second (green ≥ 50, yellow ≥ 25)        | `fps`            |
+| Latency  | Highest of home/world latency (green ≤ 100 ms)     | `ms`             |
+| Coords   | Your map position (`--` inside instances)          | `coords`         |
+| Zone     | Current zone name                                  | `zone`           |
+| Durab.   | Your **most damaged** item (red below 20%)         | `durab`          |
+| Gold     | Money on your character                            | `gold`           |
+
+Example: `/wfi hide gold` hides gold; `/wfi show gold` brings it back. Portuguese names also work
+(`zona`, `ouro`, `durabilidade`). Your choices are saved.
+
+**Tooltip:** hover the panel to see home/world latency, subzone, every damaged item with its durability, and more.
 
 ## Language
 
@@ -57,7 +78,7 @@ Information security is this project's first rule:
 - **Nothing leaves your computer.** The addon never uses `SendAddonMessage`, chat or any other channel to send data.
 - **No external code is executed.** No `loadstring`/`RunScript`; commands only accept fixed words.
 - **No automation.** It only reads and displays information; it never plays for you (which would break server rules).
-- **Saved data is validated.** `WoWForeverInfoDB` only stores the panel's position, state and language, and is
+- **Saved data is validated.** `WoWForeverInfoDB` only stores the panel's position, state, language and visible items, and is
   checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official source** (this repository). Addons are plain Lua text: you can read all of it in `Core.lua`.
 

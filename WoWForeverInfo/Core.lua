@@ -1,18 +1,32 @@
 --[[
   WoW Forever Info
-  Painel na tela com FPS, latência, coordenadas e ouro.
-  On-screen panel with FPS, latency, coordinates and gold. (PT / EN)
+  Painel na tela com FPS, latência, coordenadas, zona, durabilidade e ouro.
+  On-screen panel with FPS, latency, coordinates, zone, durability and gold. (PT / EN)
 
   Princípios de segurança deste addon:
     * Não usa loadstring/RunScript nem executa código vindo de chat, arquivos ou outros jogadores.
     * Não envia nem recebe mensagens de addon (SendAddonMessage) — nenhum dado sai do seu cliente.
     * Não automatiza ações de jogo (nada de bot); apenas LÊ informações e as mostra.
-    * Só grava a posição/estado do painel em SavedVariables, e valida esses dados ao carregar.
+    * Só grava posição, idioma e itens visíveis em SavedVariables, e valida esses dados ao carregar.
+    * Cada leitura de dados é isolada (pcall): se o jogo bloquear algo, aparece "--", nunca um erro.
 ]]
 
 local ADDON_NAME = ...
 local PREFIX = "|cff33ccffWoW Forever Info|r: "
 local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
+
+-- Itens da barra, na ordem em que aparecem.
+local ITEM_ORDER = { "fps", "ms", "coords", "zone", "durab", "gold" }
+
+-- Nomes aceitos nos comandos /wfi show|hide (português e inglês).
+local ITEM_ALIASES = {
+    fps = "fps",
+    ms = "ms", ping = "ms", latencia = "ms", latency = "ms",
+    coords = "coords", coord = "coords", coordenadas = "coords", coordinates = "coords",
+    zona = "zone", zone = "zone",
+    durab = "durab", dur = "durab", durabilidade = "durab", durability = "durab",
+    ouro = "gold", gold = "gold",
+}
 
 local DEFAULTS = {
     shown = true,
@@ -33,10 +47,13 @@ local VALID_LANGS = { auto = true, pt = true, en = true }
 local STRINGS = {
     pt = {
         help_title   = "comandos:",
-        help_toggle  = "  /wfi               - mostrar/ocultar o painel",
-        help_lock    = "  /wfi lock          - travar/destravar o painel (arraste com o botão esquerdo)",
-        help_reset   = "  /wfi reset         - voltar o painel à posição padrão",
-        help_version = "  /wfi version       - mostrar a versão do cliente e o número de Interface",
+        help_toggle  = "  /wfi                 - mostrar/ocultar o painel",
+        help_lock    = "  /wfi lock            - travar/destravar o painel (arraste com o botão esquerdo)",
+        help_reset   = "  /wfi reset           - voltar o painel à posição padrão",
+        help_show    = "  /wfi show <item>     - mostrar um item na barra",
+        help_hide    = "  /wfi hide <item>     - esconder um item da barra",
+        help_items   = "  /wfi itens           - listar os itens e o que está visível",
+        help_version = "  /wfi version         - mostrar a versão do cliente e o número de Interface",
         help_lang    = "  /wfi lang pt|en|auto - escolher o idioma (auto = idioma do cliente)",
         shown        = "painel visível.",
         hidden       = "painel oculto.",
@@ -48,13 +65,41 @@ local STRINGS = {
         lang_set     = "idioma: Português.",
         lang_auto    = "idioma: automático (segue o cliente).",
         lang_usage   = "uso: /wfi lang pt | en | auto",
+        item_usage   = "uso: /wfi show|hide fps | ms | coords | zona | durab | ouro",
+        item_on      = "%s: |cff00ff00visível|r",
+        item_off     = "%s: |cffff3333escondido|r",
+        items_title  = "itens da barra:",
+        none_shown   = "WoW Forever Info — /wfi show <item>",
+        name_fps     = "FPS",
+        name_ms      = "Latência (ms)",
+        name_coords  = "Coordenadas (coords)",
+        name_zone    = "Zona (zona)",
+        name_durab   = "Durabilidade (durab)",
+        name_gold    = "Ouro (ouro)",
+        label_durab  = "Dur",
+        tt_latency   = "Latência",
+        tt_lat_value = "local %d ms / mundo %d ms",
+        tt_coords    = "Coordenadas",
+        tt_zone      = "Zona",
+        tt_subzone   = "Subzona",
+        tt_durab     = "Durabilidade (menor peça)",
+        tt_all_ok    = "Todo o equipamento está 100%.",
+        tt_no_gear   = "Nenhum item com durabilidade equipado.",
+        tt_gold      = "Ouro",
+        tt_drag      = "Arraste para mover.",
+        tt_locked    = "Painel travado (/wfi lock).",
+        tt_help      = "/wfi ajuda — lista de comandos",
+        tt_slot      = "Espaço %d",
     },
     en = {
         help_title   = "commands:",
-        help_toggle  = "  /wfi               - show/hide the panel",
-        help_lock    = "  /wfi lock          - lock/unlock the panel (drag with left mouse button)",
-        help_reset   = "  /wfi reset         - move the panel back to its default position",
-        help_version = "  /wfi version       - show the client version and Interface number",
+        help_toggle  = "  /wfi                 - show/hide the panel",
+        help_lock    = "  /wfi lock            - lock/unlock the panel (drag with left mouse button)",
+        help_reset   = "  /wfi reset           - move the panel back to its default position",
+        help_show    = "  /wfi show <item>     - show an item on the bar",
+        help_hide    = "  /wfi hide <item>     - hide an item from the bar",
+        help_items   = "  /wfi items           - list items and which are visible",
+        help_version = "  /wfi version         - show the client version and Interface number",
         help_lang    = "  /wfi lang pt|en|auto - choose the language (auto = client language)",
         shown        = "panel shown.",
         hidden       = "panel hidden.",
@@ -66,6 +111,31 @@ local STRINGS = {
         lang_set     = "language: English.",
         lang_auto    = "language: automatic (follows the client).",
         lang_usage   = "usage: /wfi lang pt | en | auto",
+        item_usage   = "usage: /wfi show|hide fps | ms | coords | zone | durab | gold",
+        item_on      = "%s: |cff00ff00shown|r",
+        item_off     = "%s: |cffff3333hidden|r",
+        items_title  = "bar items:",
+        none_shown   = "WoW Forever Info — /wfi show <item>",
+        name_fps     = "FPS",
+        name_ms      = "Latency (ms)",
+        name_coords  = "Coordinates (coords)",
+        name_zone    = "Zone (zone)",
+        name_durab   = "Durability (durab)",
+        name_gold    = "Gold (gold)",
+        label_durab  = "Dur",
+        tt_latency   = "Latency",
+        tt_lat_value = "home %d ms / world %d ms",
+        tt_coords    = "Coordinates",
+        tt_zone      = "Zone",
+        tt_subzone   = "Subzone",
+        tt_durab     = "Durability (lowest item)",
+        tt_all_ok    = "All gear is at 100%.",
+        tt_no_gear   = "No equipped items with durability.",
+        tt_gold      = "Gold",
+        tt_drag      = "Drag to move.",
+        tt_locked    = "Panel locked (/wfi lock).",
+        tt_help      = "/wfi help — list of commands",
+        tt_slot      = "Slot %d",
     },
 }
 
@@ -124,7 +194,32 @@ local function SanitizeDB(saved)
     if clean.x ~= clean.x or clean.x > limit or clean.x < -limit then clean.x = DEFAULTS.x end
     if clean.y ~= clean.y or clean.y > limit or clean.y < -limit then clean.y = DEFAULTS.y end
 
+    -- Itens visíveis: só chaves conhecidas, só booleanos; o resto é descartado.
+    local savedItems = type(saved.items) == "table" and saved.items or {}
+    clean.items = {}
+    for _, key in ipairs(ITEM_ORDER) do
+        local value = savedItems[key]
+        if type(value) == "boolean" then
+            clean.items[key] = value
+        else
+            clean.items[key] = true -- padrão: visível
+        end
+    end
+
     return clean
+end
+
+-- Executa uma leitura de dados isolada: qualquer erro/bloqueio vira nil.
+local function Safe(fn, ...)
+    local ok, a, b, c = pcall(fn, ...)
+    if ok then return a, b, c end
+    return nil
+end
+
+-- WoW Forever / Midnight podem marcar valores como "secretos" (secret values);
+-- não podemos fazer contas com eles, então os tratamos como indisponíveis.
+local function IsSecret(v)
+    return issecretvalue ~= nil and issecretvalue(v) or false
 end
 
 local function FormatMoney(copper)
@@ -135,28 +230,39 @@ local function FormatMoney(copper)
     return string.format("|cffffd700%dg|r |cffc7c7cf%ds|r |cffeda55f%dc|r", gold, silver, cop)
 end
 
-local function ColorByValue(value, good, ok)
-    -- verde se bom, amarelo se médio, vermelho se ruim
-    if value <= good then return "|cff00ff00" end
-    if value <= ok then return "|cffffff00" end
-    return "|cffff3333"
+-- Cores: verde (bom), amarelo (médio), vermelho (ruim).
+local GREEN, YELLOW, RED = "|cff00ff00", "|cffffff00", "|cffff3333"
+
+local function ColorLowIsGood(value, good, ok)
+    if value <= good then return GREEN end
+    if value <= ok then return YELLOW end
+    return RED
+end
+
+local function ColorHighIsGood(value, good, ok)
+    if value >= good then return GREEN end
+    if value >= ok then return YELLOW end
+    return RED
 end
 
 ---------------------------------------------------------------------------
 -- Leitura de dados compatível com várias versões do cliente
 ---------------------------------------------------------------------------
 
+local function GetFPS()
+    return math.floor((GetFramerate() or 0) + 0.5)
+end
+
 local function GetLatency()
-    -- 3.3.5a retorna (entrada, saída, latência); Classic/Retail retornam também latencyWorld.
+    -- 3.3.5a retorna (entrada, saída, latência); clientes modernos retornam também latencyWorld.
     local _, _, home, world = GetNetStats()
     home = tonumber(home) or 0
     world = tonumber(world) or 0
-    return math.max(home, world)
+    return math.max(home, world), home, world
 end
 
 local function GetCoordsRaw()
     if C_Map and C_Map.GetBestMapForUnit and C_Map.GetPlayerMapPosition then
-        -- Classic / Retail
         local mapID = C_Map.GetBestMapForUnit("player")
         if mapID then
             local pos = C_Map.GetPlayerMapPosition(mapID, "player")
@@ -166,23 +272,49 @@ local function GetCoordsRaw()
             end
         end
     elseif GetPlayerMapPosition then
-        -- 3.3.5a e anteriores
         local x, y = GetPlayerMapPosition("player")
         if x and y and (x > 0 or y > 0) then return x, y end
     end
     return nil -- instâncias e alguns mapas não informam posição
 end
 
--- WoW Forever / Midnight podem marcar valores como "secretos" (secret values) em certas situações;
--- nesse caso não podemos fazer contas com eles. Qualquer bloqueio vira "sem coordenadas", nunca um erro.
-local function IsSecret(v)
-    return issecretvalue ~= nil and issecretvalue(v) or false
+local function GetCoords()
+    local x, y = Safe(GetCoordsRaw)
+    if x == nil or IsSecret(x) or IsSecret(y) then return nil end
+    return x, y
 end
 
-local function GetCoords()
-    local ok, x, y = pcall(GetCoordsRaw)
-    if not ok or IsSecret(x) or IsSecret(y) then return nil end
-    return x, y
+local function GetZones()
+    local zone = (GetRealZoneText and GetRealZoneText()) or (GetZoneText and GetZoneText()) or ""
+    local sub = GetSubZoneText and GetSubZoneText() or ""
+    if IsSecret(zone) then zone = "" end
+    if IsSecret(sub) then sub = "" end
+    return zone, sub
+end
+
+-- Durabilidade: guardada em cache e recalculada só quando o equipamento muda.
+local durability = { lowest = nil, damaged = {} }
+
+local function ScanDurabilityRaw()
+    local lowest, damaged = nil, {}
+    for slot = 1, 19 do -- espaços de equipamento
+        local cur, max = GetInventoryItemDurability(slot)
+        if cur and max and not IsSecret(cur) and not IsSecret(max) and max > 0 then
+            local pct = cur / max * 100
+            if not lowest or pct < lowest then lowest = pct end
+            if pct < 100 then
+                damaged[#damaged + 1] = { slot = slot, pct = pct }
+            end
+        end
+    end
+    table.sort(damaged, function(a, b) return a.pct < b.pct end)
+    durability.lowest, durability.damaged = lowest, damaged
+end
+
+local function ScanDurability()
+    if not pcall(ScanDurabilityRaw) then
+        durability.lowest, durability.damaged = nil, {}
+    end
 end
 
 -- No 3.3.5a as coordenadas dependem do mapa "ativo"; ao trocar de zona,
@@ -196,10 +328,43 @@ local function ResetMapToCurrentZone()
 end
 
 ---------------------------------------------------------------------------
+-- Itens da barra: cada um devolve o texto que aparece no painel
+---------------------------------------------------------------------------
+
+local ITEM_TEXT = {
+    fps = function()
+        local fps = GetFPS()
+        return string.format("%s%d|r fps", ColorHighIsGood(fps, 50, 25), fps)
+    end,
+    ms = function()
+        local ms = GetLatency()
+        return string.format("%s%d|r ms", ColorLowIsGood(ms, 100, 250), ms)
+    end,
+    coords = function()
+        local x, y = GetCoords()
+        if not x then return "--, --" end
+        return string.format("%.1f, %.1f", x * 100, y * 100)
+    end,
+    zone = function()
+        local zone = GetZones()
+        if zone == "" then return nil end
+        return "|cffffcc66" .. zone .. "|r"
+    end,
+    durab = function()
+        local pct = durability.lowest
+        if not pct then return nil end -- sem itens com durabilidade (ex.: personagem sem equipamento)
+        return string.format("%s %s%d%%|r", T("label_durab"), ColorHighIsGood(pct, 50, 20), math.floor(pct))
+    end,
+    gold = function()
+        return FormatMoney(GetMoney())
+    end,
+}
+
+---------------------------------------------------------------------------
 -- Painel
 ---------------------------------------------------------------------------
 
--- Retail exige o template "BackdropTemplate" para usar SetBackdrop; clientes antigos não o possuem.
+-- Clientes modernos exigem o template "BackdropTemplate" para usar SetBackdrop; os antigos não o possuem.
 local backdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 
 local frame = CreateFrame("Frame", "WoWForeverInfoFrame", UIParent, backdropTemplate)
@@ -249,35 +414,103 @@ frame:SetScript("OnDragStop", function(self)
 end)
 
 local function UpdateText()
-    local fps = math.floor((GetFramerate() or 0) + 0.5)
-    local ms = GetLatency()
-
-    local coords
-    local x, y = GetCoords()
-    if x then
-        coords = string.format("%.1f, %.1f", x * 100, y * 100)
-    else
-        coords = "--, --"
+    local parts = {}
+    for _, key in ipairs(ITEM_ORDER) do
+        if db.items[key] then
+            local ok, value = pcall(ITEM_TEXT[key])
+            if not ok then value = "--" end
+            if value then parts[#parts + 1] = value end
+        end
     end
 
-    -- FPS: quanto maior melhor, então invertemos a lógica de cor.
-    local fpsColor = (fps >= 50 and "|cff00ff00") or (fps >= 25 and "|cffffff00") or "|cffff3333"
+    if #parts == 0 then
+        text:SetText("|cff888888" .. T("none_shown") .. "|r")
+    else
+        text:SetText(table.concat(parts, "   "))
+    end
+    frame:SetWidth(math.max(120, text:GetStringWidth() + 20))
+end
 
-    text:SetText(string.format("%s%d|r fps   %s%d|r ms   %s   %s",
-        fpsColor, fps,
-        ColorByValue(ms, 100, 250), ms,
-        coords,
-        FormatMoney(GetMoney())))
+---------------------------------------------------------------------------
+-- Tooltip (passar o mouse sobre o painel)
+---------------------------------------------------------------------------
 
-    frame:SetWidth(math.max(200, text:GetStringWidth() + 20))
+local WHITE = { 1, 1, 1 }
+local GOLD_TXT = { 1, 0.82, 0 }
+
+local function AddPair(label, value)
+    GameTooltip:AddDoubleLine(label, value, GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3], WHITE[1], WHITE[2], WHITE[3])
+end
+
+local function FillTooltip()
+    GameTooltip:AddLine("WoW Forever Info", 0.2, 0.8, 1)
+
+    local fps = Safe(GetFPS)
+    AddPair("FPS", fps and tostring(fps) or "--")
+
+    local _, home, world = Safe(GetLatency)
+    AddPair(T("tt_latency"), home and string.format(T("tt_lat_value"), home, world) or "--")
+
+    local x, y = GetCoords()
+    AddPair(T("tt_coords"), x and string.format("%.1f, %.1f", x * 100, y * 100) or "--, --")
+
+    local zone, sub = Safe(GetZones)
+    AddPair(T("tt_zone"), (zone and zone ~= "") and zone or "--")
+    if sub and sub ~= "" and sub ~= zone then
+        AddPair(T("tt_subzone"), sub)
+    end
+
+    GameTooltip:AddLine(" ")
+    if durability.lowest then
+        AddPair(T("tt_durab"), string.format("%s%d%%|r",
+            ColorHighIsGood(durability.lowest, 50, 20), math.floor(durability.lowest)))
+        if #durability.damaged == 0 then
+            GameTooltip:AddLine(T("tt_all_ok"), 0.6, 0.6, 0.6)
+        else
+            for _, entry in ipairs(durability.damaged) do
+                local link = Safe(GetInventoryItemLink, "player", entry.slot)
+                if type(link) ~= "string" or IsSecret(link) then
+                    link = string.format(T("tt_slot"), entry.slot)
+                end
+                GameTooltip:AddDoubleLine("  " .. link, string.format("%s%d%%|r",
+                    ColorHighIsGood(entry.pct, 50, 20), math.floor(entry.pct)))
+            end
+        end
+    else
+        GameTooltip:AddLine(T("tt_no_gear"), 0.6, 0.6, 0.6)
+    end
+
+    GameTooltip:AddLine(" ")
+    local money = Safe(GetMoney)
+    AddPair(T("tt_gold"), money and FormatMoney(money) or "--")
+
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddLine(db.locked and T("tt_locked") or T("tt_drag"), 0.6, 0.6, 0.6)
+    GameTooltip:AddLine(T("tt_help"), 0.6, 0.6, 0.6)
+end
+
+local function ShowTooltip(self)
+    if not db then return end
+    GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+    GameTooltip:ClearLines()
+    pcall(FillTooltip)
+    GameTooltip:Show()
+end
+
+frame:SetScript("OnEnter", ShowTooltip)
+frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+local function TooltipIsOurs()
+    return GameTooltip ~= nil and GameTooltip:IsShown() and GameTooltip.IsOwned ~= nil and GameTooltip:IsOwned(frame)
 end
 
 local elapsedSinceUpdate = 0
-frame:SetScript("OnUpdate", function(_, elapsed)
+frame:SetScript("OnUpdate", function(self, elapsed)
     elapsedSinceUpdate = elapsedSinceUpdate + elapsed
     if elapsedSinceUpdate >= UPDATE_INTERVAL then
         elapsedSinceUpdate = 0
         UpdateText()
+        if TooltipIsOurs() then ShowTooltip(self) end -- mantém o tooltip atualizado
     end
 end)
 
@@ -292,18 +525,30 @@ end
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+frame:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
+frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 
 frame:SetScript("OnEvent", function(self, event, arg1)
-    if event == "ADDON_LOADED" and arg1 == ADDON_NAME then
+    if event == "ADDON_LOADED" then
+        if arg1 ~= ADDON_NAME then return end
         db = SanitizeDB(WoWForeverInfoDB)
         WoWForeverInfoDB = db
         ApplyPosition()
         ApplyVisibility()
         self:UnregisterEvent("ADDON_LOADED")
-    elseif event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
-        ResetMapToCurrentZone()
-        if db then UpdateText() end
+        return
     end
+    if not db then return end
+
+    if event == "PLAYER_ENTERING_WORLD" then
+        ResetMapToCurrentZone()
+        ScanDurability()
+    elseif event == "ZONE_CHANGED_NEW_AREA" then
+        ResetMapToCurrentZone()
+    elseif event == "UPDATE_INVENTORY_DURABILITY" or event == "PLAYER_EQUIPMENT_CHANGED" then
+        ScanDurability()
+    end
+    UpdateText()
 end)
 
 ---------------------------------------------------------------------------
@@ -312,11 +557,28 @@ end)
 
 local function ShowHelp()
     Print(T("help_title"))
-    Print(T("help_toggle"))
-    Print(T("help_lock"))
-    Print(T("help_reset"))
-    Print(T("help_version"))
-    Print(T("help_lang"))
+    for _, key in ipairs({ "help_toggle", "help_lock", "help_reset", "help_show",
+                           "help_hide", "help_items", "help_version", "help_lang" }) do
+        Print(T(key))
+    end
+end
+
+local function ListItems()
+    Print(T("items_title"))
+    for _, key in ipairs(ITEM_ORDER) do
+        Print("  " .. string.format(db.items[key] and T("item_on") or T("item_off"), T("name_" .. key)))
+    end
+end
+
+local function SetItem(alias, visible)
+    local key = ITEM_ALIASES[alias] -- só nomes da lista fixa são aceitos
+    if not key then
+        Print(T("item_usage"))
+        return
+    end
+    db.items[key] = visible
+    UpdateText()
+    Print(string.format(visible and T("item_on") or T("item_off"), T("name_" .. key)))
 end
 
 SLASH_WOWFOREVERINFO1 = "/wfi"
@@ -331,16 +593,23 @@ SlashCmdList["WOWFOREVERINFO"] = function(msg)
         db.shown = not db.shown
         ApplyVisibility()
         Print(db.shown and T("shown") or T("hidden"))
-    elseif cmd == "lock" then
+    elseif cmd == "lock" or cmd == "travar" then
         db.locked = not db.locked
         Print(db.locked and T("locked") or T("unlocked"))
     elseif cmd == "reset" then
         db.point, db.relPoint, db.x, db.y = DEFAULTS.point, DEFAULTS.relPoint, DEFAULTS.x, DEFAULTS.y
         ApplyPosition()
         Print(T("reset"))
+    elseif cmd == "show" or cmd == "mostrar" then
+        SetItem(arg, true)
+    elseif cmd == "hide" or cmd == "esconder" or cmd == "ocultar" then
+        SetItem(arg, false)
+    elseif cmd == "items" or cmd == "itens" then
+        ListItems()
     elseif cmd == "lang" or cmd == "idioma" then
         if VALID_LANGS[arg] then
             db.lang = arg
+            UpdateText()
             Print(arg == "auto" and T("lang_auto") or T("lang_set"))
         else
             Print(T("lang_usage"))

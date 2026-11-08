@@ -1,9 +1,9 @@
 ## Interface: 16001, 11507
 ## Title: WoW Forever Info
-## Notes: On-screen FPS, latency, coordinates and gold panel. Free and open source.
-## Notes-ptBR: Painel com FPS, latência, coordenadas e ouro. Gratuito e de código aberto.
+## Notes: On-screen FPS, latency, coordinates, zone, durability and gold panel. Free and open source.
+## Notes-ptBR: Painel com FPS, latência, coordenadas, zona, durabilidade e ouro. Gratuito e de código aberto.
 ## Author: PedroHBorgens
-## Version: 1.2.0
+## Version: 1.3.0
 ## SavedVariables: WoWForeverInfoDB
 
 Core.lua

@@ -31,6 +31,7 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 | `/farol warn`       | Open the warnings window (durability and bags) |
 | `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, vertical, hide in combat) |
+| `/farol order`      | Choose the order of the items on the bar |
 | `/farol alarm`      | Open the alarms window |
 | `/farol alarm add 07:30`| Create an alarm (see below) |
 | `/farol snooze`     | Snooze the ringing alarm (configured time, default 5 min) |
@@ -189,6 +190,10 @@ in the menu, or `/farol session reset`, to restart them (e.g. when you move to a
 | Session time    | How long you've been playing since login / `/reload`   | `playtime`   | off     |
 | Friends online  | Count of online WoW + Battle.net friends               | `friends`    | off     |
 | Guild online    | Count of online guild members (hidden without a guild) | `guild`      | off     |
+
+**Order:** open **Order...** in the options menu (or `/farol order`) and use the [▲]/[▼] arrows to move each
+item; the bar updates immediately (also in vertical mode). Hidden items are greyed out so you can place them in
+advance. **Restore default order** (or `/farol order default`) undoes it.
 
 Example: `/farol hide gold` hides gold; `/farol show gold` brings it back. Portuguese names also work
 (`zona`, `ouro`, `bolsas`, `hora`…). Your choices are saved.

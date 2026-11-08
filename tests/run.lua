@@ -57,6 +57,7 @@ local SUITES = {
     "test_history",
     "test_quickbuttons",
     "test_layers",
+    "test_order",
 }
 
 local passed, failed = 0, 0

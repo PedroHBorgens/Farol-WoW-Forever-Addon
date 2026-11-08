@@ -93,13 +93,15 @@ depois de um `/reload` dentro desse minuto (isso evita alarmes falsos).
 Abra **Aparência...** no menu de opções (ou `/farol aparencia`):
 
 - **Escala** de 50% a 200% e **opacidade do fundo** de 0% a 100% (0% = só o texto flutuando na tela), com botões [-]/[+].
+- **Tamanho do texto** de 8 a 24 e **tamanho dos ícones** de 10 a 32, separados (a escala aumenta tudo junto). A barra
+  e os botões ao lado se ajustam sozinhos.
 - **Barra vertical**: um item por linha.
 - **Mostrar borda**, **mostrar ícones na barra** (um por item) e **mostrar o botão do histórico de avisos** e **mostrar o botão de saques**.
 - **Esconder em combate** (volta quando a luta acaba) e **esconder em masmorras, raides, arenas e campos de batalha**.
   Os alarmes e os avisos continuam funcionando com a barra escondida.
 - **Restaurar padrão** volta tudo ao normal.
 
-Comandos: `/farol aparencia escala 120`, `/farol aparencia fundo 40`, `/farol aparencia vertical`,
+Comandos: `/farol aparencia escala 120`, `/farol aparencia fundo 40`, `/farol aparencia texto 14`, `/farol aparencia icones 20`, `/farol aparencia vertical`,
 `/farol aparencia borda`, `/farol aparencia combate`, `/farol aparencia instancia`, `/farol aparencia padrao`.
 
 ## Avisos de durabilidade e bolsas

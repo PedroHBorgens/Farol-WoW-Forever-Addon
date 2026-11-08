@@ -72,6 +72,8 @@ local DEFAULTS = {
     icons = true,           -- ícone antes de cada informação da barra
     warnButton = true,      -- botão do histórico de avisos ao lado da barra
     lootButton = true,      -- botão da janela de saques ao lado da barra
+    fontSize = 11,          -- tamanho do texto da barra (8 a 24)
+    iconSize = 14,          -- tamanho dos ícones da barra e dos botões ao lado (10 a 32)
 }
 
 local VALID_LANGS = { auto = true, pt = true, en = true }
@@ -350,6 +352,12 @@ local function SanitizeDB(saved)
     -- Aparência: números fora da faixa (ou NaN) voltam ao padrão.
     if clean.scale ~= clean.scale or clean.scale < 0.5 or clean.scale > 2 then clean.scale = DEFAULTS.scale end
     if clean.bgAlpha ~= clean.bgAlpha or clean.bgAlpha < 0 or clean.bgAlpha > 1 then clean.bgAlpha = DEFAULTS.bgAlpha end
+    if clean.fontSize ~= math.floor(clean.fontSize) or clean.fontSize < 8 or clean.fontSize > 24 then
+        clean.fontSize = DEFAULTS.fontSize
+    end
+    if clean.iconSize ~= math.floor(clean.iconSize) or clean.iconSize < 10 or clean.iconSize > 32 then
+        clean.iconSize = DEFAULTS.iconSize
+    end
 
     -- Limita deslocamentos a valores razoáveis.
     local limit = 5000
@@ -798,7 +806,13 @@ text:SetPoint("CENTER")
 -- Texto invisível usado só para medir a largura de cada linha no modo vertical.
 local measure = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 measure:Hide()
-local LINE_HEIGHT = 14
+-- Fonte original da barra: só o tamanho muda (a fonte e o contorno continuam os do jogo).
+local FONT_PATH, _, FONT_FLAGS = text:GetFont()
+
+-- Altura de uma linha: o maior entre o texto e o ícone, com uma folga.
+local function LineHeight()
+    return math.max(db.fontSize, db.icons and db.iconSize or 0) + 3
+end
 text:SetText("...")
 
 local function SavePosition()
@@ -841,7 +855,8 @@ ns.ITEM_ICONS = ITEM_ICONS
 local function IconTag(key)
     local icon = ITEM_ICONS[key]
     if not icon then return "" end
-    return "|TInterface\\Icons\\" .. icon .. ":14:14:0:0:64:64:5:59:5:59|t "
+    local size = db.iconSize
+    return "|TInterface\\Icons\\" .. icon .. ":" .. size .. ":" .. size .. ":0:0:64:64:5:59:5:59|t "
 end
 
 local function UpdateText()
@@ -871,12 +886,12 @@ local function UpdateText()
             widest = math.max(widest, measure:GetStringWidth() or 0)
         end
         frame:SetWidth(math.max(80, widest + 20))
-        frame:SetHeight(#parts * LINE_HEIGHT + 14)
+        frame:SetHeight(#parts * LineHeight() + 14)
     else
         text:SetJustifyH("CENTER")
         text:SetText(table.concat(parts, "   "))
         frame:SetWidth(math.max(120, (text:GetStringWidth() or 0) + 20))
-        frame:SetHeight(26)
+        frame:SetHeight(math.max(26, LineHeight() + 9)) -- 26 no tamanho padrão
     end
 end
 
@@ -885,6 +900,10 @@ local function ApplyAppearance()
     if ns.Warnings and ns.Warnings.UpdateButton then ns.Warnings.UpdateButton() end
     if ns.Loot and ns.Loot.UpdateButton then ns.Loot.UpdateButton() end
     frame:SetScale(db.scale)
+    if FONT_PATH then
+        text:SetFont(FONT_PATH, db.fontSize, FONT_FLAGS)
+        measure:SetFont(FONT_PATH, db.fontSize, FONT_FLAGS)
+    end
     if frame.SetBackdropColor then
         frame:SetBackdropColor(0, 0, 0, db.bgAlpha)
         frame:SetBackdropBorderColor(0.4, 0.4, 0.4, db.border and 1 or 0)
@@ -1036,6 +1055,7 @@ function ns.LayoutQuickButtons()
         if button:IsShown() then
             button:ClearAllPoints()
             button:SetPoint("LEFT", anchor, "RIGHT", 2, 0)
+            button:SetSize(db.iconSize + 4, db.iconSize + 4) -- acompanha o tamanho dos ícones
             anchor = button
         end
     end

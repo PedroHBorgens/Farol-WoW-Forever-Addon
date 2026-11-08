@@ -71,6 +71,7 @@ local DEFAULTS = {
     hideInstance = false,   -- esconder em masmorras, raides, arenas e campos de batalha
     icons = true,           -- ícone antes de cada informação da barra
     warnButton = true,      -- botão do histórico de avisos ao lado da barra
+    lootButton = true,      -- botão da janela de saques ao lado da barra
 }
 
 local VALID_LANGS = { auto = true, pt = true, en = true }
@@ -872,6 +873,7 @@ end
 -- Escala, fundo e borda.
 local function ApplyAppearance()
     if ns.Warnings and ns.Warnings.UpdateButton then ns.Warnings.UpdateButton() end
+    if ns.Loot and ns.Loot.UpdateButton then ns.Loot.UpdateButton() end
     frame:SetScale(db.scale)
     if frame.SetBackdropColor then
         frame:SetBackdropColor(0, 0, 0, db.bgAlpha)
@@ -1014,6 +1016,20 @@ frame:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 ns.ApplyAppearance = function() ApplyAppearance() end
+
+-- Botões rápidos ao lado da barra (histórico de avisos, saques...), na ordem em que foram criados.
+-- Os visíveis ficam encostados um no outro; se um some, o próximo encosta no anterior.
+ns.quickButtons = {}
+function ns.LayoutQuickButtons()
+    local anchor = frame
+    for _, button in ipairs(ns.quickButtons) do
+        if button:IsShown() then
+            button:ClearAllPoints()
+            button:SetPoint("LEFT", anchor, "RIGHT", 2, 0)
+            anchor = button
+        end
+    end
+end
 ns.frame = frame
 
 -- Combate e instância: a barra some temporariamente se o jogador escolheu isso.

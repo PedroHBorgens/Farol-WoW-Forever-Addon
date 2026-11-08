@@ -94,7 +94,7 @@ Open **Appearance...** in the options menu (or `/farol appearance`):
 
 - **Scale** 50%–200% and **background opacity** 0%–100% (0% = only the text floats on screen), with [-]/[+] buttons.
 - **Vertical bar**: one item per line.
-- **Show border** on/off, **show icons on the bar** (one per item) and **show the warning history button**.
+- **Show border** on/off, **show icons on the bar** (one per item) and **show the warning history button** and **show the loot button**.
 - **Hide in combat** (comes back when the fight ends) and **hide in dungeons, raids, arenas and battlegrounds**.
   Alarms and warnings keep working while the bar is hidden.
 - **Restore defaults** puts everything back.
@@ -147,7 +147,8 @@ The **last 10 warnings** (with date and time) are kept per character. Open them 
 
 A separate window listing the items **you** looted or received, newest first.
 
-- Open it with **Loot...** in the options menu, or type `/farol loot`.
+- Open it with the **bag button next to the bar** (a green number shows items looted since you last opened
+  it), **Loot...** in the options menu, or `/farol loot`.
 - **Show** dropdown — 5, 10, 15 or 20 recent items.
 - **Quality** dropdown — tick Poor, Common, Uncommon, Rare, Epic and Legendary+ (names and colors come from the game), or use *Check all* / *Uncheck all*.
 - **Resizable** — drag the corner grip; the list follows the width and scrolls with the mouse wheel when it doesn't fit. The size is saved.

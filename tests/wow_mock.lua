@@ -64,6 +64,8 @@ function Frame:UnlockHighlight() self._highlight = false end
 function Frame:HasFocus() return false end
 function Frame:SetTexture(texture) self._texture = texture end
 function Frame:SetScale(scale) self._scale = scale end
+function Frame:SetPoint(point, relativeTo) self._anchor = type(relativeTo) == "table" and relativeTo or nil end
+function Frame:ClearAllPoints() self._anchor = nil end
 function Frame:GetScale() return self._scale or 1 end
 function Frame:SetBackdropColor(r, g, b, a) self._bgAlpha = a end
 function Frame:SetBackdropBorderColor(r, g, b, a) self._borderAlpha = a end

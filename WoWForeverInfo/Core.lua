@@ -1,6 +1,7 @@
 --[[
   WoW Forever Info
   Painel na tela com FPS, latência, coordenadas e ouro.
+  On-screen panel with FPS, latency, coordinates and gold. (PT / EN)
 
   Princípios de segurança deste addon:
     * Não usa loadstring/RunScript nem executa código vindo de chat, arquivos ou outros jogadores.
@@ -20,6 +21,52 @@ local DEFAULTS = {
     relPoint = "TOP",
     x = 0,
     y = -20,
+    lang = "auto", -- "auto" (segue o idioma do cliente), "pt" ou "en"
+}
+
+local VALID_LANGS = { auto = true, pt = true, en = true }
+
+---------------------------------------------------------------------------
+-- Textos / Strings (Português e English)
+---------------------------------------------------------------------------
+
+local STRINGS = {
+    pt = {
+        help_title   = "comandos:",
+        help_toggle  = "  /wf                - mostrar/ocultar o painel",
+        help_lock    = "  /wf lock           - travar/destravar o painel (arraste com o botão esquerdo)",
+        help_reset   = "  /wf reset          - voltar o painel à posição padrão",
+        help_version = "  /wf version        - mostrar a versão do cliente e o número de Interface",
+        help_lang    = "  /wf lang pt|en|auto - escolher o idioma (auto = idioma do cliente)",
+        shown        = "painel visível.",
+        hidden       = "painel oculto.",
+        locked       = "painel travado.",
+        unlocked     = "painel destravado — arraste para mover.",
+        reset        = "posição restaurada.",
+        version      = "cliente %s (build %s, %s) — Interface: |cffffff00%s|r",
+        version_hint = "use esse número na linha '## Interface:' do arquivo .toc.",
+        lang_set     = "idioma: Português.",
+        lang_auto    = "idioma: automático (segue o cliente).",
+        lang_usage   = "uso: /wf lang pt | en | auto",
+    },
+    en = {
+        help_title   = "commands:",
+        help_toggle  = "  /wf                - show/hide the panel",
+        help_lock    = "  /wf lock           - lock/unlock the panel (drag with left mouse button)",
+        help_reset   = "  /wf reset          - move the panel back to its default position",
+        help_version = "  /wf version        - show the client version and Interface number",
+        help_lang    = "  /wf lang pt|en|auto - choose the language (auto = client language)",
+        shown        = "panel shown.",
+        hidden       = "panel hidden.",
+        locked       = "panel locked.",
+        unlocked     = "panel unlocked — drag to move.",
+        reset        = "position restored.",
+        version      = "client %s (build %s, %s) — Interface: |cffffff00%s|r",
+        version_hint = "use this number on the '## Interface:' line of the .toc file.",
+        lang_set     = "language: English.",
+        lang_auto    = "language: automatic (follows the client).",
+        lang_usage   = "usage: /wf lang pt | en | auto",
+    },
 }
 
 local VALID_POINTS = {
@@ -38,6 +85,22 @@ local function Print(msg)
     DEFAULT_CHAT_FRAME:AddMessage(PREFIX .. tostring(msg))
 end
 
+-- Idioma ativo: escolha do usuário, ou o idioma do cliente quando "auto".
+local function CurrentLang()
+    local lang = db and db.lang or "auto"
+    if lang == "auto" then
+        local locale = GetLocale and GetLocale() or "enUS"
+        return (locale == "ptBR" or locale == "ptPT") and "pt" or "en"
+    end
+    return lang
+end
+
+-- Busca um texto traduzido; cai para inglês se faltar.
+local function T(key)
+    local lang = STRINGS[CurrentLang()] or STRINGS.en
+    return lang[key] or STRINGS.en[key] or key
+end
+
 -- Garante que SavedVariables tenham só os tipos/valores esperados.
 -- Um arquivo corrompido ou editado à mão nunca quebra o addon.
 local function SanitizeDB(saved)
@@ -54,6 +117,7 @@ local function SanitizeDB(saved)
 
     if not VALID_POINTS[clean.point] then clean.point = DEFAULTS.point end
     if not VALID_POINTS[clean.relPoint] then clean.relPoint = DEFAULTS.relPoint end
+    if not VALID_LANGS[clean.lang] then clean.lang = DEFAULTS.lang end
 
     -- Limita deslocamentos a valores razoáveis.
     local limit = 5000
@@ -235,41 +299,50 @@ end)
 ---------------------------------------------------------------------------
 
 local function ShowHelp()
-    Print("comandos:")
-    Print("  /wf           - mostrar/ocultar o painel")
-    Print("  /wf lock      - travar/destravar o painel (arraste com o botão esquerdo)")
-    Print("  /wf reset     - voltar o painel à posição padrão")
-    Print("  /wf version   - mostrar a versão do cliente e o número de Interface")
+    Print(T("help_title"))
+    Print(T("help_toggle"))
+    Print(T("help_lock"))
+    Print(T("help_reset"))
+    Print(T("help_version"))
+    Print(T("help_lang"))
 end
 
 SLASH_WOWFOREVERINFO1 = "/wf"
 SLASH_WOWFOREVERINFO2 = "/wfinfo"
 SlashCmdList["WOWFOREVERINFO"] = function(msg)
     if not db then return end
-    -- Aceita só uma palavra simples; qualquer outra coisa mostra a ajuda.
-    local cmd = string.lower(string.match(msg or "", "^%s*(%a*)") or "")
+    -- Aceita só palavras simples (letras); qualquer outra coisa mostra a ajuda.
+    local cmd, arg = string.match(msg or "", "^%s*(%a*)%s*(%a*)")
+    cmd, arg = string.lower(cmd or ""), string.lower(arg or "")
 
     if cmd == "" then
         db.shown = not db.shown
         ApplyVisibility()
-        Print(db.shown and "painel visível." or "painel oculto.")
+        Print(db.shown and T("shown") or T("hidden"))
     elseif cmd == "lock" then
         db.locked = not db.locked
-        Print(db.locked and "painel travado." or "painel destravado — arraste para mover.")
+        Print(db.locked and T("locked") or T("unlocked"))
     elseif cmd == "reset" then
         db.point, db.relPoint, db.x, db.y = DEFAULTS.point, DEFAULTS.relPoint, DEFAULTS.x, DEFAULTS.y
         ApplyPosition()
-        Print("posição restaurada.")
-    elseif cmd == "version" then
+        Print(T("reset"))
+    elseif cmd == "lang" or cmd == "idioma" then
+        if VALID_LANGS[arg] then
+            db.lang = arg
+            Print(arg == "auto" and T("lang_auto") or T("lang_set"))
+        else
+            Print(T("lang_usage"))
+        end
+    elseif cmd == "version" or cmd == "versao" then
         local version, build, date, interface = GetBuildInfo()
         -- Clientes muito antigos não retornam o 4º valor; deduzimos pela versão.
         if not interface and type(version) == "string" then
             local major, minor = string.match(version, "^(%d+)%.(%d+)")
             if major then interface = string.format("%d%02d00", tonumber(major), tonumber(minor)) end
         end
-        Print(string.format("cliente %s (build %s, %s) — Interface: |cffffff00%s|r",
+        Print(string.format(T("version"),
             tostring(version), tostring(build), tostring(date), tostring(interface)))
-        Print("use esse número na linha '## Interface:' do arquivo .toc.")
+        Print(T("version_hint"))
     else
         ShowHelp()
     end

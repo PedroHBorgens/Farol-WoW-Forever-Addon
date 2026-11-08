@@ -1,48 +1,58 @@
 # WoW Forever Info
 
-Addon **gratuito e de código aberto** para WoW Forever: mostra um painel pequeno e arrastável com
-**FPS · latência · coordenadas · ouro**.
+[Português](README.pt-BR.md) | **English**
 
-## Instalação
+A **free and open-source** addon for WoW Forever: a small, draggable on-screen panel showing
+**FPS · latency · coordinates · gold**.
 
-1. Baixe este repositório (botão **Code → Download ZIP**).
-2. Copie a pasta `WoWForeverInfo` para `World of Warcraft/Interface/AddOns/`
-   (a pasta final deve ser `Interface/AddOns/WoWForeverInfo/Core.lua`).
-3. Na tela de personagens, clique em **AddOns** e ative **WoW Forever Info**.
-   Se aparecer "desatualizado", marque **Carregar AddOns desatualizados**.
+## Installation
 
-## Comandos
+1. Download this repository (**Code → Download ZIP**).
+2. Copy the `WoWForeverInfo` folder into `World of Warcraft/Interface/AddOns/`
+   (the result must be `Interface/AddOns/WoWForeverInfo/Core.lua`).
+3. On the character select screen, click **AddOns** and enable **WoW Forever Info**.
+   If it shows as "out of date", tick **Load out of date AddOns**.
 
-| Comando       | O que faz                                              |
-|---------------|--------------------------------------------------------|
-| `/wf`         | Mostra/oculta o painel                                 |
-| `/wf lock`    | Trava/destrava o painel (arraste com o botão esquerdo) |
-| `/wf reset`   | Volta o painel para a posição padrão                   |
-| `/wf version` | Mostra a versão do cliente e o número de **Interface** |
+## Commands
 
-## Descobrindo a versão do seu cliente
+| Command         | What it does                                          |
+|-----------------|-------------------------------------------------------|
+| `/wf`           | Show/hide the panel                                   |
+| `/wf lock`      | Lock/unlock the panel (drag with left mouse button)   |
+| `/wf reset`     | Move the panel back to its default position           |
+| `/wf version`   | Show the client version and **Interface** number      |
+| `/wf lang en`   | English interface                                     |
+| `/wf lang pt`   | Portuguese interface                                  |
+| `/wf lang auto` | Follow the client language (default)                  |
 
-Rode `/wf version` no jogo. O número de Interface que aparecer vai na primeira linha do `.toc`:
+## Language
 
-- `WoWForeverInfo.toc` — usado por clientes antigos (padrão **30300**, WotLK 3.3.5a)
+By default the addon follows your client language: **Portuguese** on `ptBR`/`ptPT` clients and
+**English** on all others. Switch any time with `/wf lang en` or `/wf lang pt`; your choice is saved.
+
+## Finding your client version
+
+Run `/wf version` in game. The Interface number it prints goes on the first line of the `.toc` file:
+
+- `WoWForeverInfo.toc` — used by older clients (default **30300**, WotLK 3.3.5a)
 - `WoWForeverInfo_Vanilla.toc` — Classic Era (11507)
 - `WoWForeverInfo_Mainline.toc` — Retail (110205)
 
-Clientes modernos escolhem o `.toc` com sufixo correspondente; clientes antigos leem só o primeiro.
+Modern clients pick the `.toc` with the matching suffix; older clients only read the first one.
 
-## Segurança
+## Security
 
-Segurança da informação é a primeira regra deste projeto:
+Information security is this project's first rule:
 
-- **Nada sai do seu computador.** O addon não usa `SendAddonMessage`, chat ou qualquer canal para enviar dados.
-- **Nenhum código externo é executado.** Sem `loadstring`/`RunScript`; comandos aceitam só palavras fixas.
-- **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
-- **Dados salvos são validados.** `WoWForeverInfoDB` guarda apenas a posição e o estado do painel, e é
-  verificado ao carregar — um arquivo corrompido ou adulterado volta para os valores padrão.
-- **Baixe só da fonte oficial** (este repositório). Addons são texto Lua: você pode ler todo o código em `Core.lua`.
+- **Nothing leaves your computer.** The addon never uses `SendAddonMessage`, chat or any other channel to send data.
+- **No external code is executed.** No `loadstring`/`RunScript`; commands only accept fixed words.
+- **No automation.** It only reads and displays information; it never plays for you (which would break server rules).
+- **Saved data is validated.** `WoWForeverInfoDB` only stores the panel's position, state and language, and is
+  checked on load — a corrupted or tampered file falls back to defaults.
+- **Only download from the official source** (this repository). Addons are plain Lua text: you can read all of it in `Core.lua`.
 
-Encontrou um problema de segurança? Abra uma issue sem incluir dados pessoais, senhas ou informações da sua conta.
+Found a security issue? Open an issue without including personal data, passwords or account details.
 
-## Licença
+## License
 
-MIT — use, modifique e distribua livremente. Veja `LICENSE`.
+MIT — free to use, modify and distribute. See `LICENSE`.

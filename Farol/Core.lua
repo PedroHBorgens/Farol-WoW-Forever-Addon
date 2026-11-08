@@ -62,6 +62,13 @@ local DEFAULTS = {
     lang = "auto", -- "auto" (segue o idioma do cliente), "pt" ou "en"
     serverTime = false, -- relógio mostra o horário do servidor em vez do local
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
+    -- Aparência
+    scale = 1,              -- escala da barra (0.5 a 2)
+    bgAlpha = 0.7,          -- opacidade do fundo (0 a 1)
+    border = true,          -- mostrar a borda
+    vertical = false,       -- um item por linha
+    hideCombat = false,     -- esconder em combate
+    hideInstance = false,   -- esconder em masmorras, raides, arenas e campos de batalha
 }
 
 local VALID_LANGS = { auto = true, pt = true, en = true }
@@ -327,6 +334,9 @@ local function SanitizeDB(saved)
     if not VALID_LANGS[clean.lang] then clean.lang = DEFAULTS.lang end
     local snooze = clean.snoozeMinutes
     if snooze ~= math.floor(snooze) or snooze < 1 or snooze > 60 then clean.snoozeMinutes = DEFAULTS.snoozeMinutes end
+    -- Aparência: números fora da faixa (ou NaN) voltam ao padrão.
+    if clean.scale ~= clean.scale or clean.scale < 0.5 or clean.scale > 2 then clean.scale = DEFAULTS.scale end
+    if clean.bgAlpha ~= clean.bgAlpha or clean.bgAlpha < 0 or clean.bgAlpha > 1 then clean.bgAlpha = DEFAULTS.bgAlpha end
 
     -- Limita deslocamentos a valores razoáveis.
     local limit = 5000
@@ -772,6 +782,10 @@ end
 
 local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 text:SetPoint("CENTER")
+-- Texto invisível usado só para medir a largura de cada linha no modo vertical.
+local measure = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+measure:Hide()
+local LINE_HEIGHT = 14
 text:SetText("...")
 
 local function SavePosition()
@@ -808,11 +822,36 @@ local function UpdateText()
     end
 
     if #parts == 0 then
-        text:SetText("|cff888888" .. T("none_shown") .. "|r")
-    else
-        text:SetText(table.concat(parts, "   "))
+        parts = { "|cff888888" .. T("none_shown") .. "|r" }
     end
-    frame:SetWidth(math.max(120, text:GetStringWidth() + 20))
+
+    if db.vertical then
+        -- Um item por linha: largura = linha mais larga; altura = número de linhas.
+        text:SetJustifyH("LEFT")
+        text:SetText(table.concat(parts, "\n"))
+        local widest = 0
+        for _, part in ipairs(parts) do
+            measure:SetText(part)
+            widest = math.max(widest, measure:GetStringWidth() or 0)
+        end
+        frame:SetWidth(math.max(80, widest + 20))
+        frame:SetHeight(#parts * LINE_HEIGHT + 14)
+    else
+        text:SetJustifyH("CENTER")
+        text:SetText(table.concat(parts, "   "))
+        frame:SetWidth(math.max(120, (text:GetStringWidth() or 0) + 20))
+        frame:SetHeight(26)
+    end
+end
+
+-- Escala, fundo e borda.
+local function ApplyAppearance()
+    frame:SetScale(db.scale)
+    if frame.SetBackdropColor then
+        frame:SetBackdropColor(0, 0, 0, db.bgAlpha)
+        frame:SetBackdropBorderColor(0.4, 0.4, 0.4, db.border and 1 or 0)
+    end
+    UpdateText()
 end
 
 ---------------------------------------------------------------------------
@@ -948,8 +987,22 @@ frame:SetScript("OnUpdate", function(self, elapsed)
     end
 end)
 
+ns.ApplyAppearance = function() ApplyAppearance() end
+
+-- Combate e instância: a barra some temporariamente se o jogador escolheu isso.
+local inCombat = false
+
+local function InHiddenInstance()
+    if not (db.hideInstance and IsInInstance) then return false end
+    local inside, kind = IsInInstance()
+    return inside and kind ~= "none" and true or false
+end
+
 local function ApplyVisibility()
-    if db.shown then frame:Show() else frame:Hide() end
+    local visible = db.shown
+        and not (db.hideCombat and inCombat)
+        and not InHiddenInstance()
+    if visible then frame:Show() else frame:Hide() end
 end
 
 ---------------------------------------------------------------------------
@@ -987,6 +1040,7 @@ local function SetLang(lang)
     if ns.Alarm then ns.Alarm.Refresh() end
     if ns.Loot then ns.Loot.Refresh() end
     if ns.Warnings then ns.Warnings.Refresh() end
+    if ns.Appearance then ns.Appearance.Refresh() end
 end
 
 local function SetItemVisible(key, value)
@@ -1095,6 +1149,8 @@ local function BuildControls(parent, top)
     y = y - 26
     set.warnings = CreateButton(parent, 150, function() ns.Warnings.ToggleWindow() end)
     set.warnings:SetPoint("TOPLEFT", 20, y)
+    set.appearance = CreateButton(parent, 150, function() ns.Appearance.ToggleWindow() end)
+    set.appearance:SetPoint("TOPLEFT", 176, y)
     y = y - 30
 
     controlSets[#controlSets + 1] = set
@@ -1126,6 +1182,7 @@ RefreshOptions = function()
         set.loot:SetText(T("opt_loot"))
         set.sessionReset:SetText(T("opt_session_reset"))
         set.warnings:SetText(T("opt_warnings"))
+        set.appearance:SetText(T("opt_appearance"))
     end
 end
 
@@ -1197,6 +1254,8 @@ local function RegisterSettingsPanel()
     end
 end
 
+ns.ApplyVisibility = function() ApplyVisibility() end
+
 -- Clique direito no painel abre o menu.
 frame:SetScript("OnMouseUp", function(_, button)
     if button == "RightButton" and db then ToggleOptions() end
@@ -1212,6 +1271,8 @@ frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 frame:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 frame:RegisterEvent("PLAYER_XP_UPDATE")
+frame:RegisterEvent("PLAYER_REGEN_DISABLED") -- entrou em combate
+frame:RegisterEvent("PLAYER_REGEN_ENABLED")  -- saiu do combate
 
 frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" then
@@ -1224,6 +1285,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         FarolDB = db
         FarolCharDB = ns.Loot.SanitizeHistory(FarolCharDB) -- histórico de saques deste personagem
         ApplyPosition()
+        ApplyAppearance()
         ApplyVisibility()
         pcall(RegisterSettingsPanel) -- se a API de configurações mudar, o addon continua funcionando
         self:UnregisterEvent("ADDON_LOADED")
@@ -1235,8 +1297,14 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         StartSession()
         ResetMapToCurrentZone()
         ScanDurability()
+        inCombat = InCombatLockdown and InCombatLockdown() or false
+        ApplyVisibility()
     elseif event == "ZONE_CHANGED_NEW_AREA" then
         ResetMapToCurrentZone()
+        ApplyVisibility()
+    elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
+        inCombat = (event == "PLAYER_REGEN_DISABLED")
+        ApplyVisibility()
     elseif event == "PLAYER_XP_UPDATE" then
         pcall(SampleXP)
     elseif event == "UPDATE_INVENTORY_DURABILITY" or event == "PLAYER_EQUIPMENT_CHANGED" then
@@ -1252,7 +1320,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_warn",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_warn", "help_appearance",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -1312,6 +1380,8 @@ SlashCmdList["FAROL"] = function(msg)
         end
     elseif cmd == "alarme" or cmd == "alarmes" or cmd == "alarm" or cmd == "alarms" then
         ns.Alarm.HandleCommand(rest)
+    elseif cmd == "aparencia" or cmd == "appearance" or cmd == "look" then
+        ns.Appearance.HandleCommand(rest)
     elseif cmd == "aviso" or cmd == "avisos" or cmd == "warn" or cmd == "warning" or cmd == "warnings" then
         ns.Warnings.HandleCommand(rest)
     elseif (cmd == "sessao" or cmd == "session") and (arg == "zerar" or arg == "reset") then

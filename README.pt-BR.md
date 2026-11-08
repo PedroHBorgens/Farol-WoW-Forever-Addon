@@ -29,6 +29,7 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 | `/farol saque limpar`| Apaga o histórico de saques deste personagem |
 | `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h e tempo |
 | `/farol aviso`      | Abre a janela de avisos (durabilidade e bolsas) |
+| `/farol aparencia`  | Abre a janela de aparência (escala, fundo, vertical, esconder em combate) |
 | `/farol alarme`     | Abre a janela de alarmes |
 | `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
 | `/farol soneca`     | Adia o alarme que está tocando (tempo configurado, padrão 5 min) |
@@ -85,6 +86,20 @@ Comandos no chat:
 
 Os alarmes só tocam com o jogo aberto. Um alarme não dispara no mesmo minuto em que foi criado, nem
 depois de um `/reload` dentro desse minuto (isso evita alarmes falsos).
+
+## Aparência
+
+Abra **Aparência...** no menu de opções (ou `/farol aparencia`):
+
+- **Escala** de 50% a 200% e **opacidade do fundo** de 0% a 100% (0% = só o texto flutuando na tela), com botões [-]/[+].
+- **Barra vertical**: um item por linha.
+- **Mostrar borda** liga/desliga.
+- **Esconder em combate** (volta quando a luta acaba) e **esconder em masmorras, raides, arenas e campos de batalha**.
+  Os alarmes e os avisos continuam funcionando com a barra escondida.
+- **Restaurar padrão** volta tudo ao normal.
+
+Comandos: `/farol aparencia escala 120`, `/farol aparencia fundo 40`, `/farol aparencia vertical`,
+`/farol aparencia borda`, `/farol aparencia combate`, `/farol aparencia instancia`, `/farol aparencia padrao`.
 
 ## Avisos de durabilidade e bolsas
 

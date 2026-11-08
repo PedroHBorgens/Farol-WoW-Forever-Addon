@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua" }
 
 local function noop() end
 
@@ -63,6 +63,11 @@ function Frame:LockHighlight() self._highlight = true end
 function Frame:UnlockHighlight() self._highlight = false end
 function Frame:HasFocus() return false end
 function Frame:SetTexture(texture) self._texture = texture end
+function Frame:SetScale(scale) self._scale = scale end
+function Frame:GetScale() return self._scale or 1 end
+function Frame:SetBackdropColor(r, g, b, a) self._bgAlpha = a end
+function Frame:SetBackdropBorderColor(r, g, b, a) self._borderAlpha = a end
+function Frame:SetJustifyH(justify) self._justify = justify end
 
 local function NewObject(env, kind, name)
     local object = { _scripts = {}, _events = {}, _kind = kind, _name = name, _shown = true, _env = env }
@@ -115,7 +120,11 @@ function Mock.new(opts)
     env.tinsert = table.insert
     env.wipe = function(t) for k in pairs(t) do t[k] = nil end return t end
     env.SlashCmdList = {}
-    env.InCombatLockdown = function() return false end
+    env.InCombatLockdown = function() return H.inCombat or false end
+    env.IsInInstance = function()
+        if H.instanceType then return true, H.instanceType end
+        return false, "none"
+    end
     env.GetLocale = function() return opts.locale or "ptBR" end
 
     -- Tooltip

@@ -17,6 +17,9 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - **Right-click** the bar (or `/farol menu`) to tick the items you want.
 - **Hover** the bar for a detailed tooltip: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
 
+### Appearance
+- Scale 50–200%, background opacity, border, **vertical layout**, **hide in combat** and **hide in instances**.
+
 ### Clock alarms
 - Up to **10 alarms**, using **local** or **server** time, with an optional name.
 - Plays a game sound and posts a message **only in your own chat**, every 30 seconds, until you click **Snooze** (1–60 min, configurable) or **Stop**.
@@ -52,6 +55,9 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 
 - **Clique direito** na barra (ou `/farol menu`) e marque os itens que quiser.
 - **Passe o mouse** na barra para ver um tooltip detalhado: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.
+
+### Aparência
+- Escala de 50 a 200%, opacidade do fundo, borda, **barra vertical**, **esconder em combate** e **esconder em instâncias**.
 
 ### Alarmes do relógio
 - Até **10 alarmes**, com hora **local** ou do **servidor** e um nome opcional.

@@ -90,6 +90,15 @@ local STRINGS = {
         tt_locked    = "Painel travado (/wfi lock).",
         tt_help      = "/wfi ajuda — lista de comandos",
         tt_slot      = "Espaço %d",
+        help_menu    = "  /wfi menu            - abrir o menu de opções (ou clique direito no painel)",
+        opt_items    = "Itens da barra",
+        opt_general  = "Geral",
+        opt_shown    = "Mostrar painel",
+        opt_locked   = "Travar posição",
+        opt_lang     = "Idioma",
+        opt_reset    = "Resetar posição",
+        opt_hint     = "Marque o que deseja ver na barra.",
+        tt_rightclick = "Clique direito: opções.",
     },
     en = {
         help_title   = "commands:",
@@ -136,6 +145,15 @@ local STRINGS = {
         tt_locked    = "Panel locked (/wfi lock).",
         tt_help      = "/wfi help — list of commands",
         tt_slot      = "Slot %d",
+        help_menu    = "  /wfi menu            - open the options menu (or right-click the panel)",
+        opt_items    = "Bar items",
+        opt_general  = "General",
+        opt_shown    = "Show panel",
+        opt_locked   = "Lock position",
+        opt_lang     = "Language",
+        opt_reset    = "Reset position",
+        opt_hint     = "Tick what you want to see on the bar.",
+        tt_rightclick = "Right-click: options.",
     },
 }
 
@@ -486,6 +504,7 @@ local function FillTooltip()
 
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(db.locked and T("tt_locked") or T("tt_drag"), 0.6, 0.6, 0.6)
+    GameTooltip:AddLine(T("tt_rightclick"), 0.6, 0.6, 0.6)
     GameTooltip:AddLine(T("tt_help"), 0.6, 0.6, 0.6)
 end
 
@@ -519,6 +538,221 @@ local function ApplyVisibility()
 end
 
 ---------------------------------------------------------------------------
+-- Ações (usadas pelos comandos e pelo menu de opções)
+---------------------------------------------------------------------------
+
+local RefreshOptions -- definida abaixo; sincroniza as caixinhas com as configurações
+
+local function SetShown(value)
+    db.shown = value
+    ApplyVisibility()
+    RefreshOptions()
+end
+
+local function SetLocked(value)
+    db.locked = value
+    RefreshOptions()
+end
+
+local function ResetPosition()
+    db.point, db.relPoint, db.x, db.y = DEFAULTS.point, DEFAULTS.relPoint, DEFAULTS.x, DEFAULTS.y
+    ApplyPosition()
+end
+
+local function SetLang(lang)
+    db.lang = lang
+    UpdateText()
+    RefreshOptions()
+end
+
+local function SetItemVisible(key, value)
+    db.items[key] = value
+    UpdateText()
+    RefreshOptions()
+end
+
+---------------------------------------------------------------------------
+-- Menu de opções (caixinhas para marcar)
+-- Os mesmos controles aparecem na janela própria (/wfi menu, clique direito)
+-- e na lista de AddOns das configurações do jogo.
+---------------------------------------------------------------------------
+
+local controlSets = {} -- cada conjunto de controles criado (janela e painel de configurações)
+local widgetCount = 0
+
+local function NextName(kind)
+    widgetCount = widgetCount + 1
+    return "WoWForeverInfo" .. kind .. widgetCount
+end
+
+local function IsChecked(button)
+    return button:GetChecked() and true or false -- 3.3.5a devolve 1/nil; clientes modernos, true/false
+end
+
+local function CreateHeader(parent, y)
+    local header = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    header:SetPoint("TOPLEFT", 16, y)
+    return header
+end
+
+local function CreateCheck(parent, y, onClick)
+    local check = CreateFrame("CheckButton", NextName("Check"), parent, "UICheckButtonTemplate")
+    check:SetSize(24, 24)
+    check:SetPoint("TOPLEFT", 20, y)
+    check.label = check:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    check.label:SetPoint("LEFT", check, "RIGHT", 4, 0)
+    check:SetScript("OnClick", function(self) onClick(IsChecked(self)) end)
+    return check
+end
+
+local function CreateButton(parent, width, onClick)
+    local button = CreateFrame("Button", NextName("Button"), parent, "UIPanelButtonTemplate")
+    button:SetSize(width, 22)
+    button:SetScript("OnClick", onClick)
+    return button
+end
+
+-- Cria todos os controles dentro de "parent", começando na altura "top".
+local function BuildControls(parent, top)
+    local set = { items = {}, langs = {} }
+    local y = top
+
+    set.hint = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    set.hint:SetPoint("TOPLEFT", 16, y)
+    y = y - 22
+
+    set.itemsHeader = CreateHeader(parent, y)
+    y = y - 20
+    for _, key in ipairs(ITEM_ORDER) do
+        set.items[key] = CreateCheck(parent, y, function(value) SetItemVisible(key, value) end)
+        y = y - 26
+    end
+
+    y = y - 10
+    set.generalHeader = CreateHeader(parent, y)
+    y = y - 20
+    set.shown = CreateCheck(parent, y, SetShown)
+    y = y - 26
+    set.locked = CreateCheck(parent, y, SetLocked)
+    y = y - 36
+
+    set.langHeader = CreateHeader(parent, y)
+    y = y - 22
+    local x = 20
+    for _, entry in ipairs({ { "auto", "Auto" }, { "pt", "Português" }, { "en", "English" } }) do
+        local lang, label = entry[1], entry[2]
+        local button = CreateButton(parent, 84, function() SetLang(lang) end)
+        button:SetPoint("TOPLEFT", x, y)
+        button:SetText(label)
+        set.langs[lang] = button
+        x = x + 88
+    end
+    y = y - 36
+
+    set.reset = CreateButton(parent, 160, function() ResetPosition() end)
+    set.reset:SetPoint("TOPLEFT", 20, y)
+    y = y - 30
+
+    controlSets[#controlSets + 1] = set
+    return set, y
+end
+
+RefreshOptions = function()
+    if not db then return end
+    for _, set in ipairs(controlSets) do
+        set.hint:SetText(T("opt_hint"))
+        set.itemsHeader:SetText(T("opt_items"))
+        set.generalHeader:SetText(T("opt_general"))
+        set.langHeader:SetText(T("opt_lang"))
+        for key, check in pairs(set.items) do
+            check.label:SetText((string.gsub(T("name_" .. key), "%s*%b()", "")))
+            check:SetChecked(db.items[key])
+        end
+        set.shown.label:SetText(T("opt_shown"))
+        set.shown:SetChecked(db.shown)
+        set.locked.label:SetText(T("opt_locked"))
+        set.locked:SetChecked(db.locked)
+        for lang, button in pairs(set.langs) do
+            if lang == db.lang then button:LockHighlight() else button:UnlockHighlight() end
+        end
+        set.reset:SetText(T("opt_reset"))
+    end
+end
+
+-- Janela própria, criada só na primeira vez que for aberta.
+local optionsWindow
+
+local function CreateOptionsWindow()
+    local window = CreateFrame("Frame", "WoWForeverInfoOptions", UIParent, backdropTemplate)
+    window:SetFrameStrata("DIALOG")
+    window:SetPoint("CENTER")
+    window:SetClampedToScreen(true)
+    window:SetMovable(true)
+    window:EnableMouse(true)
+    window:RegisterForDrag("LeftButton")
+    window:SetScript("OnDragStart", window.StartMoving)
+    window:SetScript("OnDragStop", window.StopMovingOrSizing)
+
+    if window.SetBackdrop then
+        window:SetBackdrop({
+            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+            tile = true, tileSize = 32, edgeSize = 32,
+            insets = { left = 11, right = 12, top = 12, bottom = 11 },
+        })
+    end
+
+    local title = window:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOP", 0, -18)
+    title:SetText("WoW Forever Info")
+
+    local close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
+    close:SetPoint("TOPRIGHT", -6, -6)
+
+    local _, bottom = BuildControls(window, -46)
+    window:SetSize(310, -bottom + 12)
+
+    window:SetScript("OnShow", RefreshOptions)
+    tinsert(UISpecialFrames, "WoWForeverInfoOptions") -- ESC fecha a janela
+    window:Hide()
+    return window
+end
+
+local function ToggleOptions()
+    optionsWindow = optionsWindow or CreateOptionsWindow()
+    if optionsWindow:IsShown() then
+        optionsWindow:Hide()
+    else
+        optionsWindow:Show()
+    end
+end
+
+-- Também aparece em Esc > Opções > AddOns (clientes modernos) ou Interface > AddOns (antigos).
+local function RegisterSettingsPanel()
+    local panel = CreateFrame("Frame")
+    panel.name = "WoW Forever Info"
+
+    local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 16, -16)
+    title:SetText("WoW Forever Info")
+
+    BuildControls(panel, -46)
+    panel:SetScript("OnShow", RefreshOptions)
+
+    if Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory then
+        local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name)
+        Settings.RegisterAddOnCategory(category)
+    elseif InterfaceOptions_AddCategory then
+        InterfaceOptions_AddCategory(panel)
+    end
+end
+
+-- Clique direito no painel abre o menu.
+frame:SetScript("OnMouseUp", function(_, button)
+    if button == "RightButton" and db then ToggleOptions() end
+end)
+
+---------------------------------------------------------------------------
 -- Eventos
 ---------------------------------------------------------------------------
 
@@ -535,6 +769,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         WoWForeverInfoDB = db
         ApplyPosition()
         ApplyVisibility()
+        pcall(RegisterSettingsPanel) -- se a API de configurações mudar, o addon continua funcionando
         self:UnregisterEvent("ADDON_LOADED")
         return
     end
@@ -557,7 +792,7 @@ end)
 
 local function ShowHelp()
     Print(T("help_title"))
-    for _, key in ipairs({ "help_toggle", "help_lock", "help_reset", "help_show",
+    for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
                            "help_hide", "help_items", "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -576,8 +811,7 @@ local function SetItem(alias, visible)
         Print(T("item_usage"))
         return
     end
-    db.items[key] = visible
-    UpdateText()
+    SetItemVisible(key, visible)
     Print(string.format(visible and T("item_on") or T("item_off"), T("name_" .. key)))
 end
 
@@ -590,15 +824,15 @@ SlashCmdList["WOWFOREVERINFO"] = function(msg)
     cmd, arg = string.lower(cmd or ""), string.lower(arg or "")
 
     if cmd == "" then
-        db.shown = not db.shown
-        ApplyVisibility()
+        SetShown(not db.shown)
         Print(db.shown and T("shown") or T("hidden"))
+    elseif cmd == "menu" or cmd == "config" or cmd == "opcoes" or cmd == "options" then
+        ToggleOptions()
     elseif cmd == "lock" or cmd == "travar" then
-        db.locked = not db.locked
+        SetLocked(not db.locked)
         Print(db.locked and T("locked") or T("unlocked"))
     elseif cmd == "reset" then
-        db.point, db.relPoint, db.x, db.y = DEFAULTS.point, DEFAULTS.relPoint, DEFAULTS.x, DEFAULTS.y
-        ApplyPosition()
+        ResetPosition()
         Print(T("reset"))
     elseif cmd == "show" or cmd == "mostrar" then
         SetItem(arg, true)
@@ -608,8 +842,7 @@ SlashCmdList["WOWFOREVERINFO"] = function(msg)
         ListItems()
     elseif cmd == "lang" or cmd == "idioma" then
         if VALID_LANGS[arg] then
-            db.lang = arg
-            UpdateText()
+            SetLang(arg)
             Print(arg == "auto" and T("lang_auto") or T("lang_set"))
         else
             Print(T("lang_usage"))

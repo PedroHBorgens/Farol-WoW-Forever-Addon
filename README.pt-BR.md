@@ -20,6 +20,7 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 | Comando           | O que faz                                              |
 |-------------------|--------------------------------------------------------|
 | `/wfi`            | Mostra/oculta o painel |
+| `/wfi menu`       | Abre o menu de opções (ou clique direito no painel) |
 | `/wfi lock`       | Trava/destrava o painel (arraste com o botão esquerdo) |
 | `/wfi reset`      | Volta o painel para a posição padrão |
 | `/wfi show <item>`| Mostra um item na barra |
@@ -30,6 +31,17 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 | `/wfi lang pt`    | Interface em português |
 | `/wfi lang en`    | Interface em inglês |
 | `/wfi lang auto`  | Segue o idioma do cliente (padrão) |
+
+## Menu de opções
+
+Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um destes jeitos:
+
+- **Clique direito** no painel
+- Digite `/wfi menu`
+- **Esc → Opções → AddOns → WoW Forever Info**
+
+No menu você escolhe os itens da barra, mostra/trava o painel, escolhe o idioma (Auto / Português /
+English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/wfi menu` para trazê-lo de volta.
 
 ## Itens da barra
 

@@ -20,6 +20,7 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 | Command           | What it does                                           |
 |-------------------|--------------------------------------------------------|
 | `/wfi`            | Show/hide the panel |
+| `/wfi menu`       | Open the options menu (or right-click the panel) |
 | `/wfi lock`       | Lock/unlock the panel (drag with left mouse button) |
 | `/wfi reset`      | Move the panel back to its default position |
 | `/wfi show <item>`| Show an item on the bar |
@@ -30,6 +31,17 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 | `/wfi lang en`    | English interface |
 | `/wfi lang pt`    | Portuguese interface |
 | `/wfi lang auto`  | Follow the client language (default) |
+
+## Options menu
+
+Tick or untick each item — no commands needed. Open it in any of these ways:
+
+- **Right-click** the panel
+- Type `/wfi menu`
+- **Esc → Options → AddOns → WoW Forever Info**
+
+The menu lets you choose bar items, show/lock the panel, pick the language (Auto / Português / English)
+and reset the position. Press **Esc** to close it. If you hide the panel, use `/wfi menu` to bring it back.
 
 ## Bar items
 

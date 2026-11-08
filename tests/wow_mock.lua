@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua" }
 
 local function noop() end
 
@@ -164,8 +164,17 @@ function Mock.new(opts)
     H.rosterRequests = 0
 
     -- Sons e itens
-    H.sounds = 0
-    env.PlaySound = function() H.sounds = H.sounds + 1 end
+    -- Sons: H.sounds conta o som do alarme (aviso de raide); H.warnSounds conta o dos avisos.
+    H.sounds, H.warnSounds = 0, 0
+    env.PlaySound = function(sound)
+        if sound == 8959 or sound == "RaidWarning" then
+            H.sounds = H.sounds + 1
+        else
+            H.warnSounds = H.warnSounds + 1
+        end
+    end
+    env.UIErrorsFrame = { AddMessage = function(_, text) H.screen = text end }
+    H.bagFree = { [0] = 2, 1, 1, 1, 1 } -- espaços livres por bolsa (total 6 de 80)
     env.LOOT_ITEM_SELF = "Você recebe saque: %s."
     env.LOOT_ITEM_SELF_MULTIPLE = "Você recebe saque: %sx%d."
     env.LOOT_ITEM_PUSHED_SELF = "Você recebe o item: %s."
@@ -183,7 +192,7 @@ function Mock.new(opts)
         env.GetPlayerMapPosition = function() return 0.453, 0.611 end
         env.SetMapToCurrentZone = noop
         env.GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end
-        env.GetContainerNumFreeSlots = function(bag) return bag == 0 and 2 or 1, 0 end
+        env.GetContainerNumFreeSlots = function(bag) return H.bagFree[bag] or 0, 0 end
         env.GetItemInfo = function(link)
             local id = tonumber(string.match(link, "Hitem:(%d+)"))
             return "item", link, H.itemQuality[id]
@@ -199,7 +208,7 @@ function Mock.new(opts)
         env.GetBuildInfo = function() return "1.60.1", "70862", "Nov 6 2026", 16001 end
         env.GetNetStats = function() return 1, 2, 40, 60 end
         env.BackdropTemplateMixin = {}
-        env.SOUNDKIT = { RAID_WARNING = 8959 }
+        env.SOUNDKIT = { RAID_WARNING = 8959, READY_CHECK = 8960 }
         env.C_Map = {
             GetBestMapForUnit = function() return 1 end,
             GetPlayerMapPosition = function()
@@ -208,7 +217,7 @@ function Mock.new(opts)
         }
         env.C_Container = {
             GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end,
-            GetContainerNumFreeSlots = function(bag) return bag == 0 and 2 or 1, 0 end,
+            GetContainerNumFreeSlots = function(bag) return H.bagFree[bag] or 0, 0 end,
         }
         env.C_Item = {
             GetItemQualityByID = function(link)

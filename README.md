@@ -28,6 +28,7 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 | `/farol loot`       | Open the recent loot window |
 | `/farol loot clear` | Clear this character's loot history |
 | `/farol session reset`| Restart session gold, gold/h, XP/h and time |
+| `/farol warn`       | Open the warnings window (durability and bags) |
 | `/farol alarm`      | Open the alarms window |
 | `/farol alarm add 07:30`| Create an alarm (see below) |
 | `/farol snooze`     | Snooze the ringing alarm (configured time, default 5 min) |
@@ -84,6 +85,18 @@ Chat commands:
 
 Alarms only ring while the game is open. An alarm is not triggered in the same minute it is created or
 after a `/reload` inside that minute (this avoids false alarms).
+
+## Durability and bag warnings
+
+Farol warns you **once** when your most damaged item drops below **20%** durability, and when only **2 or
+fewer** bag slots are free (with a separate "Bags full!" warning). The warning appears **in the middle of
+your screen and in your own chat** (nothing is sent to anyone), with the game's ready-check sound.
+
+- It warns again only after things improve (you repaired / freed slots), and at most once every 5 minutes,
+  so it won't keep repeating while you loot or sell.
+- Open **Warnings...** in the options menu (or `/farol warn`) to turn each warning on/off, change the limits
+  (durability 5–50%, bags 0–10 slots), turn the sound off or test it.
+- Commands: `/farol warn durab 25`, `/farol warn bags 4`, `/farol warn durab off`, `/farol warn sound off`.
 
 ## Recent loot window
 
@@ -167,7 +180,7 @@ Information security is this project's first rule:
 - **Nothing leaves your computer.** The addon never uses `SendAddonMessage`, chat or any other channel to send data.
 - **No external code is executed.** No `loadstring`/`RunScript`; commands only accept fixed words.
 - **No automation.** It only reads and displays information; it never plays for you (which would break server rules).
-- **Saved data is validated.** `FarolDB` only stores the panel's position, state, language, visible items and your alarms (time, clock type, on/off, a cleaned-up name and the snooze time). `FarolCharDB` (per character) stores only validated item links from your loot history, and is
+- **Saved data is validated.** `FarolDB` only stores the panel's position, state, language, visible items your alarms (time, clock type, on/off, a cleaned-up name and the snooze time) and warning settings. `FarolCharDB` (per character) stores only validated item links from your loot history, and is
   checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official source** (this repository). Addons are plain Lua text: you can read all of it in `Core.lua`.
 

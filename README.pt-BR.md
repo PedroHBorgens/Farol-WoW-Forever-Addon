@@ -28,6 +28,7 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 | `/farol saque`      | Abre a janela de últimos saques |
 | `/farol saque limpar`| Apaga o histórico de saques deste personagem |
 | `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h e tempo |
+| `/farol aviso`      | Abre a janela de avisos (durabilidade e bolsas) |
 | `/farol alarme`     | Abre a janela de alarmes |
 | `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
 | `/farol soneca`     | Adia o alarme que está tocando (tempo configurado, padrão 5 min) |
@@ -84,6 +85,18 @@ Comandos no chat:
 
 Os alarmes só tocam com o jogo aberto. Um alarme não dispara no mesmo minuto em que foi criado, nem
 depois de um `/reload` dentro desse minuto (isso evita alarmes falsos).
+
+## Avisos de durabilidade e bolsas
+
+O Farol avisa **uma vez** quando a sua peça mais gasta fica abaixo de **20%** de durabilidade, e quando sobram
+**2 ou menos** espaços nas bolsas (com um aviso separado de "Bolsas cheias!"). O aviso aparece **no centro da
+tela e no seu chat** (nada é enviado a ninguém), com o som de checagem de prontidão do jogo.
+
+- Só avisa de novo depois que a situação melhora (você reparou / liberou espaço), e no máximo uma vez a cada
+  5 minutos, para não ficar repetindo enquanto você saqueia ou vende.
+- Abra **Avisos...** no menu de opções (ou `/farol aviso`) para ligar/desligar cada aviso, mudar os limites
+  (durabilidade 5–50%, bolsas 0–10 espaços), desligar o som ou testar.
+- Comandos: `/farol aviso durab 25`, `/farol aviso bolsas 4`, `/farol aviso durab off`, `/farol aviso som off`.
 
 ## Janela de últimos saques
 
@@ -169,7 +182,7 @@ Segurança da informação é a primeira regra deste projeto:
 - **Nada sai do seu computador.** O addon não usa `SendAddonMessage`, chat ou qualquer canal para enviar dados.
 - **Nenhum código externo é executado.** Sem `loadstring`/`RunScript`; comandos aceitam só palavras fixas.
 - **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
-- **Dados salvos são validados.** `FarolDB` guarda apenas a posição, o estado do painel, o idioma, os itens visíveis e seus alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o tempo da soneca). `FarolCharDB` (por personagem) guarda só links de item validados do seu histórico de saques, e é
+- **Dados salvos são validados.** `FarolDB` guarda apenas a posição, o estado do painel, o idioma, os itens visíveis seus alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o tempo da soneca) e os ajustes dos avisos. `FarolCharDB` (por personagem) guarda só links de item validados do seu histórico de saques, e é
   verificado ao carregar — um arquivo corrompido ou adulterado volta para os valores padrão.
 - **Baixe só da fonte oficial** (este repositório). Addons são texto Lua: você pode ler todo o código em `Core.lua`.
 

@@ -434,6 +434,7 @@ end
 
 -- Durabilidade: guardada em cache e recalculada só quando o equipamento muda.
 local durability = { lowest = nil, damaged = {} }
+ns.GetLowestDurability = function() return durability.lowest end -- usado por Warnings.lua
 
 local function ScanDurabilityRaw()
     local lowest, damaged = nil, {}
@@ -516,6 +517,7 @@ local function GetBagSpace()
     if total == 0 then return nil end
     return free, total
 end
+ns.GetBagSpace = GetBagSpace -- usado por Warnings.lua
 
 local function GetSessionMoney()
     if not session.startMoney then return nil end
@@ -984,6 +986,7 @@ local function SetLang(lang)
     RefreshOptions()
     if ns.Alarm then ns.Alarm.Refresh() end
     if ns.Loot then ns.Loot.Refresh() end
+    if ns.Warnings then ns.Warnings.Refresh() end
 end
 
 local function SetItemVisible(key, value)
@@ -1089,6 +1092,9 @@ local function BuildControls(parent, top)
         Print(T("session_reset"))
     end)
     set.sessionReset:SetPoint("TOPLEFT", 176, y)
+    y = y - 26
+    set.warnings = CreateButton(parent, 150, function() ns.Warnings.ToggleWindow() end)
+    set.warnings:SetPoint("TOPLEFT", 20, y)
     y = y - 30
 
     controlSets[#controlSets + 1] = set
@@ -1119,6 +1125,7 @@ RefreshOptions = function()
         set.alarms:SetText(T("opt_alarms"))
         set.loot:SetText(T("opt_loot"))
         set.sessionReset:SetText(T("opt_session_reset"))
+        set.warnings:SetText(T("opt_warnings"))
     end
 end
 
@@ -1213,6 +1220,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         db = SanitizeDB(saved)
         db.alarms = ns.Alarm.Sanitize(type(saved) == "table" and saved.alarms or nil)
         db.loot = ns.Loot.SanitizeSettings(type(saved) == "table" and saved.loot or nil)
+        db.warnings = ns.Warnings.Sanitize(type(saved) == "table" and saved.warnings or nil)
         FarolDB = db
         FarolCharDB = ns.Loot.SanitizeHistory(FarolCharDB) -- histórico de saques deste personagem
         ApplyPosition()
@@ -1244,7 +1252,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_warn",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -1304,6 +1312,8 @@ SlashCmdList["FAROL"] = function(msg)
         end
     elseif cmd == "alarme" or cmd == "alarmes" or cmd == "alarm" or cmd == "alarms" then
         ns.Alarm.HandleCommand(rest)
+    elseif cmd == "aviso" or cmd == "avisos" or cmd == "warn" or cmd == "warning" or cmd == "warnings" then
+        ns.Warnings.HandleCommand(rest)
     elseif (cmd == "sessao" or cmd == "session") and (arg == "zerar" or arg == "reset") then
         ResetSession()
         UpdateText()

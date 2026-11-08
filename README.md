@@ -16,24 +16,24 @@ A **free and open-source** addon for WoW Forever: a small, draggable on-screen p
 
 ## Commands
 
-| Command         | What it does                                          |
-|-----------------|-------------------------------------------------------|
-| `/wf`           | Show/hide the panel                                   |
-| `/wf lock`      | Lock/unlock the panel (drag with left mouse button)   |
-| `/wf reset`     | Move the panel back to its default position           |
-| `/wf version`   | Show the client version and **Interface** number      |
-| `/wf lang en`   | English interface                                     |
-| `/wf lang pt`   | Portuguese interface                                  |
-| `/wf lang auto` | Follow the client language (default)                  |
+| Command           | What it does                                           |
+|-------------------|--------------------------------------------------------|
+| `/wfi`            | Show/hide the panel |
+| `/wfi lock`       | Lock/unlock the panel (drag with left mouse button) |
+| `/wfi reset`      | Move the panel back to its default position |
+| `/wfi version`    | Show the client version and **Interface** number |
+| `/wfi lang en`    | English interface |
+| `/wfi lang pt`    | Portuguese interface |
+| `/wfi lang auto`  | Follow the client language (default) |
 
 ## Language
 
 By default the addon follows your client language: **Portuguese** on `ptBR`/`ptPT` clients and
-**English** on all others. Switch any time with `/wf lang en` or `/wf lang pt`; your choice is saved.
+**English** on all others. Switch any time with `/wfi lang en` or `/wfi lang pt`; your choice is saved.
 
 ## Finding your client version
 
-Run `/wf version` in game. The Interface number it prints goes on the first line of the `.toc` file:
+Run `/wfi version` in game. The Interface number it prints goes on the first line of the `.toc` file:
 
 - `WoWForeverInfo_Mainline.toc` — **WoW Forever** (16001) and Retail. **This is the file WoW Forever reads.**
 - `WoWForeverInfo_Camelot.toc` — WoW Forever-specific fallback (16001)

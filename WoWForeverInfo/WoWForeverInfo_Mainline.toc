@@ -3,7 +3,7 @@
 ## Notes: On-screen FPS, latency, coordinates and gold panel. Free and open source.
 ## Notes-ptBR: Painel com FPS, latência, coordenadas e ouro. Gratuito e de código aberto.
 ## Author: PedroHBorgens
-## Version: 1.1.2
+## Version: 1.2.0
 ## SavedVariables: WoWForeverInfoDB
 
 Core.lua

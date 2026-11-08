@@ -33,11 +33,11 @@ local VALID_LANGS = { auto = true, pt = true, en = true }
 local STRINGS = {
     pt = {
         help_title   = "comandos:",
-        help_toggle  = "  /wf                - mostrar/ocultar o painel",
-        help_lock    = "  /wf lock           - travar/destravar o painel (arraste com o botão esquerdo)",
-        help_reset   = "  /wf reset          - voltar o painel à posição padrão",
-        help_version = "  /wf version        - mostrar a versão do cliente e o número de Interface",
-        help_lang    = "  /wf lang pt|en|auto - escolher o idioma (auto = idioma do cliente)",
+        help_toggle  = "  /wfi               - mostrar/ocultar o painel",
+        help_lock    = "  /wfi lock          - travar/destravar o painel (arraste com o botão esquerdo)",
+        help_reset   = "  /wfi reset         - voltar o painel à posição padrão",
+        help_version = "  /wfi version       - mostrar a versão do cliente e o número de Interface",
+        help_lang    = "  /wfi lang pt|en|auto - escolher o idioma (auto = idioma do cliente)",
         shown        = "painel visível.",
         hidden       = "painel oculto.",
         locked       = "painel travado.",
@@ -47,15 +47,15 @@ local STRINGS = {
         version_hint = "use esse número na linha '## Interface:' do arquivo .toc.",
         lang_set     = "idioma: Português.",
         lang_auto    = "idioma: automático (segue o cliente).",
-        lang_usage   = "uso: /wf lang pt | en | auto",
+        lang_usage   = "uso: /wfi lang pt | en | auto",
     },
     en = {
         help_title   = "commands:",
-        help_toggle  = "  /wf                - show/hide the panel",
-        help_lock    = "  /wf lock           - lock/unlock the panel (drag with left mouse button)",
-        help_reset   = "  /wf reset          - move the panel back to its default position",
-        help_version = "  /wf version        - show the client version and Interface number",
-        help_lang    = "  /wf lang pt|en|auto - choose the language (auto = client language)",
+        help_toggle  = "  /wfi               - show/hide the panel",
+        help_lock    = "  /wfi lock          - lock/unlock the panel (drag with left mouse button)",
+        help_reset   = "  /wfi reset         - move the panel back to its default position",
+        help_version = "  /wfi version       - show the client version and Interface number",
+        help_lang    = "  /wfi lang pt|en|auto - choose the language (auto = client language)",
         shown        = "panel shown.",
         hidden       = "panel hidden.",
         locked       = "panel locked.",
@@ -65,7 +65,7 @@ local STRINGS = {
         version_hint = "use this number on the '## Interface:' line of the .toc file.",
         lang_set     = "language: English.",
         lang_auto    = "language: automatic (follows the client).",
-        lang_usage   = "usage: /wf lang pt | en | auto",
+        lang_usage   = "usage: /wfi lang pt | en | auto",
     },
 }
 
@@ -307,7 +307,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
 end)
 
 ---------------------------------------------------------------------------
--- Comandos: /wf
+-- Comandos: /wfi
 ---------------------------------------------------------------------------
 
 local function ShowHelp()
@@ -319,7 +319,7 @@ local function ShowHelp()
     Print(T("help_lang"))
 end
 
-SLASH_WOWFOREVERINFO1 = "/wf"
+SLASH_WOWFOREVERINFO1 = "/wfi"
 SLASH_WOWFOREVERINFO2 = "/wfinfo"
 SlashCmdList["WOWFOREVERINFO"] = function(msg)
     if not db then return end

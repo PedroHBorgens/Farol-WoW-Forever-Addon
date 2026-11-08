@@ -16,25 +16,25 @@ Addon **gratuito e de código aberto** para WoW Forever: mostra um painel pequen
 
 ## Comandos
 
-| Comando       | O que faz                                              |
-|---------------|--------------------------------------------------------|
-| `/wf`         | Mostra/oculta o painel                                 |
-| `/wf lock`    | Trava/destrava o painel (arraste com o botão esquerdo) |
-| `/wf reset`   | Volta o painel para a posição padrão                   |
-| `/wf version` | Mostra a versão do cliente e o número de **Interface** |
-| `/wf lang pt` | Interface em português                                 |
-| `/wf lang en` | Interface em inglês                                    |
-| `/wf lang auto` | Segue o idioma do cliente (padrão)                   |
+| Comando           | O que faz                                              |
+|-------------------|--------------------------------------------------------|
+| `/wfi`            | Mostra/oculta o painel |
+| `/wfi lock`       | Trava/destrava o painel (arraste com o botão esquerdo) |
+| `/wfi reset`      | Volta o painel para a posição padrão |
+| `/wfi version`    | Mostra a versão do cliente e o número de **Interface** |
+| `/wfi lang pt`    | Interface em português |
+| `/wfi lang en`    | Interface em inglês |
+| `/wfi lang auto`  | Segue o idioma do cliente (padrão) |
 
 ## Idioma
 
 Por padrão o addon usa o idioma do seu cliente: **português** em clientes `ptBR`/`ptPT`
-e **inglês** em todos os outros. Você pode trocar a qualquer momento com `/wf lang pt` ou `/wf lang en`;
+e **inglês** em todos os outros. Você pode trocar a qualquer momento com `/wfi lang pt` ou `/wfi lang en`;
 a escolha fica salva.
 
 ## Descobrindo a versão do seu cliente
 
-Rode `/wf version` no jogo. O número de Interface que aparecer vai na primeira linha do `.toc`:
+Rode `/wfi version` no jogo. O número de Interface que aparecer vai na primeira linha do `.toc`:
 
 - `WoWForeverInfo_Mainline.toc` — **WoW Forever** (16001) e Retail. **É este o arquivo que o WoW Forever lê.**
 - `WoWForeverInfo_Camelot.toc` — reserva específica do WoW Forever (16001)

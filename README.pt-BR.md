@@ -8,8 +8,9 @@ Addon **gratuito e de código aberto** para WoW Forever: mostra um painel pequen
 ## Instalação
 
 1. Baixe este repositório (botão **Code → Download ZIP**).
-2. Copie a pasta `WoWForeverInfo` para `World of Warcraft/Interface/AddOns/`
-   (a pasta final deve ser `Interface/AddOns/WoWForeverInfo/Core.lua`).
+2. Copie a pasta `WoWForeverInfo` para `World of Warcraft/_forever_/Interface/AddOns/`
+   (a pasta final deve ser `_forever_/Interface/AddOns/WoWForeverInfo/Core.lua`).
+   Outros clientes usam a própria pasta, como `_retail_` ou `_classic_era_`.
 3. Na tela de personagens, clique em **AddOns** e ative **WoW Forever Info**.
    Se aparecer "desatualizado", marque **Carregar AddOns desatualizados**.
 
@@ -35,11 +36,20 @@ a escolha fica salva.
 
 Rode `/wf version` no jogo. O número de Interface que aparecer vai na primeira linha do `.toc`:
 
-- `WoWForeverInfo.toc` — padrão — **16001** (WoW Forever, cliente 1.60.1)
-- `WoWForeverInfo_Vanilla.toc` — WoW Forever e Classic Era (16001, 11507)
-- `WoWForeverInfo_Mainline.toc` — Retail (110205)
+- `WoWForeverInfo_Mainline.toc` — **WoW Forever** (16001) e Retail. **É este o arquivo que o WoW Forever lê.**
+- `WoWForeverInfo_Camelot.toc` — reserva específica do WoW Forever (16001)
+- `WoWForeverInfo_Vanilla.toc` — Classic Era (11507)
+- `WoWForeverInfo.toc` — padrão para qualquer outro cliente
 
-O cliente escolhe o `.toc` com o sufixo correspondente e, se não houver, usa o padrão. Se um patch futuro do WoW Forever marcar o addon como incompatível, atualize o número a partir da versão da tela de login (ex.: 1.60.1 → 16001).
+O cliente escolhe o `.toc` com o sufixo correspondente e, se não houver, usa o padrão. Se um patch futuro do
+WoW Forever marcar o addon como incompatível, atualize o número no `_Mainline.toc` a partir da versão da tela
+de login (ex.: 1.60.1 → 16001), ou confira no jogo com `/run print(select(4, GetBuildInfo()))`.
+
+### Observações sobre o WoW Forever
+
+O WoW Forever roda no cliente moderno (Midnight) e herda as restrições de combate chamadas "secret values".
+Este addon só lê FPS, latência, coordenadas e ouro; se o jogo esconder algum valor, o painel mostra `--`
+em vez de dar erro.
 
 ## Segurança
 

@@ -154,7 +154,7 @@ local function GetLatency()
     return math.max(home, world)
 end
 
-local function GetCoords()
+local function GetCoordsRaw()
     if C_Map and C_Map.GetBestMapForUnit and C_Map.GetPlayerMapPosition then
         -- Classic / Retail
         local mapID = C_Map.GetBestMapForUnit("player")
@@ -171,6 +171,18 @@ local function GetCoords()
         if x and y and (x > 0 or y > 0) then return x, y end
     end
     return nil -- instâncias e alguns mapas não informam posição
+end
+
+-- WoW Forever / Midnight podem marcar valores como "secretos" (secret values) em certas situações;
+-- nesse caso não podemos fazer contas com eles. Qualquer bloqueio vira "sem coordenadas", nunca um erro.
+local function IsSecret(v)
+    return issecretvalue ~= nil and issecretvalue(v) or false
+end
+
+local function GetCoords()
+    local ok, x, y = pcall(GetCoordsRaw)
+    if not ok or IsSecret(x) or IsSecret(y) then return nil end
+    return x, y
 end
 
 -- No 3.3.5a as coordenadas dependem do mapa "ativo"; ao trocar de zona,

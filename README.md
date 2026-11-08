@@ -8,8 +8,9 @@ A **free and open-source** addon for WoW Forever: a small, draggable on-screen p
 ## Installation
 
 1. Download this repository (**Code → Download ZIP**).
-2. Copy the `WoWForeverInfo` folder into `World of Warcraft/Interface/AddOns/`
-   (the result must be `Interface/AddOns/WoWForeverInfo/Core.lua`).
+2. Copy the `WoWForeverInfo` folder into `World of Warcraft/_forever_/Interface/AddOns/`
+   (the result must be `_forever_/Interface/AddOns/WoWForeverInfo/Core.lua`).
+   Other clients use their own folder, e.g. `_retail_` or `_classic_era_`.
 3. On the character select screen, click **AddOns** and enable **WoW Forever Info**.
    If it shows as "out of date", tick **Load out of date AddOns**.
 
@@ -34,11 +35,20 @@ By default the addon follows your client language: **Portuguese** on `ptBR`/`ptP
 
 Run `/wf version` in game. The Interface number it prints goes on the first line of the `.toc` file:
 
-- `WoWForeverInfo.toc` — default — **16001** (WoW Forever, client 1.60.1)
-- `WoWForeverInfo_Vanilla.toc` — WoW Forever and Classic Era (16001, 11507)
-- `WoWForeverInfo_Mainline.toc` — Retail (110205)
+- `WoWForeverInfo_Mainline.toc` — **WoW Forever** (16001) and Retail. **This is the file WoW Forever reads.**
+- `WoWForeverInfo_Camelot.toc` — WoW Forever-specific fallback (16001)
+- `WoWForeverInfo_Vanilla.toc` — Classic Era (11507)
+- `WoWForeverInfo.toc` — default for any other client
 
-Clients pick the `.toc` with the matching suffix and fall back to the default one. If a future WoW Forever patch marks the addon as incompatible, update the number from the login screen version (e.g. 1.60.1 → 16001).
+Clients pick the `.toc` with the matching suffix and fall back to the default one. If a future WoW Forever
+patch marks the addon as incompatible, update the number in `_Mainline.toc` from the login screen version
+(e.g. 1.60.1 → 16001), or check it in game with `/run print(select(4, GetBuildInfo()))`.
+
+### WoW Forever notes
+
+WoW Forever runs on the modern (Midnight) client and inherits its "secret values" combat restrictions.
+This addon only reads FPS, latency, coordinates and gold; if the game hides a value, the panel shows `--`
+instead of raising an error.
 
 ## Security
 

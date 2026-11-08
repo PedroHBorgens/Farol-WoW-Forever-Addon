@@ -29,6 +29,7 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 | `/farol loot clear` | Clear this character's loot history |
 | `/farol session reset`| Restart session gold, gold/h, XP/h and time |
 | `/farol warn`       | Open the warnings window (durability and bags) |
+| `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, vertical, hide in combat) |
 | `/farol alarm`      | Open the alarms window |
 | `/farol alarm add 07:30`| Create an alarm (see below) |
@@ -93,7 +94,7 @@ Open **Appearance...** in the options menu (or `/farol appearance`):
 
 - **Scale** 50%–200% and **background opacity** 0%–100% (0% = only the text floats on screen), with [-]/[+] buttons.
 - **Vertical bar**: one item per line.
-- **Show border** on/off.
+- **Show border** on/off, **show icons on the bar** (one per item) and **show the warning history button**.
 - **Hide in combat** (comes back when the fight ends) and **hide in dungeons, raids, arenas and battlegrounds**.
   Alarms and warnings keep working while the bar is hidden.
 - **Restore defaults** puts everything back.
@@ -132,6 +133,15 @@ Every warning opens a small window with two choices:
 - **Remind in 30 min**: if the problem is still there in 30 minutes, the warning shows up again.
 
 Several warnings at once are shown one at a time. Chat: `/farol warn silence`, `/farol warn remind`.
+
+### Warning history
+
+The **last 10 warnings** (with date and time) are kept per character. Open them by:
+
+- clicking the **note button next to the bar**: a red number shows how many new warnings you haven't seen;
+- a **key binding** of your choice: Esc → Options → Keybindings → AddOns → Farol (uses the game's official
+  `Bindings.xml`; it only opens the window);
+- `/farol history`, or **History...** in the Warnings window.
 
 ## Recent loot window
 

@@ -69,6 +69,8 @@ local DEFAULTS = {
     vertical = false,       -- um item por linha
     hideCombat = false,     -- esconder em combate
     hideInstance = false,   -- esconder em masmorras, raides, arenas e campos de batalha
+    icons = true,           -- ícone antes de cada informação da barra
+    warnButton = true,      -- botão do histórico de avisos ao lado da barra
 }
 
 local VALID_LANGS = { auto = true, pt = true, en = true }
@@ -811,13 +813,36 @@ frame:SetScript("OnDragStop", function(self)
     if db then SavePosition() end
 end)
 
+-- Ícone de cada item (texturas do próprio jogo). Recorte 5..59 remove a borda do ícone.
+local ITEM_ICONS = {
+    fps = "INV_Misc_Spyglass_03",       ms = "Spell_Nature_Lightning",
+    mem = "INV_Misc_Gear_01",           coords = "INV_Misc_Map_01",
+    zone = "Spell_Nature_FarSight",     speed = "Ability_Rogue_Sprint",
+    durab = "Trade_BlackSmithing",      bags = "INV_Misc_Bag_08",
+    gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
+    goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
+    xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
+    playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
+    guild = "INV_Shirt_GuildTabard_01",
+}
+ns.ITEM_ICONS = ITEM_ICONS
+
+local function IconTag(key)
+    local icon = ITEM_ICONS[key]
+    if not icon then return "" end
+    return "|TInterface\\Icons\\" .. icon .. ":14:14:0:0:64:64:5:59:5:59|t "
+end
+
 local function UpdateText()
     local parts = {}
     for _, key in ipairs(ITEM_ORDER) do
         if db.items[key] then
             local ok, value = pcall(ITEM_TEXT[key])
             if not ok then value = "--" end
-            if value then parts[#parts + 1] = value end
+            if value then
+                if db.icons then value = IconTag(key) .. value end
+                parts[#parts + 1] = value
+            end
         end
     end
 
@@ -846,6 +871,7 @@ end
 
 -- Escala, fundo e borda.
 local function ApplyAppearance()
+    if ns.Warnings and ns.Warnings.UpdateButton then ns.Warnings.UpdateButton() end
     frame:SetScale(db.scale)
     if frame.SetBackdropColor then
         frame:SetBackdropColor(0, 0, 0, db.bgAlpha)
@@ -988,6 +1014,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 ns.ApplyAppearance = function() ApplyAppearance() end
+ns.frame = frame
 
 -- Combate e instância: a barra some temporariamente se o jogador escolheu isso.
 local inCombat = false
@@ -1283,7 +1310,9 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         db.loot = ns.Loot.SanitizeSettings(type(saved) == "table" and saved.loot or nil)
         db.warnings = ns.Warnings.Sanitize(type(saved) == "table" and saved.warnings or nil)
         FarolDB = db
-        FarolCharDB = ns.Loot.SanitizeHistory(FarolCharDB) -- histórico de saques deste personagem
+        local savedChar = FarolCharDB
+        FarolCharDB = ns.Loot.SanitizeHistory(savedChar) -- histórico de saques deste personagem
+        FarolCharDB.warnHistory = ns.Warnings.SanitizeHistory(type(savedChar) == "table" and savedChar.warnHistory or nil)
         ApplyPosition()
         ApplyAppearance()
         ApplyVisibility()
@@ -1320,7 +1349,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_warn", "help_appearance",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_warn", "help_history", "help_appearance",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -1382,6 +1411,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Alarm.HandleCommand(rest)
     elseif cmd == "aparencia" or cmd == "appearance" or cmd == "look" then
         ns.Appearance.HandleCommand(rest)
+    elseif cmd == "historico" or cmd == "history" then
+        ns.Warnings.ToggleHistory()
     elseif cmd == "aviso" or cmd == "avisos" or cmd == "warn" or cmd == "warning" or cmd == "warnings" then
         ns.Warnings.HandleCommand(rest)
     elseif (cmd == "sessao" or cmd == "session") and (arg == "zerar" or arg == "reset") then

@@ -27,6 +27,8 @@ local STRINGS = {
         app_border    = "Mostrar borda",
         app_combat    = "Esconder em combate",
         app_instance  = "Esconder em masmorras, raides, arenas e campos de batalha",
+        app_icons     = "Mostrar ícones na barra",
+        app_warnbutton = "Mostrar botão do histórico de avisos",
         app_reset     = "Restaurar padrão",
         app_set_scale = "escala: %d%%.",
         app_set_bg    = "fundo: %d%% de opacidade.",
@@ -35,7 +37,7 @@ local STRINGS = {
         app_restored  = "aparência restaurada ao padrão.",
         app_bad_scale = "escala inválida: use de 50 a 200 (%).",
         app_bad_bg    = "fundo inválido: use de 0 a 100 (%).",
-        app_usage     = "uso: /farol aparencia escala N || fundo N || vertical || borda || combate || instancia || padrao",
+        app_usage     = "uso: /farol aparencia escala N || fundo N || vertical || borda || icones || botao || combate || instancia || padrao",
         opt_appearance = "Aparência...",
         help_appearance = "  /farol aparencia     - abrir a janela de aparência (escala, fundo, vertical, esconder em combate)",
     },
@@ -47,6 +49,8 @@ local STRINGS = {
         app_border    = "Show border",
         app_combat    = "Hide in combat",
         app_instance  = "Hide in dungeons, raids, arenas and battlegrounds",
+        app_icons     = "Show icons on the bar",
+        app_warnbutton = "Show the warning history button",
         app_reset     = "Restore defaults",
         app_set_scale = "scale: %d%%.",
         app_set_bg    = "background: %d%% opacity.",
@@ -55,7 +59,7 @@ local STRINGS = {
         app_restored  = "appearance restored to defaults.",
         app_bad_scale = "invalid scale: use 50 to 200 (%).",
         app_bad_bg    = "invalid background: use 0 to 100 (%).",
-        app_usage     = "usage: /farol appearance scale N || bg N || vertical || border || combat || instance || default",
+        app_usage     = "usage: /farol appearance scale N || bg N || vertical || border || icons || button || combat || instance || default",
         opt_appearance = "Appearance...",
         help_appearance = "  /farol appearance   - open the appearance window (scale, background, vertical, hide in combat)",
     },
@@ -76,6 +80,8 @@ local TOGGLES = {
     border = "app_border",
     hideCombat = "app_combat",
     hideInstance = "app_instance",
+    icons = "app_icons",
+    warnButton = "app_warnbutton",
 }
 
 ---------------------------------------------------------------------------
@@ -136,6 +142,7 @@ local function RestoreDefaults()
     local db = DB()
     db.scale, db.bgAlpha, db.border = 1, 0.7, true
     db.vertical, db.hideCombat, db.hideInstance = false, false, false
+    db.icons, db.warnButton = true, true
     Apply()
     Print(T("app_restored"))
 end
@@ -168,7 +175,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolAppearance", UIParent, ns.backdropTemplate)
-    frame:SetSize(470, 272)
+    frame:SetSize(470, 324)
     frame:SetPoint("CENTER", 0, 40)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -195,7 +202,7 @@ local function CreateWindow()
 
     frame.checks = {}
     local y = -110
-    for _, key in ipairs({ "vertical", "border", "hideCombat", "hideInstance" }) do
+    for _, key in ipairs({ "icons", "vertical", "border", "warnButton", "hideCombat", "hideInstance" }) do
         local check = CreateFrame("CheckButton", "FarolApp_" .. key, frame, "UICheckButtonTemplate")
         check:SetSize(24, 24)
         check:SetPoint("TOPLEFT", 20, y)
@@ -252,6 +259,8 @@ local WORDS = {
     borda = "border", border = "border",
     combate = "hideCombat", combat = "hideCombat",
     instancia = "hideInstance", instance = "hideInstance", masmorra = "hideInstance",
+    icones = "icons", icons = "icons",
+    botao = "warnButton", button = "warnButton",
     padrao = "reset", default = "reset", reset = "reset",
 }
 

@@ -1,0 +1,7 @@
+<Bindings>
+	<!-- Atalho de teclado oficial do WoW: Esc > Opções > Teclas de atalho > AddOns > Farol.
+	     Só abre a janela de histórico de avisos; não executa nenhuma ação de jogo. -->
+	<Binding name="FAROL_WARN_HISTORY" header="FAROL" category="ADDONS">
+		Farol_ToggleWarnHistory()
+	</Binding>
+</Bindings>

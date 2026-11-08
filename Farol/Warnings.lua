@@ -12,12 +12,16 @@
   * Cada aviso abre uma janelinha: "Silenciar" (só volta se a situação mudar) ou
     "Lembrar em 30 min" (avisa de novo se o problema continuar).
   * Mensagem no centro da tela e no SEU chat (nada é enviado a ninguém) + som opcional.
+  * Histórico dos 10 últimos avisos (salvo por personagem): botão ao lado da barra com contador
+    de avisos novos, atalho de teclado (Esc > Teclas de atalho > AddOns > Farol) e /farol historico.
 ]]
 
 local _, ns = ...
 
 local COOLDOWN = 5 * 60
 local REMIND_SECONDS = 30 * 60 -- "Lembrar em 30 min"
+local HISTORY_MAX = 10
+local HISTORY_ICON = "Interface\\Icons\\INV_Misc_Note_01"
 local DURAB_MIN, DURAB_MAX = 5, 50
 local BAGS_MIN, BAGS_MAX = 0, 10
 local DEFAULTS = { durab = true, durabPct = 20, bags = true, bagSlots = 2, sound = true, talents = true, ranks = true }
@@ -60,6 +64,15 @@ local STRINGS = {
         warn_reminded   = "ok: aviso de novo às %s se o problema continuar.",
         warn_chat_hint  = " — /farol aviso silenciar ou /farol aviso lembrar",
         warn_none       = "nenhum aviso aberto.",
+        hist_title      = "Últimos avisos",
+        hist_empty      = "Nenhum aviso ainda.",
+        hist_clear      = "Limpar",
+        hist_cleared    = "histórico de avisos apagado.",
+        hist_button_tip = "Últimos avisos",
+        hist_button_new = "%d novo(s) — clique para ver",
+        hist_button_none = "Clique para ver",
+        opt_history     = "Histórico...",
+        help_history    = "  /farol historico     - ver os 10 últimos avisos (também pelo botão ao lado da barra ou por atalho de teclado)",
         warn_opt_test   = "Testar aviso",
         warn_hint       = "Avisa uma vez; avisa de novo depois que melhorar (mín. 5 min).",
         warn_set_durab  = "aviso de durabilidade: abaixo de %d%%.",
@@ -103,6 +116,15 @@ local STRINGS = {
         warn_reminded   = "ok: I'll warn you again at %s if it's still a problem.",
         warn_chat_hint  = " — /farol warn silence or /farol warn remind",
         warn_none       = "no open warning.",
+        hist_title      = "Recent warnings",
+        hist_empty      = "No warnings yet.",
+        hist_clear      = "Clear",
+        hist_cleared    = "warning history cleared.",
+        hist_button_tip = "Recent warnings",
+        hist_button_new = "%d new — click to view",
+        hist_button_none = "Click to view",
+        opt_history     = "History...",
+        help_history    = "  /farol history      - view the last 10 warnings (also via the button next to the bar or a key binding)",
         warn_opt_test   = "Test warning",
         warn_hint       = "Warns once; warns again after it improves (min. 5 min).",
         warn_set_durab  = "durability warning: below %d%%.",
@@ -228,12 +250,88 @@ local function ShowNext()
     popup:Show()
 end
 
+---------------------------------------------------------------------------
+-- Histórico dos últimos avisos (FarolCharDB.warnHistory, por personagem)
+---------------------------------------------------------------------------
+
+local unread = 0          -- avisos novos desde a última vez que o histórico foi aberto
+local historyButton       -- botão ao lado da barra (criado sob demanda)
+local historyWindow
+local RefreshHistory      -- definida abaixo
+
+local function History()
+    if type(FarolCharDB) ~= "table" then return {} end
+    FarolCharDB.warnHistory = FarolCharDB.warnHistory or {}
+    return FarolCharDB.warnHistory
+end
+
+-- Valida o histórico salvo: só texto simples (sem códigos "|"), com no máximo 200 caracteres.
+function Warnings.SanitizeHistory(saved)
+    local clean = {}
+    if type(saved) ~= "table" then return clean end
+    for _, entry in ipairs(saved) do
+        if type(entry) == "table" and type(entry.text) == "string" and type(entry.t) == "number" then
+            local text = string.gsub(entry.text, "[|%c]", "")
+            clean[#clean + 1] = { t = entry.t, text = string.sub(text, 1, 200) }
+        end
+    end
+    while #clean > HISTORY_MAX do table.remove(clean, 1) end
+    return clean
+end
+
+local function UpdateButton()
+    local db = ns.GetDB()
+    if not db or not ns.frame then return end
+    if not db.warnButton then
+        if historyButton then historyButton:Hide() end
+        return
+    end
+    if not historyButton then
+        historyButton = CreateFrame("Button", "FarolWarnHistoryButton", ns.frame)
+        historyButton:SetSize(18, 18)
+        historyButton:SetPoint("LEFT", ns.frame, "RIGHT", 2, 0)
+        historyButton.icon = historyButton:CreateTexture(nil, "ARTWORK")
+        historyButton.icon:SetAllPoints()
+        historyButton.icon:SetTexture(HISTORY_ICON)
+        historyButton.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        historyButton.badge = historyButton:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        historyButton.badge:SetPoint("BOTTOMRIGHT", 4, -2)
+        historyButton.badge:SetTextColor(1, 0.2, 0.2)
+        historyButton:RegisterForClicks("LeftButtonUp")
+        historyButton:SetScript("OnClick", function() Warnings.ToggleHistory() end)
+        historyButton:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(T("hist_button_tip"))
+            GameTooltip:AddLine(unread > 0 and string.format(T("hist_button_new"), unread) or T("hist_button_none"),
+                0.8, 0.8, 0.8)
+            GameTooltip:Show()
+        end)
+        historyButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    end
+    historyButton.badge:SetText(unread > 0 and tostring(unread) or "")
+    historyButton:Show()
+end
+Warnings.UpdateButton = UpdateButton
+
+local function Record(text)
+    local history = History()
+    history[#history + 1] = { t = time(), text = string.gsub(text, "[|%c]", "") }
+    while #history > HISTORY_MAX do table.remove(history, 1) end
+    if historyWindow and historyWindow:IsShown() then
+        RefreshHistory()
+    else
+        unread = unread + 1
+    end
+    UpdateButton()
+end
+
 local function Announce(text, key)
     -- Só no SEU cliente: centro da tela + sua janela de chat. Nada é enviado.
     if UIErrorsFrame and UIErrorsFrame.AddMessage then
         pcall(UIErrorsFrame.AddMessage, UIErrorsFrame, text, 1, 0.6, 0)
     end
     Print("|cffff9900" .. text .. "|r" .. T("warn_chat_hint"))
+    if key ~= "test" then Record(text) end
     if Settings().sound then pcall(PlayWarningSound) end
     -- Um aviso de cada tipo na fila: um aviso novo do mesmo tipo atualiza o texto.
     for _, entry in ipairs(queue) do
@@ -621,6 +719,10 @@ local function CreateWindow()
     frame.test = CreateFrame("Button", "FarolWarnTest", frame, "UIPanelButtonTemplate")
     frame.test:SetSize(130, 22)
     frame.test:SetPoint("BOTTOMRIGHT", -24, 18)
+    frame.history = CreateFrame("Button", "FarolWarnOpenHistory", frame, "UIPanelButtonTemplate")
+    frame.history:SetSize(130, 22)
+    frame.history:SetPoint("RIGHT", frame.test, "LEFT", -8, 0)
+    frame.history:SetScript("OnClick", function() Warnings.ToggleHistory() end)
     frame.test:SetScript("OnClick", function()
         Announce(string.format(T("warn_durab"), Settings().durabPct - 1), "test")
     end)
@@ -649,6 +751,7 @@ RefreshWindow = function()
     window.sound:SetChecked(settings.sound)
     window.hint:SetText(T("warn_hint"))
     window.test:SetText(T("warn_opt_test"))
+    window.history:SetText(T("opt_history"))
     if not window.durabBox:HasFocus() then window.durabBox:SetText(tostring(settings.durabPct)) end
     if not window.bagsBox:HasFocus() then window.bagsBox:SetText(tostring(settings.bagSlots)) end
 end
@@ -658,7 +761,92 @@ function Warnings.ToggleWindow()
     if window:IsShown() then window:Hide() else window:Show() end
 end
 
+local function CreateHistoryWindow()
+    local frame = CreateFrame("Frame", "FarolWarnHistory", UIParent, ns.backdropTemplate)
+    frame:SetSize(520, 92 + HISTORY_MAX * 20)
+    frame:SetPoint("CENTER", 0, 20)
+    frame:SetFrameStrata("DIALOG")
+    frame:SetClampedToScreen(true)
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetScript("OnDragStart", frame.StartMoving)
+    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+    if frame.SetBackdrop then
+        frame:SetBackdrop({
+            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+            tile = true, tileSize = 32, edgeSize = 32,
+            insets = { left = 11, right = 12, top = 12, bottom = 11 },
+        })
+    end
+    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    frame.title:SetPoint("TOP", 0, -18)
+    local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    close:SetPoint("TOPRIGHT", -6, -6)
+    frame.empty = frame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    frame.empty:SetPoint("TOPLEFT", 24, -52)
+    frame.rows = {}
+    for i = 1, HISTORY_MAX do
+        local row = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        row:SetPoint("TOPLEFT", 22, -48 - (i - 1) * 20)
+        row:SetWidth(476)
+        row:SetJustifyH("LEFT")
+        if row.SetWordWrap then row:SetWordWrap(false) end
+        frame.rows[i] = row
+    end
+    frame.clear = CreateFrame("Button", "FarolWarnHistoryClear", frame, "UIPanelButtonTemplate")
+    frame.clear:SetSize(100, 22)
+    frame.clear:SetPoint("BOTTOMRIGHT", -24, 16)
+    frame.clear:SetScript("OnClick", function()
+        local history = History()
+        for i = #history, 1, -1 do history[i] = nil end
+        Print(T("hist_cleared"))
+        RefreshHistory()
+    end)
+    frame:SetScript("OnShow", function()
+        unread = 0
+        UpdateButton()
+        RefreshHistory()
+    end)
+    tinsert(UISpecialFrames, "FarolWarnHistory") -- ESC fecha
+    frame:Hide()
+    return frame
+end
+
+RefreshHistory = function()
+    if not historyWindow or not historyWindow:IsShown() then return end
+    historyWindow.title:SetText(T("hist_title"))
+    historyWindow.clear:SetText(T("hist_clear"))
+    local history = History()
+    historyWindow.empty:SetText(T("hist_empty"))
+    if #history == 0 then historyWindow.empty:Show() else historyWindow.empty:Hide() end
+    for i, row in ipairs(historyWindow.rows) do
+        local entry = history[#history - i + 1] -- mais novo primeiro
+        if entry then
+            row:SetText("|cffaaaaaa" .. date("%d/%m %H:%M", entry.t) .. "|r  " .. entry.text)
+            row:Show()
+        else
+            row:Hide()
+        end
+    end
+end
+
+function Warnings.ToggleHistory()
+    historyWindow = historyWindow or CreateHistoryWindow()
+    if historyWindow:IsShown() then historyWindow:Hide() else historyWindow:Show() end
+end
+
+-- Usada pelo atalho de teclado definido em Bindings.xml.
+function Farol_ToggleWarnHistory()
+    if ns.GetDB() then Warnings.ToggleHistory() end
+end
+BINDING_HEADER_FAROL = "Farol"
+BINDING_NAME_FAROL_WARN_HISTORY = "Últimos avisos / Recent warnings"
+
 function Warnings.Refresh()
+    RefreshHistory()
+    UpdateButton()
     RefreshWindow()
 end
 
@@ -700,6 +888,8 @@ function Warnings.HandleCommand(rest)
         Warnings.ToggleWindow()
     elseif word == "status" or word == "diagnostico" then
         PrintStatus()
+    elseif word == "historico" or word == "history" then
+        Warnings.ToggleHistory()
     elseif word == "silenciar" or word == "silence" then
         Warnings.Respond(false)
     elseif word == "lembrar" or word == "remind" then

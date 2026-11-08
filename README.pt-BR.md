@@ -29,6 +29,7 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 | `/farol saque limpar`| Apaga o histórico de saques deste personagem |
 | `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h e tempo |
 | `/farol aviso`      | Abre a janela de avisos (durabilidade e bolsas) |
+| `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, vertical, esconder em combate) |
 | `/farol alarme`     | Abre a janela de alarmes |
 | `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
@@ -93,7 +94,7 @@ Abra **Aparência...** no menu de opções (ou `/farol aparencia`):
 
 - **Escala** de 50% a 200% e **opacidade do fundo** de 0% a 100% (0% = só o texto flutuando na tela), com botões [-]/[+].
 - **Barra vertical**: um item por linha.
-- **Mostrar borda** liga/desliga.
+- **Mostrar borda**, **mostrar ícones na barra** (um por item) e **mostrar o botão do histórico de avisos**.
 - **Esconder em combate** (volta quando a luta acaba) e **esconder em masmorras, raides, arenas e campos de batalha**.
   Os alarmes e os avisos continuam funcionando com a barra escondida.
 - **Restaurar padrão** volta tudo ao normal.
@@ -132,6 +133,15 @@ Cada aviso abre uma janelinha com duas opções:
 - **Lembrar em 30 min**: se o problema continuar daqui a 30 minutos, o aviso aparece de novo.
 
 Vários avisos ao mesmo tempo aparecem um de cada vez. No chat: `/farol aviso silenciar`, `/farol aviso lembrar`.
+
+### Histórico de avisos
+
+Os **10 últimos avisos** (com data e hora) ficam guardados por personagem. Para abrir:
+
+- clique no **botão de bilhete ao lado da barra**: um número vermelho mostra quantos avisos novos você ainda não viu;
+- um **atalho de teclado** à sua escolha: Esc → Opções → Teclas de atalho → AddOns → Farol (usa o `Bindings.xml`
+  oficial do jogo; só abre a janela);
+- `/farol historico`, ou **Histórico...** na janela de Avisos.
 
 ## Janela de últimos saques
 

@@ -54,6 +54,7 @@ local SUITES = {
     "test_warnings",
     "test_appearance",
     "test_reminders",
+    "test_history",
 }
 
 local passed, failed = 0, 0

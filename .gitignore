@@ -8,3 +8,6 @@ Thumbs.db
 !.env.example
 *.pem
 *.key
+
+# Páginas HTML geradas para as imagens do CurseForge
+assets/curseforge/*.html

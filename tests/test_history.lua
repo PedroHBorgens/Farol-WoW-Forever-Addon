@@ -17,7 +17,7 @@ end
 return {
     { "every bar item gets its own icon; the option turns them off", function(T, Mock)
         local H = Mock.new():login()
-        local raw = H.env.FarolFrame._fontStrings[1]._text
+        local raw = H:barRaw()
         T.has(raw, "INV_Misc_Spyglass_03", "fps icon"); T.has(raw, "Trade_BlackSmithing", "durability icon")
         T.has(raw, "INV_Misc_Coin_01", "gold icon")
         for key, icon in pairs(H.ns.ITEM_ICONS) do
@@ -27,7 +27,7 @@ return {
         for _ in pairs(H.ns.ITEM_ICONS) do count = count + 1 end
         T.eq(count, 17, "one icon per item")
         H:slash("aparencia icones")
-        T.hasnt(H.env.FarolFrame._fontStrings[1]._text, "|T", "icons off")
+        T.hasnt(H:barRaw(), "|T", "icons off")
         T.has(H:bar(), "60 fps", "values still shown")
     end },
 

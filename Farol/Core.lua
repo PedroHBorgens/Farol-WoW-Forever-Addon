@@ -66,7 +66,7 @@ local DEFAULTS = {
     scale = 1,              -- escala da barra (0.5 a 2)
     bgAlpha = 0.7,          -- opacidade do fundo (0 a 1)
     border = true,          -- mostrar a borda
-    vertical = false,       -- um item por linha
+    barWidth = 0,           -- largura máxima escolhida pelo jogador (0 = tudo em uma linha; 1 = uma coluna)
     hideCombat = false,     -- esconder em combate
     hideInstance = false,   -- esconder em masmorras, raides, arenas e campos de batalha
     icons = true,           -- ícone antes de cada informação da barra
@@ -352,6 +352,13 @@ local function SanitizeDB(saved)
     -- Aparência: números fora da faixa (ou NaN) voltam ao padrão.
     if clean.scale ~= clean.scale or clean.scale < 0.5 or clean.scale > 2 then clean.scale = DEFAULTS.scale end
     if clean.bgAlpha ~= clean.bgAlpha or clean.bgAlpha < 0 or clean.bgAlpha > 1 then clean.bgAlpha = DEFAULTS.bgAlpha end
+    -- Largura da barra: 0 (uma linha), 1 (uma coluna) ou de 2 a 4000 pixels.
+    if clean.barWidth ~= clean.barWidth or clean.barWidth < 0 or clean.barWidth > 4000 then
+        clean.barWidth = DEFAULTS.barWidth
+    end
+    clean.barWidth = math.floor(clean.barWidth)
+    -- Quem usava a antiga "barra vertical" continua vendo uma coluna.
+    if saved.vertical == true and saved.barWidth == nil then clean.barWidth = 1 end
     if clean.fontSize ~= math.floor(clean.fontSize) or clean.fontSize < 8 or clean.fontSize > 24 then
         clean.fontSize = DEFAULTS.fontSize
     end
@@ -801,19 +808,40 @@ if frame.SetBackdrop then
     frame:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
 end
 
-local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-text:SetPoint("CENTER")
--- Texto invisível usado só para medir a largura de cada linha no modo vertical.
+-- Cada informação é uma "célula" (um texto próprio), posicionada numa grade de colunas
+-- alinhadas à esquerda. O número de colunas depende da largura que o jogador escolher.
+local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall") -- 1ª célula
+text:SetJustifyH("LEFT")
+text.farolCell = 1
+-- Texto invisível usado só para medir a largura de cada informação e a altura de uma linha.
 local measure = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 measure:Hide()
 -- Fonte original da barra: só o tamanho muda (a fonte e o contorno continuam os do jogo).
 local FONT_PATH, _, FONT_FLAGS = text:GetFont()
-
--- Altura de uma linha: o maior entre o texto e o ícone, com uma folga.
-local function LineHeight()
-    return math.max(db.fontSize, db.icons and db.iconSize or 0) + 3
-end
 text:SetText("...")
+
+local cells = { text }
+local function Cell(index)
+    local cell = cells[index]
+    if not cell then
+        cell = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        cell:SetJustifyH("LEFT")
+        cell.farolCell = index
+        if FONT_PATH and db then cell:SetFont(FONT_PATH, db.fontSize, FONT_FLAGS) end
+        cells[index] = cell
+    end
+    return cell
+end
+
+local PAD_X, PAD_Y, GAP_X = 10, 4, 14 -- margens e espaço entre colunas (pixels)
+
+-- Altura de uma linha: a altura real do texto (medida pelo jogo) ou do ícone, o que for maior.
+local function LineHeight()
+    measure:SetText("Ag")
+    local textHeight = measure:GetStringHeight()
+    if type(textHeight) ~= "number" or textHeight <= 0 then textHeight = db.fontSize end
+    return math.max(textHeight, db.icons and db.iconSize or 0) + 3
+end
 
 local function SavePosition()
     local point, _, relPoint, x, y = frame:GetPoint()
@@ -860,6 +888,9 @@ local function IconTag(key)
     return "|TInterface\\Icons\\" .. icon .. ":" .. size .. ":" .. size .. ":0:0:64:64:5:59:5:59|t "
 end
 
+local isSizing = false   -- o jogador está arrastando a alça de largura
+local layoutRows = 1     -- quantas linhas a barra tem agora
+
 local function UpdateText()
     local parts = {}
     for _, key in ipairs(db.order or ITEM_ORDER) do -- ordem escolhida pelo jogador
@@ -877,30 +908,58 @@ local function UpdateText()
         parts = { "|cff888888" .. T("none_shown") .. "|r" }
     end
 
-    if db.vertical then
-        -- Um item por linha: largura = linha mais larga; altura = número de linhas.
-        text:SetJustifyH("LEFT")
-        text:SetText(table.concat(parts, "\n"))
-        local widest = 0
-        for _, part in ipairs(parts) do
-            measure:SetText(part)
-            widest = math.max(widest, measure:GetStringWidth() or 0)
-        end
-        frame:SetWidth(math.max(80, widest + 20))
-        -- Altura real medida pelo jogo; a estimativa por linha fica só como reserva
-        -- (o jogo desenha as linhas mais baixas que a estimativa, e a moldura sobrava).
-        local measured = text:GetStringHeight()
-        if type(measured) == "number" and measured > 0 then
-            frame:SetHeight(math.ceil(measured) + 16)
-        else
-            frame:SetHeight(#parts * LineHeight() + 14)
-        end
-    else
-        text:SetJustifyH("CENTER")
-        text:SetText(table.concat(parts, "   "))
-        frame:SetWidth(math.max(120, (text:GetStringWidth() or 0) + 20))
-        frame:SetHeight(math.max(26, LineHeight() + 9)) -- 26 no tamanho padrão
+    -- Largura de cada informação.
+    local widths = {}
+    for i, part in ipairs(parts) do
+        measure:SetText(part)
+        widths[i] = measure:GetStringWidth() or 0
     end
+
+    -- Quantas colunas cabem: começa com tudo numa linha e reduz até caber na largura escolhida.
+    -- Cada coluna tem a largura da maior informação dela (colunas alinhadas, como uma tabela).
+    local n = #parts
+    local available
+    if isSizing then
+        available = frame:GetWidth()            -- enquanto o jogador arrasta a alça
+    elseif db.barWidth > 0 then
+        available = db.barWidth                 -- largura escolhida (1 = uma coluna)
+    end
+    local cols, colWidths, total
+    for c = n, 1, -1 do
+        local w = {}
+        for i = 1, n do
+            local col = (i - 1) % c + 1
+            w[col] = math.max(w[col] or 0, widths[i])
+        end
+        local sum = PAD_X * 2 + GAP_X * (c - 1)
+        for col = 1, c do sum = sum + w[col] end
+        if not available or sum <= available or c == 1 then
+            cols, colWidths, total = c, w, sum
+            break
+        end
+    end
+
+    -- Posiciona cada célula na grade, alinhada à esquerda.
+    local lineHeight = LineHeight()
+    local colX, x = {}, PAD_X
+    for col = 1, cols do
+        colX[col] = x
+        x = x + colWidths[col] + GAP_X
+    end
+    for i = 1, n do
+        local cell = Cell(i)
+        local row, col = math.floor((i - 1) / cols), (i - 1) % cols + 1
+        cell:ClearAllPoints()
+        cell:SetPoint("TOPLEFT", frame, "TOPLEFT", colX[col], -PAD_Y - row * lineHeight - 2)
+        cell:SetText(parts[i])
+        cell:Show()
+    end
+    for i = n + 1, #cells do cells[i]:Hide() end
+
+    layoutRows = math.ceil(n / cols)
+    if not isSizing then frame:SetWidth(math.max(60, total)) end -- a barra encolhe até o conteúdo
+    frame:SetHeight(math.max(26, PAD_Y * 2 + layoutRows * lineHeight))
+    if ns.LayoutQuickButtons then ns.LayoutQuickButtons() end
 end
 
 -- Escala, fundo e borda.
@@ -909,7 +968,7 @@ local function ApplyAppearance()
     if ns.Loot and ns.Loot.UpdateButton then ns.Loot.UpdateButton() end
     frame:SetScale(db.scale)
     if FONT_PATH then
-        text:SetFont(FONT_PATH, db.fontSize, FONT_FLAGS)
+        for _, cell in ipairs(cells) do cell:SetFont(FONT_PATH, db.fontSize, FONT_FLAGS) end
         measure:SetFont(FONT_PATH, db.fontSize, FONT_FLAGS)
     end
     if frame.SetBackdropColor then
@@ -1053,6 +1112,51 @@ frame:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 ns.ApplyAppearance = function() ApplyAppearance() end
+
+-- Alça no canto inferior direito: arrastar muda a LARGURA; a altura se ajusta sozinha.
+-- Fica escondida com a barra travada, para não mudar o formato sem querer.
+frame:SetResizable(true)
+if frame.SetResizeBounds then
+    frame:SetResizeBounds(60, 20, 4000, 2000)
+else
+    if frame.SetMinResize then frame:SetMinResize(60, 20) end
+    if frame.SetMaxResize then frame:SetMaxResize(4000, 2000) end
+end
+local grip = CreateFrame("Button", "FarolBarResize", frame)
+grip:SetSize(12, 12)
+grip:SetPoint("BOTTOMRIGHT", -1, 1)
+grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+grip:SetScript("OnMouseDown", function()
+    if db and not db.locked then
+        isSizing = true
+        frame:StartSizing("RIGHT")
+    end
+end)
+grip:SetScript("OnMouseUp", function()
+    if not isSizing then return end
+    frame:StopMovingOrSizing()
+    isSizing = false
+    db.barWidth = math.max(2, math.floor(frame:GetWidth() + 0.5))
+    SavePosition()
+    UpdateText()
+    if ns.Appearance then ns.Appearance.Refresh() end
+end)
+frame:SetScript("OnSizeChanged", function()
+    if isSizing then UpdateText() end -- reorganiza ao vivo enquanto arrasta
+end)
+
+local function UpdateGrip()
+    if db.locked then grip:Hide() else grip:Show() end
+end
+ns.UpdateGrip = UpdateGrip
+
+-- Atalhos de formato (usados pela janela Aparência e pelos comandos).
+function ns.SetBarWidth(width)
+    db.barWidth = width
+    UpdateText()
+end
 ns.UpdateText = function() UpdateText() end
 
 -- Botões rápidos ao lado da barra (histórico de avisos, saques...), na ordem em que foram criados.
@@ -1063,8 +1167,8 @@ function ns.LayoutQuickButtons()
     for _, button in ipairs(ns.quickButtons) do
         if button:IsShown() then
             button:ClearAllPoints()
-            if anchor == frame and db.vertical then
-                button:SetPoint("TOPLEFT", frame, "TOPRIGHT", 2, -4) -- barra vertical: no canto de cima
+            if anchor == frame and layoutRows > 1 then
+                button:SetPoint("TOPLEFT", frame, "TOPRIGHT", 2, -4) -- várias linhas: no canto de cima
             else
                 button:SetPoint("LEFT", anchor, "RIGHT", 2, 0)
             end
@@ -1105,6 +1209,7 @@ end
 
 local function SetLocked(value)
     db.locked = value
+    UpdateGrip()
     RefreshOptions()
 end
 
@@ -1381,6 +1486,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         FarolCharDB = ns.Loot.SanitizeHistory(savedChar) -- histórico de saques deste personagem
         FarolCharDB.warnHistory = ns.Warnings.SanitizeHistory(type(savedChar) == "table" and savedChar.warnHistory or nil)
         ApplyPosition()
+        UpdateGrip()
         ApplyAppearance()
         ApplyVisibility()
         pcall(RegisterSettingsPanel) -- se a API de configurações mudar, o addon continua funcionando

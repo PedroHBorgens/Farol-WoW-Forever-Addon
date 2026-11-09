@@ -30,7 +30,7 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 | `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h e tempo |
 | `/farol aviso`      | Abre a janela de avisos (durabilidade e bolsas) |
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
-| `/farol aparencia`  | Abre a janela de aparência (escala, fundo, vertical, esconder em combate) |
+| `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
 | `/farol alarme`     | Abre a janela de alarmes |
 | `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
@@ -96,13 +96,16 @@ Abra **Aparência...** no menu de opções (ou `/farol aparencia`):
 - **Escala** de 50% a 200% e **opacidade do fundo** de 0% a 100% (0% = só o texto flutuando na tela), com botões [-]/[+].
 - **Tamanho do texto** de 8 a 24 e **tamanho dos ícones** de 10 a 32, separados (a escala aumenta tudo junto). A barra
   e os botões ao lado se ajustam sozinhos.
-- **Barra vertical**: um item por linha.
+- **Formato livre**: arraste a **alça no canto inferior direito da barra** (com a barra destravada) para escolher a
+  largura. As informações se reorganizam em **colunas alinhadas à esquerda** que caibam: larga = uma linha, estreita =
+  uma informação por linha, e no meio = 2, 3, 4… colunas. A altura se ajusta sozinha. Atalhos: **Uma linha** / **Uma
+  coluna**. Travar a barra (`/farol lock`) esconde a alça.
 - **Mostrar borda**, **mostrar ícones na barra** (um por item) e **mostrar o botão do histórico de avisos** e **mostrar o botão de saques**.
 - **Esconder em combate** (volta quando a luta acaba) e **esconder em masmorras, raides, arenas e campos de batalha**.
   Os alarmes e os avisos continuam funcionando com a barra escondida.
 - **Restaurar padrão** volta tudo ao normal.
 
-Comandos: `/farol aparencia escala 120`, `/farol aparencia fundo 40`, `/farol aparencia texto 14`, `/farol aparencia icones 20`, `/farol aparencia vertical`,
+Comandos: `/farol aparencia escala 120`, `/farol aparencia fundo 40`, `/farol aparencia texto 14`, `/farol aparencia icones 20`, `/farol aparencia linha`, `/farol aparencia coluna`, `/farol aparencia largura 400`,
 `/farol aparencia borda`, `/farol aparencia combate`, `/farol aparencia instancia`, `/farol aparencia padrao`.
 
 ## Avisos de durabilidade e bolsas
@@ -192,7 +195,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | Guilda online    | Quantidade de membros da guilda online (some sem guilda)  | `guilda`        | desligado  |
 
 **Ordem:** abra **Ordem...** no menu de opções (ou `/farol ordem`) e use as setas [▲]/[▼] para mover cada item;
-a barra muda na hora (também no modo vertical). Os itens escondidos aparecem em cinza, para você já deixar a posição
+a barra muda na hora (em qualquer formato). Os itens escondidos aparecem em cinza, para você já deixar a posição
 pronta. **Restaurar ordem padrão** (ou `/farol ordem padrao`) desfaz tudo.
 
 Exemplo: `/farol hide ouro` esconde o ouro; `/farol show ouro` mostra de volta. Também funcionam

@@ -56,9 +56,8 @@ return {
 
     { "restore default order (button and command) and vertical mode", function(T, Mock)
         local H = Mock.new():login({ order = { "guild", "gold" } })
-        H:slash("aparencia vertical")
-        local first = string.match(H.env.FarolFrame._fontStrings[1]._text, "^[^\n]+")
-        T.has(H.strip(first), "123g", "vertical bar starts with gold (guild is hidden)")
+        H:slash("aparencia coluna")
+        T.has(H.strip(H:cells()[1]._text), "123g", "one-column bar starts with gold (guild is hidden)")
         H:slash("ordem padrao"); T.has(H:lastMsg(), "ordem da barra restaurada")
         T.eq(H.env.FarolDB.order[1], "fps")
         H:slash("ordem"); H:click(H.env.FarolOrderUp2)

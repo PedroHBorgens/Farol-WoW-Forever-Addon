@@ -1,13 +1,14 @@
--- Aparência: escala, fundo, borda, barra vertical, esconder em combate e em instâncias.
--- Appearance: scale, background, border, vertical bar, hide in combat and in instances.
+-- Aparência: escala, fundo, borda, tamanhos, esconder em combate e em instâncias.
+-- (O formato da barra — uma linha, uma coluna, largura livre — fica em test_layout.lua.)
+-- Appearance: scale, background, border, sizes, hide in combat and in instances.
 
 local function bar(H) return H.env.FarolFrame end
 
 return {
     { "defaults are applied and invalid saved values are fixed", function(T, Mock)
-        local H = Mock.new():login({ scale = 9, bgAlpha = -1, vertical = "x", hideCombat = true })
+        local H = Mock.new():login({ scale = 9, bgAlpha = -1, barWidth = "x", hideCombat = true })
         local db = H.env.FarolDB
-        T.eq(db.scale, 1); T.eq(db.bgAlpha, 0.7); T.eq(db.vertical, false); T.eq(db.hideCombat, true)
+        T.eq(db.scale, 1); T.eq(db.bgAlpha, 0.7); T.eq(db.barWidth, 0); T.eq(db.hideCombat, true)
         T.eq(bar(H)._scale, 1); T.eq(bar(H)._bgAlpha, 0.7); T.eq(bar(H)._borderAlpha, 1)
     end },
 
@@ -19,36 +20,6 @@ return {
         H:slash("aparencia fundo 101"); T.has(H:lastMsg(), "fundo inválido")
         H:slash("aparencia borda"); T.eq(bar(H)._borderAlpha, 0, "border hidden")
         H:slash("aparencia xyz"); T.has(H:lastMsg(), "uso: /farol aparencia escala N | fundo N")
-    end },
-
-    { "vertical bar: one item per line, left aligned, taller", function(T, Mock)
-        local H = Mock.new():login()
-        T.eq(bar(H)._h, 26)
-        H:slash("aparencia vertical")
-        local text = H.env.FarolFrame._fontStrings[1]
-        T.has(text._text, "\n"); T.eq(text._justify, "LEFT")
-        local lines = 0
-        for _ in string.gmatch(text._text, "[^\n]+") do lines = lines + 1 end
-        T.eq(lines, 6, "six default items")
-        T.eq(bar(H)._h, 6 * 17 + 14, "line height = biggest of text (11) and icon (14) + 3")
-        H:slash("aparencia vertical")
-        T.hasnt(H.env.FarolFrame._fontStrings[1]._text, "\n"); T.eq(bar(H)._h, 26)
-    end },
-
-    { "vertical bar uses the real text height measured by the game", function(T, Mock)
-        local H = Mock.new():login()
-        for _, key in ipairs({ "mem", "speed", "bags", "session", "goldh", "xp", "xph", "clock", "playtime", "friends" }) do
-            H:slash("show " .. key)
-        end
-        H.env.FarolFrame._fontStrings[1]._stringHeight = 190 -- 16 linhas como no jogo (~12 px cada)
-        H:slash("aparencia vertical")
-        T.eq(bar(H)._h, 190 + 16, "frame follows the real text height, not the estimate")
-        local first = H.env.FarolWarnHistoryButton
-        T.eq(first._anchorPoint, "TOPLEFT", "quick buttons go to the top corner")
-        T.eq(first._anchor, H.env.FarolFrame)
-        T.eq(H.env.FarolLootButton._anchor, first, "second button next to the first")
-        H:slash("aparencia vertical")
-        T.eq(first._anchorPoint, "LEFT", "horizontal: back to the side")
     end },
 
     { "hide in combat: hides on entering combat and comes back after", function(T, Mock)
@@ -90,9 +61,9 @@ return {
         T.eq(text._fontSize, 11, "default text size"); T.eq(bar(H)._h, 26, "default height unchanged")
         T.has(text._text, ":14:14:", "default icon size")
         H:slash("aparencia texto 18"); T.eq(text._fontSize, 18); T.eq(H.env.FarolDB.fontSize, 18)
-        H:slash("aparencia icones 24"); T.has(H.env.FarolFrame._fontStrings[1]._text, ":24:24:")
+        H:slash("aparencia icones 24"); T.has(H:barRaw(), ":24:24:")
         T.eq(H.env.FarolDB.icons, true, "'icones 24' sets the size, does not toggle icons")
-        T.eq(bar(H)._h, 24 + 3 + 9, "bar grows with the biggest element")
+        T.eq(bar(H)._h, 4 * 2 + 24 + 3, "bar grows with the biggest element (icon 24 + 3, plus margins)")
         T.eq(H.env.FarolLootButton._w, 28, "quick buttons follow the icon size")
         H:slash("aparencia texto 30"); T.has(H:lastMsg(), "tamanho de texto inválido"); T.eq(H.env.FarolDB.fontSize, 18)
         H:slash("aparencia icone 8"); T.has(H:lastMsg(), "tamanho de ícone inválido"); T.eq(H.env.FarolDB.iconSize, 24)
@@ -122,13 +93,14 @@ return {
         H:click(H.env.FarolAppIconDown); T.eq(H.env.FarolDB.iconSize, 12, "icons step by 2")
         for _ = 1, 10 do H:click(H.env.FarolAppIconDown) end
         T.eq(H.env.FarolDB.iconSize, 10, "icons stop at 10")
-        H:check(H.env.FarolApp_vertical, true); T.eq(H.env.FarolDB.vertical, true)
+        H:click(H.env.FarolAppOneColumn); T.eq(H.env.FarolDB.barWidth, 1)
+        T.eq(H.env.FarolAppOneColumn._highlight, true, "chosen layout highlighted")
         H:check(H.env.FarolApp_hideCombat, true); T.eq(H.env.FarolDB.hideCombat, true)
         T.eq(H:text(H.env.FarolApp_hideInstance.label), "Hide in dungeons, raids, arenas and battlegrounds")
         H:click(H.env.FarolAppReset)
         local db = H.env.FarolDB
-        T.eq(db.scale, 1); T.eq(db.bgAlpha, 0.7); T.eq(db.vertical, false); T.eq(db.hideCombat, false)
+        T.eq(db.scale, 1); T.eq(db.bgAlpha, 0.7); T.eq(db.barWidth, 0); T.eq(db.hideCombat, false)
         T.eq(db.fontSize, 11); T.eq(db.iconSize, 14)
-        T.eq(H.env.FarolApp_vertical._checked, false, "window refreshed")
+        T.eq(H.env.FarolAppOneLine._highlight, true, "window refreshed: one line")
     end },
 }

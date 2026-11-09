@@ -267,13 +267,21 @@ local function History()
 end
 
 -- Valida o histórico salvo: só texto simples (sem códigos "|"), com no máximo 200 caracteres.
+-- Data salva válida: número finito entre 1970 e 2100 (um arquivo adulterado com "infinito"
+-- ou NaN quebraria a formatação da data).
+local function ValidTime(t)
+    t = tonumber(t)
+    if t and t == t and t >= 0 and t <= 4102444800 then return math.floor(t) end
+    return nil
+end
+
 function Warnings.SanitizeHistory(saved)
     local clean = {}
     if type(saved) ~= "table" then return clean end
     for _, entry in ipairs(saved) do
-        if type(entry) == "table" and type(entry.text) == "string" and type(entry.t) == "number" then
+        if type(entry) == "table" and type(entry.text) == "string" and ValidTime(entry.t) then
             local text = string.gsub(entry.text, "[|%c]", "")
-            clean[#clean + 1] = { t = entry.t, text = string.sub(text, 1, 200) }
+            clean[#clean + 1] = { t = ValidTime(entry.t), text = string.sub(text, 1, 200) }
         end
     end
     while #clean > HISTORY_MAX do table.remove(clean, 1) end
@@ -869,7 +877,7 @@ RefreshHistory = function()
     for i, row in ipairs(historyWindow.rows) do
         local entry = history[#history - i + 1] -- mais novo primeiro
         if entry then
-            row:SetText("|cffaaaaaa" .. date("%d/%m %H:%M", entry.t) .. "|r  " .. entry.text)
+            row:SetText("|cffaaaaaa" .. (date("%d/%m %H:%M", entry.t) or "--") .. "|r  " .. entry.text)
             row:Show()
         else
             row:Hide()

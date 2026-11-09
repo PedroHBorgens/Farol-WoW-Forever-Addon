@@ -243,7 +243,8 @@ Segurança da informação é a primeira regra deste projeto:
   verificado ao carregar — um arquivo corrompido ou adulterado volta para os valores padrão.
 - **Baixe só da fonte oficial** (este repositório). Addons são texto Lua: você pode ler todo o código em `Core.lua`.
 
-Encontrou um problema de segurança? Abra uma issue sem incluir dados pessoais, senhas ou informações da sua conta.
+Encontrou um problema de segurança? Relate de forma **privada** (Security → Report a vulnerability), como explicado
+no [`SECURITY.md`](SECURITY.md). Nunca inclua dados pessoais, senhas ou informações da sua conta.
 
 ## Testes
 
@@ -251,7 +252,7 @@ O addon tem testes automáticos que rodam **fora do jogo**, em Lua 5.1 (a mesma 
 usando um simulador simples da API do WoW (`tests/wow_mock.lua`). Eles cobrem a barra nos clientes WoW Forever
 e 3.3.5a, os valores bloqueados (secret values), o menu de opções, os alarmes e a soneca, a janela de saques,
 os arquivos `.toc`, e uma varredura que falha se o código algum dia usar APIs de automação, de mensagens ou de
-execução de código.
+execução de código, e um fuzzing com comandos, mensagens de chat e dados salvos aleatórios e maliciosos.
 
 ```
 lua5.1 tests/run.lua

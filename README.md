@@ -241,14 +241,16 @@ Information security is this project's first rule:
   checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official source** (this repository). Addons are plain Lua text: you can read all of it in `Core.lua`.
 
-Found a security issue? Open an issue without including personal data, passwords or account details.
+Found a security issue? Please report it **privately** (Security → Report a vulnerability), as explained in
+[`SECURITY.md`](SECURITY.md). Never include personal data, passwords or account details.
 
 ## Tests
 
 The add-on has automated tests that run **outside the game**, on Lua 5.1 (the same version the WoW client
 uses), against a small mock of the WoW API (`tests/wow_mock.lua`). They cover the bar on WoW Forever and
 3.3.5a clients, secret values, the options menu, alarms and snooze, the loot window, the `.toc` files, and a
-scan that fails if the code ever uses automation, messaging or dynamic-code APIs.
+scan that fails if the code ever uses automation, messaging or dynamic-code APIs, and fuzzing with random and
+malicious commands, chat messages and tampered saved data.
 
 ```
 lua5.1 tests/run.lua

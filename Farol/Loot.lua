@@ -109,6 +109,14 @@ local function ValidCount(n)
     return false
 end
 
+-- Data salva válida: número finito entre 1970 e 2100 (um arquivo adulterado com "infinito"
+-- ou NaN quebraria a formatação da data).
+local function ValidTime(t)
+    t = tonumber(t)
+    if t and t == t and t >= 0 and t <= 4102444800 then return math.floor(t) end
+    return nil
+end
+
 function Loot.SanitizeSettings(saved)
     local clean = { count = 10, qualities = {}, w = DEFAULT_W, h = DEFAULT_H }
     if type(saved) ~= "table" then saved = {} end
@@ -133,7 +141,7 @@ function Loot.SanitizeHistory(saved)
             if count < 1 or count > 100000 or count ~= math.floor(count) then count = 1 end
             local q = tonumber(entry.q)
             if q and (q < 0 or q > 9 or q ~= math.floor(q)) then q = nil end
-            clean[#clean + 1] = { link = entry.link, count = count, q = q, t = tonumber(entry.t) or 0 }
+            clean[#clean + 1] = { link = entry.link, count = count, q = q, t = ValidTime(entry.t) or 0 }
         end
     end
     while #clean > HISTORY_MAX do table.remove(clean, 1) end
@@ -657,7 +665,7 @@ RefreshWindow = function()
             row.link = entry.link
             row.icon:SetTexture(IconOf(entry.link))
             row.text:SetText(entry.link)
-            local info = date("%H:%M", entry.t)
+            local info = (date("%H:%M", entry.t) or "--")
             if entry.count > 1 then info = "x" .. entry.count .. "   " .. info end
             row.info:SetText(info)
             row:Show()

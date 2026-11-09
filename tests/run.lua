@@ -59,6 +59,7 @@ local SUITES = {
     "test_layers",
     "test_order",
     "test_layout",
+    "test_fuzz",
 }
 
 local passed, failed = 0, 0

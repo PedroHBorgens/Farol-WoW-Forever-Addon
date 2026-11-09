@@ -15,7 +15,7 @@ fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o sel
 | `farol-04_alarms.png` | Clock alarms with snooze — local or server time |
 | `farol-05_loot.png` | Recent loot window with quality filter |
 | `farol-06_warnings.png` | Warnings: durability, bags, talents, spell ranks |
-| `farol-07_appearance.png` | Make it yours: size, background, hide in combat |
+| `farol-07_appearance.png` | Make it yours: shape, size, background, hide in combat |
 
 ## Regenerate / Gerar de novo
 

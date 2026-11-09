@@ -159,12 +159,14 @@ page("06_warnings", f'<div style="display:flex;flex-direction:column;gap:22px;al
 def stepper(label, value): return f'<div style="display:flex;align-items:center;gap:10px;margin:7px 0"><span class="k" style="width:110px">{label}</span><span class="btn" style="padding:2px 9px">-</span><span style="width:52px;text-align:center">{value}</span><span class="btn" style="padding:2px 9px">+</span></div>'
 app = f"""<div class="win" style="width:470px"><div class="x">×</div><div class="t">Appearance</div>
 {stepper("Scale:","120%")}{stepper("Background:","40%")}{stepper("Text:","13")}{stepper("Icons:","18")}
-<div class="ck"><span class="box">✓</span>Show icons on the bar</div><div class="ck"><span class="box"></span>Vertical bar (one item per line)</div>
+<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span class="k" style="width:110px">Layout:</span><span class="btn hl">One line</span><span class="btn">One column</span></div>
+<div class="dim" style="font-size:12px;margin-bottom:6px">or drag the grip at the bottom-right corner of the bar</div>
+<div class="ck"><span class="box">✓</span>Show icons on the bar</div>
 <div class="ck"><span class="box">✓</span>Show border</div><div class="ck"><span class="box">✓</span>Hide in combat</div>
 <div class="ck"><span class="box"></span>Hide in dungeons, raids, arenas and battlegrounds</div>
 <div style="text-align:right;margin-top:8px"><span class="btn">Restore defaults</span></div></div>"""
 small = hbar(BAR_ITEMS[:4], "font-size:12px;transform:scale(.9)")
 big = hbar(BAR_ITEMS[:4], "font-size:19px;background:#0004;border-color:#0000")
 page("07_appearance", f'{app}<div style="display:flex;flex-direction:column;gap:30px;align-items:flex-start"><div class="dim">Small · compact</div>{small}<div class="dim">Large · transparent</div>{big}</div>',
-     "Make it yours: size, background, hide in combat", "Do seu jeito: tamanho do texto e ícones, fundo, esconder em combate")
+     "Make it yours: shape, size, background, hide in combat", "Do seu jeito: formato livre, tamanho do texto e ícones, fundo, esconder em combate")
 print("pages ok")

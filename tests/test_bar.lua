@@ -77,7 +77,7 @@ return {
         T.has(bar, "Amigos 8"); T.has(bar, "Guilda 12"); T.has(bar, "Mem ")
         T.has(bar, "Ouro/h +0c"); T.has(bar, "XP/h --", "no XP gained yet")
         H:slash("alarme add 06:00"); H:update(1)
-        T.ok(string.find(H.env.FarolFrame._fontStrings[1]._text, "PocketWatch", 1, true), "clock shows the alarm icon")
+        T.ok(string.find(H:barRaw(), "PocketWatch", 1, true), "clock shows the alarm icon")
     end },
 
     { "guild roster is requested at most once per minute and only when enabled", function(T, Mock)

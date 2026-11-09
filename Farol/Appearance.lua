@@ -1,7 +1,8 @@
 --[[
   Farol — Aparência da barra / Bar appearance
 
-  Escala (50% a 200%), opacidade do fundo (0% a 100%), borda, barra vertical,
+  Escala (50% a 200%), opacidade do fundo (0% a 100%), borda, formato da barra (uma linha,
+  uma coluna ou a largura que o jogador arrastar),
   esconder em combate e esconder em masmorras/raides/arenas.
   Usa botões [-] e [+] em vez de barra deslizante (o modelo de slider mudou entre versões do jogo).
 ]]
@@ -32,7 +33,14 @@ local STRINGS = {
         app_set_icon  = "tamanho dos ícones: %d.",
         app_bad_font  = "tamanho de texto inválido: use de 8 a 24.",
         app_bad_icon  = "tamanho de ícone inválido: use de 10 a 32.",
-        app_vertical  = "Barra vertical (um item por linha)",
+        app_layout    = "Formato:",
+        app_oneline   = "Uma linha",
+        app_onecolumn = "Uma coluna",
+        app_layout_hint = "ou arraste a alça no canto inferior direito da barra (com a barra destravada)",
+        app_set_row   = "formato: uma linha.",
+        app_set_col   = "formato: uma coluna.",
+        app_set_width = "largura da barra: %d pixels.",
+        app_bad_width = "largura inválida: use de 60 a 4000 pixels.",
         app_border    = "Mostrar borda",
         app_combat    = "Esconder em combate",
         app_instance  = "Esconder em masmorras, raides, arenas e campos de batalha",
@@ -47,9 +55,9 @@ local STRINGS = {
         app_restored  = "aparência restaurada ao padrão.",
         app_bad_scale = "escala inválida: use de 50 a 200 (%).",
         app_bad_bg    = "fundo inválido: use de 0 a 100 (%).",
-        app_usage     = "uso: /farol aparencia escala N || fundo N || texto N || icones N || vertical || borda || icones || botao || botaosaques || combate || instancia || padrao",
+        app_usage     = "uso: /farol aparencia escala N || fundo N || texto N || icones N || linha || coluna || largura N || borda || icones || botao || botaosaques || combate || instancia || padrao",
         opt_appearance = "Aparência...",
-        help_appearance = "  /farol aparencia     - abrir a janela de aparência (escala, fundo, vertical, esconder em combate)",
+        help_appearance = "  /farol aparencia     - abrir a janela de aparência (escala, fundo, formato, esconder em combate)",
     },
     en = {
         app_title     = "Appearance",
@@ -61,7 +69,14 @@ local STRINGS = {
         app_set_icon  = "icon size: %d.",
         app_bad_font  = "invalid text size: use 8 to 24.",
         app_bad_icon  = "invalid icon size: use 10 to 32.",
-        app_vertical  = "Vertical bar (one item per line)",
+        app_layout    = "Layout:",
+        app_oneline   = "One line",
+        app_onecolumn = "One column",
+        app_layout_hint = "or drag the grip at the bottom-right corner of the bar (bar unlocked)",
+        app_set_row   = "layout: one line.",
+        app_set_col   = "layout: one column.",
+        app_set_width = "bar width: %d pixels.",
+        app_bad_width = "invalid width: use 60 to 4000 pixels.",
         app_border    = "Show border",
         app_combat    = "Hide in combat",
         app_instance  = "Hide in dungeons, raids, arenas and battlegrounds",
@@ -76,9 +91,9 @@ local STRINGS = {
         app_restored  = "appearance restored to defaults.",
         app_bad_scale = "invalid scale: use 50 to 200 (%).",
         app_bad_bg    = "invalid background: use 0 to 100 (%).",
-        app_usage     = "usage: /farol appearance scale N || bg N || text N || icons N || vertical || border || icons || button || lootbutton || combat || instance || default",
+        app_usage     = "usage: /farol appearance scale N || bg N || text N || icons N || row || column || width N || border || icons || button || lootbutton || combat || instance || default",
         opt_appearance = "Appearance...",
-        help_appearance = "  /farol appearance   - open the appearance window (scale, background, vertical, hide in combat)",
+        help_appearance = "  /farol appearance   - open the appearance window (scale, background, layout, hide in combat)",
     },
 }
 for lang, entries in pairs(STRINGS) do
@@ -93,7 +108,6 @@ local function DB() return ns.GetDB() end
 
 -- Opções liga/desliga: chave salva -> texto do menu
 local TOGGLES = {
-    vertical = "app_vertical",
     border = "app_border",
     hideCombat = "app_combat",
     hideInstance = "app_instance",
@@ -173,6 +187,22 @@ local function StepIcon(direction)
     SetIconSize(Clamp(DB().iconSize + direction * ICON_STEP, ICON_MIN, ICON_MAX))
 end
 
+local function SetLayout(width, messageKey)
+    ns.SetBarWidth(width)
+    if RefreshWindow then RefreshWindow() end
+    if messageKey then Print(T(messageKey)) end
+end
+
+local function SetWidth(value)
+    value = tonumber(value)
+    if not value or value ~= math.floor(value) or value < 60 or value > 4000 then
+        Print(T("app_bad_width"))
+        return
+    end
+    SetLayout(value)
+    Print(string.format(T("app_set_width"), value))
+end
+
 local function SetToggle(key, value)
     DB()[key] = value
     Apply()
@@ -182,7 +212,7 @@ end
 local function RestoreDefaults()
     local db = DB()
     db.scale, db.bgAlpha, db.border = 1, 0.7, true
-    db.vertical, db.hideCombat, db.hideInstance = false, false, false
+    db.barWidth, db.hideCombat, db.hideInstance = 0, false, false
     db.icons, db.warnButton, db.lootButton = true, true, true
     db.fontSize, db.iconSize = FONT_DEFAULT, ICON_DEFAULT
     Apply()
@@ -217,7 +247,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolAppearance", UIParent, ns.backdropTemplate)
-    frame:SetSize(470, 410)
+    frame:SetSize(470, 432)
     frame:SetPoint("CENTER", 0, 40)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -244,9 +274,25 @@ local function CreateWindow()
     frame.font = StepperRow(frame, -114, "FarolAppFont", StepFont)
     frame.icon = StepperRow(frame, -144, "FarolAppIcon", StepIcon)
 
+    -- Formato: atalhos "Uma linha" / "Uma coluna" (ou a alça no canto da barra).
+    frame.layoutLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.layoutLabel:SetPoint("TOPLEFT", 24, -174)
+    frame.oneLine = CreateFrame("Button", "FarolAppOneLine", frame, "UIPanelButtonTemplate")
+    frame.oneLine:SetSize(110, 22)
+    frame.oneLine:SetPoint("TOPLEFT", 130, -170)
+    frame.oneLine:SetScript("OnClick", function() SetLayout(0, "app_set_row") end)
+    frame.oneColumn = CreateFrame("Button", "FarolAppOneColumn", frame, "UIPanelButtonTemplate")
+    frame.oneColumn:SetSize(110, 22)
+    frame.oneColumn:SetPoint("LEFT", frame.oneLine, "RIGHT", 8, 0)
+    frame.oneColumn:SetScript("OnClick", function() SetLayout(1, "app_set_col") end)
+    frame.layoutHint = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    frame.layoutHint:SetPoint("TOPLEFT", 24, -198)
+    frame.layoutHint:SetWidth(420)
+    frame.layoutHint:SetJustifyH("LEFT")
+
     frame.checks = {}
-    local y = -170
-    for _, key in ipairs({ "icons", "vertical", "border", "warnButton", "lootButton", "hideCombat", "hideInstance" }) do
+    local y = -218
+    for _, key in ipairs({ "icons", "border", "warnButton", "lootButton", "hideCombat", "hideInstance" }) do
         local check = CreateFrame("CheckButton", "FarolApp_" .. key, frame, "UICheckButtonTemplate")
         check:SetSize(24, 24)
         check:SetPoint("TOPLEFT", 20, y)
@@ -286,6 +332,12 @@ RefreshWindow = function()
         check:SetChecked(db[key])
     end
     window.reset:SetText(T("app_reset"))
+    window.layoutLabel:SetText(T("app_layout"))
+    window.oneLine:SetText(T("app_oneline"))
+    window.oneColumn:SetText(T("app_onecolumn"))
+    window.layoutHint:SetText(T("app_layout_hint"))
+    if db.barWidth == 0 then window.oneLine:LockHighlight() else window.oneLine:UnlockHighlight() end
+    if db.barWidth == 1 then window.oneColumn:LockHighlight() else window.oneColumn:UnlockHighlight() end
 end
 
 function Appearance.ToggleWindow()
@@ -306,7 +358,9 @@ local WORDS = {
     fundo = "bg", bg = "bg", background = "bg",
     texto = "font", fonte = "font", font = "font", text = "font",
     icone = "iconsize", icon = "iconsize", tamicone = "iconsize", iconsize = "iconsize",
-    vertical = "vertical",
+    linha = "row", row = "row", horizontal = "row",
+    coluna = "column", column = "column", vertical = "column",
+    largura = "width", width = "width",
     borda = "border", border = "border",
     combate = "hideCombat", combat = "hideCombat",
     instancia = "hideInstance", instance = "hideInstance", masmorra = "hideInstance",
@@ -330,6 +384,12 @@ function Appearance.HandleCommand(rest)
         SetFontSize(value)
     elseif action == "iconsize" or (action == "icons" and value ~= "") then
         SetIconSize(value) -- "icones 20" = tamanho; "icones" sozinho = liga/desliga
+    elseif action == "row" then
+        SetLayout(0, "app_set_row")
+    elseif action == "column" then
+        SetLayout(1, "app_set_col")
+    elseif action == "width" then
+        SetWidth(value)
     elseif action == "reset" then
         RestoreDefaults()
     elseif action then

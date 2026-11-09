@@ -77,9 +77,10 @@ function Frame:HookScript(name, fn)
         fn(...)
     end
 end
-function Frame:SetPoint(point, relativeTo)
+function Frame:SetPoint(point, relativeTo, relativePoint, x, y)
     self._anchor = type(relativeTo) == "table" and relativeTo or nil
     self._anchorPoint = point
+    self._x, self._y = x, y
 end
 function Frame:GetStringHeight() return self._stringHeight end -- os testes podem definir
 function Frame:ClearAllPoints() self._anchor = nil end
@@ -382,7 +383,22 @@ function Mock.new(opts)
         return text
     end
 
-    function H:bar() return H.strip(env.FarolFrame._fontStrings[1]._text) end
+    -- Células visíveis da barra, na ordem (cada informação é um texto próprio, numa grade).
+    function H:cells()
+        local list = {}
+        for _, fs in ipairs(env.FarolFrame._fontStrings) do
+            if fs.farolCell and fs:IsShown() then list[#list + 1] = fs end
+        end
+        table.sort(list, function(a, b) return a.farolCell < b.farolCell end)
+        return list
+    end
+    -- Texto da barra com códigos (ícones, cores), células separadas por "   ".
+    function H:barRaw()
+        local texts = {}
+        for _, cell in ipairs(self:cells()) do texts[#texts + 1] = cell._text or "" end
+        return table.concat(texts, "   ")
+    end
+    function H:bar() return H.strip(self:barRaw()) end
     function H:lastMsg() return H.strip(self.msgs[#self.msgs]) end
     function H:click(button, mouse) button._scripts.OnClick(button, mouse or "LeftButton") end
     function H:check(checkButton, value)

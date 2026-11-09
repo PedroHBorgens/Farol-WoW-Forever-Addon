@@ -289,6 +289,10 @@ This addon follows Blizzard's [UI Add-On Development Policy](https://us.forums.b
 - Never run an `.exe` that claims to be an addon. Real addons are only `.lua`/`.toc`/`.xml` text files.
 - Download only from this repository (or its official releases), and never type your password anywhere but the official Battle.net launcher.
 
+## Changelog
+
+See [`CHANGELOG.md`](CHANGELOG.md) for the changes in each version.
+
 ## License
 
 MIT — free to use, modify and distribute. See `LICENSE`.

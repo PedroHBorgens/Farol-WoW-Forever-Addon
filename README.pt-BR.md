@@ -291,6 +291,10 @@ Este addon segue a [Política de Desenvolvimento de AddOns da Blizzard](https://
 - Nunca rode um `.exe` que diga ser addon. Addon de verdade é só arquivo de texto `.lua`/`.toc`/`.xml`.
 - Baixe só deste repositório (ou das releases oficiais dele) e nunca digite sua senha fora do launcher oficial da Battle.net.
 
+## Histórico de versões
+
+Veja o [`CHANGELOG.md`](CHANGELOG.md) para as mudanças de cada versão (em inglês).
+
 ## Licença
 
 MIT — use, modifique e distribua livremente. Veja `LICENSE`.

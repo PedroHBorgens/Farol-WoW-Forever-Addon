@@ -189,6 +189,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | Ouro por hora    | Ouro da sessão por hora (vermelho quando negativo)        | `ouroh`         | desligado  |
 | Experiência (XP) | % de XP e bônus descansado (some no nível máximo)         | `xp`            | desligado  |
 | XP por hora      | XP/h e tempo até o próximo nível (após 1 min de sessão)   | `xph`           | desligado  |
+| Reputação        | Facção acompanhada: nível (cores do jogo), progresso %, rep/hora | `rep`           | desligado  |
 | Horário          | Hora local, ou do servidor (opção no menu)                | `hora`          | desligado  |
 | Tempo de sessão  | Quanto tempo está jogando desde que entrou / `/reload`    | `tempo`         | desligado  |
 | Amigos online    | Quantidade de amigos online (WoW + Battle.net)            | `amigos`        | desligado  |
@@ -200,6 +201,9 @@ pronta. **Restaurar ordem padrão** (ou `/farol ordem padrao`) desfaz tudo.
 
 Exemplo: `/farol hide ouro` esconde o ouro; `/farol show ouro` mostra de volta. Também funcionam
 `mostrar`/`esconder` e os nomes em inglês (`zone`, `gold`, `bags`…). Suas escolhas ficam salvas.
+
+**Reputação:** mostra a facção que você marcar como **"Mostrar como barra de experiência"** no painel de reputação
+do jogo. O tooltip mostra também o progresso, a reputação por hora e uma estimativa do tempo até o próximo nível.
 
 **Tooltip:** passe o mouse no painel para ver todos os detalhes de uma vez — latência local/mundo,
 subzona, cada peça danificada, XP exato e descansado, hora local *e* do servidor, amigos separados por

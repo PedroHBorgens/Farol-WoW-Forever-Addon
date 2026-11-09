@@ -207,6 +207,12 @@ function Mock.new(opts)
     env.UIErrorsFrame = { AddMessage = function(_, text) H.screen = text end }
     H.bagFree = { [0] = 2, 1, 1, 1, 1 } -- espaços livres por bolsa (total 6 de 80)
 
+    -- Reputação: H.faction = { name, reaction, min, max, value, id } ou nil (nenhuma facção acompanhada)
+    local standings = { "Odiado", "Hostil", "Inamistoso", "Neutro", "Amistoso", "Honrado", "Reverenciado", "Exaltado" }
+    for i = 1, 8 do env["FACTION_STANDING_LABEL" .. i] = standings[i] end
+    env.FACTION_BAR_COLORS = {}
+    for i = 1, 8 do env.FACTION_BAR_COLORS[i] = { r = 0, g = 0.6, b = 0.1 } end
+
     -- Talentos, grimório e barras de ação (os testes podem alterar)
     H.talentPoints = 0
     H.spells = { [133] = { "Bola de Fogo", 1 }, [143] = { "Bola de Fogo", 2 }, [145] = { "Bola de Fogo", 3 },
@@ -251,6 +257,10 @@ function Mock.new(opts)
         env.GuildRoster = function() H.rosterRequests = H.rosterRequests + 1 end
         env.InterfaceOptions_AddCategory = function(panel) H.settingsPanel = panel end
         env.UnitCharacterPoints = function() return H.talentPoints, 0 end
+        env.GetWatchedFactionInfo = function()
+            local f = H.faction
+            if f then return f.name, f.reaction, f.min, f.max, f.value, f.id end
+        end
         env.GetSpellInfo = function(id)
             local spell = H.spells[id]
             if spell then return spell[1], rankText(id, "Rank") end
@@ -296,6 +306,14 @@ function Mock.new(opts)
             RegisterAddOnCategory = function(category) H.settingsCategory = category end,
         }
         env.GetUnspentTalentPoints = function() return H.talentPoints end
+        env.C_Reputation = {
+            GetWatchedFactionData = function()
+                local f = H.faction
+                if not f then return nil end
+                return { name = f.name, reaction = f.reaction, currentReactionThreshold = f.min,
+                         nextReactionThreshold = f.max, currentStanding = f.value, factionID = f.id }
+            end,
+        }
         env.Enum = { SpellBookSpellBank = { Player = 0 } }
         env.C_Spell = {
             GetSpellName = function(id) local spell = H.spells[id]; return spell and spell[1] end,

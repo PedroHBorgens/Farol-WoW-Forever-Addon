@@ -20,14 +20,14 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags",
-    "gold", "session", "goldh", "xp", "xph", "clock", "playtime", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "clock", "playtime", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
 local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
-    goldh = false, xph = false,
+    goldh = false, xph = false, rep = false,
     clock = false, playtime = false, friends = false, guild = false,
 }
 
@@ -45,6 +45,7 @@ local ITEM_ALIASES = {
     sessao = "session", session = "session",
     xph = "xph", xphora = "xph", xpperhour = "xph",
     ouroh = "goldh", ourohora = "goldh", goldh = "goldh", goldperhour = "goldh",
+    rep = "rep", reputacao = "rep", reputation = "rep", faccao = "rep", faction = "rep",
     xp = "xp", experiencia = "xp", experience = "xp",
     hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
     tempo = "playtime", playtime = "playtime", played = "playtime",
@@ -120,6 +121,7 @@ local STRINGS = {
         name_session = "Ouro da sessão", cmd_session = "sessao",
         name_goldh = "Ouro por hora",  cmd_goldh = "ouroh",
         name_xph = "XP por hora",      cmd_xph = "xph",
+        name_rep = "Reputação",        cmd_rep = "rep",
         name_xp = "Experiência (XP)",  cmd_xp = "xp",
         name_clock = "Horário",        cmd_clock = "hora",
         name_playtime = "Tempo de sessão", cmd_playtime = "tempo",
@@ -132,6 +134,7 @@ local STRINGS = {
         label_session = "Sessão",
         label_goldh  = "Ouro/h",
         label_xph    = "XP/h",
+        label_rep    = "Rep",
         label_playtime = "Jogando",
         label_friends = "Amigos",
         label_guild  = "Guilda",
@@ -143,6 +146,14 @@ local STRINGS = {
         tt_goldh     = "Ouro por hora",
         tt_xph       = "XP por hora",
         tt_tolevel   = "Próximo nível em",
+        tt_rep       = "Reputação",
+        tt_rep_standing = "Nível",
+        tt_rep_progress = "Progresso",
+        tt_rep_rate  = "Reputação por hora",
+        tt_rep_next  = "Próximo nível em",
+        tt_rep_none  = "nenhuma facção acompanhada (marque 'Mostrar como barra de experiência' no painel de reputação)",
+        rep_status   = "reputação: %s (função: %s).",
+        rep_status_none = "reputação: nenhuma facção acompanhada.",
         tt_rate_wait = "calculando... (1 min)",
         session_reset = "sessão zerada: ouro, XP e tempo recomeçam agora.",
         help_session = "  /farol sessao zerar  - recomeçar a contagem de ouro, XP e tempo da sessão",
@@ -218,6 +229,7 @@ local STRINGS = {
         name_session = "Session gold", cmd_session = "session",
         name_goldh = "Gold per hour",  cmd_goldh = "goldh",
         name_xph = "XP per hour",      cmd_xph = "xph",
+        name_rep = "Reputation",       cmd_rep = "rep",
         name_xp = "Experience (XP)",   cmd_xp = "xp",
         name_clock = "Clock",          cmd_clock = "clock",
         name_playtime = "Session time", cmd_playtime = "playtime",
@@ -230,6 +242,7 @@ local STRINGS = {
         label_session = "Session",
         label_goldh  = "Gold/h",
         label_xph    = "XP/h",
+        label_rep    = "Rep",
         label_playtime = "Played",
         label_friends = "Friends",
         label_guild  = "Guild",
@@ -241,6 +254,14 @@ local STRINGS = {
         tt_goldh     = "Gold per hour",
         tt_xph       = "XP per hour",
         tt_tolevel   = "Next level in",
+        tt_rep       = "Reputation",
+        tt_rep_standing = "Standing",
+        tt_rep_progress = "Progress",
+        tt_rep_rate  = "Reputation per hour",
+        tt_rep_next  = "Next standing in",
+        tt_rep_none  = "no watched faction (tick 'Show as Experience Bar' in the reputation panel)",
+        rep_status   = "reputation: %s (function: %s).",
+        rep_status_none = "reputation: no watched faction.",
         tt_rate_wait = "calculating... (1 min)",
         session_reset = "session reset: gold, XP and time start counting now.",
         help_session = "  /farol session reset - restart the session gold, XP and time counters",
@@ -515,12 +536,62 @@ local function SampleXP()
     session.lastXP, session.lastMax, session.lastLevel = cur, max, level
 end
 
+-- Reputação da facção acompanhada (a marcada como "Mostrar como barra de experiência" no painel de
+-- reputação). O nome da função mudou entre versões: clientes modernos usam
+-- C_Reputation.GetWatchedFactionData; os antigos, GetWatchedFactionInfo. Tentamos as duas.
+-- Devolve (dados, nome da função) ou nil se não houver facção acompanhada.
+local function GetWatchedFaction()
+    if C_Reputation and C_Reputation.GetWatchedFactionData then
+        local data = C_Reputation.GetWatchedFactionData()
+        if type(data) == "table" and data.name then
+            return { id = data.factionID or data.name, name = data.name, reaction = data.reaction,
+                     min = data.currentReactionThreshold, max = data.nextReactionThreshold,
+                     value = data.currentStanding }, "C_Reputation"
+        end
+    end
+    if GetWatchedFactionInfo then
+        local name, reaction, min, max, value, id = GetWatchedFactionInfo()
+        if name then
+            return { id = id or name, name = name, reaction = reaction, min = min, max = max, value = value },
+                "GetWatchedFactionInfo"
+        end
+    end
+    return nil
+end
+ns.GetWatchedFaction = GetWatchedFaction
+
+-- Dados utilizáveis: texto e números de verdade, nada bloqueado pelo jogo.
+local function ValidFaction(f)
+    if type(f) ~= "table" or type(f.name) ~= "string" or IsSecret(f.name) then return false end
+    for _, key in ipairs({ "reaction", "min", "max", "value" }) do
+        local v = f[key]
+        if type(v) ~= "number" or IsSecret(v) or v ~= v then return false end
+    end
+    return true
+end
+
+-- Soma a reputação ganha na facção acompanhada; trocar de facção recomeça a contagem.
+local function SampleRep()
+    local f = GetWatchedFaction()
+    if not ValidFaction(f) then return end
+    if session.repID ~= f.id then
+        session.repID, session.repLast, session.repGained, session.repStart = f.id, f.value, 0, GetTime()
+        return
+    end
+    if f.value > session.repLast then
+        session.repGained = session.repGained + (f.value - session.repLast)
+    end
+    session.repLast = f.value
+end
+
 local function ResetSession()
     session.startMoney = GetMoney()
     session.startTime = GetTime()
     session.xpGained = 0
     session.lastXP = nil
+    session.repID = nil -- recomeça a contagem de reputação
     pcall(SampleXP)
+    pcall(SampleRep)
 end
 
 local function StartSession()
@@ -675,6 +746,25 @@ local function GetGoldRate()
     return delta / seconds * 3600
 end
 
+-- Reputação por hora na facção acompanhada (nil antes de 1 minuto ou sem ganho).
+local function GetRepRate()
+    if not session.repStart or not session.repGained or session.repGained <= 0 then return nil end
+    local seconds = GetTime() - session.repStart
+    if seconds < RATE_MIN_SECONDS then return nil end
+    return session.repGained / seconds * 3600
+end
+
+-- Nome do nível (Neutro, Honrado...) com a cor do próprio jogo.
+local function StandingText(reaction)
+    local label = _G["FACTION_STANDING_LABEL" .. tostring(reaction)] or tostring(reaction)
+    local color = FACTION_BAR_COLORS and FACTION_BAR_COLORS[reaction]
+    if type(color) == "table" and color.r then
+        local function byte(v) return math.floor(math.max(0, math.min(1, v)) * 255 + 0.5) end
+        return string.format("|cff%02x%02x%02x%s|r", byte(color.r), byte(color.g), byte(color.b), label)
+    end
+    return label
+end
+
 -- No 3.3.5a as coordenadas dependem do mapa "ativo"; ao trocar de zona,
 -- voltamos o mapa para a zona atual (sem mexer se o jogador estiver com o mapa aberto).
 local function ResetMapToCurrentZone()
@@ -750,6 +840,18 @@ local ITEM_TEXT = {
             clock = clock .. " |TInterface\\Icons\\INV_Misc_PocketWatch_01:12:12|t" -- há alarme ativo
         end
         return clock
+    end,
+    rep = function()
+        local f = GetWatchedFaction()
+        if not ValidFaction(f) then return T("label_rep") .. " --" end
+        local text = f.name .. " " .. StandingText(f.reaction)
+        local total = f.max - f.min
+        if total > 0 then
+            text = text .. string.format(" %d%%", math.floor((f.value - f.min) / total * 100))
+        end
+        local rate = GetRepRate()
+        if rate then text = text .. " |cff4dff4d+" .. FormatBig(rate) .. "/h|r" end
+        return text
     end,
     xph = function()
         if not GetXPInfo() then return nil end -- nível máximo: o item some
@@ -875,6 +977,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
+    rep = "Achievement_Reputation_01",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
     guild = "INV_Shirt_GuildTabard_01",
 }
@@ -1070,6 +1173,27 @@ local function FillTooltip()
             AddPair(T("tt_xph"), T("tt_rate_wait"))
         end
     end
+    if db.items.rep then
+        local f = Safe(GetWatchedFaction)
+        if ValidFaction(f) then
+            AddPair(T("tt_rep"), f.name)
+            AddPair(T("tt_rep_standing"), StandingText(f.reaction))
+            local total, cur = f.max - f.min, f.value - f.min
+            if total > 0 then
+                AddPair(T("tt_rep_progress"), string.format("%s / %s (%d%%)",
+                    FormatBig(cur), FormatBig(total), math.floor(cur / total * 100)))
+                local rate = Safe(GetRepRate)
+                if rate then
+                    AddPair(T("tt_rep_rate"), "+" .. FormatBig(rate))
+                    AddPair(T("tt_rep_next"), FormatDuration((total - cur) / rate * 3600))
+                else
+                    AddPair(T("tt_rep_rate"), T("tt_rate_wait"))
+                end
+            end
+        else
+            AddPair(T("tt_rep"), T("tt_rep_none"))
+        end
+    end
     local seconds = Safe(GetSessionSeconds)
     if seconds then AddPair(T("tt_playtime"), FormatDuration(seconds)) end
 
@@ -1105,6 +1229,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
     if elapsedSinceUpdate >= UPDATE_INTERVAL then
         elapsedSinceUpdate = 0
         pcall(SampleXP) -- mede o XP antes de redesenhar, para a taxa não ficar atrasada
+        pcall(SampleRep)
         UpdateText()
         if db.items.guild then RequestGuildRoster() end
         if TooltipIsOurs() then ShowTooltip(self) end -- mantém o tooltip atualizado
@@ -1469,6 +1594,7 @@ frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 frame:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 frame:RegisterEvent("PLAYER_XP_UPDATE")
+frame:RegisterEvent("UPDATE_FACTION")
 frame:RegisterEvent("PLAYER_REGEN_DISABLED") -- entrou em combate
 frame:RegisterEvent("PLAYER_REGEN_ENABLED")  -- saiu do combate
 
@@ -1507,6 +1633,8 @@ frame:SetScript("OnEvent", function(self, event, arg1)
     elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
         inCombat = (event == "PLAYER_REGEN_DISABLED")
         ApplyVisibility()
+    elseif event == "UPDATE_FACTION" then
+        pcall(SampleRep)
     elseif event == "PLAYER_XP_UPDATE" then
         pcall(SampleXP)
     elseif event == "UPDATE_INVENTORY_DURABILITY" or event == "PLAYER_EQUIPMENT_CHANGED" then

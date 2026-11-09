@@ -189,6 +189,7 @@ in the menu, or `/farol session reset`, to restart them (e.g. when you move to a
 | Gold per hour   | Session gold per hour (red when negative)              | `goldh`      | off     |
 | Experience (XP) | XP % and rested bonus (hidden at max level)            | `xp`         | off     |
 | XP per hour     | XP/h and time to next level (after 1 min of session)   | `xph`        | off     |
+| Reputation      | Watched faction: standing (game colors), progress %, rep/hour | `rep`        | off     |
 | Clock           | Local time, or server time (menu option)               | `clock`      | off     |
 | Session time    | How long you've been playing since login / `/reload`   | `playtime`   | off     |
 | Friends online  | Count of online WoW + Battle.net friends               | `friends`    | off     |
@@ -200,6 +201,9 @@ advance. **Restore default order** (or `/farol order default`) undoes it.
 
 Example: `/farol hide gold` hides gold; `/farol show gold` brings it back. Portuguese names also work
 (`zona`, `ouro`, `bolsas`, `hora`…). Your choices are saved.
+
+**Reputation:** shows the faction you mark as **"Show as Experience Bar"** in the game's reputation panel. The
+tooltip adds progress, reputation per hour and an estimate of the time to the next standing.
 
 **Tooltip:** hover the panel to see every detail at once — home/world latency, subzone, each damaged
 item, exact XP and rested, local *and* server time, friends split by WoW / Battle.net, and more.

@@ -938,6 +938,12 @@ local function PrintStatus()
         Print(string.format("    GetTalentTabInfo: %s", table.concat(spent, " / ")))
     end
     Print(string.format("    UnitLevel: %s", tostring(UnitLevel and UnitLevel("player"))))
+    local okRep, faction, repSource = pcall(ns.GetWatchedFaction)
+    if okRep and faction then
+        Print(string.format(T("rep_status"), tostring(faction.name), tostring(repSource)))
+    else
+        Print(T("rep_status_none"))
+    end
     local ok, outdated = pcall(FindOutdatedSpells)
     outdated = ok and outdated or {}
     Print(string.format(T("warn_status_ranks"), #outdated))

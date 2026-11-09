@@ -32,6 +32,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 - Pontos de talento não gastos: o nome da função mudou entre versões do WoW. `Warnings.lua` consulta **todas**
   (`UnitCharacterPoints`, `GetUnspentTalentPoints`, `GetNumUnspentTalents`, `C_Traits`) e uma **estimativa**
   (nível − 9 − pontos gastos via `GetTalentTabInfo`) e usa o **maior** valor. `/farol aviso status` mostra cada fonte.
+- Reputação acompanhada: clientes modernos usam `C_Reputation.GetWatchedFactionData`, os antigos
+  `GetWatchedFactionInfo`; o Core tenta os dois (`GetWatchedFaction`) e `/farol aviso status` mostra qual funcionou.
 - No chat do WoW, `|` inicia códigos (`|c` cor, `|H` link, `|T` textura). **Barra literal = `||`.** Um teste confere
   todos os textos.
 - `GetChecked()` devolve `1/nil` em clientes antigos: sempre converter com `and true or false`.

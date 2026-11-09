@@ -2,7 +2,7 @@
 -- Info bar: compatibility, language, items, tooltip, secret values, saved data.
 
 local ALL_ITEMS = { "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags",
-                    "gold", "session", "goldh", "xp", "xph", "clock", "playtime", "friends", "guild" }
+                    "gold", "session", "goldh", "xp", "xph", "rep", "clock", "playtime", "friends", "guild" }
 
 return {
     { "loads on WoW Forever and shows the default items", function(T, Mock)
@@ -67,7 +67,7 @@ return {
         T.has(H:bar(), "/farol show <item>", "hint when every item is hidden")
     end },
 
-    { "all 17 items render with correct values", function(T, Mock)
+    { "all 18 items render with correct values", function(T, Mock)
         local H = Mock.new():login()
         for _, key in ipairs(ALL_ITEMS) do H:slash("show " .. key) end
         H:update(3725)

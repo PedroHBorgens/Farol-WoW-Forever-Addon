@@ -2,6 +2,11 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.15.0 — Reputation
+- New bar item **Reputation** (off by default): watched faction, standing in the game's colors, progress %,
+  reputation per hour; the tooltip adds progress and the time to the next standing.
+- Works with the modern (`C_Reputation`) and old (`GetWatchedFactionInfo`) APIs; `/farol warn status` shows which one.
+
 ## 2.14.1 — Security review
 - Fixed: corrupted saved history dates (infinite/NaN) no longer break the warning history and loot windows.
 - Fuzz tests for commands, loot messages and tampered saved data.

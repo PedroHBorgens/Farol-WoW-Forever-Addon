@@ -59,6 +59,9 @@ BAR_ITEMS = [
     ("📈", 'Gold/h <span class="g">+</span><span class="gold">12g</span> <span class="silver">30s</span>'),
     ("⏳", 'XP/h 18.4k · 42m'),
 ]
+REP_ITEM = ("🏅", 'Orgrimmar <span class="g">Honored</span> 35% <span class="g">+600/h</span>')
+RESET_ITEM = ("📜", 'Daily 5h 12m · Weekly 2d 4h')
+HERO_ITEMS = BAR_ITEMS[:2] + [BAR_ITEMS[3], BAR_ITEMS[6], BAR_ITEMS[8], REP_ITEM, ("📜", 'Daily 5h 12m')]
 def hbar(items=BAR_ITEMS, extra_style=""):
     return f'<div class="bar" style="{extra_style}">' + "".join(item(e,h) for e,h in items) + \
         '<span class="qb">📝<span class="badge r">2</span></span><span class="qb">👜<span class="badge g">3</span></span></div>'
@@ -72,42 +75,46 @@ page("01_farol", f"""
   <div style="font:500 24px 'Inter';color:#d9e4f2">Info bar · Alarms · Loot · Warnings</div>
   <div style="font:500 20px 'Inter';color:#9fb3cf;margin-top:4px">Free & open source · Unofficial · EN / PT-BR</div></div>
  </div>
- {hbar()}
+ {hbar(HERO_ITEMS)}
 </div>""", "Your info bar for WoW Forever", "Sua barra de informações para o WoW Forever")
 
-# 2. Bar: horizontal + vertical + tooltip
-vitems = [("🔭",'<span class="g">60</span> fps'),("⚡",'<span class="y">172</span> ms'),("🧠",'Mem <span class="y">235 MB</span>'),
+# 2. Bar: aligned columns (flexible layout) + tooltip
+gitems = [("🔭",'<span class="g">60</span> fps'),("⚡",'<span class="y">172</span> ms'),("🧠",'Mem <span class="y">235 MB</span>'),
           ("🗺️",'58.5, 54.1'),("🌍",'<span class="zone">Orgrimmar</span>'),("👟",'Speed 100%'),("🔨",'Dur <span class="g">77%</span>'),
           ("🎒",'Bags <span class="g">13</span>/38'),("💰",'<span class="gold">0g</span> <span class="silver">97s</span> <span class="copper">23c</span>'),
           ("🪙",'Session <span class="g">+</span><span class="silver">5s</span> <span class="copper">34c</span>'),
           ("📈",'Gold/h <span class="g">+</span><span class="gold">1g</span> <span class="silver">33s</span>'),
-          ("📖",'XP 46% <span class="blue">+0%</span>'),("⏰",'18:49'),("👥",'Friends 4')]
-vbar = '<div class="vbar">' + "".join(item(e,h) for e,h in vitems) + '</div>'
+          ("📖",'XP 46% <span class="blue">+0%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,("⏰",'18:49'),
+          RESET_ITEM,("⌛",'Played 1h 02m'),("👥",'Friends 4'),("🛡️",'Guild 12')]
+grid = ('<div class="vbar" style="display:grid;grid-template-columns:repeat(3,auto);column-gap:18px;row-gap:6px;position:relative;padding-bottom:16px;font-size:13px;white-space:nowrap">'
+        + "".join(item(e,h) for e,h in gitems)
+        + '<span style="position:absolute;right:4px;bottom:0;color:#ccc;font-size:14px">◢</span></div>')
 tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol</div>
-<div class="row"><span class="k">FPS</span><span>60</span></div>
 <div class="row"><span class="k">Latency</span><span>home 40 ms / world 60 ms</span></div>
-<div class="row"><span class="k">Zone</span><span>Orgrimmar</span></div>
 <div class="row"><span class="k">Durability (lowest)</span><span class="y">31%</span></div>
 <div class="row"><span>&nbsp; [Helm of Valor]</span><span class="y">31%</span></div>
 <div class="row"><span class="k">XP per hour</span><span>18.4k</span></div>
-<div class="row"><span class="k">Next level in</span><span>42m</span></div>
+<div class="row"><span class="k">Reputation</span><span>Orgrimmar</span></div>
+<div class="row"><span class="k">Daily reset in</span><span>5h 12m</span></div>
 <div class="row"><span class="k">Server time</span><span>21:05</span></div>
 <div class="dim" style="margin-top:6px">Right-click: options.</div></div>"""
 page("02_bar", f"""
-<div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:7])}{tip}</div>
-{vbar}""", "17 items with icons — horizontal or vertical", "17 informações com ícones — na horizontal ou vertical, com tooltip detalhado")
+<div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
+     "19 items with icons — one line, one column or columns", "19 informações com ícones — em linha, coluna ou colunas alinhadas, com tooltip")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Clock","Session time","Friends online","Guild online"]
-on = {0,1,3,4,6,7,8,10,12}
-half = 9
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Clock","Resets (daily/weekly)","Session time","Friends online","Guild online"]
+on = {0,1,3,4,6,7,8,10,12,13,15}
+half = 10
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
-menu = f"""<div class="win" style="width:440px"><div class="x">×</div><div class="t">Farol</div>
+menu = f"""<div class="win" style="width:500px;padding-top:12px;padding-bottom:14px"><div class="x">×</div><div class="t">Farol</div>
 <div class="dim" style="font-size:13px">Tick what you want to see on the bar.</div>
-<div class="h">Bar items</div><div style="display:flex;gap:30px"><div>{col(range(0,half))}</div><div>{col(range(half,17))}</div></div>
-<div class="h">General</div><div style="display:flex;gap:30px"><div class="ck"><span class="box">✓</span>Show panel</div><div class="ck"><span class="box"></span>Lock position</div></div>
+<div class="h">Bar items</div><div style="display:flex;gap:30px"><div>{col(range(0,half))}</div><div>{col(range(half,19))}</div></div>
+<div class="h">General</div><div style="display:flex;gap:22px"><div class="ck"><span class="box">✓</span>Show panel</div><div class="ck"><span class="box"></span>Lock position</div><div class="ck"><span class="box">✓</span>Server time</div></div>
+<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="k" style="font-size:14px">Language:</span><span class="btn" style="padding:2px 10px">Português</span><span class="btn hl" style="padding:2px 10px">English</span></div>
 <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><span class="btn">Alarms...</span><span class="btn">Loot...</span><span class="btn">Warnings...</span><span class="btn">Appearance...</span><span class="btn hl">Order...</span></div></div>"""
-order_names = [("🌍","Zone"),("🔭","FPS"),("⚡","Latency"),("💰","Gold"),("📈","Gold per hour"),("🔨","Durability"),("🎒","Bags"),("⏰","Clock (hidden)")]
+order_names = [("🌍","Zone"),("🔭","FPS"),("⚡","Latency"),("💰","Gold"),("🏅","Reputation"),("📜","Resets (daily/weekly)"),("🔨","Durability"),("🎒","Bags"),("⏰","Clock (hidden)")]
 order = '<div class="win" style="width:330px"><div class="x">×</div><div class="t">Bar order</div>' + "".join(
     f'<div class="ck" style="justify-content:space-between"><span><span class="dim" style="display:inline-block;width:22px;text-align:right">{i+1}.</span> {ic(e)} <span class="{"dim" if "hidden" in n else ""}">{n}</span></span><span>▲ ▼</span></div>'
     for i,(e,n) in enumerate(order_names)) + '<div style="text-align:right;margin-top:10px"><span class="btn">Restore default order</span></div></div>'
@@ -164,9 +171,28 @@ app = f"""<div class="win" style="width:470px"><div class="x">×</div><div class
 <div class="ck"><span class="box">✓</span>Show icons on the bar</div>
 <div class="ck"><span class="box">✓</span>Show border</div><div class="ck"><span class="box">✓</span>Hide in combat</div>
 <div class="ck"><span class="box"></span>Hide in dungeons, raids, arenas and battlegrounds</div>
+<div class="ck"><span class="box">✓</span>Show the warning history button 📝</div>
+<div class="ck"><span class="box">✓</span>Show the loot button 👜</div>
 <div style="text-align:right;margin-top:8px"><span class="btn">Restore defaults</span></div></div>"""
 small = hbar(BAR_ITEMS[:4], "font-size:12px;transform:scale(.9)")
 big = hbar(BAR_ITEMS[:4], "font-size:19px;background:#0004;border-color:#0000")
 page("07_appearance", f'{app}<div style="display:flex;flex-direction:column;gap:30px;align-items:flex-start"><div class="dim">Small · compact</div>{small}<div class="dim">Large · transparent</div>{big}</div>',
      "Make it yours: shape, size, background, hide in combat", "Do seu jeito: formato livre, tamanho do texto e ícones, fundo, esconder em combate")
+# 8. Progress: XP, reputation, resets
+pbar = hbar([("📖",'XP 46% <span class="blue">+12%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,RESET_ITEM])
+ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol</div>
+<div class="row"><span class="k">Experience</span><span>11,040 / 24,000 (46%)</span></div>
+<div class="row"><span class="k">XP per hour</span><span>18.4k</span></div>
+<div class="row"><span class="k">Next level in</span><span>42m</span></div>
+<div style="height:6px"></div>
+<div class="row"><span class="k">Reputation</span><span>Orgrimmar</span></div>
+<div class="row"><span class="k">Standing</span><span class="g">Honored</span></div>
+<div class="row"><span class="k">Progress</span><span>4.2k / 12.0k (35%)</span></div>
+<div class="row"><span class="k">Reputation per hour</span><span>+600</span></div>
+<div class="row"><span class="k">Next standing in</span><span>13h 00m</span></div>
+<div style="height:6px"></div>
+<div class="row"><span class="k">Daily reset in</span><span>5h 12m (02:17 local · 05:17 server)</span></div>
+<div class="row"><span class="k">Weekly reset in</span><span>2d 4h (Wed 01:05 local · 04:05 server)</span></div></div>"""
+page("08_progress", f'<div style="display:flex;flex-direction:column;gap:22px;align-items:center">{pbar}{ptip}</div>',
+     "Track your progress: XP, reputation and resets", "Acompanhe seu progresso: XP, reputação e contagem até os resets")
 print("pages ok")

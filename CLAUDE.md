@@ -110,4 +110,14 @@ lua5.1 tests/run.lua        # ~100 testes; deve terminar com "0 failed"
 
 `assets/curseforge/`: ilustrações 1280×720 com legenda EN/PT e selo "Illustration · Ilustração" (não são prints do
 jogo). Para regenerar: `python3 assets/curseforge/make_pages.py` e `node assets/curseforge/shoot.js` (Playwright).
-Ao mudar uma janela do addon, atualize a ilustração correspondente.
+Ao mudar uma janela do addon, atualize a ilustração correspondente:
+
+| Mudança | Imagens |
+|---|---|
+| Item novo na barra / no tooltip | 02 (contagem de itens, grade, tooltip), 03 (caixinhas e ordem); 08 se for de progresso; 01 se for destaque |
+| Opção nova no menu (Geral, idioma, botões) | 03 |
+| Alarmes | 04 · Janela de saques: 05 · Avisos / histórico: 06 |
+| Aparência (escala, fundo, formato, botões rápidos) | 07 (e 02 se mudar o formato da barra) |
+
+As imagens 04–06 saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
+e apague lá as versões antigas.

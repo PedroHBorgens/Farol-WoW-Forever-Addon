@@ -163,8 +163,10 @@ A separate window listing the items **you** looted or received, newest first.
 - **Show** dropdown — 5, 10, 15 or 20 recent items.
 - **Quality** dropdown — tick Poor, Common, Uncommon, Rare, Epic and Legendary+ (names and colors come from the game), or use *Check all* / *Uncheck all*.
 - **Resizable** — drag the corner grip; the list follows the width and scrolls with the mouse wheel when it doesn't fit. The size is saved.
-- Each row shows the item icon, the colored item link, the quantity and the time. Hover for the item tooltip;
-  **Shift-click** puts the link in your chat box (you decide whether to send it).
+- Each row shows the item icon, the colored item link, the quantity and **when** you looted it: **Today 21:42**,
+  **Yesterday 21:27**, or the date for older items (**Nov 8 21:12**). Hover for the item tooltip, which also shows
+  the full date ("Looted: Sunday, Nov 8, 2026 at 21:12"); **Shift-click** puts the link in your chat box (you decide
+  whether to send it).
 - History is saved **per character** (last 100 items). **Clear** erases it.
 
 It reads only the game's own loot messages about **you** ("You receive loot: …"), using the client's text,

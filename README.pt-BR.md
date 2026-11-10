@@ -163,8 +163,10 @@ Uma janela separada que lista os itens que **você** saqueou ou recebeu, do mais
 - Menu **Mostrar** — 5, 10, 15 ou 20 itens recentes.
 - Menu **Qualidade** — marque Inferior, Comum, Incomum, Raro, Épico e Lendário+ (nomes e cores vêm do próprio jogo), ou use *Marcar todas* / *Desmarcar todas*.
 - **Redimensionável** — arraste a alça do canto; a lista acompanha a largura e rola com a roda do mouse quando não cabe tudo. O tamanho fica salvo.
-- Cada linha mostra o ícone, o link do item colorido, a quantidade e a hora. Passe o mouse para ver o tooltip
-  do item; **Shift+clique** coloca o link na sua caixa de chat (você decide se envia).
+- Cada linha mostra o ícone, o link do item colorido, a quantidade e **quando** você saqueou: **Hoje 21:42**,
+  **Ontem 21:27**, ou a data para os mais antigos (**08/11 21:12**). Passe o mouse para ver o tooltip do item, que
+  também mostra a data completa ("Saqueado: domingo, 08/11/2026 às 21:12"); **Shift+clique** coloca o link na sua
+  caixa de chat (você decide se envia).
 - O histórico é salvo **por personagem** (últimos 100 itens). **Limpar** apaga tudo.
 
 Ele lê só as mensagens de saque do próprio jogo sobre **você** ("Você recebe saque: …"), usando os textos do

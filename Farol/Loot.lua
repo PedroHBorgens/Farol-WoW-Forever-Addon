@@ -51,6 +51,7 @@ local STRINGS = {
         loot_button_tip = "Últimos saques",
         loot_button_new = "%d item(ns) novo(s) — clique para ver",
         loot_button_none = "Clique para ver",
+        loot_when     = "Saqueado: %s",
         help_loot     = "  /farol saque [limpar] - abrir a janela de últimos saques (ou apagar o histórico)",
     },
     en = {
@@ -73,6 +74,7 @@ local STRINGS = {
         loot_button_tip = "Recent loot",
         loot_button_new = "%d new item(s) — click to view",
         loot_button_none = "Click to view",
+        loot_when     = "Looted: %s",
         help_loot     = "  /farol loot [clear]  - open the recent loot window (or clear the history)",
     },
 }
@@ -577,6 +579,8 @@ local function CreateWindow()
             if not self.link then return end
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             pcall(GameTooltip.SetHyperlink, GameTooltip, self.link)
+            local when = ns.FormatWhen(self.when, true)
+            if when ~= "--" then GameTooltip:AddLine(string.format(T("loot_when"), when), 0.6, 0.6, 0.6) end
             GameTooltip:Show()
         end)
         row:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -665,7 +669,8 @@ RefreshWindow = function()
             row.link = entry.link
             row.icon:SetTexture(IconOf(entry.link))
             row.text:SetText(entry.link)
-            local info = (date("%H:%M", entry.t) or "--")
+            row.when = entry.t
+            local info = ns.FormatWhen(entry.t)
             if entry.count > 1 then info = "x" .. entry.count .. "   " .. info end
             row.info:SetText(info)
             row:Show()

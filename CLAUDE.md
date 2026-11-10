@@ -66,8 +66,9 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - Arquivos compartilham a tabela `ns` (`local _, ns = ...`). O Core exporta `ns.T` (tradução), `ns.Print`,
   `ns.GetDB`, `ns.IsSecret`, `ns.frame`, `ns.UpdateText`, `ns.ApplyAppearance`, `ns.ApplyVisibility`,
   `ns.MakeToplevel`, `ns.LayoutQuickButtons`, `ns.SetBarWidth`, `ns.ITEM_ORDER`, `ns.ITEM_ICONS`,
-  `ns.GetWatchedFaction`, `ns.GetResetTimes` e `ns.GetServerClock` (hora do servidor validada: relógio, alarmes e
-  resets usam só ela, nunca `GetGameTime` direto).
+  `ns.GetWatchedFaction`, `ns.GetResetTimes`, `ns.GetServerClock` (hora do servidor validada: relógio, alarmes e
+  resets usam só ela, nunca `GetGameTime` direto) e `ns.FormatWhen(t, longo)` (datas de histórico: "Hoje 21:42" /
+  "Ontem" / "08/11"; longo = "domingo, 08/11/2026 às 21:12"; inválido = "--").
 - Cada módulo adiciona seus textos em `ns.STRINGS.pt` / `ns.STRINGS.en` e usa `T("chave")`.
 - **Globais:** só nomes começando com `Farol` (janelas/botões), `FarolDB`, `FarolCharDB`, `SLASH_FAROL1`,
   `Farol_ToggleWarnHistory`, `BINDING_*`. Nada de globais genéricos.

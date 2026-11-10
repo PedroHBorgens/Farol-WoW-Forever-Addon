@@ -137,18 +137,18 @@ popup = """<div style="display:flex;flex-direction:column;gap:18px">
 page("04_alarms", alarms + popup, "Clock alarms with snooze — local or server time", "Alarmes do relógio com soneca — hora local ou do servidor")
 
 # 5. Loot
-loot_items = [("q5","⚔️","[Thunderfury, Blessed Blade]","","21:42"),("q4","🛡️","[Helm of Valor]","","21:38"),("q3","💍","[Band of the Ancients]","","21:30"),
-              ("q2","🌿","[Peacebloom]","x6","21:27"),("q1","🧵","[Linen Cloth]","x12","21:20"),("q2","🗡️","[Bloodlust Dagger]","","21:12")]
-rows = "".join(f'<div class="row" style="padding:3px 0;font-size:15px"><span>{ic(e)} <span class="{q}">{n}</span></span><span class="dim">{c}&nbsp;&nbsp;{t}</span></div>' for q,e,n,c,t in loot_items)
+loot_items = [("q5","⚔️","[Thunderfury, Blessed Blade]","","Today","21:42"),("q4","🛡️","[Helm of Valor]","","Today","21:38"),("q3","💍","[Band of the Ancients]","","Today","09:30"),
+              ("q2","🌿","[Peacebloom]","x6","Yesterday","22:27"),("q1","🧵","[Linen Cloth]","x12","Yesterday","21:20"),("q2","🗡️","[Bloodlust Dagger]","","Nov 7","21:12")]
+rows = "".join(f'<div class="row" style="padding:3px 0;font-size:15px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{ic(e)} <span class="{q}">{n}</span></span><span style="white-space:nowrap"><span class="dim">{c}</span>&nbsp;&nbsp;<span style="color:#8c8c8c">{d}</span> <span style="color:#c8c8c8">{t}</span></span></div>' for q,e,n,c,d,t in loot_items)
 dd = """<div class="tip" style="position:absolute;left:236px;top:92px;width:200px;font-size:14px;line-height:1.7;z-index:2;background:#0a0d1a">
 <div><span class="k">✓</span> <span class="q0">Poor</span></div><div>&nbsp;&nbsp;&nbsp;<span class="q1">Common</span></div><div><span class="k">✓</span> <span class="q2">Uncommon</span></div>
 <div><span class="k">✓</span> <span class="q3">Rare</span></div><div><span class="k">✓</span> <span class="q4">Epic</span></div><div><span class="k">✓</span> <span class="q5">Legendary+</span></div>
 <div class="dim">Check all</div><div class="dim">Uncheck all</div></div>"""
-loot = f"""<div class="win" style="width:560px;padding-bottom:26px"><div class="x">×</div><div class="t">Recent loot</div>
+loot = f"""<div class="win" style="width:720px;padding-bottom:26px"><div class="x">×</div><div class="t">Recent loot</div>
 <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px"><span class="k">Show:</span><span class="btn">10 ▾</span><span class="k" style="margin-left:14px">Quality:</span><span class="btn">5 selected ▾</span></div>
 {dd}{rows}<div class="dim" style="font-size:12px;margin-top:10px">Hover: details · Shift-click: link · Wheel: scroll</div>
 <div style="position:absolute;right:8px;bottom:6px;color:#aaa">◢</div></div>"""
-page("05_loot", loot, "Recent loot window with quality filter", "Janela de últimos saques com filtro de qualidade — redimensionável")
+page("05_loot", loot, "Recent loot: when you got it, with quality filter", "Últimos saques: quando você pegou, com filtro de qualidade — redimensionável")
 
 # 6. Warnings
 warnpop = """<div class="win" style="width:440px;text-align:center"><div class="t">Warning</div><div style="font-size:16px">You have 2 unspent talent point(s).</div>

@@ -34,6 +34,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 ### Recent loot window
 - Shows the last **5 / 10 / 15 / 20** items you looted (dropdown). Quick **bag button** next to the bar with a new-items counter.
 - **Quality filter** dropdown (Poor → Legendary+), item tooltips, shift-click to link.
+- Shows **when** you looted each item: Today / Yesterday / date, plus the full date in the tooltip.
 - **Resizable** window with mouse-wheel scrolling. History saved per character.
 
 ### Languages
@@ -76,6 +77,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 ### Janela de últimos saques
 - Mostra os últimos **5 / 10 / 15 / 20** itens que você saqueou (menu suspenso). **Botão de bolsa** ao lado da barra, com contador de itens novos.
 - Menu de **filtro de qualidade** (Inferior → Lendário+), tooltip dos itens, Shift+clique para linkar.
+- Mostra **quando** você saqueou cada item: Hoje / Ontem / data, e a data completa no tooltip.
 - Janela **redimensionável**, com rolagem pela roda do mouse. Histórico salvo por personagem.
 
 ### Idiomas

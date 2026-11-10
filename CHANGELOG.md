@@ -2,6 +2,12 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.17.0 — Loot dates
+- The recent loot window shows the day before the time: **Today 21:42**, **Yesterday 21:27** or the date
+  (**Nov 8 21:12** / **08/11 21:12**; the year is added for older years). The day is dimmed so the item stands out.
+- Hovering an item adds the full date to its tooltip ("Looted: Sunday, Nov 8, 2026 at 21:12").
+- Works across midnight and daylight saving time; invalid saved dates show `--`.
+
 ## 2.16.1 — Security review
 - Server time is validated (whole hours 0–23, minutes 0–59) before use in the clock, alarms and reset tooltip;
   an invalid or blocked value shows `--` (server-time alarms wait) instead of a wrong time or an error.

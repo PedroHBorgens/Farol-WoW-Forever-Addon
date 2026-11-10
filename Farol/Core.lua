@@ -686,9 +686,24 @@ local function GetXPInfo()
     return cur, max, rested
 end
 
+-- Hora do servidor validada: horas inteiras 0-23 e minutos 0-59; qualquer outra coisa (bloqueado, NaN,
+-- infinito, texto, fora da faixa) devolve nil. Usada pelo relógio, pelos alarmes e pelos resets.
+local function GetServerClock()
+    if type(GetGameTime) ~= "function" then return nil end
+    local ok, hour, minute = pcall(GetGameTime)
+    if not ok or type(hour) ~= "number" or type(minute) ~= "number" or IsSecret(hour) or IsSecret(minute) then
+        return nil
+    end
+    if hour ~= math.floor(hour) or minute ~= math.floor(minute) then return nil end -- também recusa NaN/infinito
+    if hour < 0 or hour > 23 or minute < 0 or minute > 59 then return nil end
+    return hour, minute
+end
+ns.GetServerClock = GetServerClock
+
 local function GetClockText(server)
-    if server and GetGameTime then
-        local hour, minute = GetGameTime()
+    if server then
+        local hour, minute = GetServerClock()
+        if not hour then return "--" end
         return string.format("%02d:%02d", hour, minute)
     end
     return date("%H:%M")
@@ -755,12 +770,10 @@ local function ResetMoment(seconds)
         if day then localText = day .. " " .. localText end
     end
     local serverText = "--"
-    if GetGameTime then
-        local ok, hour, minute = pcall(GetGameTime)
-        if ok and type(hour) == "number" and type(minute) == "number" and not IsSecret(hour) and not IsSecret(minute) then
-            local total = (hour * 60 + minute + math.floor(seconds / 60 + 0.5)) % 1440
-            serverText = string.format("%02d:%02d", math.floor(total / 60), total % 60)
-        end
+    local hour, minute = GetServerClock()
+    if hour then
+        local total = (hour * 60 + minute + math.floor(seconds / 60 + 0.5)) % 1440
+        serverText = string.format("%02d:%02d", math.floor(total / 60), total % 60)
     end
     return localText, serverText
 end

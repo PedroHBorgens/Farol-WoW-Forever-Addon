@@ -71,4 +71,26 @@ return {
         H.env.C_DateAndTime = nil
         H:update(1); T.has(H:bar(), "Reset --", "API missing")
     end },
+
+    { "invalid server time never shows nonsense in clock, resets or alarms (security review)", function(T, Mock)
+        local H = setup(Mock)
+        H:slash("show hora")
+        H.env.FarolDB.serverTime = true
+        local bad = { { 0 / 0, 5 }, { math.huge, 5 }, { -math.huge, 0 }, { 1e300, 1e300 }, { -5, -70 },
+                      { 25, 61 }, { 21.5, 5 }, { "21", "05" }, { nil, nil } }
+        for _, pair in ipairs(bad) do
+            H.env.GetGameTime = function() return pair[1], pair[2] end
+            H:update(1)
+            T.hasnt(H:bar(), "9223372036854775808", "no overflow on the bar")
+            local text = tip(H)
+            T.has(text, "local · -- servidor)", "reset tooltip with bad server time " .. tostring(pair[1]))
+            T.hasnt(text, "9223372036854775808", "no overflow in the tooltip")
+        end
+        H.env.GetGameTime = function() error("blocked by the game") end
+        H:update(1); T.has(tip(H), "local · -- servidor)", "error inside the game API is contained")
+        T.eq(H.ns.GetServerClock(), nil)
+        H.env.GetGameTime = function() return 23, 59 end
+        T.eq(select(2, H.ns.GetServerClock()), 59, "valid time still works")
+        T.has(tip(H), "local · 05:11 servidor)", "23:59 + 5h 12m wraps past midnight")
+    end },
 }

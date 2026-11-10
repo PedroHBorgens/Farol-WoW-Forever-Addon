@@ -940,9 +940,15 @@ local function PrintStatus()
     Print(string.format("    UnitLevel: %s", tostring(UnitLevel and UnitLevel("player"))))
     local okRep, faction, repSource = pcall(ns.GetWatchedFaction)
     if okRep and faction then
-        Print(string.format(T("rep_status"), tostring(faction.name), tostring(repSource)))
+        Print(string.format(T("rep_status"), (string.gsub(tostring(faction.name), "|", "||")), tostring(repSource)))
     else
         Print(T("rep_status_none"))
+    end
+    local okReset, daily, weekly, dailySource, weeklySource = pcall(ns.GetResetTimes)
+    if okReset then
+        local function show(v) return v and string.format("%dh %02dm", math.floor(v / 3600), math.floor(v % 3600 / 60)) or "--" end
+        Print(string.format(T("reset_status"), show(daily), tostring(dailySource or "--"),
+            show(weekly), tostring(weeklySource or "--")))
     end
     local ok, outdated = pcall(FindOutdatedSpells)
     outdated = ok and outdated or {}

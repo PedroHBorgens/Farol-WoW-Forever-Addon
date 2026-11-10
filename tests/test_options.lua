@@ -1,7 +1,7 @@
 -- Menu de opções: abrir/fechar, caixinhas sincronizadas, idioma, horário do servidor.
 -- Options menu: open/close, synced checkboxes, language, server time.
 
-local ITEM_COUNT, GENERAL_COUNT = 18, 3 -- 18 itens + mostrar/travar/horário do servidor
+local ITEM_COUNT, GENERAL_COUNT = 19, 3 -- 19 itens + mostrar/travar/horário do servidor
 
 local function openMenu(H)
     H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
@@ -36,9 +36,9 @@ return {
         T.eq(H:text(window[11].label), "Ouro por hora")
         T.eq(H:text(window[13].label), "XP por hora")
         T.eq(H:text(window[14].label), "Reputação")
-        T.eq(H:text(window[19].label), "Mostrar painel")
-        T.eq(H:text(window[21].label), "Horário do servidor")
-        T.eq(H:text(panel[20].label), "Travar posição")
+        T.eq(H:text(window[20].label), "Mostrar painel")
+        T.eq(H:text(window[22].label), "Horário do servidor")
+        T.eq(H:text(panel[21].label), "Travar posição")
     end },
 
     { "ticking a box updates the bar, the saved settings and the other menu", function(T, Mock)
@@ -55,10 +55,10 @@ return {
     { "show panel, lock and server time options", function(T, Mock)
         local H = Mock.new():login()
         local _, window = openMenu(H)
-        H:check(window[20], true); T.eq(H.env.FarolDB.locked, true)
-        H:check(window[19], false)
+        H:check(window[21], true); T.eq(H.env.FarolDB.locked, true)
+        H:check(window[20], false)
         T.eq(H.env.FarolDB.shown, false); T.ok(not H.env.FarolFrame:IsShown(), "panel hidden")
-        H:check(window[21], true); T.eq(H.env.FarolDB.serverTime, true)
+        H:check(window[22], true); T.eq(H.env.FarolDB.serverTime, true)
         H:slash(""); T.ok(H.env.FarolFrame:IsShown(), "/farol shows it again")
         H:slash("show hora"); H:update(1)
         T.has(H:bar(), "21:05", "clock uses server time")

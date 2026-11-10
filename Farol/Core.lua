@@ -20,7 +20,7 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags",
-    "gold", "session", "goldh", "xp", "xph", "rep", "clock", "playtime", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "clock", "reset", "playtime", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
@@ -28,7 +28,7 @@ local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
     goldh = false, xph = false, rep = false,
-    clock = false, playtime = false, friends = false, guild = false,
+    clock = false, reset = false, playtime = false, friends = false, guild = false,
 }
 
 -- Nomes aceitos nos comandos /farol show|hide (português e inglês).
@@ -48,6 +48,7 @@ local ITEM_ALIASES = {
     rep = "rep", reputacao = "rep", reputation = "rep", faccao = "rep", faction = "rep",
     xp = "xp", experiencia = "xp", experience = "xp",
     hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
+    reset = "reset", resets = "reset", reinicio = "reset",
     tempo = "playtime", playtime = "playtime", played = "playtime",
     amigos = "friends", friends = "friends",
     guilda = "guild", guild = "guild",
@@ -124,6 +125,7 @@ local STRINGS = {
         name_rep = "Reputação",        cmd_rep = "rep",
         name_xp = "Experiência (XP)",  cmd_xp = "xp",
         name_clock = "Horário",        cmd_clock = "hora",
+        name_reset = "Resets (diário/semanal)", cmd_reset = "reset",
         name_playtime = "Tempo de sessão", cmd_playtime = "tempo",
         name_friends = "Amigos online", cmd_friends = "amigos",
         name_guild = "Guilda online",  cmd_guild = "guilda",
@@ -136,6 +138,9 @@ local STRINGS = {
         label_xph    = "XP/h",
         label_rep    = "Rep",
         label_playtime = "Jogando",
+        label_reset  = "Reset",
+        label_reset_daily = "Diário",
+        label_reset_weekly = "Semanal",
         label_friends = "Amigos",
         label_guild  = "Guilda",
         opt_servertime = "Horário do servidor",
@@ -154,6 +159,12 @@ local STRINGS = {
         tt_rep_none  = "nenhuma facção acompanhada (marque 'Mostrar como barra de experiência' no painel de reputação)",
         rep_status   = "reputação: %s (função: %s).",
         rep_status_none = "reputação: nenhuma facção acompanhada.",
+        tt_reset_daily  = "Reset diário em",
+        tt_reset_weekly = "Reset semanal em",
+        tt_reset_at     = "%s (%s local · %s servidor)",
+        tt_reset_none   = "o jogo não informou",
+        reset_status    = "resets: diário %s (função: %s) · semanal %s (função: %s).",
+        weekdays        = "dom,seg,ter,qua,qui,sex,sáb",
         tt_rate_wait = "calculando... (1 min)",
         session_reset = "sessão zerada: ouro, XP e tempo recomeçam agora.",
         help_session = "  /farol sessao zerar  - recomeçar a contagem de ouro, XP e tempo da sessão",
@@ -232,6 +243,7 @@ local STRINGS = {
         name_rep = "Reputation",       cmd_rep = "rep",
         name_xp = "Experience (XP)",   cmd_xp = "xp",
         name_clock = "Clock",          cmd_clock = "clock",
+        name_reset = "Resets (daily/weekly)", cmd_reset = "reset",
         name_playtime = "Session time", cmd_playtime = "playtime",
         name_friends = "Friends online", cmd_friends = "friends",
         name_guild = "Guild online",   cmd_guild = "guild",
@@ -244,6 +256,9 @@ local STRINGS = {
         label_xph    = "XP/h",
         label_rep    = "Rep",
         label_playtime = "Played",
+        label_reset  = "Reset",
+        label_reset_daily = "Daily",
+        label_reset_weekly = "Weekly",
         label_friends = "Friends",
         label_guild  = "Guild",
         opt_servertime = "Server time",
@@ -262,6 +277,12 @@ local STRINGS = {
         tt_rep_none  = "no watched faction (tick 'Show as Experience Bar' in the reputation panel)",
         rep_status   = "reputation: %s (function: %s).",
         rep_status_none = "reputation: no watched faction.",
+        tt_reset_daily  = "Daily reset in",
+        tt_reset_weekly = "Weekly reset in",
+        tt_reset_at     = "%s (%s local · %s server)",
+        tt_reset_none   = "not reported by the game",
+        reset_status    = "resets: daily %s (function: %s) · weekly %s (function: %s).",
+        weekdays        = "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
         tt_rate_wait = "calculating... (1 min)",
         session_reset = "session reset: gold, XP and time start counting now.",
         help_session = "  /farol session reset - restart the session gold, XP and time counters",
@@ -678,12 +699,70 @@ local function GetSessionSeconds()
     return GetTime() - session.startTime
 end
 
+
 local function FormatDuration(seconds)
     seconds = math.floor(seconds or 0)
     local hours = math.floor(seconds / 3600)
     local minutes = math.floor((seconds % 3600) / 60)
     if hours > 0 then return string.format("%dh %02dm", hours, minutes) end
     return string.format("%dm", minutes)
+end
+
+-- Segundos até os resets, como o próprio jogo informa. Clientes modernos: C_DateAndTime;
+-- antigos (3.3.5a): GetQuestResetTime (só o diário). Devolve diário, semanal e o nome de cada função.
+local function ResetSeconds(fn, limit)
+    if type(fn) ~= "function" then return nil end
+    local ok, seconds = pcall(fn)
+    if not ok or type(seconds) ~= "number" or IsSecret(seconds) or seconds ~= seconds then return nil end
+    if seconds < 0 or seconds > limit then return nil end -- também recusa infinito
+    return seconds
+end
+
+local function GetResetTimes()
+    local daily, dailySource, weekly, weeklySource
+    local dt = C_DateAndTime
+    if type(dt) == "table" then
+        daily = ResetSeconds(dt.GetSecondsUntilDailyReset, 2 * 86400)
+        if daily then dailySource = "C_DateAndTime" end
+        weekly = ResetSeconds(dt.GetSecondsUntilWeeklyReset, 8 * 86400)
+        if weekly then weeklySource = "C_DateAndTime" end
+    end
+    if not daily then
+        daily = ResetSeconds(GetQuestResetTime, 2 * 86400)
+        if daily then dailySource = "GetQuestResetTime" end
+    end
+    return daily, weekly, dailySource, weeklySource
+end
+ns.GetResetTimes = GetResetTimes
+
+-- Tempo curto com dias: "2d 4h", "5h 12m", "38m".
+local function FormatCountdown(seconds)
+    seconds = math.floor(seconds)
+    if seconds >= 86400 then
+        return string.format("%dd %dh", math.floor(seconds / 86400), math.floor((seconds % 86400) / 3600))
+    end
+    return FormatDuration(seconds)
+end
+
+-- Quando o reset acontece: dia da semana (se for depois de hoje) e hora local, mais a hora do servidor.
+local function ResetMoment(seconds)
+    local at = time() + math.floor(seconds)
+    local localText = date("%H:%M", at)
+    if seconds >= 86400 or date("%d", at) ~= date("%d") then
+        local names = {}
+        for name in string.gmatch(T("weekdays"), "[^,]+") do names[#names + 1] = name end
+        local day = names[(tonumber(date("%w", at)) or 0) + 1]
+        if day then localText = day .. " " .. localText end
+    end
+    local serverText = "--"
+    if GetGameTime then
+        local ok, hour, minute = pcall(GetGameTime)
+        if ok and type(hour) == "number" and type(minute) == "number" and not IsSecret(hour) and not IsSecret(minute) then
+            local total = (hour * 60 + minute + math.floor(seconds / 60 + 0.5)) % 1440
+            serverText = string.format("%02d:%02d", math.floor(total / 60), total % 60)
+        end
+    end
+    return localText, serverText
 end
 
 local function GetFriendsOnline()
@@ -891,6 +970,14 @@ local ITEM_TEXT = {
         local copper = perHour >= 0 and math.floor(perHour) or -math.floor(-perHour)
         return T("label_goldh") .. " " .. FormatMoneyDelta(copper)
     end,
+    reset = function()
+        local daily, weekly = GetResetTimes()
+        if not daily and not weekly then return T("label_reset") .. " --" end
+        local parts = {}
+        if daily then parts[#parts + 1] = T("label_reset_daily") .. " " .. FormatCountdown(daily) end
+        if weekly then parts[#parts + 1] = T("label_reset_weekly") .. " " .. FormatCountdown(weekly) end
+        return table.concat(parts, " · ")
+    end,
     playtime = function()
         local seconds = GetSessionSeconds()
         if not seconds then return nil end
@@ -1001,7 +1088,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
     guild = "INV_Shirt_GuildTabard_01",
 }
@@ -1215,6 +1302,17 @@ local function FillTooltip()
             end
         else
             AddPair(T("tt_rep"), T("tt_rep_none"))
+        end
+    end
+    if db.items.reset then
+        local daily, weekly = Safe(GetResetTimes)
+        for _, entry in ipairs({ { "tt_reset_daily", daily }, { "tt_reset_weekly", weekly } }) do
+            if entry[2] then
+                local localText, serverText = ResetMoment(entry[2])
+                AddPair(T(entry[1]), string.format(T("tt_reset_at"), FormatCountdown(entry[2]), localText, serverText))
+            else
+                AddPair(T(entry[1]), T("tt_reset_none"))
+            end
         end
     end
     local seconds = Safe(GetSessionSeconds)

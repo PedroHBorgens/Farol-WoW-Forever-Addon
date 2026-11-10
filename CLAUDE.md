@@ -100,8 +100,10 @@ lua5.1 tests/run.lua        # ~100 testes; deve terminar com "0 failed"
 3. Subir a versão em **todos os 4 `.toc`** (`## Version:`) e registrar no `CHANGELOG.md`.
 4. Pull request. O `main` é protegido: o merge exige **`test`** e **`github-advanced-security`** aprovados.
    Esperar as duas verificações antes do merge.
-5. Pacote para o CurseForge: ZIP com **uma única pasta `Farol` na raiz** (com `Farol.toc` dentro) e
-   `LICENSE.txt`. O workflow gera esse pacote como *artifact* em cada execução.
+5. Pacote para o CurseForge: ZIP com **uma única pasta `Farol` na raiz e mais nada** — `LICENSE.txt` fica
+   **dentro** de `Farol/` (`Farol/LICENSE.txt`). Qualquer arquivo solto na raiz do ZIP faz o CurseForge rejeitar
+   ("This ZIP contains files at the top level"). O workflow gera esse pacote como *artifact* em cada execução;
+   ao montar à mão: `cp LICENSE Farol/LICENSE.txt` e zipar só a pasta `Farol`. Conferir com `unzip -Z1`.
 6. Sessões automatizadas não conseguem apagar branches no GitHub; isso é feito pela interface do GitHub.
 
 ## Imagens do CurseForge

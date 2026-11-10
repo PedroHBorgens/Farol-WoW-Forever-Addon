@@ -63,6 +63,7 @@ local DEFAULTS = {
     y = -20,
     lang = "auto", -- "auto" (segue o idioma do cliente), "pt" ou "en"
     serverTime = false, -- relógio mostra o horário do servidor em vez do local
+    summary = true,     -- mostrar o resumo da última sessão ao entrar no jogo
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
     -- Aparência
     scale = 1,              -- escala da barra (0.5 a 2)
@@ -144,6 +145,25 @@ local STRINGS = {
         label_friends = "Amigos",
         label_guild  = "Guilda",
         opt_servertime = "Horário do servidor",
+        opt_summary  = "Resumo da sessão ao entrar",
+        sum_title    = "resumo da sessão (%s):",
+        sum_last     = "última sessão (%s, %s):",
+        sum_gold     = "Ouro: %s",
+        sum_xp       = "XP: +%s",
+        sum_level1   = "1 nível",
+        sum_levels   = "%d níveis",
+        sum_rep      = "Reputação: +%s %s",
+        sum_loot     = "Saques: %d",
+        sum_rare1    = "1 raro",
+        sum_rares    = "%d raros",
+        sum_epic1    = "1 épico",
+        sum_epics    = "%d épicos",
+        sum_legend1  = "1 lendário",
+        sum_legends  = "%d lendários",
+        sum_warns    = "Avisos: %d",
+        sum_on       = "resumo da sessão ao entrar: ligado.",
+        sum_off      = "resumo da sessão ao entrar: desligado.",
+        help_summary = "  /farol resumo [on||off] - resumo da sessão atual (ou ligar/desligar o resumo ao entrar)",
         tt_mem       = "Memória Lua (interface + addons)",
         tt_speed     = "Velocidade",
         tt_bags      = "Bolsas (livres / total)",
@@ -269,6 +289,25 @@ local STRINGS = {
         label_friends = "Friends",
         label_guild  = "Guild",
         opt_servertime = "Server time",
+        opt_summary  = "Session summary at login",
+        sum_title    = "session summary (%s):",
+        sum_last     = "last session (%s, %s):",
+        sum_gold     = "Gold: %s",
+        sum_xp       = "XP: +%s",
+        sum_level1   = "1 level",
+        sum_levels   = "%d levels",
+        sum_rep      = "Reputation: +%s %s",
+        sum_loot     = "Loot: %d",
+        sum_rare1    = "1 rare",
+        sum_rares    = "%d rares",
+        sum_epic1    = "1 epic",
+        sum_epics    = "%d epics",
+        sum_legend1  = "1 legendary",
+        sum_legends  = "%d legendaries",
+        sum_warns    = "Warnings: %d",
+        sum_on       = "session summary at login: on.",
+        sum_off      = "session summary at login: off.",
+        help_summary = "  /farol summary [on||off] - current session summary (or turn the summary at login on/off)",
         tt_mem       = "Lua memory (UI + addons)",
         tt_speed     = "Speed",
         tt_bags      = "Bags (free / total)",
@@ -634,17 +673,22 @@ local function SampleRep()
     if not ValidFaction(f) then return end
     if session.repID ~= f.id then
         session.repID, session.repLast, session.repGained, session.repStart = f.id, f.value, 0, GetTime()
+        session.repName, session.repFrom, session.repTo = f.name, f.reaction, f.reaction
         return
     end
     if f.value > session.repLast then
         session.repGained = session.repGained + (f.value - session.repLast)
     end
     session.repLast = f.value
+    session.repTo = f.reaction
 end
 
 local function ResetSession()
     session.startMoney = GetMoney()
     session.startTime = GetTime()
+    session.startClock = time() -- hora do relógio: separa os saques e avisos desta sessão
+    local okLevel, level = pcall(UnitLevel, "player")
+    session.startLevel = (okLevel and type(level) == "number" and not IsSecret(level)) and level or nil
     session.xpGained = 0
     session.lastXP = nil
     session.repID = nil -- recomeça a contagem de reputação
@@ -941,6 +985,159 @@ local function StandingText(reaction)
         return string.format("|cff%02x%02x%02x%s|r", byte(color.r), byte(color.g), byte(color.b), label)
     end
     return label
+end
+
+---------------------------------------------------------------------------
+-- Resumo da sessão: só números já calculados pela barra. Mostrado só no SEU chat.
+---------------------------------------------------------------------------
+
+local function CountSince(list, since, quality)
+    local n = 0
+    if type(list) ~= "table" or not since then return 0 end
+    for _, entry in ipairs(list) do
+        if type(entry) == "table" and type(entry.t) == "number" and entry.t >= since
+                and (not quality or (type(entry.q) == "number" and quality(entry.q))) then
+            n = n + 1
+        end
+    end
+    return n
+end
+
+-- Fotografia numérica da sessão atual (é isso que fica salvo ao sair).
+local function BuildSummary()
+    local char = FarolCharDB or {}
+    local okLevel, level = pcall(UnitLevel, "player")
+    local levels = 0
+    if okLevel and type(level) == "number" and not IsSecret(level) and session.startLevel then
+        levels = math.max(0, level - session.startLevel)
+    end
+    local since = session.startClock
+    return {
+        t = time(),
+        secs = math.floor(GetSessionSeconds() or 0),
+        money = GetSessionMoney() or 0,
+        xp = math.floor(session.xpGained or 0),
+        levels = levels,
+        rep = math.floor(session.repGained or 0),
+        repName = session.repName,
+        repFrom = session.repFrom,
+        repTo = session.repTo,
+        loot = CountSince(char.items, since),
+        rare = CountSince(char.items, since, function(q) return q == 3 end),
+        epic = CountSince(char.items, since, function(q) return q == 4 end),
+        legend = CountSince(char.items, since, function(q) return q >= 5 end),
+        warns = CountSince(char.warnHistory, since),
+    }
+end
+
+-- Valida o resumo salvo (arquivo pode estar corrompido ou adulterado). Inválido = nil.
+local function SanitizeSummary(saved)
+    if type(saved) ~= "table" then return nil end
+    local function int(v, lo, hi)
+        if type(v) ~= "number" or v ~= v or v < lo or v > hi then return nil end
+        return math.floor(v)
+    end
+    local t = int(saved.t, 1, 4102444799)
+    if not t then return nil end
+    local clean = {
+        t = t,
+        secs = int(saved.secs, 0, 30 * 86400) or 0,
+        money = int(saved.money, -1e12, 1e12) or 0,
+        xp = int(saved.xp, 0, 1e10) or 0,
+        levels = int(saved.levels, 0, 100) or 0,
+        rep = int(saved.rep, 0, 1e9) or 0,
+        repFrom = int(saved.repFrom, 1, 8),
+        repTo = int(saved.repTo, 1, 8),
+        loot = int(saved.loot, 0, 100) or 0,
+        rare = int(saved.rare, 0, 100) or 0,
+        epic = int(saved.epic, 0, 100) or 0,
+        legend = int(saved.legend, 0, 100) or 0,
+        warns = int(saved.warns, 0, 10) or 0,
+    }
+    if type(saved.repName) == "string" and #saved.repName > 0 and #saved.repName <= 100 then
+        clean.repName = saved.repName
+    end
+    return clean
+end
+ns.SanitizeSummary = SanitizeSummary
+
+local function Plural(n, one, many)
+    if n == 1 then return T(one) end
+    return string.format(T(many), n)
+end
+
+-- Linhas de texto do resumo. "last" = resumo salvo da sessão anterior.
+local function SummaryLines(s, last)
+    local lines = {}
+    if last then
+        lines[1] = string.format(T("sum_last"), FormatWhen(s.t), FormatDuration(s.secs))
+    else
+        lines[1] = string.format(T("sum_title"), FormatDuration(s.secs))
+    end
+    local perHour = s.secs >= RATE_MIN_SECONDS and 3600 / s.secs or nil
+    local parts = {}
+    local gold = string.format(T("sum_gold"), FormatMoneyDelta(s.money))
+    if perHour then
+        local rate = s.money * perHour
+        rate = rate >= 0 and math.floor(rate) or -math.floor(-rate)
+        gold = gold .. " (" .. FormatMoneyDelta(rate) .. "/h)"
+    end
+    parts[#parts + 1] = gold
+    if s.xp > 0 or s.levels > 0 then
+        local xp = string.format(T("sum_xp"), FormatBig(s.xp))
+        local extra = {}
+        if s.levels > 0 then extra[#extra + 1] = Plural(s.levels, "sum_level1", "sum_levels") end
+        if perHour and s.xp > 0 then extra[#extra + 1] = FormatBig(s.xp * perHour) .. "/h" end
+        if #extra > 0 then xp = xp .. " (" .. table.concat(extra, ", ") .. ")" end
+        parts[#parts + 1] = xp
+    end
+    lines[#lines + 1] = "  " .. table.concat(parts, " · ")
+    if s.rep > 0 and s.repName then
+        local text = string.format(T("sum_rep"), FormatBig(s.rep), FactionName(s.repName))
+        if s.repFrom and s.repTo then
+            local standing = StandingText(s.repTo)
+            if s.repFrom ~= s.repTo then standing = StandingText(s.repFrom) .. " → " .. standing end
+            text = text .. " (" .. standing .. ")"
+        end
+        lines[#lines + 1] = "  " .. text
+    end
+    local loot = string.format(T("sum_loot"), s.loot)
+    local special = {}
+    if s.rare > 0 then special[#special + 1] = Plural(s.rare, "sum_rare1", "sum_rares") end
+    if s.epic > 0 then special[#special + 1] = Plural(s.epic, "sum_epic1", "sum_epics") end
+    if s.legend > 0 then special[#special + 1] = Plural(s.legend, "sum_legend1", "sum_legends") end
+    if #special > 0 then loot = loot .. " (" .. table.concat(special, ", ") .. ")" end
+    lines[#lines + 1] = "  " .. loot .. " · " .. string.format(T("sum_warns"), s.warns)
+    return lines
+end
+
+local function PrintSummary(s, last)
+    local ok, lines = pcall(SummaryLines, s, last)
+    if not ok then return end
+    for _, line in ipairs(lines) do Print(line) end
+end
+
+local SUMMARY_MIN_SECONDS = 300 -- sessões com menos de 5 minutos não ficam salvas
+local summaryShown = false      -- mostra a última sessão uma vez por carregamento
+
+-- Ao sair (ou /reload): guarda a fotografia da sessão, se ela durou o bastante.
+local function SaveSummary()
+    if not FarolCharDB or not session.startTime then return end
+    local ok, s = pcall(BuildSummary)
+    if ok and s.secs >= SUMMARY_MIN_SECONDS then FarolCharDB.lastSession = s end
+end
+
+-- Ao entrar: mostra a última sessão só no login de verdade (não depois de /reload) e apaga o registro.
+local function ShowLastSummary(isInitialLogin, isReloadingUi)
+    if summaryShown then return end
+    summaryShown = true
+    local last = FarolCharDB and FarolCharDB.lastSession
+    if not db.summary or not last then return end
+    if isInitialLogin == false or isReloadingUi == true then return end
+    -- Cliente antigo (sem esses argumentos): um /reload logo depois de salvar não conta como sessão nova.
+    if isInitialLogin == nil and time() - last.t < 120 then return end
+    PrintSummary(last, true)
+    FarolCharDB.lastSession = nil
 end
 
 -- No 3.3.5a as coordenadas dependem do mapa "ativo"; ao trocar de zona,
@@ -1538,6 +1735,11 @@ local function SetServerTime(value)
     RefreshOptions()
 end
 
+local function SetSummary(value)
+    db.summary = value
+    RefreshOptions()
+end
+
 local function ResetPosition()
     db.point, db.relPoint, db.x, db.y = DEFAULTS.point, DEFAULTS.relPoint, DEFAULTS.x, DEFAULTS.y
     ApplyPosition()
@@ -1630,6 +1832,7 @@ local function BuildControls(parent, top)
     set.locked = CreateCheck(parent, 185, y, SetLocked)
     y = y - 26
     set.serverTime = CreateCheck(parent, 20, y, SetServerTime)
+    set.summary = CreateCheck(parent, 185, y, SetSummary)
     y = y - 36
 
     set.langHeader = CreateHeader(parent, y)
@@ -1689,6 +1892,8 @@ RefreshOptions = function()
         set.locked:SetChecked(db.locked)
         set.serverTime.label:SetText(T("opt_servertime"))
         set.serverTime:SetChecked(db.serverTime)
+        set.summary.label:SetText(T("opt_summary"))
+        set.summary:SetChecked(db.summary)
         for lang, button in pairs(set.langs) do
             if lang == db.lang then button:LockHighlight() else button:UnlockHighlight() end
         end
@@ -1784,6 +1989,7 @@ end)
 
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+frame:RegisterEvent("PLAYER_LOGOUT") -- guardar o resumo da sessão (também acontece no /reload)
 frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 frame:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
@@ -1792,7 +1998,7 @@ frame:RegisterEvent("UPDATE_FACTION")
 frame:RegisterEvent("PLAYER_REGEN_DISABLED") -- entrou em combate
 frame:RegisterEvent("PLAYER_REGEN_ENABLED")  -- saiu do combate
 
-frame:SetScript("OnEvent", function(self, event, arg1)
+frame:SetScript("OnEvent", function(self, event, arg1, arg2)
     if event == "ADDON_LOADED" then
         if arg1 ~= ADDON_NAME then return end
         local saved = FarolDB
@@ -1805,6 +2011,7 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         local savedChar = FarolCharDB
         FarolCharDB = ns.Loot.SanitizeHistory(savedChar) -- histórico de saques deste personagem
         FarolCharDB.warnHistory = ns.Warnings.SanitizeHistory(type(savedChar) == "table" and savedChar.warnHistory or nil)
+        FarolCharDB.lastSession = SanitizeSummary(type(savedChar) == "table" and savedChar.lastSession or nil)
         ApplyPosition()
         UpdateGrip()
         ApplyAppearance()
@@ -1815,7 +2022,13 @@ frame:SetScript("OnEvent", function(self, event, arg1)
     end
     if not db then return end
 
+    if event == "PLAYER_LOGOUT" then
+        SaveSummary()
+        return
+    end
+
     if event == "PLAYER_ENTERING_WORLD" then
+        pcall(ShowLastSummary, arg1, arg2) -- antes de StartSession: o registro é da sessão anterior
         StartSession()
         ResetMapToCurrentZone()
         ScanDurability()
@@ -1844,7 +2057,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_warn", "help_history", "help_appearance", "help_order",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_warn", "help_history", "help_appearance", "help_order",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -1912,6 +2125,16 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Warnings.ToggleHistory()
     elseif cmd == "aviso" or cmd == "avisos" or cmd == "warn" or cmd == "warning" or cmd == "warnings" then
         ns.Warnings.HandleCommand(rest)
+    elseif cmd == "resumo" or cmd == "summary" then
+        if arg == "on" or arg == "ligar" then
+            SetSummary(true); Print(T("sum_on"))
+        elseif arg == "off" or arg == "desligar" then
+            SetSummary(false); Print(T("sum_off"))
+        else
+            pcall(SampleXP); pcall(SampleRep)
+            local ok, s = pcall(BuildSummary)
+            if ok then PrintSummary(s, false) end
+        end
     elseif (cmd == "sessao" or cmd == "session") and (arg == "zerar" or arg == "reset") then
         ResetSession()
         UpdateText()

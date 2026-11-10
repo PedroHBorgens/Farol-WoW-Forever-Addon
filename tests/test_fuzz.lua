@@ -48,18 +48,25 @@ return {
 
     { "tampered saved data with wrong types never breaks any window", function(T, Mock)
         local KEYS = { "x", "y", "point", "lang", "scale", "bgAlpha", "fontSize", "iconSize", "barWidth", "items",
-                       "alarms", "loot", "warnings", "order", "snoozeMinutes", "shown", "locked", "icons", "vertical" }
+                       "alarms", "loot", "warnings", "order", "snoozeMinutes", "shown", "locked", "icons", "vertical",
+                       "summary", "serverTime" }
         for i = 1, 60 do
             local db = {}
             for _, key in ipairs(KEYS) do if random(3) > 1 then db[key] = pick(BAD) end end
             local char = {
                 items = { { link = "|cff1eff00|Hitem:1|h[Ok]|h|r", count = pick(BAD), q = pick(BAD), t = pick(BAD) } },
                 warnHistory = { { t = pick(BAD), text = "Aviso " .. i }, pick(BAD) },
+                lastSession = random(4) == 1 and pick(BAD) or {
+                    t = random(2) == 1 and pick(BAD) or 1e9, secs = pick(BAD), money = pick(BAD), xp = pick(BAD),
+                    levels = pick(BAD), rep = pick(BAD), repName = pick(BAD), repFrom = pick(BAD), repTo = pick(BAD),
+                    loot = pick(BAD), rare = pick(BAD), epic = pick(BAD), legend = pick(BAD), warns = pick(BAD),
+                },
             }
             local ok, err = pcall(function()
                 local H = Mock.new():login(db, char)
+                H:event("PLAYER_ENTERING_WORLD", true, false) -- mostra o resumo salvo (se ficou válido)
                 H:update(1)
-                for _, cmd in ipairs({ "menu", "saque", "historico", "ordem", "alarme", "aviso", "aparencia" }) do
+                for _, cmd in ipairs({ "menu", "saque", "historico", "ordem", "alarme", "aviso", "aparencia", "resumo" }) do
                     H:slash(cmd)
                 end
             end)

@@ -31,6 +31,10 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - Each warning lets you **Silence** it or get a **reminder in 30 minutes**.
 - **History of the last 10 warnings**: button next to the bar (with unread counter), key binding or `/farol history`.
 
+### Session summary
+- `/farol summary` shows what you did this session **in your own chat**: gold (and per hour), XP and levels, reputation (standing before → after), loot (rares, epics, legendaries) and warnings.
+- The last session's summary is shown **the next time you log in** (option in the menu; not after `/reload`).
+
 ### Recent loot window
 - Shows the last **5 / 10 / 15 / 20** items you looted (dropdown). Quick **bag button** next to the bar with a new-items counter.
 - **Quality filter** dropdown (Poor → Legendary+), item tooltips, shift-click to link.
@@ -46,7 +50,7 @@ English and Brazilian Portuguese (follows your client, or `/farol lang en|pt`).
 - Saved settings are validated on load. Free, no ads, readable source code (MIT license).
 
 ### Commands
-`/farol` show/hide · `/farol menu` options · `/farol alarm` alarms · `/farol loot` loot window · `/farol help` all commands
+`/farol` show/hide · `/farol menu` options · `/farol alarm` alarms · `/farol loot` loot window · `/farol summary` session summary · `/farol help` all commands
 
 ---
 
@@ -74,6 +78,10 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 - Cada aviso deixa você **Silenciar** ou ser **lembrado em 30 minutos**.
 - **Histórico dos 10 últimos avisos**: botão ao lado da barra (com contador de novos), atalho de teclado ou `/farol historico`.
 
+### Resumo da sessão
+- `/farol resumo` mostra **no seu chat** o que você fez na sessão: ouro (e por hora), XP e níveis, reputação (nível antes → depois), saques (raros, épicos, lendários) e avisos.
+- O resumo da última sessão aparece **na próxima vez que você entrar** (opção no menu; não aparece depois de `/reload`).
+
 ### Janela de últimos saques
 - Mostra os últimos **5 / 10 / 15 / 20** itens que você saqueou (menu suspenso). **Botão de bolsa** ao lado da barra, com contador de itens novos.
 - Menu de **filtro de qualidade** (Inferior → Lendário+), tooltip dos itens, Shift+clique para linkar.
@@ -89,4 +97,4 @@ Português do Brasil e inglês (segue o idioma do cliente, ou `/farol lang pt|en
 - As configurações salvas são validadas ao carregar. Gratuito, sem anúncios, código legível (licença MIT).
 
 ### Comandos
-`/farol` mostrar/ocultar · `/farol menu` opções · `/farol alarme` alarmes · `/farol saque` janela de saques · `/farol ajuda` todos os comandos
+`/farol` mostrar/ocultar · `/farol menu` opções · `/farol alarme` alarmes · `/farol saque` janela de saques · `/farol resumo` resumo da sessão · `/farol ajuda` todos os comandos

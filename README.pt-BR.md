@@ -30,6 +30,8 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol saque`      | Abre a janela de últimos saques |
 | `/farol saque limpar`| Apaga o histórico de saques deste personagem |
 | `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h, rep/h e tempo |
+| `/farol resumo`     | Resumo da sessão atual (ouro, XP, reputação, saques, avisos) |
+| `/farol resumo on` / `off` | Mostra / não mostra o resumo da última sessão ao entrar |
 | `/farol aviso`      | Abre a janela de avisos (durabilidade, bolsas, talentos, graus de magia) |
 | `/farol aviso status`| Mostra o que o Farol consegue ler no seu cliente (talentos, reputação, resets) |
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
@@ -154,6 +156,24 @@ Os **10 últimos avisos** (com data e hora) ficam guardados por personagem. Para
   oficial do jogo; só abre a janela);
 - `/farol historico`, ou **Histórico...** na janela de Avisos.
 
+## Resumo da sessão
+
+`/farol resumo` mostra, **só no seu chat**, o que você fez nesta sessão:
+
+```
+Farol: resumo da sessão (2h 14m):
+Farol:   Ouro: +38g 12s (+17g 6s/h) · XP: +84.2k (1 nível, 37.6k/h)
+Farol:   Reputação: +1.3k Orgrimmar (Honrado → Reverenciado)
+Farol:   Saques: 46 (3 raros, 1 épico) · Avisos: 2
+```
+
+- Quando você sai do jogo, o Farol guarda esse resumo para o personagem e, **na próxima vez que você entrar**, mostra
+  "última sessão (data, duração)" no seu chat. Ele não aparece depois de um `/reload`, e sessões com menos de
+  5 minutos não são guardadas.
+- Para desligar: **Resumo da sessão ao entrar** no menu de opções, ou `/farol resumo off`.
+- Usa os mesmos números da barra (ouro da sessão, XP/h, reputação por hora) e os históricos de saques e de avisos.
+  Nada é enviado a ninguém.
+
 ## Janela de últimos saques
 
 Uma janela separada que lista os itens que **você** saqueou ou recebeu, do mais novo para o mais antigo.
@@ -257,7 +277,7 @@ Segurança da informação é a primeira regra deste projeto:
 - **Dados salvos são validados.** `FarolDB` guarda só as suas configurações: posição e estado do painel, idioma,
   itens visíveis e a ordem deles, aparência, alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o
   tempo da soneca), ajustes da janela de saques e dos avisos. `FarolCharDB` (por personagem) guarda só o histórico
-  de saques (links de item validados) e os 10 últimos avisos. Tudo é verificado ao carregar — um arquivo corrompido
+  de saques (links de item validados), os 10 últimos avisos e o resumo da última sessão (só números). Tudo é verificado ao carregar — um arquivo corrompido
   ou adulterado volta para os valores padrão.
 - **Baixe só das fontes oficiais** (este repositório ou a página do CurseForge). Addons são texto Lua: você pode ler
   todo o código na pasta `Farol`.

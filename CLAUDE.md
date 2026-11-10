@@ -100,12 +100,24 @@ lua5.1 tests/run.lua        # ~100 testes; deve terminar com "0 failed"
 3. Subir a versão em **todos os 4 `.toc`** (`## Version:`) e registrar no `CHANGELOG.md`.
 4. Pull request. O `main` é protegido: o merge exige **`test`** e **`github-advanced-security`** aprovados.
    Esperar as duas verificações antes do merge.
-5. Pacote para o CurseForge: ZIP com **uma única pasta `Farol` na raiz** (com `Farol.toc` dentro) e
-   `LICENSE.txt`. O workflow gera esse pacote como *artifact* em cada execução.
+5. Pacote para o CurseForge: ZIP com **uma única pasta `Farol` na raiz e mais nada** — `LICENSE.txt` fica
+   **dentro** de `Farol/` (`Farol/LICENSE.txt`). Qualquer arquivo solto na raiz do ZIP faz o CurseForge rejeitar
+   ("This ZIP contains files at the top level"). O workflow gera esse pacote como *artifact* em cada execução;
+   ao montar à mão: `cp LICENSE Farol/LICENSE.txt` e zipar só a pasta `Farol`. Conferir com `unzip -Z1`.
 6. Sessões automatizadas não conseguem apagar branches no GitHub; isso é feito pela interface do GitHub.
 
 ## Imagens do CurseForge
 
 `assets/curseforge/`: ilustrações 1280×720 com legenda EN/PT e selo "Illustration · Ilustração" (não são prints do
 jogo). Para regenerar: `python3 assets/curseforge/make_pages.py` e `node assets/curseforge/shoot.js` (Playwright).
-Ao mudar uma janela do addon, atualize a ilustração correspondente.
+Ao mudar uma janela do addon, atualize a ilustração correspondente:
+
+| Mudança | Imagens |
+|---|---|
+| Item novo na barra / no tooltip | 02 (contagem de itens, grade, tooltip), 03 (caixinhas e ordem); 08 se for de progresso; 01 se for destaque |
+| Opção nova no menu (Geral, idioma, botões) | 03 |
+| Alarmes | 04 · Janela de saques: 05 · Avisos / histórico: 06 |
+| Aparência (escala, fundo, formato, botões rápidos) | 07 (e 02 se mudar o formato da barra) |
+
+As imagens 04–06 saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
+e apague lá as versões antigas.

@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.18.0 — Session summary
+- `/farol summary` (`/farol resumo`) shows the current session **in your own chat**: gold and gold per hour, XP,
+  levels and XP per hour, reputation (standing before → after), loot (rares, epics, legendaries) and warnings.
+- On logout the summary is saved per character and shown **the next time you log in** ("last session"); not after
+  `/reload`, and sessions under 5 minutes are not saved. Option **Session summary at login** (on by default) and
+  `/farol summary on|off`.
+- The saved summary holds numbers only and is validated on load (tampered values fall back or are discarded).
+
 ## 2.17.0 — Loot dates
 - The recent loot window shows the day before the time: **Today 21:42**, **Yesterday 21:27** or the date
   (**Nov 8 21:12** / **08/11 21:12**; the year is added for older years). The day is dimmed so the item stands out.

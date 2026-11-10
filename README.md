@@ -30,6 +30,8 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol loot`       | Open the recent loot window |
 | `/farol loot clear` | Clear this character's loot history |
 | `/farol session reset`| Restart session gold, gold/h, XP/h, rep/h and time |
+| `/farol summary`    | Summary of the current session (gold, XP, reputation, loot, warnings) |
+| `/farol summary on` / `off` | Show / don't show the last session's summary at login |
 | `/farol warn`       | Open the warnings window (durability, bags, talents, spell ranks) |
 | `/farol warn status`| Show what Farol can read on your client (talents, reputation, resets) |
 | `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
@@ -154,6 +156,24 @@ The **last 10 warnings** (with date and time) are kept per character. Open them 
   `Bindings.xml`; it only opens the window);
 - `/farol history`, or **History...** in the Warnings window.
 
+## Session summary
+
+`/farol summary` shows, **only in your own chat**, what you did in this session:
+
+```
+Farol: session summary (2h 14m):
+Farol:   Gold: +38g 12s (+17g 6s/h) · XP: +84.2k (1 level, 37.6k/h)
+Farol:   Reputation: +1.3k Orgrimmar (Honored → Revered)
+Farol:   Loot: 46 (3 rares, 1 epic) · Warnings: 2
+```
+
+- When you log out, Farol saves this summary for the character, and **the next time you log in** it shows
+  "last session (date, duration)" in your chat. It is not shown after a `/reload`, and sessions under 5 minutes
+  are not saved.
+- Turn it off with **Session summary at login** in the options menu or `/farol summary off`.
+- It uses the same numbers as the bar (session gold, XP/h, reputation per hour) and the loot and warning
+  histories. Nothing is sent to anyone.
+
 ## Recent loot window
 
 A separate window listing the items **you** looted or received, newest first.
@@ -256,7 +276,7 @@ Information security is this project's first rule:
 - **Saved data is validated.** `FarolDB` only stores your settings: panel position and state, language, visible
   items and their order, appearance, alarms (time, clock type, on/off, a cleaned-up name and the snooze time),
   loot window and warning settings. `FarolCharDB` (per character) stores only your loot history (validated item
-  links) and the last 10 warnings. Everything is checked on load — a corrupted or tampered file falls back to defaults.
+  links), the last 10 warnings and the last session's summary (numbers only). Everything is checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official sources** (this repository or the CurseForge page). Addons are plain Lua text:
   you can read all of it in the `Farol` folder.
 

@@ -37,6 +37,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 - Resets: `C_DateAndTime.GetSecondsUntilDailyReset` / `GetSecondsUntilWeeklyReset`; clientes antigos só têm
   `GetQuestResetTime` (diário). Valores fora da faixa (negativo, NaN, infinito, diário > 2 dias, semanal > 8 dias)
   são recusados (`ns.GetResetTimes`).
+- `PLAYER_ENTERING_WORLD` traz `(isInitialLogin, isReloadingUi)` nos clientes modernos; nos antigos vem sem
+  argumentos e também dispara ao trocar de zona/instância. O resumo da sessão usa isso para aparecer só no login.
 - No chat do WoW, `|` inicia códigos (`|c` cor, `|H` link, `|T` textura). **Barra literal = `||`.** Um teste confere
   todos os textos.
 - `GetChecked()` devolve `1/nil` em clientes antigos: sempre converter com `and true or false`.
@@ -73,7 +75,8 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - **Globais:** só nomes começando com `Farol` (janelas/botões), `FarolDB`, `FarolCharDB`, `SLASH_FAROL1`,
   `Farol_ToggleWarnHistory`, `BINDING_*`. Nada de globais genéricos.
 - **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`) e
-  `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`). O Core monta o `db` limpo em
+  `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `lastSession` = resumo da última sessão,
+  só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
   `ADDON_LOADED` chamando o `Sanitize` de cada módulo; chaves desconhecidas são descartadas.
 - **Barra:** cada informação é uma **célula** (FontString) numa grade de **colunas alinhadas à esquerda**. O número
   de colunas é o máximo que cabe em `db.barWidth` (0 = uma linha, 1 = uma coluna, N = pixels escolhidos pela alça).

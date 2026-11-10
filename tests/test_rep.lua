@@ -92,4 +92,34 @@ return {
         H.env.C_Reputation.GetWatchedFactionData = function() error("blocked by the game") end
         H:update(1); T.has(H:bar(), "--", "error inside the game API is contained")
     end },
+
+    { "infinite, out-of-range or odd values never show nonsense (security review)", function(T, Mock)
+        local H = setup(Mock)
+        H.faction.max = math.huge
+        H:update(1); T.has(H:bar(), "Rep --", "infinity is rejected")
+        H.faction = honored(-math.huge)
+        H:update(1); T.has(H:bar(), "Rep --", "minus infinity is rejected")
+        H.faction = honored(999999) -- acima do máximo do nível
+        H:update(1); T.has(H.strip(H:bar()), "Darnassus Honrado 100%", "progress is clamped to 100%")
+        T.has(tip(H), "12.0k / 12.0k (100%)")
+        H.faction = honored(0)      -- abaixo do mínimo do nível
+        H:update(1); T.has(H.strip(H:bar()), "Darnassus Honrado 0%", "progress is clamped to 0%")
+        H.faction = { name = "X", reaction = 1.5, min = 0, max = 100, value = 50, id = 1 }
+        H:update(1); T.has(H.strip(H:bar()), "X ? 50%", "non-integer standing")
+    end },
+
+    { "faction names cannot inject chat codes or flood the bar", function(T, Mock)
+        local H = setup(Mock)
+        H.faction = { name = "Evil|Hitem:1|h[link]|h|T1:0|t", reaction = 6, min = 0, max = 100, value = 50, id = 2 }
+        H:update(1)
+        T.has(H:barRaw(), "Evil||Hitem:1||h[link]||h||T1:0||t", "every '|' is shown as a literal bar")
+        H.faction = { name = string.rep("Á", 200), reaction = 6, min = 0, max = 100, value = 50, id = 3 }
+        H:update(1)
+        local bar = H:bar()
+        T.has(bar, string.rep("Á", 24) .. "...", "long name is cut at 48 bytes, on a whole letter")
+        T.hasnt(bar, string.rep("Á", 25), "nothing beyond the limit")
+        H.faction.name = "A" .. string.rep("Á", 200) -- o limite cai no meio de uma letra
+        H:update(1)
+        T.has(H:bar(), "A" .. string.rep("Á", 23) .. "...", "a split letter is dropped, never half shown")
+    end },
 }

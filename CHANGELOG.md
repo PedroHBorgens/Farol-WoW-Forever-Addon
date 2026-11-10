@@ -2,6 +2,10 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.15.1 — Security review
+- Reputation: infinite values are rejected, progress always stays between 0% and 100%, odd standings show `?`.
+- Faction names are shown as plain text (`|` cannot create links/icons) and are cut at 48 bytes without breaking letters.
+
 ## 2.15.0 — Reputation
 - New bar item **Reputation** (off by default): watched faction, standing in the game's colors, progress %,
   reputation per hour; the tooltip adds progress and the time to the next standing.

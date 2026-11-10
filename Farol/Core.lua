@@ -565,9 +565,32 @@ local function ValidFaction(f)
     if type(f) ~= "table" or type(f.name) ~= "string" or IsSecret(f.name) then return false end
     for _, key in ipairs({ "reaction", "min", "max", "value" }) do
         local v = f[key]
-        if type(v) ~= "number" or IsSecret(v) or v ~= v then return false end
+        -- número de verdade: nem bloqueado, nem NaN, nem infinito
+        if type(v) ~= "number" or IsSecret(v) or v ~= v or v == math.huge or v == -math.huge then return false end
     end
     return true
+end
+
+-- Nome da facção pronto para mostrar: "|" vira barra literal (nada de códigos/links) e no máximo 48 bytes.
+local function FactionName(name)
+    name = string.gsub(name, "|", "||")
+    if #name > 48 then
+        local cut = string.sub(name, 1, 48)
+        local nextByte = string.byte(name, 49)
+        if nextByte >= 128 and nextByte < 192 then -- a letra seguinte ficaria cortada no meio (UTF-8)
+            cut = string.gsub(cut, "[\192-\255][\128-\191]*$", "")
+        end
+        name = cut .. "..."
+    end
+    return name
+end
+
+-- Progresso no nível atual, sempre dentro da faixa: atual, total e % (0 a 100). nil se o nível não tem faixa.
+local function RepProgress(f)
+    local total = f.max - f.min
+    if total <= 0 then return nil end
+    local cur = math.max(0, math.min(total, f.value - f.min))
+    return cur, total, math.floor(cur / total * 100)
 end
 
 -- Soma a reputação ganha na facção acompanhada; trocar de facção recomeça a contagem.
@@ -756,9 +779,12 @@ end
 
 -- Nome do nível (Neutro, Honrado...) com a cor do próprio jogo.
 local function StandingText(reaction)
-    local label = _G["FACTION_STANDING_LABEL" .. tostring(reaction)] or tostring(reaction)
+    if reaction ~= math.floor(reaction) then return "?" end
+    local label = _G["FACTION_STANDING_LABEL" .. reaction]
+    if type(label) ~= "string" then label = tostring(reaction) end
     local color = FACTION_BAR_COLORS and FACTION_BAR_COLORS[reaction]
-    if type(color) == "table" and color.r then
+    if type(color) == "table" and type(color.r) == "number" and type(color.g) == "number"
+            and type(color.b) == "number" then
         local function byte(v) return math.floor(math.max(0, math.min(1, v)) * 255 + 0.5) end
         return string.format("|cff%02x%02x%02x%s|r", byte(color.r), byte(color.g), byte(color.b), label)
     end
@@ -844,11 +870,9 @@ local ITEM_TEXT = {
     rep = function()
         local f = GetWatchedFaction()
         if not ValidFaction(f) then return T("label_rep") .. " --" end
-        local text = f.name .. " " .. StandingText(f.reaction)
-        local total = f.max - f.min
-        if total > 0 then
-            text = text .. string.format(" %d%%", math.floor((f.value - f.min) / total * 100))
-        end
+        local text = FactionName(f.name) .. " " .. StandingText(f.reaction)
+        local _, _, pct = RepProgress(f)
+        if pct then text = text .. string.format(" %d%%", pct) end
         local rate = GetRepRate()
         if rate then text = text .. " |cff4dff4d+" .. FormatBig(rate) .. "/h|r" end
         return text
@@ -1176,12 +1200,11 @@ local function FillTooltip()
     if db.items.rep then
         local f = Safe(GetWatchedFaction)
         if ValidFaction(f) then
-            AddPair(T("tt_rep"), f.name)
+            AddPair(T("tt_rep"), FactionName(f.name))
             AddPair(T("tt_rep_standing"), StandingText(f.reaction))
-            local total, cur = f.max - f.min, f.value - f.min
-            if total > 0 then
-                AddPair(T("tt_rep_progress"), string.format("%s / %s (%d%%)",
-                    FormatBig(cur), FormatBig(total), math.floor(cur / total * 100)))
+            local cur, total, pct = RepProgress(f)
+            if cur then
+                AddPair(T("tt_rep_progress"), string.format("%s / %s (%d%%)", FormatBig(cur), FormatBig(total), pct))
                 local rate = Safe(GetRepRate)
                 if rate then
                     AddPair(T("tt_rep_rate"), "+" .. FormatBig(rate))

@@ -759,6 +759,8 @@ end
 
 local function FormatWhen(t, long)
     if type(t) ~= "number" or t ~= t or t <= 0 or t >= 4102444800 then return "--" end
+    t = math.floor(t) -- segundos inteiros: date() recusa frações em motores Lua mais novos
+    if t <= 0 then return "--" end
     local tokens = DateTokens(t)
     if long then return (string.gsub(T("when_long"), "%u+", tokens)) end
     local now = time()

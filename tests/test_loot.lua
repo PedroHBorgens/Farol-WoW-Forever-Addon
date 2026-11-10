@@ -191,5 +191,8 @@ return {
         end
         local H = Mock.new():login()
         T.eq(H.ns.FormatWhen(nil), "--"); T.eq(H.ns.FormatWhen(5e12), "--"); T.eq(H.ns.FormatWhen("x", true), "--")
+        T.eq(H.ns.FormatWhen(0.5), "--", "fraction of the first second")
+        T.eq(H.ns.FormatWhen(1e9 + 0.7, true), H.ns.FormatWhen(1e9, true), "fractions are rounded down, never an error")
+        T.eq(H.ns.FormatWhen(4102444799.9), H.ns.FormatWhen(4102444799), "last valid second")
     end },
 }

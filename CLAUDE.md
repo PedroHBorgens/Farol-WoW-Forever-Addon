@@ -34,6 +34,9 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
   (nível − 9 − pontos gastos via `GetTalentTabInfo`) e usa o **maior** valor. `/farol aviso status` mostra cada fonte.
 - Reputação acompanhada: clientes modernos usam `C_Reputation.GetWatchedFactionData`, os antigos
   `GetWatchedFactionInfo`; o Core tenta os dois (`GetWatchedFaction`) e `/farol aviso status` mostra qual funcionou.
+- Resets: `C_DateAndTime.GetSecondsUntilDailyReset` / `GetSecondsUntilWeeklyReset`; clientes antigos só têm
+  `GetQuestResetTime` (diário). Valores fora da faixa (negativo, NaN, infinito, diário > 2 dias, semanal > 8 dias)
+  são recusados (`ns.GetResetTimes`).
 - No chat do WoW, `|` inicia códigos (`|c` cor, `|H` link, `|T` textura). **Barra literal = `||`.** Um teste confere
   todos os textos.
 - `GetChecked()` devolve `1/nil` em clientes antigos: sempre converter com `and true or false`.

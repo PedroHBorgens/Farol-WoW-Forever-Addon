@@ -11,7 +11,7 @@ return {
     { "default order matches the original bar", function(T, Mock)
         local H = Mock.new():login()
         local order = H.env.FarolDB.order
-        T.eq(#order, 18); T.eq(order[1], "fps"); T.eq(order[18], "guild")
+        T.eq(#order, 19); T.eq(order[1], "fps"); T.eq(order[19], "guild")
         local at = positions(H)
         T.ok(at("fps") < at("ms") and at("ms") < at("Floresta"), "fps, latency, zone in default order")
     end },
@@ -35,9 +35,9 @@ return {
         local H = Mock.new({ locale = "enUS" }):login()
         H:slash("order")
         T.eq(H.env.FarolOrderUp1._disabled, true); T.eq(H.env.FarolOrderDown1._disabled, false)
-        T.eq(H.env.FarolOrderDown18._disabled, true)
+        T.eq(H.env.FarolOrderDown19._disabled, true)
         H:click(H.env.FarolOrderUp1); T.eq(H.env.FarolDB.order[1], "fps", "nothing moves past the top")
-        local guild = H.env.FarolOrder.rows[18]
+        local guild = H.env.FarolOrder.rows[19]
         T.eq(H:text(guild.text), "Guild online (hidden)"); T.eq(guild.text._color[1], 0.5)
         H:slash("show guild")
         T.eq(H:text(guild.text), "Guild online", "updates when the item is shown")
@@ -46,7 +46,7 @@ return {
     { "order is saved; invalid, duplicated and unknown entries are fixed", function(T, Mock)
         local H = Mock.new():login({ order = { "gold", "zone", "gold", "evil", 42 } })
         local order = H.env.FarolDB.order
-        T.eq(#order, 18, "every item exactly once")
+        T.eq(#order, 19, "every item exactly once")
         T.eq(order[1], "gold"); T.eq(order[2], "zone"); T.eq(order[3], "fps", "missing items keep default order")
         local seen = {}
         for _, key in ipairs(order) do T.ok(not seen[key], "no duplicates: " .. key); seen[key] = true end

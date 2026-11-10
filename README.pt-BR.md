@@ -191,6 +191,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | XP por hora      | XP/h e tempo até o próximo nível (após 1 min de sessão)   | `xph`           | desligado  |
 | Reputação        | Facção acompanhada: nível (cores do jogo), progresso %, rep/hora | `rep`           | desligado  |
 | Horário          | Hora local, ou do servidor (opção no menu)                | `hora`          | desligado  |
+| Resets           | Tempo até o reset diário e o semanal                      | `reset`         | desligado  |
 | Tempo de sessão  | Quanto tempo está jogando desde que entrou / `/reload`    | `tempo`         | desligado  |
 | Amigos online    | Quantidade de amigos online (WoW + Battle.net)            | `amigos`        | desligado  |
 | Guilda online    | Quantidade de membros da guilda online (some sem guilda)  | `guilda`        | desligado  |
@@ -204,6 +205,9 @@ Exemplo: `/farol hide ouro` esconde o ouro; `/farol show ouro` mostra de volta. 
 
 **Reputação:** mostra a facção que você marcar como **"Mostrar como barra de experiência"** no painel de reputação
 do jogo. O tooltip mostra também o progresso, a reputação por hora e uma estimativa do tempo até o próximo nível.
+
+**Resets:** contagem regressiva até o reset **diário** e o **semanal**, com o tempo que o próprio jogo informa. O
+tooltip mostra quando cada um acontece, na hora local e na do servidor. Clientes antigos só informam o diário.
 
 **Tooltip:** passe o mouse no painel para ver todos os detalhes de uma vez — latência local/mundo,
 subzona, cada peça danificada, XP exato e descansado, hora local *e* do servidor, amigos separados por

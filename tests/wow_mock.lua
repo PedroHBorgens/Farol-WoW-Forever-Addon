@@ -126,7 +126,8 @@ function Mock.new(opts)
     local env = setmetatable({}, { __index = _G })
     env._G = env
 
-    local H = { env = env, msgs = {}, frames = {}, now = 1000, clock = { hour = 7, min = 29 } }
+    local H = { env = env, msgs = {}, frames = {}, now = 1000, clock = { hour = 7, min = 29 },
+                dailyReset = 5 * 3600 + 12 * 60, weeklyReset = 2 * 86400 + 4 * 3600 }
 
     -- Chat e frames
     env.DEFAULT_CHAT_FRAME = { AddMessage = function(_, msg) table.insert(H.msgs, msg) end }
@@ -257,6 +258,7 @@ function Mock.new(opts)
         env.GuildRoster = function() H.rosterRequests = H.rosterRequests + 1 end
         env.InterfaceOptions_AddCategory = function(panel) H.settingsPanel = panel end
         env.UnitCharacterPoints = function() return H.talentPoints, 0 end
+        env.GetQuestResetTime = function() return H.dailyReset end -- 3.3.5a: só o diário
         env.GetWatchedFactionInfo = function()
             local f = H.faction
             if f then return f.name, f.reaction, f.min, f.max, f.value, f.id end
@@ -306,6 +308,11 @@ function Mock.new(opts)
             RegisterAddOnCategory = function(category) H.settingsCategory = category end,
         }
         env.GetUnspentTalentPoints = function() return H.talentPoints end
+        -- Resets: H.dailyReset / H.weeklyReset em segundos (nil = o jogo não informa)
+        env.C_DateAndTime = {
+            GetSecondsUntilDailyReset = function() return H.dailyReset end,
+            GetSecondsUntilWeeklyReset = function() return H.weeklyReset end,
+        }
         env.C_Reputation = {
             GetWatchedFactionData = function()
                 local f = H.faction

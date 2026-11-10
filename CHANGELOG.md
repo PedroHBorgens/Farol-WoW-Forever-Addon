@@ -2,6 +2,11 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.16.0 — Resets
+- New bar item **Resets** (off by default): countdown to the daily and weekly reset (`Daily 5h 12m · Weekly 2d 4h`);
+  the tooltip shows when each happens in local and server time.
+- Uses `C_DateAndTime` (modern) or `GetQuestResetTime` (old clients, daily only); `/farol warn status` shows which.
+
 ## 2.15.1 — Security review
 - Reputation: infinite values are rejected, progress always stays between 0% and 100%, odd standings show `?`.
 - Faction names are shown as plain text (`|` cannot create links/icons) and are cut at 48 bytes without breaking letters.

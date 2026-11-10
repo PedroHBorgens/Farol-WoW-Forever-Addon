@@ -108,12 +108,12 @@ names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bag
 on = {0,1,3,4,6,7,8,10,12,13,15}
 half = 10
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
-menu = f"""<div class="win" style="width:500px;padding-top:12px;padding-bottom:14px"><div class="x">×</div><div class="t">Farol</div>
+menu = f"""<div class="win" style="width:580px;padding-top:12px;padding-bottom:14px"><div class="x">×</div><div class="t">Farol</div>
 <div class="dim" style="font-size:13px">Tick what you want to see on the bar.</div>
 <div class="h">Bar items</div><div style="display:flex;gap:30px"><div>{col(range(0,half))}</div><div>{col(range(half,19))}</div></div>
 <div class="h">General</div><div style="display:flex;gap:22px"><div class="ck"><span class="box">✓</span>Show panel</div><div class="ck"><span class="box"></span>Lock position</div><div class="ck"><span class="box">✓</span>Server time</div></div>
-<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="k" style="font-size:14px">Language:</span><span class="btn" style="padding:2px 10px">Português</span><span class="btn hl" style="padding:2px 10px">English</span></div>
-<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><span class="btn">Alarms...</span><span class="btn">Loot...</span><span class="btn">Warnings...</span><span class="btn">Appearance...</span><span class="btn hl">Order...</span></div></div>"""
+<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="k" style="font-size:14px">Language:</span><span class="btn" style="padding:2px 10px">Auto</span><span class="btn" style="padding:2px 10px">Português</span><span class="btn hl" style="padding:2px 10px">English</span></div>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><span class="btn">Alarms...</span><span class="btn">Loot...</span><span class="btn">Warnings...</span><span class="btn">Appearance...</span><span class="btn hl">Order...</span><span class="btn">Reset position</span><span class="btn">Reset session</span></div></div>"""
 order_names = [("🌍","Zone"),("🔭","FPS"),("⚡","Latency"),("💰","Gold"),("🏅","Reputation"),("📜","Resets (daily/weekly)"),("🔨","Durability"),("🎒","Bags"),("⏰","Clock (hidden)")]
 order = '<div class="win" style="width:330px"><div class="x">×</div><div class="t">Bar order</div>' + "".join(
     f'<div class="ck" style="justify-content:space-between"><span><span class="dim" style="display:inline-block;width:22px;text-align:right">{i+1}.</span> {ic(e)} <span class="{"dim" if "hidden" in n else ""}">{n}</span></span><span>▲ ▼</span></div>'

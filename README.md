@@ -3,8 +3,10 @@
 [Português](README.pt-BR.md) | **English**
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
-**FPS · latency · memory · coordinates · zone · speed · durability · bags · gold · session gold · XP · clock · session time · friends · guild** — you pick what shows.
-Hover the panel for a detailed tooltip, and choose which items appear on the bar.
+**FPS · latency · memory · coordinates · zone · speed · durability · bags · gold · session gold · gold/hour · XP · XP/hour ·
+reputation · clock · daily/weekly resets · session time · friends · guild** — you pick what shows (19 items).
+Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
+(durability, bags, unspent talents, lower-rank spells).
 
 ## Installation
 
@@ -12,7 +14,7 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 > `Interface/AddOns/WoWForeverInfo` folder before installing `Farol`. Your old settings are not carried
 > over (just re-tick your items in the menu), and the chat command is now `/farol`.
 
-1. Download this repository (**Code → Download ZIP**).
+1. Install it from **CurseForge** (search for *Farol*), or download this repository (**Code → Download ZIP**).
 2. Copy the `Farol` folder into `World of Warcraft/_forever_/Interface/AddOns/`
    (the result must be `_forever_/Interface/AddOns/Farol/Core.lua`).
    Other clients use their own folder, e.g. `_retail_` or `_classic_era_`.
@@ -27,8 +29,9 @@ Hover the panel for a detailed tooltip, and choose which items appear on the bar
 | `/farol menu`       | Open the options menu (or right-click the panel) |
 | `/farol loot`       | Open the recent loot window |
 | `/farol loot clear` | Clear this character's loot history |
-| `/farol session reset`| Restart session gold, gold/h, XP/h and time |
-| `/farol warn`       | Open the warnings window (durability and bags) |
+| `/farol session reset`| Restart session gold, gold/h, XP/h, rep/h and time |
+| `/farol warn`       | Open the warnings window (durability, bags, talents, spell ranks) |
+| `/farol warn status`| Show what Farol can read on your client (talents, reputation, resets) |
 | `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
 | `/farol order`      | Choose the order of the items on the bar |
@@ -106,7 +109,8 @@ Open **Appearance...** in the options menu (or `/farol appearance`):
 - **Restore defaults** puts everything back.
 
 Commands: `/farol appearance scale 120`, `/farol appearance bg 40`, `/farol appearance text 14`, `/farol appearance icons 20`, `/farol appearance row`, `/farol appearance column`, `/farol appearance width 400`,
-`/farol appearance border`, `/farol appearance combat`, `/farol appearance instance`, `/farol appearance default`.
+`/farol appearance border`, `/farol appearance combat`, `/farol appearance instance`, `/farol appearance icons` (on/off),
+`/farol appearance button` (warning history button), `/farol appearance lootbutton`, `/farol appearance default`.
 
 ## Durability and bag warnings
 
@@ -169,9 +173,10 @@ modern client may hide chat contents from addons; those items are simply not rec
 
 ## Bar items
 
-The first six items are on by default; the others start off — tick them in the menu.
+Six items are on by default (FPS, latency, coordinates, zone, durability and gold); the others start off — tick
+them in the menu.
 
-Session items (session gold, gold/h, XP/h, session time) count from login or `/reload`. Use **Reset session**
+Session items (session gold, gold/h, XP/h, reputation per hour, session time) count from login or `/reload`. Use **Reset session**
 in the menu, or `/farol session reset`, to restart them (e.g. when you move to a new farming spot).
 
 | Item            | Shows                                                  | Command name | Default |
@@ -210,7 +215,8 @@ tooltip adds progress, reputation per hour and an estimate of the time to the ne
 shows when each one happens in local and server time. Older clients only report the daily reset.
 
 **Tooltip:** hover the panel to see every detail at once — home/world latency, subzone, each damaged
-item, exact XP and rested, local *and* server time, friends split by WoW / Battle.net, and more.
+item, exact XP and rested, reputation progress, when the daily/weekly reset happens, local *and* server time,
+friends split by WoW / Battle.net, and more.
 
 **Privacy:** friends and guild items only read **counts**; no names are read or stored.
 
@@ -235,8 +241,8 @@ patch marks the addon as incompatible, update the number in `_Mainline.toc` from
 ### WoW Forever notes
 
 WoW Forever runs on the modern (Midnight) client and inherits its "secret values" combat restrictions.
-This addon only reads FPS, latency, coordinates and gold; if the game hides a value, the panel shows `--`
-instead of raising an error.
+Every value Farol reads is protected: if the game hides or blocks a value (for example during combat), the panel
+shows `--` instead of raising an error.
 
 ## Security
 
@@ -245,9 +251,12 @@ Information security is this project's first rule:
 - **Nothing leaves your computer.** The addon never uses `SendAddonMessage`, chat or any other channel to send data.
 - **No external code is executed.** No `loadstring`/`RunScript`; commands only accept fixed words.
 - **No automation.** It only reads and displays information; it never plays for you (which would break server rules).
-- **Saved data is validated.** `FarolDB` only stores the panel's position, state, language, visible items your alarms (time, clock type, on/off, a cleaned-up name and the snooze time) and warning settings. `FarolCharDB` (per character) stores only validated item links from your loot history, and is
-  checked on load — a corrupted or tampered file falls back to defaults.
-- **Only download from the official source** (this repository). Addons are plain Lua text: you can read all of it in `Core.lua`.
+- **Saved data is validated.** `FarolDB` only stores your settings: panel position and state, language, visible
+  items and their order, appearance, alarms (time, clock type, on/off, a cleaned-up name and the snooze time),
+  loot window and warning settings. `FarolCharDB` (per character) stores only your loot history (validated item
+  links) and the last 10 warnings. Everything is checked on load — a corrupted or tampered file falls back to defaults.
+- **Only download from the official sources** (this repository or the CurseForge page). Addons are plain Lua text:
+  you can read all of it in the `Farol` folder.
 
 Found a security issue? Please report it **privately** (Security → Report a vulnerability), as explained in
 [`SECURITY.md`](SECURITY.md). Never include personal data, passwords or account details.
@@ -256,7 +265,8 @@ Found a security issue? Please report it **privately** (Security → Report a vu
 
 The add-on has automated tests that run **outside the game**, on Lua 5.1 (the same version the WoW client
 uses), against a small mock of the WoW API (`tests/wow_mock.lua`). They cover the bar on WoW Forever and
-3.3.5a clients, secret values, the options menu, alarms and snooze, the loot window, the `.toc` files, and a
+3.3.5a clients, secret values, the options menu, alarms and snooze, the loot window, warnings, appearance,
+reputation, resets, the `.toc` files, and a
 scan that fails if the code ever uses automation, messaging or dynamic-code APIs, and fuzzing with random and
 malicious commands, chat messages and tampered saved data.
 
@@ -270,8 +280,10 @@ install-ready `Farol-<version>` package to each run (Actions tab → the run →
 ## Publishing on CurseForge
 
 The page text is in [`assets/curseforge-description.md`](assets/curseforge-description.md) and the project
-avatar in [`assets/farol-icon-400.png`](assets/farol-icon-400.png). Upload a ZIP whose root contains only the
-`Farol` folder, and select the WoW Forever game version (1.60.1).
+avatar in [`assets/farol-icon-400.png`](assets/farol-icon-400.png); the screenshots (illustrations) are in
+[`assets/curseforge/`](assets/curseforge/). Upload a ZIP whose root contains **only** the `Farol` folder (with
+`LICENSE.txt` inside it — any file loose at the root is rejected), and select the WoW Forever game version (1.60.1).
+Each GitHub Actions run builds that package for you (*Artifacts*).
 
 The in-game icon (`Farol/Media/Farol.tga`, shown in the AddOns list) is original artwork made for this project.
 
@@ -282,7 +294,7 @@ This addon follows Blizzard's [UI Add-On Development Policy](https://us.forums.b
 | Policy rule | This addon |
 |---|---|
 | Must be free | ✅ Free, MIT license — no paid version, no paid features |
-| Code must be visible (no obfuscation) | ✅ Plain, commented Lua in `Core.lua` |
+| Code must be visible (no obfuscation) | ✅ Plain, commented Lua in the `Farol` folder |
 | No ads or donation requests | ✅ None, in game or in this repository |
 | Must not hurt realm performance | ✅ Only server request is the guild roster, at most once a minute and only if the Guild item is on (the same thing the game's own Guild window does) |
 | Must not automate gameplay | ✅ Uses only the official addon API to **read and display** information; it never casts, moves, targets, buys, sells or sends chat |

@@ -173,9 +173,8 @@ local function Describe(alarm)
 end
 
 local function NowHM(server)
-    if server and GetGameTime then
-        local hour, minute = GetGameTime()
-        return hour, minute
+    if server then
+        return ns.GetServerClock() -- nil se o jogo não informar uma hora válida (o alarme espera)
     end
     local now = date("*t")
     return now.hour, now.min

@@ -2,6 +2,10 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.16.1 — Security review
+- Server time is validated (whole hours 0–23, minutes 0–59) before use in the clock, alarms and reset tooltip;
+  an invalid or blocked value shows `--` (server-time alarms wait) instead of a wrong time or an error.
+
 ## 2.16.0 — Resets
 - New bar item **Resets** (off by default): countdown to the daily and weekly reset (`Daily 5h 12m · Weekly 2d 4h`);
   the tooltip shows when each happens in local and server time.

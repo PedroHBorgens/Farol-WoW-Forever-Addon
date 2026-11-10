@@ -81,6 +81,19 @@ return {
         H:update(1); T.eq(H.sounds, 1)
     end },
 
+    { "server-time alarms wait (no error) while the game reports an invalid time", function(T, Mock)
+        local H = Mock.new():login()
+        H:slash("alarme add 21:06 servidor")
+        H:update(1)
+        for _, bad in ipairs({ 0 / 0, math.huge, 21.1, -1, "21" }) do
+            H.env.GetGameTime = function() return bad, 6 end
+            H:update(1)
+        end
+        T.eq(H.sounds or 0, 0, "never fires on a bad time")
+        H.env.GetGameTime = function() return 21, 6 end
+        H:update(1); T.eq(H.sounds, 1, "fires once the time is valid")
+    end },
+
     { "alarm commands: add, invalid time, list, enable/disable, remove, limit of 10", function(T, Mock)
         local H = Mock.new():login()
         H:slash("alarme add 22:15 servidor Dormir")

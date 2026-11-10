@@ -47,11 +47,12 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
                     Appearance, Order
-  Core.lua          barra (grade de células), itens, tooltip, menu de opções, comandos /farol, dados salvos
+  Core.lua          barra (grade de células), 19 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus), "Silenciar / Lembrar em 30 min", histórico 📝
-  Appearance.lua    escala, fundo, tamanhos de texto/ícone, formato (uma linha / uma coluna), esconder em combate
+  Appearance.lua    escala, fundo, tamanhos de texto/ícone, formato (uma linha / uma coluna), esconder em combate,
+                    mostrar/esconder os botões rápidos 📝 👜
   Order.lua         ordem dos itens na barra
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
   Media/Farol.tga   ícone original (64×64)
@@ -64,7 +65,10 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 
 - Arquivos compartilham a tabela `ns` (`local _, ns = ...`). O Core exporta `ns.T` (tradução), `ns.Print`,
   `ns.GetDB`, `ns.IsSecret`, `ns.frame`, `ns.UpdateText`, `ns.ApplyAppearance`, `ns.ApplyVisibility`,
-  `ns.MakeToplevel`, `ns.LayoutQuickButtons`, `ns.SetBarWidth`, `ns.ITEM_ORDER`, `ns.ITEM_ICONS`.
+  `ns.MakeToplevel`, `ns.LayoutQuickButtons`, `ns.SetBarWidth`, `ns.ITEM_ORDER`, `ns.ITEM_ICONS`,
+  `ns.GetWatchedFaction`, `ns.GetResetTimes`, `ns.GetServerClock` (hora do servidor validada: relógio, alarmes e
+  resets usam só ela, nunca `GetGameTime` direto) e `ns.FormatWhen(t, longo)` (datas de histórico: "Hoje 21:42" /
+  "Ontem" / "08/11"; longo = "domingo, 08/11/2026 às 21:12"; inválido = "--").
 - Cada módulo adiciona seus textos em `ns.STRINGS.pt` / `ns.STRINGS.en` e usa `T("chave")`.
 - **Globais:** só nomes começando com `Farol` (janelas/botões), `FarolDB`, `FarolCharDB`, `SLASH_FAROL1`,
   `Farol_ToggleWarnHistory`, `BINDING_*`. Nada de globais genéricos.
@@ -82,7 +86,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 ## Testes
 
 ```
-lua5.1 tests/run.lua        # ~100 testes; deve terminar com "0 failed"
+lua5.1 tests/run.lua        # ~120 testes; deve terminar com "0 failed"
 ```
 
 - `tests/wow_mock.lua`: simulador da API (modos `forever`, `wotlk` e `secret`). `H:login()`, `H:slash()`,

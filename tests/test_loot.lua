@@ -122,4 +122,77 @@ return {
         H:click(row)
         T.eq(H.clickedLink, row.link)
     end },
+
+    { "each row shows the day (Today / Yesterday / date) before the time, in both languages", function(T, Mock)
+        local now = os.time()
+        local sinceMidnight = tonumber(os.date("%H", now)) * 3600 + tonumber(os.date("%M", now)) * 60
+            + tonumber(os.date("%S", now))
+        local yesterday = now - sinceMidnight - 4 * 3600        -- 20:xx de ontem
+        local older = now - sinceMidnight - 5 * 86400 + 3600     -- 01:xx de 5 dias atrás
+        local lastYear = now - 400 * 86400
+        local function hm(t) return os.date("%H:%M", t) end
+        local link = "|cff1eff00|Hitem:2447::::|h[Peacebloom]|h|r"
+        local saved = { items = {
+            { link = link, count = 1, q = 2, t = lastYear },
+            { link = link, count = 1, q = 2, t = older },
+            { link = link, count = 6, q = 2, t = yesterday },
+            { link = link, count = 1, q = 2, t = now },
+            { link = link, count = 1, q = 2, t = -5 },             -- adulterado: vira "--"
+        } }
+        local expected = {
+            pt = { "--", "Hoje " .. hm(now), "x6   Ontem " .. hm(yesterday),
+                   nil, os.date("%d/%m/%y ", lastYear) .. hm(lastYear) },
+            en = { "--", "Today " .. hm(now), "x6   Yesterday " .. hm(yesterday) },
+        }
+        local months = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" }
+        local function mon(t) return months[tonumber(os.date("%m", t))] .. " " .. tonumber(os.date("%d", t)) end
+        local sameYear = os.date("%Y", older) == os.date("%Y", now) -- no começo de janeiro, 5 dias atrás é outro ano
+        expected.pt[4] = os.date(sameYear and "%d/%m " or "%d/%m/%y ", older) .. hm(older)
+        expected.en[4] = mon(older) .. (sameYear and "" or (" '" .. os.date("%y", older))) .. " " .. hm(older)
+        expected.en[5] = mon(lastYear) .. " '" .. os.date("%y", lastYear) .. " " .. hm(lastYear)
+        for lang, list in pairs(expected) do
+            local H = Mock.new({ locale = lang == "pt" and "ptBR" or "enUS" }):login(nil, { items = saved.items })
+            H:slash("saque")
+            for i, text in ipairs(list) do
+                T.eq(H.strip(H:text(H.env.FarolLoot.rows[i].info)), text, lang .. " row " .. i)
+            end
+            local raw = H.env.FarolLoot.rows[2].info._text
+            T.has(raw, "|cff8c8c8c", "the day is dimmed so the item stands out")
+        end
+    end },
+
+    { "hovering a row adds the full date to the item tooltip", function(T, Mock)
+        local t = os.time({ year = 2026, month = 11, day = 8, hour = 21, min = 12 })
+        local saved = { items = { { link = "|cff1eff00|Hitem:2447::::|h[Peacebloom]|h|r", count = 1, q = 2, t = t } } }
+        local H = Mock.new():login(nil, saved)
+        H:slash("saque")
+        local row = H.env.FarolLoot.rows[1]
+        H.env.GameTooltip.lines = {}
+        row._scripts.OnEnter(row)
+        T.eq(H.env.GameTooltip.lines[#H.env.GameTooltip.lines], "Saqueado: domingo, 08/11/2026 às 21:12")
+        local E = Mock.new({ locale = "enUS" }):login(nil, saved)
+        E:slash("loot")
+        local erow = E.env.FarolLoot.rows[1]
+        E.env.GameTooltip.lines = {}
+        erow._scripts.OnEnter(erow)
+        T.eq(E.env.GameTooltip.lines[#E.env.GameTooltip.lines], "Looted: Sunday, Nov 8, 2026 at 21:12")
+    end },
+
+    { "an invalid saved date never adds a tooltip line or breaks the window", function(T, Mock)
+        for _, bad in ipairs({ 0, -1, 0 / 0, math.huge, "ontem", {} }) do
+            local saved = { items = { { link = "|cff1eff00|Hitem:2447::::|h[Peacebloom]|h|r", count = 1, q = 2, t = bad } } }
+            local H = Mock.new():login(nil, saved)
+            H:slash("saque")
+            local row = H.env.FarolLoot.rows[1]
+            T.eq(H.strip(H:text(row.info)), "--", "bad date " .. tostring(bad))
+            H.env.GameTooltip.lines = {}
+            row._scripts.OnEnter(row)
+            T.eq(#H.env.GameTooltip.lines, 0, "no date line for " .. tostring(bad))
+        end
+        local H = Mock.new():login()
+        T.eq(H.ns.FormatWhen(nil), "--"); T.eq(H.ns.FormatWhen(5e12), "--"); T.eq(H.ns.FormatWhen("x", true), "--")
+        T.eq(H.ns.FormatWhen(0.5), "--", "fraction of the first second")
+        T.eq(H.ns.FormatWhen(1e9 + 0.7, true), H.ns.FormatWhen(1e9, true), "fractions are rounded down, never an error")
+        T.eq(H.ns.FormatWhen(4102444799.9), H.ns.FormatWhen(4102444799), "last valid second")
+    end },
 }

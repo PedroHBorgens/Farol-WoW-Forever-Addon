@@ -3,8 +3,10 @@
 **Português** | [English](README.md)
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
-**FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · ouro · ouro da sessão · XP · horário · tempo de sessão · amigos · guilda** — você escolhe o que aparece.
-Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens aparecem na barra.
+**FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · ouro · ouro da sessão · ouro/hora · XP ·
+XP/hora · reputação · horário · resets diário/semanal · tempo de sessão · amigos · guilda** — você escolhe o que aparece (19 itens).
+Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
+saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
 ## Instalação
 
@@ -12,7 +14,7 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 > `Interface/AddOns/WoWForeverInfo` antes de instalar o `Farol`. As configurações antigas não são
 > levadas junto (é só marcar seus itens de novo no menu), e o comando agora é `/farol`.
 
-1. Baixe este repositório (botão **Code → Download ZIP**).
+1. Instale pelo **CurseForge** (procure por *Farol*), ou baixe este repositório (botão **Code → Download ZIP**).
 2. Copie a pasta `Farol` para `World of Warcraft/_forever_/Interface/AddOns/`
    (a pasta final deve ser `_forever_/Interface/AddOns/Farol/Core.lua`).
    Outros clientes usam a própria pasta, como `_retail_` ou `_classic_era_`.
@@ -27,8 +29,9 @@ Passe o mouse no painel para ver um tooltip com detalhes, e escolha quais itens 
 | `/farol menu`       | Abre o menu de opções (ou clique direito no painel) |
 | `/farol saque`      | Abre a janela de últimos saques |
 | `/farol saque limpar`| Apaga o histórico de saques deste personagem |
-| `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h e tempo |
-| `/farol aviso`      | Abre a janela de avisos (durabilidade e bolsas) |
+| `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h, rep/h e tempo |
+| `/farol aviso`      | Abre a janela de avisos (durabilidade, bolsas, talentos, graus de magia) |
+| `/farol aviso status`| Mostra o que o Farol consegue ler no seu cliente (talentos, reputação, resets) |
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
@@ -106,7 +109,8 @@ Abra **Aparência...** no menu de opções (ou `/farol aparencia`):
 - **Restaurar padrão** volta tudo ao normal.
 
 Comandos: `/farol aparencia escala 120`, `/farol aparencia fundo 40`, `/farol aparencia texto 14`, `/farol aparencia icones 20`, `/farol aparencia linha`, `/farol aparencia coluna`, `/farol aparencia largura 400`,
-`/farol aparencia borda`, `/farol aparencia combate`, `/farol aparencia instancia`, `/farol aparencia padrao`.
+`/farol aparencia borda`, `/farol aparencia combate`, `/farol aparencia instancia`, `/farol aparencia icones` (liga/desliga),
+`/farol aparencia botao` (botão do histórico de avisos), `/farol aparencia botaosaques`, `/farol aparencia padrao`.
 
 ## Avisos de durabilidade e bolsas
 
@@ -159,8 +163,10 @@ Uma janela separada que lista os itens que **você** saqueou ou recebeu, do mais
 - Menu **Mostrar** — 5, 10, 15 ou 20 itens recentes.
 - Menu **Qualidade** — marque Inferior, Comum, Incomum, Raro, Épico e Lendário+ (nomes e cores vêm do próprio jogo), ou use *Marcar todas* / *Desmarcar todas*.
 - **Redimensionável** — arraste a alça do canto; a lista acompanha a largura e rola com a roda do mouse quando não cabe tudo. O tamanho fica salvo.
-- Cada linha mostra o ícone, o link do item colorido, a quantidade e a hora. Passe o mouse para ver o tooltip
-  do item; **Shift+clique** coloca o link na sua caixa de chat (você decide se envia).
+- Cada linha mostra o ícone, o link do item colorido, a quantidade e **quando** você saqueou: **Hoje 21:42**,
+  **Ontem 21:27**, ou a data para os mais antigos (**08/11 21:12**). Passe o mouse para ver o tooltip do item, que
+  também mostra a data completa ("Saqueado: domingo, 08/11/2026 às 21:12"); **Shift+clique** coloca o link na sua
+  caixa de chat (você decide se envia).
 - O histórico é salvo **por personagem** (últimos 100 itens). **Limpar** apaga tudo.
 
 Ele lê só as mensagens de saque do próprio jogo sobre **você** ("Você recebe saque: …"), usando os textos do
@@ -169,9 +175,10 @@ instância/combate o cliente moderno pode esconder o conteúdo do chat dos addon
 
 ## Itens da barra
 
-Os seis primeiros vêm ligados; os outros começam desligados — marque no menu.
+Seis itens vêm ligados (FPS, latência, coordenadas, zona, durabilidade e ouro); os outros começam desligados —
+marque no menu.
 
-Os itens de sessão (ouro da sessão, ouro/h, XP/h, tempo de sessão) contam desde que você entrou ou deu `/reload`.
+Os itens de sessão (ouro da sessão, ouro/h, XP/h, reputação por hora, tempo de sessão) contam desde que você entrou ou deu `/reload`.
 Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por exemplo, ao trocar de lugar de farm).
 
 | Item             | Mostra                                                    | Nome no comando | Padrão     |
@@ -210,8 +217,8 @@ do jogo. O tooltip mostra também o progresso, a reputação por hora e uma esti
 tooltip mostra quando cada um acontece, na hora local e na do servidor. Clientes antigos só informam o diário.
 
 **Tooltip:** passe o mouse no painel para ver todos os detalhes de uma vez — latência local/mundo,
-subzona, cada peça danificada, XP exato e descansado, hora local *e* do servidor, amigos separados por
-WoW / Battle.net, e mais.
+subzona, cada peça danificada, XP exato e descansado, progresso da reputação, quando acontece o reset diário/semanal,
+hora local *e* do servidor, amigos separados por WoW / Battle.net, e mais.
 
 **Privacidade:** os itens de amigos e guilda leem só **quantidades**; nenhum nome é lido ou guardado.
 
@@ -237,8 +244,8 @@ de login (ex.: 1.60.1 → 16001), ou confira no jogo com `/run print(select(4, G
 ### Observações sobre o WoW Forever
 
 O WoW Forever roda no cliente moderno (Midnight) e herda as restrições de combate chamadas "secret values".
-Este addon só lê FPS, latência, coordenadas e ouro; se o jogo esconder algum valor, o painel mostra `--`
-em vez de dar erro.
+Toda leitura do Farol é protegida: se o jogo esconder ou bloquear um valor (por exemplo, em combate), o painel
+mostra `--` em vez de dar erro.
 
 ## Segurança
 
@@ -247,9 +254,13 @@ Segurança da informação é a primeira regra deste projeto:
 - **Nada sai do seu computador.** O addon não usa `SendAddonMessage`, chat ou qualquer canal para enviar dados.
 - **Nenhum código externo é executado.** Sem `loadstring`/`RunScript`; comandos aceitam só palavras fixas.
 - **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
-- **Dados salvos são validados.** `FarolDB` guarda apenas a posição, o estado do painel, o idioma, os itens visíveis seus alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o tempo da soneca) e os ajustes dos avisos. `FarolCharDB` (por personagem) guarda só links de item validados do seu histórico de saques, e é
-  verificado ao carregar — um arquivo corrompido ou adulterado volta para os valores padrão.
-- **Baixe só da fonte oficial** (este repositório). Addons são texto Lua: você pode ler todo o código em `Core.lua`.
+- **Dados salvos são validados.** `FarolDB` guarda só as suas configurações: posição e estado do painel, idioma,
+  itens visíveis e a ordem deles, aparência, alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o
+  tempo da soneca), ajustes da janela de saques e dos avisos. `FarolCharDB` (por personagem) guarda só o histórico
+  de saques (links de item validados) e os 10 últimos avisos. Tudo é verificado ao carregar — um arquivo corrompido
+  ou adulterado volta para os valores padrão.
+- **Baixe só das fontes oficiais** (este repositório ou a página do CurseForge). Addons são texto Lua: você pode ler
+  todo o código na pasta `Farol`.
 
 Encontrou um problema de segurança? Relate de forma **privada** (Security → Report a vulnerability), como explicado
 no [`SECURITY.md`](SECURITY.md). Nunca inclua dados pessoais, senhas ou informações da sua conta.
@@ -259,7 +270,7 @@ no [`SECURITY.md`](SECURITY.md). Nunca inclua dados pessoais, senhas ou informa�
 O addon tem testes automáticos que rodam **fora do jogo**, em Lua 5.1 (a mesma versão do cliente do WoW),
 usando um simulador simples da API do WoW (`tests/wow_mock.lua`). Eles cobrem a barra nos clientes WoW Forever
 e 3.3.5a, os valores bloqueados (secret values), o menu de opções, os alarmes e a soneca, a janela de saques,
-os arquivos `.toc`, e uma varredura que falha se o código algum dia usar APIs de automação, de mensagens ou de
+os avisos, a aparência, a reputação, os resets, os arquivos `.toc`, e uma varredura que falha se o código algum dia usar APIs de automação, de mensagens ou de
 execução de código, e um fuzzing com comandos, mensagens de chat e dados salvos aleatórios e maliciosos.
 
 ```
@@ -272,8 +283,10 @@ execução um pacote `Farol-<versão>` pronto para instalar (aba Actions → a e
 ## Publicando no CurseForge
 
 O texto da página está em [`assets/curseforge-description.md`](assets/curseforge-description.md) e o avatar do
-projeto em [`assets/farol-icon-400.png`](assets/farol-icon-400.png). Envie um ZIP que tenha na raiz só a pasta
-`Farol`, e selecione a versão do jogo do WoW Forever (1.60.1).
+projeto em [`assets/farol-icon-400.png`](assets/farol-icon-400.png); as imagens (ilustrações) estão em
+[`assets/curseforge/`](assets/curseforge/). Envie um ZIP que tenha na raiz **só** a pasta `Farol` (com o
+`LICENSE.txt` dentro dela — qualquer arquivo solto na raiz é recusado), e selecione a versão do jogo do WoW Forever
+(1.60.1). Cada execução do GitHub Actions monta esse pacote para você (*Artifacts*).
 
 O ícone do jogo (`Farol/Media/Farol.tga`, que aparece na lista de AddOns) é uma arte original feita para este projeto.
 
@@ -284,7 +297,7 @@ Este addon segue a [Política de Desenvolvimento de AddOns da Blizzard](https://
 | Regra da política | Este addon |
 |---|---|
 | Deve ser gratuito | ✅ Gratuito, licença MIT — sem versão paga nem funções pagas |
-| Código visível (sem ofuscação) | ✅ Lua simples e comentado em `Core.lua` |
+| Código visível (sem ofuscação) | ✅ Lua simples e comentado na pasta `Farol` |
 | Sem propaganda ou pedidos de doação | ✅ Nenhum, nem no jogo nem neste repositório |
 | Não pode prejudicar o desempenho do servidor | ✅ O único pedido ao servidor é a lista da guilda, no máximo 1 vez por minuto e só com o item Guilda ligado (o mesmo que a janela de Guilda do jogo faz) |
 | Não pode automatizar o jogo | ✅ Usa só a API oficial de addons para **ler e mostrar** informações; nunca lança magias, move, seleciona alvos, compra, vende ou manda mensagens |

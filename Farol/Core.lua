@@ -165,6 +165,13 @@ local STRINGS = {
         tt_reset_none   = "o jogo não informou",
         reset_status    = "resets: diário %s (função: %s) · semanal %s (função: %s).",
         weekdays        = "dom,seg,ter,qua,qui,sex,sáb",
+        weekdays_long   = "domingo,segunda-feira,terça-feira,quarta-feira,quinta-feira,sexta-feira,sábado",
+        months          = "jan,fev,mar,abr,mai,jun,jul,ago,set,out,nov,dez",
+        when_today      = "Hoje",
+        when_yesterday  = "Ontem",
+        when_date       = "DD/MM",
+        when_date_year  = "DD/MM/YY",
+        when_long       = "WEEKDAY, DD/MM/YYYY às HH:MI",
         tt_rate_wait = "calculando... (1 min)",
         session_reset = "sessão zerada: ouro, XP e tempo recomeçam agora.",
         help_session = "  /farol sessao zerar  - recomeçar a contagem de ouro, XP e tempo da sessão",
@@ -283,6 +290,13 @@ local STRINGS = {
         tt_reset_none   = "not reported by the game",
         reset_status    = "resets: daily %s (function: %s) · weekly %s (function: %s).",
         weekdays        = "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+        weekdays_long   = "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday",
+        months          = "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+        when_today      = "Today",
+        when_yesterday  = "Yesterday",
+        when_date       = "MON D",
+        when_date_year  = "MON D 'YY",
+        when_long       = "WEEKDAY, MON D, YYYY at HH:MI",
         tt_rate_wait = "calculating... (1 min)",
         session_reset = "session reset: gold, XP and time start counting now.",
         help_session = "  /farol session reset - restart the session gold, XP and time counters",
@@ -722,6 +736,52 @@ local function FormatDuration(seconds)
     if hours > 0 then return string.format("%dh %02dm", hours, minutes) end
     return string.format("%dm", minutes)
 end
+
+-- Data de um momento salvo (segundos desde 1970), para as janelas de histórico.
+-- Curta: "Hoje 21:42" / "Ontem 21:27" / "08/11 21:12" (o dia vem em cinza). Longa: "domingo, 08/11/2026 às 21:12".
+-- Momento inválido (0, negativo, não-número) devolve "--". Os nomes vêm das traduções.
+local function ListOf(key)
+    local list = {}
+    for name in string.gmatch(T(key), "[^,]+") do list[#list + 1] = name end
+    return list
+end
+
+local function DateTokens(t)
+    local tokens = {
+        DD = date("%d", t), MM = date("%m", t), YYYY = date("%Y", t), YY = date("%y", t),
+        HH = date("%H", t), MI = date("%M", t),
+    }
+    tokens.D = tostring(tonumber(tokens.DD) or tokens.DD)
+    tokens.MON = ListOf("months")[tonumber(tokens.MM) or 0] or tokens.MM
+    tokens.WEEKDAY = ListOf("weekdays_long")[(tonumber(date("%w", t)) or 0) + 1] or ""
+    return tokens
+end
+
+local function FormatWhen(t, long)
+    if type(t) ~= "number" or t ~= t or t <= 0 or t >= 4102444800 then return "--" end
+    t = math.floor(t) -- segundos inteiros: date() recusa frações em motores Lua mais novos
+    if t <= 0 then return "--" end
+    local tokens = DateTokens(t)
+    if long then return (string.gsub(T("when_long"), "%u+", tokens)) end
+    local now = time()
+    local day, today = date("%Y-%m-%d", t), date("%Y-%m-%d", now)
+    -- Ontem = o dia de 3 h antes da meia-noite de hoje (funciona mesmo com horário de verão).
+    local sinceMidnight = (tonumber(date("%H", now)) or 0) * 3600 + (tonumber(date("%M", now)) or 0) * 60
+        + (tonumber(date("%S", now)) or 0)
+    local yesterday = date("%Y-%m-%d", now - sinceMidnight - 3 * 3600)
+    local label
+    if day == today then
+        label = T("when_today")
+    elseif day == yesterday then
+        label = T("when_yesterday")
+    elseif tokens.YYYY == date("%Y", now) then
+        label = string.gsub(T("when_date"), "%u+", tokens)
+    else
+        label = string.gsub(T("when_date_year"), "%u+", tokens)
+    end
+    return "|cff8c8c8c" .. label .. "|r " .. tokens.HH .. ":" .. tokens.MI
+end
+ns.FormatWhen = FormatWhen
 
 -- Segundos até os resets, como o próprio jogo informa. Clientes modernos: C_DateAndTime;
 -- antigos (3.3.5a): GetQuestResetTime (só o diário). Devolve diário, semanal e o nome de cada função.

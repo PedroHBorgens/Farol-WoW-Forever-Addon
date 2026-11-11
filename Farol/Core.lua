@@ -771,6 +771,7 @@ local function GetSessionSeconds()
     if not session.startTime then return nil end
     return GetTime() - session.startTime
 end
+ns.GetSessionSeconds = GetSessionSeconds -- usado pelos avisos (lembrete de pausa)
 
 
 local function FormatDuration(seconds)
@@ -780,6 +781,7 @@ local function FormatDuration(seconds)
     if hours > 0 then return string.format("%dh %02dm", hours, minutes) end
     return string.format("%dm", minutes)
 end
+ns.FormatDuration = FormatDuration -- usado pelos avisos (lembrete de pausa)
 
 -- Data de um momento salvo (segundos desde 1970), para as janelas de histórico.
 -- Curta: "Hoje 21:42" / "Ontem 21:27" / "08/11 21:12" (o dia vem em cinza). Longa: "domingo, 08/11/2026 às 21:12".
@@ -2032,7 +2034,8 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         StartSession()
         ResetMapToCurrentZone()
         ScanDurability()
-        inCombat = InCombatLockdown and InCombatLockdown() or false
+        local okCombat, combat = pcall(function() return InCombatLockdown and InCombatLockdown() end)
+        inCombat = okCombat and combat and true or false
         ApplyVisibility()
     elseif event == "ZONE_CHANGED_NEW_AREA" then
         ResetMapToCurrentZone()

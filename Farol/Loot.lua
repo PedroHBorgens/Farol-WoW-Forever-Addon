@@ -438,6 +438,7 @@ local function CreateDropdown(parent, name, width, getItems)
     button:SetScript("OnHide", function() if openList == list then CloseDropdown() end end)
     return button
 end
+ns.CreateDropdown = CreateDropdown -- também usado pelos avisos (tempo do "Lembrar")
 
 ---------------------------------------------------------------------------
 -- Janela (redimensionável)

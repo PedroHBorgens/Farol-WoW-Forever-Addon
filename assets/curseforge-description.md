@@ -28,7 +28,8 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - One-time warning on screen and in your chat when gear durability drops below 20% or your bags are almost full / full.
 - Configurable limits and sound; never repeats while the number flickers.
 - **Unspent talent points** and **lower-rank spells on your action bars** (never changes your bars for you).
-- Each warning lets you **Silence** it or get a **reminder in 30 minutes**.
+- Each warning lets you **Silence** it or get a **reminder in 2, 5, 10, 15 or 30 minutes** (your choice). Several warnings at once appear together in one window.
+- Optional **break** and **drink water** reminders (off by default): you choose how often (15–240 min) and whether they can show during fights, raids and dungeons.
 - **History of the last 10 warnings**: button next to the bar (with unread counter), key binding or `/farol history`.
 
 ### Session summary
@@ -75,7 +76,8 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 - Aviso único na tela e no seu chat quando a durabilidade cai abaixo de 20% ou as bolsas estão quase cheias / cheias.
 - Limites e som configuráveis; não fica repetindo quando o número oscila.
 - **Pontos de talento não gastos** e **magias de grau antigo na barra de ações** (nunca mexe nas suas barras).
-- Cada aviso deixa você **Silenciar** ou ser **lembrado em 30 minutos**.
+- Cada aviso deixa você **Silenciar** ou ser **lembrado em 2, 5, 10, 15 ou 30 minutos** (você escolhe). Vários avisos ao mesmo tempo aparecem juntos numa janela só.
+- Lembretes opcionais de **pausa** e de **beber água** (desligados por padrão): você escolhe de quanto em quanto tempo (15–240 min) e se podem aparecer em lutas, raides e masmorras.
 - **Histórico dos 10 últimos avisos**: botão ao lado da barra (com contador de novos), atalho de teclado ou `/farol historico`.
 
 ### Resumo da sessão

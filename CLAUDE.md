@@ -52,7 +52,8 @@ Farol/
   Core.lua          barra (grade de células), 19 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
-  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus), "Silenciar / Lembrar em 30 min", histórico 📝
+  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, pausa, água), "Silenciar / Lembrar em N min"
+                    (2–30), janela agrupada para vários avisos, histórico 📝
   Appearance.lua    escala, fundo, tamanhos de texto/ícone, formato (uma linha / uma coluna), esconder em combate,
                     mostrar/esconder os botões rápidos 📝 👜
   Order.lua         ordem dos itens na barra
@@ -89,7 +90,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 ## Testes
 
 ```
-lua5.1 tests/run.lua        # ~120 testes; deve terminar com "0 failed"
+lua5.1 tests/run.lua        # ~150 testes; deve terminar com "0 failed"
 ```
 
 - `tests/wow_mock.lua`: simulador da API (modos `forever`, `wotlk` e `secret`). `H:login()`, `H:slash()`,
@@ -98,6 +99,11 @@ lua5.1 tests/run.lua        # ~120 testes; deve terminar com "0 failed"
   no-op. Quando um teste falhar, confira primeiro se o erro é do simulador ou do addon.
 - `test_fuzz.lua` bombardeia comandos, mensagens de saque e dados salvos adulterados. Novos campos salvos devem
   aparecer nele.
+- `test_globals.lua` usa todas as funções e falha se aparecer qualquer global fora de `Farol…`/`BINDING_*`/
+  `SLASH_FAROL1`, ou um `function Nome()` sem `local`. Esquecer o `local` é o erro mais fácil de cometer.
+- Leituras do jogo que decidem quando avisar (`InCombatLockdown`, `IsInInstance`) passam por `pcall`; se falharem,
+  o aviso **espera** (conta como "em combate"), nunca quebra a verificação.
+- Rode também em Lua 5.4 (`lupa.lua54`): ele recusa frações em `date()` e `%d`, e pega erros que o 5.1 deixa passar.
 - Sem Lua instalado, dá para rodar com a biblioteca Python `lupa` (`lupa.lua51`).
 
 ## Fluxo de trabalho

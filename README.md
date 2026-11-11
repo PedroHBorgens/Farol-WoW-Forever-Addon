@@ -32,7 +32,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol session reset`| Restart session gold, gold/h, XP/h, rep/h and time |
 | `/farol summary`    | Summary of the current session (gold, XP, reputation, loot, warnings) |
 | `/farol summary on` / `off` | Show / don't show the last session's summary at login |
-| `/farol warn`       | Open the warnings window (durability, bags, talents, spell ranks) |
+| `/farol warn`       | Open the warnings window (durability, bags, talents, spell ranks, break, water) |
 | `/farol warn status`| Show what Farol can read on your client (talents, reputation, resets) |
 | `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
@@ -60,7 +60,7 @@ Tick or untick each item — no commands needed. Open it in any of these ways:
 - Type `/farol menu`
 - **Esc → Options → AddOns → Farol**
 
-The menu lets you choose bar items, show/lock the panel, switch the clock to server time, pick the language (Auto / Português / English)
+The menu lets you choose bar items, show/lock the panel, switch the clock to server time, turn the session summary at login on/off, pick the language (Auto / Português / English)
 and reset the position. Press **Esc** to close it. If you hide the panel, use `/farol menu` to bring it back.
 
 ## Clock alarms
@@ -137,15 +137,34 @@ your screen and in your own chat** (nothing is sent to anyone), with the game's 
   talent source (the game function name changed between WoW versions, so Farol asks all of them and uses the
   highest value, plus a level-based estimate: level − 9 minus points spent), and lower-rank spells found. Turn them off with `/farol warn talents off` / `/farol warn ranks off`.
 
-### Silence or remind me in 30 minutes
+### Break and drink-water reminders
+
+Two optional reminders, **both off by default**, turned on in the Warnings window:
+
+- **Break reminder**: "You've been playing for 2h 00m — time for a break?"
+- **Drink water reminder**: "Time to drink some water!"
+- You choose the interval of each one (**15 to 240 minutes**; defaults 120 and 45). The count starts at login
+  (or when you turn it on / change the interval) and repeats.
+- **Also during fights, raids and dungeons** (off by default): when off, a reminder that comes due during a fight
+  or inside a dungeon, raid, arena or battleground **waits** and shows as soon as you are out.
+- **Silence** turns that reminder off until the end of the session (it is back at the next login).
+- Commands: `/farol warn break 90`, `/farol warn water 30`, `/farol warn break on` / `off`,
+  `/farol warn water fights on` / `off`.
+
+### Silence or remind me later
 
 Every warning opens a small window with two choices:
 
 - **Silence**: the warning stays quiet and only comes back if the situation changes (e.g. you repair and the
   durability drops again, or you gain a new talent point).
-- **Remind in 30 min**: if the problem is still there in 30 minutes, the warning shows up again.
+- **Remind in [30 min ▾]**: choose **2, 5, 10, 15 or 30 minutes** in the dropdown; if the problem is still there
+  then, the warning shows up again. The time that comes selected is set in the Warnings window (default 30).
 
-Several warnings at once are shown one at a time. Chat: `/farol warn silence`, `/farol warn remind`.
+- **Several warnings at once appear together** in one window, one line each (with its own Silence / Remind),
+  plus **Silence all** and **Remind all in [N min ▾]**.
+- One reminder per warning type: reminding again replaces the previous time. A reminder whose problem is
+  already solved (you repaired, spent the points…) is dropped. Reminders end with `/reload` or logout.
+- Chat: `/farol warn silence` and `/farol warn remind [minutes]` (all open warnings), `/farol warn default 10`.
 
 ### Warning history
 
@@ -287,10 +306,11 @@ Found a security issue? Please report it **privately** (Security → Report a vu
 
 The add-on has automated tests that run **outside the game**, on Lua 5.1 (the same version the WoW client
 uses), against a small mock of the WoW API (`tests/wow_mock.lua`). They cover the bar on WoW Forever and
-3.3.5a clients, secret values, the options menu, alarms and snooze, the loot window, warnings, appearance,
-reputation, resets, the `.toc` files, and a
-scan that fails if the code ever uses automation, messaging or dynamic-code APIs, and fuzzing with random and
-malicious commands, chat messages and tampered saved data.
+3.3.5a clients, secret values, the options menu, alarms and snooze, the loot window, warnings (including break and
+water reminders and the grouped window), appearance, reputation, resets, the session summary, the `.toc` files, a
+scan that fails if the code ever uses automation, messaging or dynamic-code APIs, a check that the add-on creates no
+generic global names (only `Farol…`), and fuzzing with random and malicious commands, chat messages and tampered
+saved data. The suite runs on Lua 5.1 and is also checked on Lua 5.4.
 
 ```
 lua5.1 tests/run.lua

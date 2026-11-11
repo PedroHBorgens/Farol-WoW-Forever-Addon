@@ -142,15 +142,55 @@ return {
         T.has(popupText(H), "Bola de Fogo (Grau 1)", "ranks reminded")
     end },
 
-    { "several warnings at once are shown one at a time", function(T, Mock)
+    { "several warnings at once appear together in one window", function(T, Mock)
         local H = Mock.new():login() -- durabilidade baixa já está na fila
         H.talentPoints = 2; H:update(1)
-        T.has(popupText(H), "Durabilidade baixa")
-        H:click(H.env.FarolWarnSilence)
+        local popup = H.env.FarolWarnPopup
+        T.eq(H:text(popup.title), "Avisos (2)")
+        T.has(H:text(popup.rows[1].text), "Durabilidade baixa")
+        T.has(H:text(popup.rows[2].text), "Você tem 2 ponto(s) de talento")
+        T.eq(H:text(H.env.FarolWarnSilence), "Silenciar todos")
+        T.eq(H:text(H.env.FarolWarnRemind), "Lembrar todos em 30 min")
+        H:click(H.env.FarolWarnRow1Silence)              -- responde só a primeira linha
+        T.eq(H:text(popup.title), "Aviso", "back to the single layout")
         T.has(popupText(H), "Você tem 2 ponto(s) de talento")
         H:click(H.env.FarolWarnSilence)
-        T.ok(not H.env.FarolWarnPopup:IsShown())
+        T.ok(not popup:IsShown())
         H:slash("aviso silenciar"); T.has(H:lastMsg(), "nenhum aviso aberto")
+    end },
+
+    { "each warning chooses its own remind time (2, 5, 10, 15 or 30 min)", function(T, Mock)
+        local H = Mock.new():login(); fixGear(H)
+        H.talentPoints = 1; H:update(1)
+        H:click(H.env.FarolWarnRemindTime)
+        local list = H.env.FarolWarnRemindTimeList
+        T.ok(list:IsShown(), "dropdown open")
+        local labels = {}
+        for i = 1, 5 do labels[i] = H:text(H.env["FarolWarnRemindTimeEntry" .. i].text) end
+        T.eq(table.concat(labels, ","), "2 min,5 min,10 min,15 min,30 min")
+        H:click(H.env.FarolWarnRemindTimeEntry2)          -- 5 min
+        T.eq(H:text(H.env.FarolWarnRemind), "Lembrar em 5 min")
+        H:click(H.env.FarolWarnRemind)
+        for _ = 1, 4 do H:update(60) end; T.eq(H.warnSounds, 1, "not before 5 min")
+        H:update(61); T.eq(H.warnSounds, 2, "reminded after 5 min")
+        H:slash("aviso lembrar 2"); H:update(121); T.eq(H.warnSounds, 3, "chat: remind in 2 min")
+        H:slash("aviso lembrar 7"); T.has(H:lastMsg(), "use 2, 5, 10, 15 ou 30")
+    end },
+
+    { "remind all at once, one reminder per warning type, default time is configurable", function(T, Mock)
+        local H = Mock.new():login({ warnings = { remindMin = 10 } })
+        H.talentPoints = 2; H:update(1)
+        T.eq(H:text(H.env.FarolWarnRemind), "Lembrar todos em 10 min", "default from the settings")
+        T.eq(H:text(H.env.FarolWarnRow1Remind), "Lembrar em 10 min")
+        H:click(H.env.FarolWarnRemind)
+        T.has(H:lastMsg(), "2 aviso(s) de novo às")
+        T.ok(not H.env.FarolWarnPopup:IsShown())
+        for _ = 1, 10 do H:update(60) end
+        T.eq(H:text(H.env.FarolWarnPopup.title), "Avisos (2)", "both come back together")
+        H:slash("aviso padrao 15"); T.eq(H.env.FarolDB.warnings.remindMin, 15)
+        H:slash("aviso padrao 4"); T.has(H:lastMsg(), "use 2, 5, 10, 15 ou 30")
+        local B = Mock.new():login({ warnings = { remindMin = 7 } })
+        T.eq(B.env.FarolDB.warnings.remindMin, 30, "invalid saved default falls back to 30")
     end },
 
     { "talent and rank warnings can be turned off", function(T, Mock)

@@ -32,7 +32,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h, rep/h e tempo |
 | `/farol resumo`     | Resumo da sessão atual (ouro, XP, reputação, saques, avisos) |
 | `/farol resumo on` / `off` | Mostra / não mostra o resumo da última sessão ao entrar |
-| `/farol aviso`      | Abre a janela de avisos (durabilidade, bolsas, talentos, graus de magia) |
+| `/farol aviso`      | Abre a janela de avisos (durabilidade, bolsas, talentos, graus de magia, pausa, água) |
 | `/farol aviso status`| Mostra o que o Farol consegue ler no seu cliente (talentos, reputação, resets) |
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
@@ -60,7 +60,7 @@ Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um des
 - Digite `/farol menu`
 - **Esc → Opções → AddOns → Farol**
 
-No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, escolhe o idioma (Auto / Português /
+No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, liga/desliga o resumo da sessão ao entrar, escolhe o idioma (Auto / Português /
 English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/farol menu` para trazê-lo de volta.
 
 ## Alarmes do relógio
@@ -137,15 +137,34 @@ tela e no seu chat** (nada é enviado a ninguém), com o som de checagem de pron
   fonte de talentos (o nome da função do jogo mudou entre versões do WoW, então o Farol consulta todas e usa o maior
   valor, além de uma estimativa pelo nível: nível − 9 menos os pontos gastos) e as magias de grau antigo encontradas. Para desligar: `/farol aviso talentos off` / `/farol aviso graus off`.
 
-### Silenciar ou lembrar em 30 minutos
+### Lembretes de pausa e de beber água
+
+Dois lembretes opcionais, **os dois desligados por padrão**, que você liga na janela de Avisos:
+
+- **Lembrete de pausa**: "Você está jogando há 2h 00m — que tal uma pausa?"
+- **Lembrete de beber água**: "Hora de beber água!"
+- Você escolhe o intervalo de cada um (**15 a 240 minutos**; padrão 120 e 45). A contagem começa no login (ou
+  quando você liga / muda o intervalo) e se repete.
+- **Também em lutas, raides e masmorras** (desmarcado por padrão): desmarcado, um lembrete que vence durante uma
+  luta ou dentro de masmorra, raide, arena ou campo de batalha **espera** e aparece assim que você sair.
+- **Silenciar** desliga aquele lembrete até o fim da sessão (ele volta no próximo login).
+- Comandos: `/farol aviso pausa 90`, `/farol aviso agua 30`, `/farol aviso pausa on` / `off`,
+  `/farol aviso agua lutas on` / `off`.
+
+### Silenciar ou lembrar depois
 
 Cada aviso abre uma janelinha com duas opções:
 
 - **Silenciar**: o aviso fica quieto e só volta se a situação mudar (ex.: você reparou e a durabilidade caiu de
   novo, ou ganhou um ponto de talento novo).
-- **Lembrar em 30 min**: se o problema continuar daqui a 30 minutos, o aviso aparece de novo.
+- **Lembrar em [30 min ▾]**: escolha **2, 5, 10, 15 ou 30 minutos** no menu; se o problema continuar, o aviso
+  aparece de novo. O tempo que já vem escolhido é definido na janela de Avisos (padrão 30).
 
-Vários avisos ao mesmo tempo aparecem um de cada vez. No chat: `/farol aviso silenciar`, `/farol aviso lembrar`.
+- **Vários avisos ao mesmo tempo aparecem juntos** numa janela só, uma linha para cada (com o próprio
+  Silenciar / Lembrar), e mais **Silenciar todos** e **Lembrar todos em [N min ▾]**.
+- Um lembrete por tipo de aviso: lembrar de novo troca o horário anterior. Lembrete de um problema que já foi
+  resolvido (você reparou, gastou os pontos…) é descartado. Os lembretes acabam no `/reload` ou ao sair do jogo.
+- No chat: `/farol aviso silenciar` e `/farol aviso lembrar [minutos]` (todos os avisos abertos), `/farol aviso padrao 10`.
 
 ### Histórico de avisos
 
@@ -290,8 +309,11 @@ no [`SECURITY.md`](SECURITY.md). Nunca inclua dados pessoais, senhas ou informa�
 O addon tem testes automáticos que rodam **fora do jogo**, em Lua 5.1 (a mesma versão do cliente do WoW),
 usando um simulador simples da API do WoW (`tests/wow_mock.lua`). Eles cobrem a barra nos clientes WoW Forever
 e 3.3.5a, os valores bloqueados (secret values), o menu de opções, os alarmes e a soneca, a janela de saques,
-os avisos, a aparência, a reputação, os resets, os arquivos `.toc`, e uma varredura que falha se o código algum dia usar APIs de automação, de mensagens ou de
-execução de código, e um fuzzing com comandos, mensagens de chat e dados salvos aleatórios e maliciosos.
+os avisos (inclusive os lembretes de pausa e água e a janela agrupada), a aparência, a reputação, os resets, o resumo
+da sessão, os arquivos `.toc`, uma varredura que falha se o código algum dia usar APIs de automação, de mensagens ou
+de execução de código, uma checagem de que o addon não cria nomes globais genéricos (só `Farol…`), e um fuzzing com
+comandos, mensagens de chat e dados salvos aleatórios e maliciosos. A suíte roda em Lua 5.1 e também é conferida em
+Lua 5.4.
 
 ```
 lua5.1 tests/run.lua

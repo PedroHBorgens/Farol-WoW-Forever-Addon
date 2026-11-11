@@ -5,6 +5,7 @@
 local ALPHA = { "a", "0", "9", " ", ":", "%", "|", "c", "H", "T", "\n", "\0", "é", "[", "]", "(", ".", "-",
                 "%s", "%d", "%1$s", "|cff", "|H", "|T", "|A", "|r" }
 local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", "durab", "bolsas", "talentos",
+                "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "15", "240", "2",
                 "graus", "som", "status", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
                 "sessao", "zerar", "historico", "on", "off", "07:30", "25:99", "-1", "99999" }
@@ -53,6 +54,13 @@ return {
         for i = 1, 60 do
             local db = {}
             for _, key in ipairs(KEYS) do if random(3) > 1 then db[key] = pick(BAD) end end
+            if random(2) == 1 then -- avisos com cada campo adulterado (inclusive pausa, água e "Lembrar em")
+                db.warnings = {}
+                for _, key in ipairs({ "durab", "durabPct", "bags", "bagSlots", "sound", "talents", "ranks", "remindMin",
+                                       "pause", "pauseMin", "pauseAnywhere", "water", "waterMin", "waterAnywhere" }) do
+                    db.warnings[key] = pick(BAD)
+                end
+            end
             local char = {
                 items = { { link = "|cff1eff00|Hitem:1|h[Ok]|h|r", count = pick(BAD), q = pick(BAD), t = pick(BAD) } },
                 warnHistory = { { t = pick(BAD), text = "Aviso " .. i }, pick(BAD) },

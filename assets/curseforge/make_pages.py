@@ -67,7 +67,7 @@ def hbar(items=BAR_ITEMS, extra_style=""):
         '<span class="qb">📝<span class="badge r">2</span></span><span class="qb">👜<span class="badge g">3</span></span></div>'
 
 # 1. Hero
-page("01_farol", f"""
+page("farol-01-overview-info-bar", f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:30px">
  <div style="display:flex;align-items:center;gap:26px">
   <img src="data:image/png;base64,{logo}" style="width:150px;height:150px;border-radius:14px;box-shadow:0 0 0 3px #c9a24a,0 12px 40px #000">
@@ -98,7 +98,7 @@ tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
 <div class="row"><span class="k">Daily reset in</span><span>5h 12m</span></div>
 <div class="row"><span class="k">Server time</span><span>21:05</span></div>
 <div class="dim" style="margin-top:6px">Right-click: options.</div></div>"""
-page("02_bar", f"""
+page("farol-02-bar-items-layout-tooltip", f"""
 <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
      "19 items with icons — one line, one column or columns", "19 informações com ícones — em linha, coluna ou colunas alinhadas, com tooltip")
@@ -118,7 +118,7 @@ order_names = [("🌍","Zone"),("🔭","FPS"),("⚡","Latency"),("💰","Gold"),
 order = '<div class="win" style="width:330px"><div class="x">×</div><div class="t">Bar order</div>' + "".join(
     f'<div class="ck" style="justify-content:space-between"><span><span class="dim" style="display:inline-block;width:22px;text-align:right">{i+1}.</span> {ic(e)} <span class="{"dim" if "hidden" in n else ""}">{n}</span></span><span>▲ ▼</span></div>'
     for i,(e,n) in enumerate(order_names)) + '<div style="text-align:right;margin-top:10px"><span class="btn">Restore default order</span></div></div>'
-page("03_menu_order", menu + order, "Tick what you want — and choose the order", "Marque o que quiser e escolha a ordem com as setas")
+page("farol-03-options-menu-bar-order", menu + order, "Tick what you want — and choose the order", "Marque o que quiser e escolha a ordem com as setas")
 
 # 4. Alarms
 alarms = """<div class="win" style="width:470px"><div class="x">×</div><div class="t">Alarms</div>
@@ -134,7 +134,7 @@ popup = """<div style="display:flex;flex-direction:column;gap:18px">
 <div class="win" style="width:400px;text-align:center"><div class="t">⏰ Alarm!</div><div style="font-size:16px">21:00 (Server) Raid</div>
 <div style="display:flex;justify-content:space-between;margin-top:16px"><span class="btn">Snooze (10 min)</span><span class="btn">Stop</span></div></div>
 <div class="tip" style="width:400px;font-size:13px"><span style="color:#33ccff">Farol:</span> ⏰ <span style="color:#ff6600">Alarm!</span> 21:00 (Server) Raid — /farol snooze or /farol stop</div></div>"""
-page("04_alarms", alarms + popup, "Clock alarms with snooze — local or server time", "Alarmes do relógio com soneca — hora local ou do servidor")
+page("farol-04-clock-alarms-snooze", alarms + popup, "Clock alarms with snooze — local or server time", "Alarmes do relógio com soneca — hora local ou do servidor")
 
 # 5. Loot
 loot_items = [("q5","⚔️","[Thunderfury, Blessed Blade]","","Today","21:42"),("q4","🛡️","[Helm of Valor]","","Today","21:38"),("q3","💍","[Band of the Ancients]","","Today","09:30"),
@@ -148,7 +148,7 @@ loot = f"""<div class="win" style="width:720px;padding-bottom:26px"><div class="
 <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px"><span class="k">Show:</span><span class="btn">10 ▾</span><span class="k" style="margin-left:14px">Quality:</span><span class="btn">5 selected ▾</span></div>
 {dd}{rows}<div class="dim" style="font-size:12px;margin-top:10px">Hover: details · Shift-click: link · Wheel: scroll</div>
 <div style="position:absolute;right:8px;bottom:6px;color:#aaa">◢</div></div>"""
-page("05_loot", loot, "Recent loot: when you got it, with quality filter", "Últimos saques: quando você pegou, com filtro de qualidade — redimensionável")
+page("farol-05-recent-loot-window", loot, "Recent loot: when you got it, with quality filter", "Últimos saques: quando você pegou, com filtro de qualidade — redimensionável")
 
 # 6. Warnings: grouped window with remind-time dropdowns + history
 def wrow(text):
@@ -170,7 +170,7 @@ hist = """<div class="win" style="width:520px"><div class="x">×</div><div class
 <div><span class="dim">11/11 21:12</span>&nbsp; Lower-rank spell on your bars: Fireball (Rank 3).</div>
 <div><span class="dim">11/11 20:31</span>&nbsp; Low durability: 18% — time to repair!</div></div>
 <div style="text-align:right;margin-top:10px"><span class="btn">Clear</span></div></div>"""
-page("06_warnings", f'<div style="display:flex;flex-direction:column;gap:18px;align-items:center;transform:scale(.92)">{warnpop}{hist}</div>',
+page("farol-06-warnings-break-water-reminders", f'<div style="display:flex;flex-direction:column;gap:18px;align-items:center;transform:scale(.92)">{warnpop}{hist}</div>',
      "Warnings + break & water reminders, remind in 2–30 min", "Avisos + lembretes de pausa e água — lembrar em 2 a 30 min, vários numa janela só")
 
 # 7. Appearance
@@ -187,7 +187,7 @@ app = f"""<div class="win" style="width:470px"><div class="x">×</div><div class
 <div style="text-align:right;margin-top:8px"><span class="btn">Restore defaults</span></div></div>"""
 small = hbar(BAR_ITEMS[:4], "font-size:12px;transform:scale(.9)")
 big = hbar(BAR_ITEMS[:4], "font-size:19px;background:#0004;border-color:#0000")
-page("07_appearance", f'{app}<div style="display:flex;flex-direction:column;gap:30px;align-items:flex-start"><div class="dim">Small · compact</div>{small}<div class="dim">Large · transparent</div>{big}</div>',
+page("farol-07-appearance-settings", f'{app}<div style="display:flex;flex-direction:column;gap:30px;align-items:flex-start"><div class="dim">Small · compact</div>{small}<div class="dim">Large · transparent</div>{big}</div>',
      "Make it yours: shape, size, background, hide in combat", "Do seu jeito: formato livre, tamanho do texto e ícones, fundo, esconder em combate")
 # 8. Progress: XP, reputation, resets
 pbar = hbar([("📖",'XP 46% <span class="blue">+12%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,RESET_ITEM])
@@ -204,6 +204,6 @@ ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-we
 <div style="height:6px"></div>
 <div class="row"><span class="k">Daily reset in</span><span>5h 12m (02:17 local · 05:17 server)</span></div>
 <div class="row"><span class="k">Weekly reset in</span><span>2d 4h (Wed 01:05 local · 04:05 server)</span></div></div>"""
-page("08_progress", f'<div style="display:flex;flex-direction:column;gap:22px;align-items:center">{pbar}{ptip}</div>',
+page("farol-08-progress-xp-reputation-resets", f'<div style="display:flex;flex-direction:column;gap:22px;align-items:center">{pbar}{ptip}</div>',
      "Track your progress: XP, reputation and resets", "Acompanhe seu progresso: XP, reputação e contagem até os resets")
 print("pages ok")

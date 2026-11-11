@@ -107,4 +107,73 @@ return {
         local B = setup(Mock, { pauseMin = 240.5, waterMin = 1e309 })
         T.eq(B.env.FarolDB.warnings.pauseMin, 120); T.eq(B.env.FarolDB.warnings.waterMin, 45)
     end },
+
+    { "turning a reminder off removes its open warning from the window", function(T, Mock)
+        local H = setup(Mock, { pause = true, pauseMin = 15, water = true, waterMin = 15 })
+        minutes(H, 15)
+        T.eq(H:text(popup(H).title), "Avisos (2)")
+        H:slash("aviso agua off")
+        T.eq(H:text(popup(H).title), "Aviso", "only the break is left")
+        T.has(H:text(popup(H).text), "que tal uma pausa?")
+        H:slash("aviso pausa off")
+        T.ok(not popup(H):IsShown(), "window closed")
+    end },
+
+    { "silence and reminders end with /reload or logout; the next session counts again", function(T, Mock)
+        local H = setup(Mock, { water = true, waterMin = 15 })
+        minutes(H, 15); H:click(H.env.FarolWarnSilence)
+        minutes(H, 60); T.eq(H.warnSounds, 1, "silenced in this session")
+        local N = Mock.new():login(H.env.FarolDB, H.env.FarolCharDB); fixGear(N); N:update(1)
+        minutes(N, 14); T.eq(N.warnSounds, 0)
+        minutes(N, 1); T.eq(N.warnSounds, 1, "back in the next session, after a full interval")
+        N:click(N.env.FarolWarnRemind)                     -- lembrete pendente...
+        local R = Mock.new():login(N.env.FarolDB, N.env.FarolCharDB); fixGear(R); R:update(1)
+        minutes(R, 14); T.eq(R.warnSounds, 0, "...does not survive the reload")
+    end },
+
+    { "arenas and battlegrounds also wait; outside instances ('none') does not", function(T, Mock)
+        for _, kind in ipairs({ "arena", "pvp", "party", "raid", "scenario" }) do
+            local H = setup(Mock, { water = true, waterMin = 15 })
+            H.instanceType = kind
+            minutes(H, 20); T.eq(H.warnSounds, 0, "waits in " .. kind)
+        end
+        local O = setup(Mock, { water = true, waterMin = 15 })
+        O.env.IsInInstance = function() return false, "none" end
+        minutes(O, 15); T.eq(O.warnSounds, 1, "open world")
+    end },
+
+    { "English window and commands", function(T, Mock)
+        local H = setup(Mock, nil, { locale = "enUS" })
+        H:slash("warn")
+        T.eq(H:text(H.env.FarolWarnPause.label), "Break reminder every")
+        T.eq(H:text(H.env.FarolWarnWater.label), "Drink water reminder every")
+        T.eq(H:text(H.env.FarolWarnWaterAnywhere.label), "Also during fights, raids and dungeons")
+        T.eq(H:text(H.env.FarolWarnRemindLabel or H.env.FarolWarnings.remindLabel), "\"Remind in\" starts at:")
+        H:slash("warn break on"); H:slash("warn break 90"); H:slash("warn water fights on"); H:slash("warn default 5")
+        local w = H.env.FarolDB.warnings
+        T.eq(w.pause, true); T.eq(w.pauseMin, 90); T.eq(w.waterAnywhere, true); T.eq(w.remindMin, 5)
+        T.has(H:lastMsg(), "\"Remind in\" now starts at 5 min.")
+        H:slash("warn break fights"); T.has(H:lastMsg(), "use 15 to 240 minutes", "missing on/off is rejected")
+        T.eq(w.pauseAnywhere, false)
+    end },
+
+    { "each line of the grouped window keeps its own remind time", function(T, Mock)
+        local H = setup(Mock, { pause = true, pauseMin = 15, water = true, waterMin = 15 })
+        minutes(H, 15)
+        H:click(H.env.FarolWarnRow1Time); H:click(H.env.FarolWarnRow1TimeEntry1)   -- linha 1: 2 min
+        T.eq(H:text(H.env.FarolWarnRow1Remind), "Lembrar em 2 min")
+        T.eq(H:text(H.env.FarolWarnRow2Remind), "Lembrar em 30 min", "the other line keeps its time")
+        H:click(H.env.FarolWarnRow1Remind)
+        T.eq(H:text(popup(H).title), "Aviso")
+        H:click(H.env.FarolWarnSilence)
+        minutes(H, 2); T.eq(H.warnSounds, 3, "line 1 reminded after 2 min")
+    end },
+
+    { "a failing combat check never breaks the warnings (they just wait)", function(T, Mock)
+        local H = setup(Mock, { water = true, waterMin = 15 })
+        H.env.InCombatLockdown = function() error("blocked by the game") end
+        minutes(H, 20); T.eq(H.warnSounds, 0, "treated as in combat: waits")
+        H.env.InCombatLockdown = function() return false end
+        H:update(1); T.eq(H.warnSounds, 1)
+    end },
 }

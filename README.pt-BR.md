@@ -60,7 +60,7 @@ Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um des
 - Digite `/farol menu`
 - **Esc → Opções → AddOns → Farol**
 
-No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, escolhe o idioma (Auto / Português /
+No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, liga/desliga o resumo da sessão ao entrar, escolhe o idioma (Auto / Português /
 English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/farol menu` para trazê-lo de volta.
 
 ## Alarmes do relógio
@@ -309,8 +309,11 @@ no [`SECURITY.md`](SECURITY.md). Nunca inclua dados pessoais, senhas ou informa�
 O addon tem testes automáticos que rodam **fora do jogo**, em Lua 5.1 (a mesma versão do cliente do WoW),
 usando um simulador simples da API do WoW (`tests/wow_mock.lua`). Eles cobrem a barra nos clientes WoW Forever
 e 3.3.5a, os valores bloqueados (secret values), o menu de opções, os alarmes e a soneca, a janela de saques,
-os avisos, a aparência, a reputação, os resets, os arquivos `.toc`, e uma varredura que falha se o código algum dia usar APIs de automação, de mensagens ou de
-execução de código, e um fuzzing com comandos, mensagens de chat e dados salvos aleatórios e maliciosos.
+os avisos (inclusive os lembretes de pausa e água e a janela agrupada), a aparência, a reputação, os resets, o resumo
+da sessão, os arquivos `.toc`, uma varredura que falha se o código algum dia usar APIs de automação, de mensagens ou
+de execução de código, uma checagem de que o addon não cria nomes globais genéricos (só `Farol…`), e um fuzzing com
+comandos, mensagens de chat e dados salvos aleatórios e maliciosos. A suíte roda em Lua 5.1 e também é conferida em
+Lua 5.4.
 
 ```
 lua5.1 tests/run.lua

@@ -60,7 +60,7 @@ Tick or untick each item — no commands needed. Open it in any of these ways:
 - Type `/farol menu`
 - **Esc → Options → AddOns → Farol**
 
-The menu lets you choose bar items, show/lock the panel, switch the clock to server time, pick the language (Auto / Português / English)
+The menu lets you choose bar items, show/lock the panel, switch the clock to server time, turn the session summary at login on/off, pick the language (Auto / Português / English)
 and reset the position. Press **Esc** to close it. If you hide the panel, use `/farol menu` to bring it back.
 
 ## Clock alarms
@@ -306,10 +306,11 @@ Found a security issue? Please report it **privately** (Security → Report a vu
 
 The add-on has automated tests that run **outside the game**, on Lua 5.1 (the same version the WoW client
 uses), against a small mock of the WoW API (`tests/wow_mock.lua`). They cover the bar on WoW Forever and
-3.3.5a clients, secret values, the options menu, alarms and snooze, the loot window, warnings, appearance,
-reputation, resets, the `.toc` files, and a
-scan that fails if the code ever uses automation, messaging or dynamic-code APIs, and fuzzing with random and
-malicious commands, chat messages and tampered saved data.
+3.3.5a clients, secret values, the options menu, alarms and snooze, the loot window, warnings (including break and
+water reminders and the grouped window), appearance, reputation, resets, the session summary, the `.toc` files, a
+scan that fails if the code ever uses automation, messaging or dynamic-code APIs, a check that the add-on creates no
+generic global names (only `Farol…`), and fuzzing with random and malicious commands, chat messages and tampered
+saved data. The suite runs on Lua 5.1 and is also checked on Lua 5.4.
 
 ```
 lua5.1 tests/run.lua

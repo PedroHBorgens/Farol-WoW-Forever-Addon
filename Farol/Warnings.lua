@@ -573,6 +573,14 @@ function Warnings.Respond(remind, key, minutes)
     ShowNext()
 end
 
+-- Em combate? Leitura protegida: se o jogo der erro, conta como "em combate" (os avisos só esperam).
+local function InCombat()
+    if not InCombatLockdown then return false end
+    local ok, value = pcall(InCombatLockdown)
+    if not ok then return true end
+    return value and true or false
+end
+
 local function CanFire(entry, now)
     return entry.armed and (entry.lastAt == nil or now - entry.lastAt >= COOLDOWN)
 end
@@ -843,7 +851,7 @@ end
 
 -- Em luta, ou dentro de masmorra, raide, arena ou campo de batalha?
 local function Busy()
-    if InCombatLockdown and InCombatLockdown() then return true end
+    if InCombat() then return true end
     if IsInInstance then
         local ok, inside, kind = pcall(IsInInstance)
         if ok and inside and kind ~= "none" then return true end
@@ -896,7 +904,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
     pcall(CheckDurability, now)
     pcall(CheckBags, now)
     pcall(CheckBreaks, now)
-    if not (InCombatLockdown and InCombatLockdown()) then -- talentos e graus esperam o combate acabar
+    if not InCombat() then -- talentos e graus esperam o combate acabar
         pcall(CheckTalents, now)
         pcall(CheckRanks, now)
     end
@@ -915,6 +923,12 @@ local function SetEnabled(key, value)
     elseif IsBreak(key) then -- recomeça a contagem agora
         state[key].nextAt = value and GetTime() + Settings()[key .. "Min"] * 60 or nil
         state[key].silenced = false
+        if not value then -- desligou: o aviso aberto desse lembrete some da janela
+            for i = #queue, 1, -1 do
+                if queue[i].key == key then table.remove(queue, i) end
+            end
+            ShowNext()
+        end
     elseif state[key] then state[key].armed = true end
     Print(string.format(value and T("warn_on") or T("warn_off"), T("warn_name_" .. key)))
     if RefreshWindow then RefreshWindow() end

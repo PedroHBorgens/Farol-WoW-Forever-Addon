@@ -10,6 +10,8 @@ All notable changes to Farol. Versions follow the `## Version:` line of the `.to
 - Several warnings at once now appear **together in one window**, each with its own buttons, plus **Silence all**
   and **Remind all**. One reminder per warning type; solved problems are not reminded; reminders end on `/reload`.
 - New settings validated on load and added to the fuzz test.
+- Security review: turning a reminder off removes its open warning; the combat check is protected (if the game
+  API fails, warnings wait instead of stopping); new permanent test against generic global names.
 
 ## 2.18.0 — Session summary
 - `/farol summary` (`/farol resumo`) shows the current session **in your own chat**: gold and gold per hour, XP,

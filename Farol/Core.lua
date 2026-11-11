@@ -2034,7 +2034,8 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         StartSession()
         ResetMapToCurrentZone()
         ScanDurability()
-        inCombat = InCombatLockdown and InCombatLockdown() or false
+        local okCombat, combat = pcall(function() return InCombatLockdown and InCombatLockdown() end)
+        inCombat = okCombat and combat and true or false
         ApplyVisibility()
     elseif event == "ZONE_CHANGED_NEW_AREA" then
         ResetMapToCurrentZone()

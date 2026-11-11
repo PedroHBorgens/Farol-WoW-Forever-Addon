@@ -10,7 +10,11 @@
     O addon NÃO troca a magia por você (isso seria automação): só avisa.
   * Talentos e graus nunca avisam no meio do combate: esperam a luta acabar.
   * Cada aviso abre uma janelinha: "Silenciar" (só volta se a situação mudar) ou
-    "Lembrar em 30 min" (avisa de novo se o problema continuar).
+    "Lembrar em N min" (2, 5, 10, 15 ou 30; avisa de novo se o problema continuar).
+    Vários avisos ao mesmo tempo aparecem juntos, numa janela só, com "Silenciar todos" / "Lembrar todos".
+    Um lembrete por tipo de aviso; lembretes acabam no /reload ou ao sair do jogo.
+  * Lembretes de pausa e de beber água (desligados por padrão): o jogador escolhe o intervalo (15 a 240 min)
+    e se podem aparecer em lutas, raides e masmorras (por padrão esperam). "Silenciar" vale até o fim da sessão.
   * Mensagem no centro da tela e no SEU chat (nada é enviado a ninguém) + som opcional.
   * Histórico dos 10 últimos avisos (salvo por personagem): botão ao lado da barra com contador
     de avisos novos, atalho de teclado (Esc > Teclas de atalho > AddOns > Farol) e /farol historico.
@@ -19,12 +23,19 @@
 local _, ns = ...
 
 local COOLDOWN = 5 * 60
-local REMIND_SECONDS = 30 * 60 -- "Lembrar em 30 min"
+local REMIND_CHOICES = { 2, 5, 10, 15, 30 } -- minutos do "Lembrar em"
+local BREAK_MIN, BREAK_MAX = 15, 240        -- intervalo dos lembretes de pausa e de água (minutos)
+local BREAK_KEYS = { "pause", "water" }
 local HISTORY_MAX = 10
 local HISTORY_ICON = "Interface\\Icons\\INV_Misc_Note_01"
 local DURAB_MIN, DURAB_MAX = 5, 50
 local BAGS_MIN, BAGS_MAX = 0, 10
-local DEFAULTS = { durab = true, durabPct = 20, bags = true, bagSlots = 2, sound = true, talents = true, ranks = true }
+local DEFAULTS = {
+    durab = true, durabPct = 20, bags = true, bagSlots = 2, sound = true, talents = true, ranks = true,
+    remindMin = 30,                                          -- tempo padrão do "Lembrar em"
+    pause = false, pauseMin = 120, pauseAnywhere = false,    -- lembrete de pausa (desligado por padrão)
+    water = false, waterMin = 45, waterAnywhere = false,     -- lembrete de beber água (desligado por padrão)
+}
 local MAX_ACTION_SLOT = 180 -- barras de ação (clientes modernos têm até 180 espaços)
 local RANK_SCAN_INTERVAL = 5 -- segundos entre varreduras quando algo mudou
 
@@ -59,10 +70,32 @@ local STRINGS = {
         warn_status_ranks = "magias de grau antigo na barra: %d.",
         warn_popup_title = "Aviso",
         warn_silence_btn = "Silenciar",
-        warn_remind_btn = "Lembrar em 30 min",
+        warn_remind_btn = "Lembrar em %d min",
+        warn_minutes    = "%d min",
+        warn_group_title = "Avisos (%d)",
+        warn_silence_all = "Silenciar todos",
+        warn_remind_all = "Lembrar todos em %d min",
         warn_silenced   = "aviso silenciado: só volta se a situação mudar.",
+        warn_silenced_session = "lembrete silenciado até o fim da sessão.",
+        warn_silenced_n = "%d aviso(s) silenciado(s).",
         warn_reminded   = "ok: aviso de novo às %s se o problema continuar.",
-        warn_chat_hint  = " — /farol aviso silenciar ou /farol aviso lembrar",
+        warn_reminded_n = "ok: %d aviso(s) de novo às %s (se ainda for preciso).",
+        warn_chat_hint  = " — /farol aviso silenciar ou /farol aviso lembrar [minutos]",
+        warn_pause      = "Você está jogando há %s — que tal uma pausa?",
+        warn_water      = "Hora de beber água!",
+        warn_opt_pause  = "Lembrete de pausa a cada",
+        warn_opt_water  = "Lembrete de beber água a cada",
+        warn_unit_min   = "min",
+        warn_opt_anywhere = "Também em lutas, raides e masmorras",
+        warn_opt_remind = "\"Lembrar em\" vem com:",
+        warn_name_pause = "pausa",
+        warn_name_water = "beber água",
+        warn_set_break  = "lembrete de %s: a cada %d min.",
+        warn_set_anywhere = "lembrete de %s: aparece também em lutas, raides e masmorras.",
+        warn_set_wait   = "lembrete de %s: espera a luta acabar e você sair da masmorra/raide.",
+        warn_set_remind = "\"Lembrar em\" agora vem com %d min.",
+        warn_bad_break  = "valor inválido: use de 15 a 240 minutos.",
+        warn_bad_remind = "valor inválido: use 2, 5, 10, 15 ou 30 minutos.",
         warn_none       = "nenhum aviso aberto.",
         hist_title      = "Últimos avisos",
         hist_empty      = "Nenhum aviso ainda.",
@@ -75,6 +108,7 @@ local STRINGS = {
         help_history    = "  /farol historico     - ver os 10 últimos avisos (também pelo botão ao lado da barra ou por atalho de teclado)",
         warn_opt_test   = "Testar aviso",
         warn_hint       = "Avisa uma vez; avisa de novo depois que melhorar (mín. 5 min).",
+        warn_hint_break = "Pausa e água vêm desligadas; sem a opção acima, esperam a luta e a masmorra acabarem.",
         warn_set_durab  = "aviso de durabilidade: abaixo de %d%%.",
         warn_set_bags   = "aviso de bolsas: até %d espaço(s) livre(s).",
         warn_on         = "aviso ligado: %s",
@@ -84,9 +118,9 @@ local STRINGS = {
         warn_name_sound = "som",
         warn_bad_durab  = "valor inválido: use de 5 a 50 (%).",
         warn_bad_bags   = "valor inválido: use de 0 a 10 espaços.",
-        warn_usage      = "uso: /farol aviso durab N || bolsas N || durab/bolsas/talentos/graus/som off (ou on) || status || silenciar || lembrar",
+        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || durab/bolsas/talentos/graus/pausa/agua/som on||off || pausa/agua lutas on||off || lembrar N || status || silenciar",
         opt_warnings    = "Avisos...",
-        help_warn       = "  /farol aviso         - abrir a janela de avisos (durabilidade e bolsas)",
+        help_warn       = "  /farol aviso         - abrir a janela de avisos (durabilidade, bolsas, talentos, graus, pausa, água)",
     },
     en = {
         warn_title      = "Warnings",
@@ -111,10 +145,32 @@ local STRINGS = {
         warn_status_ranks = "lower-rank spells on your bars: %d.",
         warn_popup_title = "Warning",
         warn_silence_btn = "Silence",
-        warn_remind_btn = "Remind in 30 min",
+        warn_remind_btn = "Remind in %d min",
+        warn_minutes    = "%d min",
+        warn_group_title = "Warnings (%d)",
+        warn_silence_all = "Silence all",
+        warn_remind_all = "Remind all in %d min",
         warn_silenced   = "warning silenced: it only comes back if the situation changes.",
+        warn_silenced_session = "reminder silenced until the end of the session.",
+        warn_silenced_n = "%d warning(s) silenced.",
         warn_reminded   = "ok: I'll warn you again at %s if it's still a problem.",
-        warn_chat_hint  = " — /farol warn silence or /farol warn remind",
+        warn_reminded_n = "ok: %d warning(s) again at %s (if still needed).",
+        warn_chat_hint  = " — /farol warn silence or /farol warn remind [minutes]",
+        warn_pause      = "You've been playing for %s — time for a break?",
+        warn_water      = "Time to drink some water!",
+        warn_opt_pause  = "Break reminder every",
+        warn_opt_water  = "Drink water reminder every",
+        warn_unit_min   = "min",
+        warn_opt_anywhere = "Also during fights, raids and dungeons",
+        warn_opt_remind = "\"Remind in\" starts at:",
+        warn_name_pause = "break",
+        warn_name_water = "drink water",
+        warn_set_break  = "%s reminder: every %d min.",
+        warn_set_anywhere = "%s reminder: also shown during fights, raids and dungeons.",
+        warn_set_wait   = "%s reminder: waits until the fight ends and you leave the dungeon/raid.",
+        warn_set_remind = "\"Remind in\" now starts at %d min.",
+        warn_bad_break  = "invalid value: use 15 to 240 minutes.",
+        warn_bad_remind = "invalid value: use 2, 5, 10, 15 or 30 minutes.",
         warn_none       = "no open warning.",
         hist_title      = "Recent warnings",
         hist_empty      = "No warnings yet.",
@@ -127,6 +183,7 @@ local STRINGS = {
         help_history    = "  /farol history      - view the last 10 warnings (also via the button next to the bar or a key binding)",
         warn_opt_test   = "Test warning",
         warn_hint       = "Warns once; warns again after it improves (min. 5 min).",
+        warn_hint_break = "Break and water start off; without the option above they wait for fights and dungeons to end.",
         warn_set_durab  = "durability warning: below %d%%.",
         warn_set_bags   = "bag warning: %d free slot(s) or fewer.",
         warn_on         = "warning on: %s",
@@ -136,9 +193,9 @@ local STRINGS = {
         warn_name_sound = "sound",
         warn_bad_durab  = "invalid value: use 5 to 50 (%).",
         warn_bad_bags   = "invalid value: use 0 to 10 slots.",
-        warn_usage      = "usage: /farol warn durab N || bags N || durab/bags/talents/ranks/sound off (or on) || status || silence || remind",
+        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || durab/bags/talents/ranks/break/water/sound on||off || break/water fights on||off || remind N || status || silence",
         opt_warnings    = "Warnings...",
-        help_warn       = "  /farol warn          - open the warnings window (durability and bags)",
+        help_warn       = "  /farol warn          - open the warnings window (durability, bags, talents, ranks, break, water)",
     },
 }
 for lang, entries in pairs(STRINGS) do
@@ -164,11 +221,18 @@ end
 function Warnings.Sanitize(saved)
     local clean = {}
     if type(saved) ~= "table" then saved = {} end
-    for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks" }) do
+    for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "pause", "pauseAnywhere",
+                           "water", "waterAnywhere" }) do
         if type(saved[key]) == "boolean" then clean[key] = saved[key] else clean[key] = DEFAULTS[key] end
     end
     clean.durabPct = InRange(saved.durabPct, DURAB_MIN, DURAB_MAX) or DEFAULTS.durabPct
     clean.bagSlots = InRange(saved.bagSlots, BAGS_MIN, BAGS_MAX) or DEFAULTS.bagSlots
+    clean.pauseMin = InRange(saved.pauseMin, BREAK_MIN, BREAK_MAX) or DEFAULTS.pauseMin
+    clean.waterMin = InRange(saved.waterMin, BREAK_MIN, BREAK_MAX) or DEFAULTS.waterMin
+    clean.remindMin = DEFAULTS.remindMin
+    for _, minutes in ipairs(REMIND_CHOICES) do
+        if saved.remindMin == minutes then clean.remindMin = minutes end
+    end
     return clean
 end
 
@@ -182,6 +246,8 @@ local state = {
     bags = { armed = true, lastAt = nil, full = false },
     talents = { warnedCount = 0 },      -- quantos pontos já foram avisados
     ranks = { warned = {}, dirty = true, lastScan = nil }, -- magias já avisadas; "dirty" = algo mudou
+    pause = { nextAt = nil, silenced = false },         -- lembretes por tempo: próxima vez (GetTime)
+    water = { nextAt = nil, silenced = false },
 }
 
 local function PlayWarningSound()
@@ -194,15 +260,76 @@ local function PlayWarningSound()
 end
 
 ---------------------------------------------------------------------------
--- Janelinha de aviso: "Silenciar" ou "Lembrar em 30 min"
+-- Janelinha de aviso: "Silenciar" ou "Lembrar em N min"
+-- Um aviso: texto + botões. Vários: uma janela só, com uma linha por aviso e "Silenciar todos" /
+-- "Lembrar todos". Cada linha tem o seu próprio tempo de "Lembrar" (menu suspenso).
 ---------------------------------------------------------------------------
 
-local queue = {}  -- avisos esperando resposta: { key = "durab"|"bags"|"talents"|"ranks"|"test", text = ... }
+-- Avisos esperando resposta: { key = "durab"|"bags"|"talents"|"ranks"|"pause"|"water"|"test", text, minutes }
+local queue = {}
 local popup
+local groupMinutes          -- tempo escolhido no "Lembrar todos" (nil = padrão das configurações)
+local Render                -- definida abaixo
+
+local function DefaultMinutes()
+    local settings = ns.GetDB() and Settings()
+    return settings and settings.remindMin or DEFAULTS.remindMin
+end
+
+-- Itens do menu de tempo: 2, 5, 10, 15, 30 min. get/set leem e gravam o tempo escolhido.
+local function MinuteItems(get, set)
+    return function()
+        local items = {}
+        for _, minutes in ipairs(REMIND_CHOICES) do
+            items[#items + 1] = {
+                text = string.format(T("warn_minutes"), minutes),
+                checked = get() == minutes,
+                onClick = function() set(minutes); Render() end,
+            }
+        end
+        return items
+    end
+end
+
+local function NewButton(parent, name, width, onClick)
+    local button = CreateFrame("Button", name, parent, "UIPanelButtonTemplate")
+    button:SetSize(width, 22)
+    button:SetScript("OnClick", onClick)
+    return button
+end
+
+local ROW_HEIGHT = 28
+local GROUP_WIDTH, SINGLE_WIDTH = 640, 400
+
+local function CreateRow(frame, index)
+    local row = CreateFrame("Frame", nil, frame)
+    row:SetSize(GROUP_WIDTH - 40, ROW_HEIGHT - 4)
+    row:SetPoint("TOPLEFT", 20, -44 - (index - 1) * ROW_HEIGHT)
+    row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    row.text:SetPoint("LEFT", 0, 0)
+    row.text:SetWidth(300)
+    row.text:SetJustifyH("LEFT")
+    if row.text.SetWordWrap then row.text:SetWordWrap(false) end
+    local prefix = "FarolWarnRow" .. index
+    row.time = ns.CreateDropdown(row, prefix .. "Time", 34, MinuteItems(
+        function() return row.entry and row.entry.minutes end,
+        function(minutes) if row.entry then row.entry.minutes = minutes end end))
+    row.time:SetPoint("RIGHT", 0, 0)
+    row.remind = NewButton(row, prefix .. "Remind", 130, function()
+        if row.entry then Warnings.Respond(true, row.entry.key, row.entry.minutes) end
+    end)
+    row.remind:SetPoint("RIGHT", row.time, "LEFT", -2, 0)
+    row.silence = NewButton(row, prefix .. "Silence", 100, function()
+        if row.entry then Warnings.Respond(false, row.entry.key) end
+    end)
+    row.silence:SetPoint("RIGHT", row.remind, "LEFT", -6, 0)
+    row:Hide()
+    return row
+end
 
 local function CreatePopup()
     local frame = CreateFrame("Frame", "FarolWarnPopup", UIParent, ns.backdropTemplate)
-    frame:SetSize(360, 118)
+    frame:SetSize(SINGLE_WIDTH, 118)
     frame:SetPoint("TOP", 0, -240)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -223,33 +350,73 @@ local function CreatePopup()
     frame.title:SetPoint("TOP", 0, -16)
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.text:SetPoint("TOP", frame.title, "BOTTOM", 0, -6)
-    frame.text:SetWidth(320)
-    frame.silence = CreateFrame("Button", "FarolWarnSilence", frame, "UIPanelButtonTemplate")
-    frame.silence:SetSize(150, 22)
+    frame.text:SetWidth(SINGLE_WIDTH - 40)
+    -- Botões de baixo: um aviso = Silenciar / Lembrar; vários = Silenciar todos / Lembrar todos.
+    frame.silence = NewButton(frame, "FarolWarnSilence", 140, function()
+        if #queue == 1 then Warnings.Respond(false, queue[1].key) else Warnings.Respond(false) end
+    end)
     frame.silence:SetPoint("BOTTOMLEFT", 22, 16)
-    frame.silence:SetScript("OnClick", function() Warnings.Respond(false) end)
-    frame.remind = CreateFrame("Button", "FarolWarnRemind", frame, "UIPanelButtonTemplate")
-    frame.remind:SetSize(150, 22)
-    frame.remind:SetPoint("BOTTOMRIGHT", -22, 16)
-    frame.remind:SetScript("OnClick", function() Warnings.Respond(true) end)
+    frame.time = ns.CreateDropdown(frame, "FarolWarnRemindTime", 34, MinuteItems(
+        function()
+            if #queue == 1 then return queue[1].minutes end
+            return groupMinutes or DefaultMinutes()
+        end,
+        function(minutes)
+            if #queue == 1 then queue[1].minutes = minutes else groupMinutes = minutes end
+        end))
+    frame.time:SetPoint("BOTTOMRIGHT", -22, 16)
+    frame.remind = NewButton(frame, "FarolWarnRemind", 170, function()
+        if #queue == 1 then
+            Warnings.Respond(true, queue[1].key, queue[1].minutes)
+        else
+            Warnings.Respond(true, nil, groupMinutes or DefaultMinutes())
+        end
+    end)
+    frame.remind:SetPoint("RIGHT", frame.time, "LEFT", -2, 0)
+    frame.rows = {}
     ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
 end
 
-local function ShowNext()
-    local current = queue[1]
-    if not current then
+Render = function()
+    if #queue == 0 then
+        groupMinutes = nil
         if popup then popup:Hide() end
         return
     end
     popup = popup or CreatePopup()
-    popup.title:SetText(T("warn_popup_title"))
-    popup.text:SetText(current.text)
-    popup.silence:SetText(T("warn_silence_btn"))
-    popup.remind:SetText(T("warn_remind_btn"))
+    local group = #queue > 1
+    for i, row in ipairs(popup.rows) do
+        if not (group and queue[i]) then row.entry = nil; row:Hide() end
+    end
+    if group then
+        popup:SetSize(GROUP_WIDTH, 100 + #queue * ROW_HEIGHT)
+        popup.title:SetText(string.format(T("warn_group_title"), #queue))
+        popup.text:SetText("")
+        popup.text:Hide()
+        for i, entry in ipairs(queue) do
+            local row = popup.rows[i] or CreateRow(popup, i)
+            popup.rows[i] = row
+            row.entry = entry
+            row.text:SetText(entry.text)
+            row.silence:SetText(T("warn_silence_btn"))
+            row.remind:SetText(string.format(T("warn_remind_btn"), entry.minutes))
+            row:Show()
+        end
+        popup.silence:SetText(T("warn_silence_all"))
+        popup.remind:SetText(string.format(T("warn_remind_all"), groupMinutes or DefaultMinutes()))
+    else
+        popup:SetSize(SINGLE_WIDTH, 118)
+        popup.title:SetText(T("warn_popup_title"))
+        popup.text:SetText(queue[1].text)
+        popup.text:Show()
+        popup.silence:SetText(T("warn_silence_btn"))
+        popup.remind:SetText(string.format(T("warn_remind_btn"), queue[1].minutes))
+    end
     popup:Show()
 end
+local ShowNext = Render -- nome antigo, usado abaixo
 
 ---------------------------------------------------------------------------
 -- Histórico dos últimos avisos (FarolCharDB.warnHistory, por personagem)
@@ -352,21 +519,56 @@ local function Announce(text, key)
             return
         end
     end
-    queue[#queue + 1] = { key = key, text = text }
+    queue[#queue + 1] = { key = key, text = text, minutes = DefaultMinutes() }
     ShowNext()
 end
 
--- Resposta do jogador ao aviso mostrado: remind = true (lembrar em 30 min) ou false (silenciar).
-function Warnings.Respond(remind)
-    local current = table.remove(queue, 1)
-    if not current then Print(T("warn_none")) return end
+local function ValidRemind(minutes)
+    minutes = tonumber(minutes)
+    for _, choice in ipairs(REMIND_CHOICES) do
+        if minutes == choice then return choice end
+    end
+    return nil
+end
+
+local function IsBreak(key) return key == "pause" or key == "water" end
+
+-- Aplica a resposta a um aviso. Um lembrete por tipo: lembrar de novo troca o horário anterior.
+local function Apply(current, remind, minutes, now)
     local entry = state[current.key]
-    if remind then
-        if entry then entry.remindAt = GetTime() + REMIND_SECONDS end
-        Print(string.format(T("warn_reminded"), date("%H:%M", time() + REMIND_SECONDS)))
+    if not entry then return end
+    if IsBreak(current.key) then
+        if remind then entry.nextAt = now + minutes * 60 else entry.silenced = true end
+    elseif remind then
+        entry.remindAt = now + minutes * 60
     else
-        if entry then entry.remindAt = nil end
-        Print(T("warn_silenced"))
+        entry.remindAt = nil
+    end
+end
+
+-- Resposta do jogador: remind = true (lembrar em "minutes") ou false (silenciar).
+-- key = um aviso; sem key = todos os avisos abertos (botões "todos" e comandos do chat).
+function Warnings.Respond(remind, key, minutes)
+    if #queue == 0 then Print(T("warn_none")) return end
+    minutes = ValidRemind(minutes) or DefaultMinutes()
+    local now = GetTime()
+    local answered, onlyBreaks = {}, true
+    for i = #queue, 1, -1 do
+        if key == nil or queue[i].key == key then
+            local current = table.remove(queue, i)
+            Apply(current, remind, minutes, now)
+            table.insert(answered, 1, current)
+            if not IsBreak(current.key) then onlyBreaks = false end
+        end
+    end
+    if #answered == 0 then Print(T("warn_none")) return end
+    local at = date("%H:%M", time() + minutes * 60)
+    if #answered > 1 then
+        Print(remind and string.format(T("warn_reminded_n"), #answered, at) or string.format(T("warn_silenced_n"), #answered))
+    elseif remind then
+        Print(string.format(T("warn_reminded"), at))
+    else
+        Print(onlyBreaks and T("warn_silenced_session") or T("warn_silenced"))
     end
     ShowNext()
 end
@@ -635,6 +837,45 @@ local function CheckRanks(now)
     Announce(string.format(T("warn_ranks"), text), "ranks")
 end
 
+---------------------------------------------------------------------------
+-- Lembretes de pausa e de beber água (por tempo)
+---------------------------------------------------------------------------
+
+-- Em luta, ou dentro de masmorra, raide, arena ou campo de batalha?
+local function Busy()
+    if InCombatLockdown and InCombatLockdown() then return true end
+    if IsInInstance then
+        local ok, inside, kind = pcall(IsInInstance)
+        if ok and inside and kind ~= "none" then return true end
+    end
+    return false
+end
+
+-- Conta a partir do login (ou de quando a opção foi ligada / o intervalo mudou). Quando vence:
+-- aparece, ou espera a luta/masmorra acabar se o jogador não marcou "também em lutas...".
+local function CheckBreaks(now)
+    local settings = Settings()
+    for _, key in ipairs(BREAK_KEYS) do
+        local entry = state[key]
+        if not settings[key] then
+            entry.nextAt, entry.silenced = nil, false
+        elseif not entry.silenced then
+            local interval = settings[key .. "Min"] * 60
+            if not entry.nextAt then
+                entry.nextAt = now + interval
+            elseif now >= entry.nextAt and (settings[key .. "Anywhere"] or not Busy()) then
+                entry.nextAt = now + interval
+                local text = T("warn_water")
+                if key == "pause" then
+                    local played = ns.GetSessionSeconds and ns.GetSessionSeconds() or nil
+                    text = string.format(T("warn_pause"), ns.FormatDuration(played or interval))
+                end
+                Announce(text, key)
+            end
+        end
+    end
+end
+
 -- Mudanças nas barras, no grimório ou no nível pedem uma nova varredura dos graus.
 local watcher = CreateFrame("Frame")
 for _, event in ipairs({ "ACTIONBAR_SLOT_CHANGED", "SPELLS_CHANGED", "LEARNED_SPELL_IN_TAB",
@@ -654,6 +895,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
     local now = GetTime()
     pcall(CheckDurability, now)
     pcall(CheckBags, now)
+    pcall(CheckBreaks, now)
     if not (InCombatLockdown and InCombatLockdown()) then -- talentos e graus esperam o combate acabar
         pcall(CheckTalents, now)
         pcall(CheckRanks, now)
@@ -670,6 +912,9 @@ local function SetEnabled(key, value)
     Settings()[key] = value
     if key == "talents" then state.talents.warnedCount = 0
     elseif key == "ranks" then state.ranks.warned = {}; state.ranks.dirty = true
+    elseif IsBreak(key) then -- recomeça a contagem agora
+        state[key].nextAt = value and GetTime() + Settings()[key .. "Min"] * 60 or nil
+        state[key].silenced = false
     elseif state[key] then state[key].armed = true end
     Print(string.format(value and T("warn_on") or T("warn_off"), T("warn_name_" .. key)))
     if RefreshWindow then RefreshWindow() end
@@ -681,6 +926,34 @@ local function SetDurabPct(value)
     Settings().durabPct = pct
     state.durab.armed = true
     Print(string.format(T("warn_set_durab"), pct))
+    if RefreshWindow then RefreshWindow() end
+    return true
+end
+
+-- Intervalo do lembrete de pausa/água (15 a 240 min); a contagem recomeça agora.
+local function SetBreakMinutes(key, value)
+    local minutes = InRange(value, BREAK_MIN, BREAK_MAX)
+    if not minutes then Print(T("warn_bad_break")) return false end
+    Settings()[key .. "Min"] = minutes
+    state[key].nextAt = GetTime() + minutes * 60 -- a contagem recomeça agora
+    Print(string.format(T("warn_set_break"), T("warn_name_" .. key), minutes))
+    if RefreshWindow then RefreshWindow() end
+    return true
+end
+
+-- Pode aparecer em lutas, raides e masmorras? (false = espera)
+local function SetAnywhere(key, value)
+    Settings()[key .. "Anywhere"] = value
+    Print(string.format(value and T("warn_set_anywhere") or T("warn_set_wait"), T("warn_name_" .. key)))
+    if RefreshWindow then RefreshWindow() end
+end
+
+-- Tempo que já vem escolhido no "Lembrar em".
+local function SetRemindDefault(value)
+    local minutes = ValidRemind(value)
+    if not minutes then Print(T("warn_bad_remind")) return false end
+    Settings().remindMin = minutes
+    Print(string.format(T("warn_set_remind"), minutes))
     if RefreshWindow then RefreshWindow() end
     return true
 end
@@ -701,13 +974,13 @@ end
 
 local window
 
-local function NumberBox(frame, name, anchor, onSave)
+local function NumberBox(frame, name, anchor, onSave, digits)
     local box = CreateFrame("EditBox", name, frame, "InputBoxTemplate")
-    box:SetSize(28, 20)
+    box:SetSize(digits == 3 and 36 or 28, 20)
     box:SetPoint("LEFT", anchor, "RIGHT", 10, 0)
     box:SetAutoFocus(false)
     box:SetNumeric(true)
-    box:SetMaxLetters(2)
+    box:SetMaxLetters(digits or 2)
     box:SetScript("OnEnterPressed", function(self)
         if not onSave(self:GetText()) then RefreshWindow() end -- inválido: volta ao valor salvo
         self:ClearFocus()
@@ -718,7 +991,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolWarnings", UIParent, ns.backdropTemplate)
-    frame:SetSize(470, 256)
+    frame:SetSize(470, 410)
     frame:SetPoint("CENTER", 0, 60)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -740,13 +1013,16 @@ local function CreateWindow()
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -6, -6)
 
-    local function Check(name, y, key)
+    local function Check(name, y, key, onClick, x)
         local check = CreateFrame("CheckButton", name, frame, "UICheckButtonTemplate")
         check:SetSize(24, 24)
-        check:SetPoint("TOPLEFT", 20, y)
+        check:SetPoint("TOPLEFT", x or 20, y)
         check.label = check:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         check.label:SetPoint("LEFT", check, "RIGHT", 4, 0)
-        check:SetScript("OnClick", function(self) SetEnabled(key, self:GetChecked() and true or false) end)
+        check:SetScript("OnClick", function(self)
+            local value = self:GetChecked() and true or false
+            if onClick then onClick(value) else SetEnabled(key, value) end
+        end)
         return check
     end
 
@@ -762,10 +1038,35 @@ local function CreateWindow()
 
     frame.talents = Check("FarolWarnTalents", -110, "talents")
     frame.ranks = Check("FarolWarnRanks", -140, "ranks")
-    frame.sound = Check("FarolWarnSound", -170, "sound")
+
+    -- Lembretes de pausa e de água: liga/desliga, intervalo em minutos e "também em lutas...".
+    local y = -170
+    for _, key in ipairs(BREAK_KEYS) do
+        local cap = key == "pause" and "Pause" or "Water"
+        local check = Check("FarolWarn" .. cap, y, key)
+        frame[key] = check
+        frame[key .. "Box"] = NumberBox(frame, "FarolWarn" .. cap .. "Min", check.label,
+            function(text) return SetBreakMinutes(key, text) end, 3)
+        frame[key .. "Unit"] = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        frame[key .. "Unit"]:SetPoint("LEFT", frame[key .. "Box"], "RIGHT", 6, 0)
+        frame[key .. "Anywhere"] = Check("FarolWarn" .. cap .. "Anywhere", y - 24, nil,
+            function(value) SetAnywhere(key, value) end, 44)
+        y = y - 56
+    end
+
+    frame.sound = Check("FarolWarnSound", y, "sound")
+    y = y - 32
+    frame.remindLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    frame.remindLabel:SetPoint("TOPLEFT", 24, y - 4)
+    frame.remindDefault = ns.CreateDropdown(frame, "FarolWarnRemindDefault", 80, MinuteItems(
+        function() return Settings().remindMin end,
+        function(minutes) SetRemindDefault(minutes) end))
+    frame.remindDefault:SetPoint("LEFT", frame.remindLabel, "RIGHT", 10, 0)
 
     frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    frame.hint:SetPoint("TOPLEFT", 22, -202)
+    frame.hint:SetPoint("TOPLEFT", 22, y - 34)
+    frame.hint:SetWidth(426)
+    frame.hint:SetJustifyH("LEFT")
 
     frame.test = CreateFrame("Button", "FarolWarnTest", frame, "UIPanelButtonTemplate")
     frame.test:SetSize(130, 22)
@@ -801,7 +1102,17 @@ RefreshWindow = function()
     window.ranks:SetChecked(settings.ranks)
     window.sound.label:SetText(T("warn_opt_sound"))
     window.sound:SetChecked(settings.sound)
-    window.hint:SetText(T("warn_hint"))
+    for _, key in ipairs(BREAK_KEYS) do
+        window[key].label:SetText(T("warn_opt_" .. key))
+        window[key]:SetChecked(settings[key])
+        window[key .. "Unit"]:SetText(T("warn_unit_min"))
+        window[key .. "Anywhere"].label:SetText(T("warn_opt_anywhere"))
+        window[key .. "Anywhere"]:SetChecked(settings[key .. "Anywhere"])
+        if not window[key .. "Box"]:HasFocus() then window[key .. "Box"]:SetText(tostring(settings[key .. "Min"])) end
+    end
+    window.remindLabel:SetText(T("warn_opt_remind"))
+    window.remindDefault:SetText(string.format(T("warn_minutes"), settings.remindMin))
+    window.hint:SetText(T("warn_hint") .. " " .. T("warn_hint_break"))
     window.test:SetText(T("warn_opt_test"))
     window.history:SetText(T("opt_history"))
     if not window.durabBox:HasFocus() then window.durabBox:SetText(tostring(settings.durabPct)) end
@@ -913,7 +1224,10 @@ local KEYS = {
     som = "sound", sound = "sound",
     talentos = "talents", talento = "talents", talents = "talents", talent = "talents",
     graus = "ranks", grau = "ranks", ranks = "ranks", rank = "ranks",
+    pausa = "pause", pause = "pause", ["break"] = "pause", descanso = "pause",
+    agua = "water", water = "water", hidratacao = "water", hydrate = "water",
 }
+local FIGHTS = { lutas = true, luta = true, fights = true, fight = true, combate = true, combat = true }
 
 -- Diagnóstico: mostra o que o addon consegue ler neste cliente.
 local function PrintStatus()
@@ -961,8 +1275,8 @@ local ON = { on = true, ligar = true, ativar = true, sim = true }
 local OFF = { off = true, desligar = true, desativar = true, nao = true }
 
 function Warnings.HandleCommand(rest)
-    local word, value = string.match(rest or "", "^%s*(%a*)%s*(%w*)")
-    word, value = string.lower(word or ""), string.lower(value or "")
+    local word, value, extra = string.match(rest or "", "^%s*(%a*)%s*(%w*)%s*(%w*)")
+    word, value, extra = string.lower(word or ""), string.lower(value or ""), string.lower(extra or "")
     local key = KEYS[word]
     if word == "" then
         Warnings.ToggleWindow()
@@ -973,7 +1287,10 @@ function Warnings.HandleCommand(rest)
     elseif word == "silenciar" or word == "silence" then
         Warnings.Respond(false)
     elseif word == "lembrar" or word == "remind" then
-        Warnings.Respond(true)
+        if value ~= "" and not ValidRemind(value) then Print(T("warn_bad_remind")) return end
+        Warnings.Respond(true, nil, value)
+    elseif word == "padrao" or word == "default" then
+        SetRemindDefault(value)                       -- /farol aviso padrao 10
     elseif not key then
         Print(T("warn_usage"))
     elseif ON[value] then
@@ -984,6 +1301,10 @@ function Warnings.HandleCommand(rest)
         SetDurabPct(value)
     elseif key == "bags" and value ~= "" then
         SetBagSlots(value)
+    elseif IsBreak(key) and FIGHTS[value] and (ON[extra] or OFF[extra]) then
+        SetAnywhere(key, ON[extra] and true or false)  -- /farol aviso pausa lutas on
+    elseif IsBreak(key) and value ~= "" then
+        SetBreakMinutes(key, value)                    -- /farol aviso agua 30
     else
         Print(T("warn_usage"))
     end

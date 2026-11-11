@@ -52,7 +52,8 @@ Farol/
   Core.lua          barra (grade de células), 19 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
-  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus), "Silenciar / Lembrar em 30 min", histórico 📝
+  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, pausa, água), "Silenciar / Lembrar em N min"
+                    (2–30), janela agrupada para vários avisos, histórico 📝
   Appearance.lua    escala, fundo, tamanhos de texto/ícone, formato (uma linha / uma coluna), esconder em combate,
                     mostrar/esconder os botões rápidos 📝 👜
   Order.lua         ordem dos itens na barra

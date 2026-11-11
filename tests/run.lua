@@ -63,6 +63,7 @@ local SUITES = {
     "test_rep",
     "test_reset",
     "test_summary",
+    "test_breaks",
 }
 
 local passed, failed = 0, 0

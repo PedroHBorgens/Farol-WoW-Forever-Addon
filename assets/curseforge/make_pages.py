@@ -150,17 +150,28 @@ loot = f"""<div class="win" style="width:720px;padding-bottom:26px"><div class="
 <div style="position:absolute;right:8px;bottom:6px;color:#aaa">◢</div></div>"""
 page("05_loot", loot, "Recent loot: when you got it, with quality filter", "Últimos saques: quando você pegou, com filtro de qualidade — redimensionável")
 
-# 6. Warnings
-warnpop = """<div class="win" style="width:440px;text-align:center"><div class="t">Warning</div><div style="font-size:16px">You have 2 unspent talent point(s).</div>
-<div style="display:flex;justify-content:space-between;margin-top:16px"><span class="btn">Silence</span><span class="btn">Remind in 30 min</span></div></div>"""
+# 6. Warnings: grouped window with remind-time dropdowns + history
+def wrow(text):
+    return (f'<div style="display:flex;align-items:center;gap:8px;margin:7px 0"><span style="flex:1;font-size:14px;white-space:nowrap">{text}</span>'
+            '<span class="btn" style="padding:3px 10px;font-size:13px">Silence</span>'
+            '<span class="btn" style="padding:3px 10px;font-size:13px">Remind in 10 min</span>'
+            '<span class="btn" style="padding:3px 7px;font-size:13px">▾</span></div>')
+dd6 = """<div class="tip" style="position:absolute;right:20px;top:104px;width:96px;font-size:13px;line-height:1.7;z-index:2;background:#0a0d1a">
+<div>&nbsp;&nbsp;&nbsp;2 min</div><div>&nbsp;&nbsp;&nbsp;5 min</div><div><span class="k">✓</span> 10 min</div><div>&nbsp;&nbsp;&nbsp;15 min</div><div>&nbsp;&nbsp;&nbsp;30 min</div></div>"""
+warnpop = f"""<div class="win" style="width:740px"><div class="t">Warnings (3)</div>{dd6}
+{wrow("Low durability: 18% — time to repair!")}
+{wrow("You've been playing for 2h 00m — time for a break?")}
+{wrow("Time to drink some water!")}
+<div style="display:flex;justify-content:space-between;margin-top:14px"><span class="btn">Silence all</span>
+<span><span class="btn">Remind all in 10 min</span> <span class="btn" style="padding:5px 8px">▾</span></span></div></div>"""
 hist = """<div class="win" style="width:520px"><div class="x">×</div><div class="t">Recent warnings</div>
-<div style="font-size:14px;line-height:1.9"><div><span class="dim">09/11 21:40</span>&nbsp; You have 2 unspent talent point(s).</div>
-<div><span class="dim">09/11 21:12</span>&nbsp; Lower-rank spell on your bars: Fireball (Rank 3) — you already know Rank 5.</div>
-<div><span class="dim">09/11 20:55</span>&nbsp; Bags almost full: 2 free slot(s).</div>
-<div><span class="dim">09/11 20:31</span>&nbsp; Low durability: 18% — time to repair!</div></div>
+<div style="font-size:14px;line-height:1.9"><div><span class="dim">11/11 21:40</span>&nbsp; Time to drink some water!</div>
+<div><span class="dim">11/11 21:40</span>&nbsp; You've been playing for 2h 00m — time for a break?</div>
+<div><span class="dim">11/11 21:12</span>&nbsp; Lower-rank spell on your bars: Fireball (Rank 3).</div>
+<div><span class="dim">11/11 20:31</span>&nbsp; Low durability: 18% — time to repair!</div></div>
 <div style="text-align:right;margin-top:10px"><span class="btn">Clear</span></div></div>"""
-page("06_warnings", f'<div style="display:flex;flex-direction:column;gap:22px;align-items:center">{warnpop}<div style="display:flex;gap:10px;align-items:center">{hbar(BAR_ITEMS[:4])}</div></div>{hist}',
-     "Warnings: durability, bags, talents, spell ranks", "Avisos de durabilidade, bolsas, talentos e graus de magia — silenciar ou lembrar em 30 min")
+page("06_warnings", f'<div style="display:flex;flex-direction:column;gap:18px;align-items:center;transform:scale(.92)">{warnpop}{hist}</div>',
+     "Warnings + break & water reminders, remind in 2–30 min", "Avisos + lembretes de pausa e água — lembrar em 2 a 30 min, vários numa janela só")
 
 # 7. Appearance
 def stepper(label, value): return f'<div style="display:flex;align-items:center;gap:10px;margin:7px 0"><span class="k" style="width:110px">{label}</span><span class="btn" style="padding:2px 9px">-</span><span style="width:52px;text-align:center">{value}</span><span class="btn" style="padding:2px 9px">+</span></div>'

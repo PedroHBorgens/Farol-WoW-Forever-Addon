@@ -122,7 +122,8 @@ lua5.1 tests/run.lua        # ~150 testes; deve terminar com "0 failed"
 ## Imagens do CurseForge
 
 `assets/curseforge/`: ilustrações 1280×720 com legenda EN/PT e selo "Illustration · Ilustração" (não são prints do
-jogo). Para regenerar: `python3 assets/curseforge/make_pages.py` e `node assets/curseforge/shoot.js` (Playwright).
+jogo). Nome dos arquivos: `farol-NN-o-que-mostra.png` (número = ordem no CurseForge; o gerador já salva com o nome
+final, definido em `page("...")` no `make_pages.py`). Para regenerar: `python3 assets/curseforge/make_pages.py` e `node assets/curseforge/shoot.js` (Playwright).
 Ao mudar uma janela do addon, atualize a ilustração correspondente:
 
 | Mudança | Imagens |
@@ -131,6 +132,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Opção nova no menu (Geral, idioma, botões) | 03 |
 | Alarmes | 04 · Janela de saques: 05 · Avisos / histórico: 06 |
 | Aparência (escala, fundo, formato, botões rápidos) | 07 (e 02 se mudar o formato da barra) |
+| Resumo da sessão (textos no chat) | 09 |
 
-As imagens 04–06 saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
+As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

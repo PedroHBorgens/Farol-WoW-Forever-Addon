@@ -206,4 +206,24 @@ ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-we
 <div class="row"><span class="k">Weekly reset in</span><span>2d 4h (Wed 01:05 local · 04:05 server)</span></div></div>"""
 page("farol-08-progress-xp-reputation-resets", f'<div style="display:flex;flex-direction:column;gap:22px;align-items:center">{pbar}{ptip}</div>',
      "Track your progress: XP, reputation and resets", "Acompanhe seu progresso: XP, reputação e contagem até os resets")
+# 9. Session summary (chat only)
+def chatline(text): return f'<div><span style="color:#33ccff">Farol:</span> {text}</div>'
+G = lambda g, sv: f'<span class="g">+</span><span class="gold">{g}g</span> <span class="silver">{sv}s</span>'
+summary_lines = [
+    "session summary (2h 14m):",
+    f"&nbsp;&nbsp;Gold: {G(38, 12)} ({G(17, 6)}/h) · XP: +84.2k (1 level, 37.6k/h)",
+    'Reputation: +1.3k Orgrimmar (<span class="g">Honored</span> → <span style="color:#00b3ff">Revered</span>)',
+    "Loot: 46 (3 rares, 1 epic) · Warnings: 2",
+]
+summary_lines[2] = "&nbsp;&nbsp;" + summary_lines[2]
+summary_lines[3] = "&nbsp;&nbsp;" + summary_lines[3]
+def chatbox(title, lines, width=760):
+    return (f'<div style="width:{width}px"><div class="dim" style="margin:0 0 6px 4px;font-size:14px">{title}</div>'
+            '<div class="tip" style="font-size:15px;line-height:1.7;background:#000a;border-color:#3a3f55">'
+            + "".join(chatline(l) for l in lines) + '</div></div>')
+last_lines = ["last session (Yesterday 23:41, 2h 14m):"] + summary_lines[1:]
+page("farol-09-session-summary-chat", f'''<div style="display:flex;flex-direction:column;gap:26px;align-items:center">
+{chatbox("/farol summary — any time, only in your own chat", summary_lines)}
+{chatbox("Next login — the last session (not after /reload)", last_lines)}</div>''',
+     "Session summary: gold, XP, reputation, loot", "Resumo da sessão: ouro, XP, reputação e saques — só no seu chat")
 print("pages ok")

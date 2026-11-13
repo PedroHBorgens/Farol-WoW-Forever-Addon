@@ -4,7 +4,7 @@
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · horário · resets diário/semanal · tempo de sessão · amigos · guilda** — você escolhe o que aparece (19 itens).
+XP/hora · reputação · profissões · horário · resets diário/semanal · tempo de sessão · amigos · guilda** — você escolhe o que aparece (20 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -137,6 +137,15 @@ tela e no seu chat** (nada é enviado a ninguém), com o som de checagem de pron
   fonte de talentos (o nome da função do jogo mudou entre versões do WoW, então o Farol consulta todas e usa o maior
   valor, além de uma estimativa pelo nível: nível − 9 menos os pontos gastos) e as magias de grau antigo encontradas. Para desligar: `/farol aviso talentos off` / `/farol aviso graus off`.
 
+### Profissões: procure um instrutor
+
+No estilo clássico, as profissões param de subir em cada limite de treinamento (75, 150, 225, 300). Quando uma
+chega ao limite, o Farol avisa uma vez: "Mineração 150/150 no máximo do treinamento — procure um instrutor para
+continuar subindo." Avisa de novo no próximo limite depois que você treinar, nunca no último (300/300). Várias ao
+mesmo tempo aparecem num aviso só. Espera a luta acabar, tem Silenciar / Lembrar como os outros e desliga com
+`/farol aviso profissoes off` ou na janela de Avisos. `/farol aviso status` mostra as profissões lidas e qual
+função do jogo respondeu.
+
 ### Lembretes de pausa e de beber água
 
 Dois lembretes opcionais, **os dois desligados por padrão**, que você liga na janela de Avisos:
@@ -236,6 +245,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | Experiência (XP) | % de XP e bônus descansado (some no nível máximo)         | `xp`            | desligado  |
 | XP por hora      | XP/h e tempo até o próximo nível (após 1 min de sessão)   | `xph`           | desligado  |
 | Reputação        | Facção acompanhada: nível (cores do jogo), progresso %, rep/hora | `rep`           | desligado  |
+| Profissões       | Profissões principais com nível/limite do treinamento (amarelo perto, vermelho no limite) | `prof` | desligado |
 | Horário          | Hora local, ou do servidor (opção no menu)                | `hora`          | desligado  |
 | Resets           | Tempo até o reset diário e o semanal                      | `reset`         | desligado  |
 | Tempo de sessão  | Quanto tempo está jogando desde que entrou / `/reload`    | `tempo`         | desligado  |
@@ -251,6 +261,9 @@ Exemplo: `/farol hide ouro` esconde o ouro; `/farol show ouro` mostra de volta. 
 
 **Reputação:** mostra a facção que você marcar como **"Mostrar como barra de experiência"** no painel de reputação
 do jogo. O tooltip mostra também o progresso, a reputação por hora e uma estimativa do tempo até o próximo nível.
+
+**Profissões:** a barra mostra as profissões principais (ou as secundárias, se você não tiver principal); o tooltip
+lista todas, incluindo culinária, pesca e primeiros socorros, com os pontos ganhos nesta sessão.
 
 **Resets:** contagem regressiva até o reset **diário** e o **semanal**, com o tempo que o próprio jogo informa. O
 tooltip mostra quando cada um acontece, na hora local e na do servidor. Clientes antigos só informam o diário.

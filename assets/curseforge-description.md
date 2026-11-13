@@ -12,7 +12,7 @@
 **Farol** (Portuguese for *lighthouse*) shows the information you care about in one small, movable bar.
 
 ### Info bar — pick what you see
-FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · Gold · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · **Reputation (standing, progress, rep/hour)** · Clock (local or server) · **Daily & weekly reset countdown** · Session time · Friends online · Guild online
+FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · Gold · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · **Reputation (standing, progress, rep/hour)** · **Professions (level / training limit)** · Clock (local or server) · **Daily & weekly reset countdown** · Session time · Friends online · Guild online
 
 - **Right-click** the bar (or `/farol menu`) to tick the items you want, and **choose their order** with [▲]/[▼] arrows.
 - **Hover** the bar for a detailed tooltip: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
@@ -28,6 +28,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - One-time warning on screen and in your chat when gear durability drops below 20% or your bags are almost full / full.
 - Configurable limits and sound; never repeats while the number flickers.
 - **Unspent talent points** and **lower-rank spells on your action bars** (never changes your bars for you).
+- **Profession at its training limit**: "find a trainer to keep leveling" (once per limit).
 - Each warning lets you **Silence** it or get a **reminder in 2, 5, 10, 15 or 30 minutes** (your choice). Several warnings at once appear together in one window.
 - Optional **break** and **drink water** reminders (off by default): you choose how often (15–240 min) and whether they can show during fights, raids and dungeons.
 - **History of the last 10 warnings**: button next to the bar (with unread counter), key binding or `/farol history`.
@@ -60,7 +61,7 @@ English and Brazilian Portuguese (follows your client, or `/farol lang en|pt`).
 **Farol** mostra as informações que importam numa barra pequena e móvel.
 
 ### Barra de informações — você escolhe o que aparece
-FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · Ouro · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · **Reputação (nível, progresso, rep/hora)** · Horário (local ou do servidor) · **Contagem até o reset diário e semanal** · Tempo de sessão · Amigos online · Guilda online
+FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · Ouro · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · **Reputação (nível, progresso, rep/hora)** · **Profissões (nível / limite do treinamento)** · Horário (local ou do servidor) · **Contagem até o reset diário e semanal** · Tempo de sessão · Amigos online · Guilda online
 
 - **Clique direito** na barra (ou `/farol menu`), marque os itens que quiser e **escolha a ordem** com as setas [▲]/[▼].
 - **Passe o mouse** na barra para ver um tooltip detalhado: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.
@@ -76,6 +77,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 - Aviso único na tela e no seu chat quando a durabilidade cai abaixo de 20% ou as bolsas estão quase cheias / cheias.
 - Limites e som configuráveis; não fica repetindo quando o número oscila.
 - **Pontos de talento não gastos** e **magias de grau antigo na barra de ações** (nunca mexe nas suas barras).
+- **Profissão no máximo do treinamento**: "procure um instrutor para continuar subindo" (uma vez por limite).
 - Cada aviso deixa você **Silenciar** ou ser **lembrado em 2, 5, 10, 15 ou 30 minutos** (você escolhe). Vários avisos ao mesmo tempo aparecem juntos numa janela só.
 - Lembretes opcionais de **pausa** e de **beber água** (desligados por padrão): você escolhe de quanto em quanto tempo (15–240 min) e se podem aparecer em lutas, raides e masmorras.
 - **Histórico dos 10 últimos avisos**: botão ao lado da barra (com contador de novos), atalho de teclado ou `/farol historico`.

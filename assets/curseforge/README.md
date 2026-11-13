@@ -10,13 +10,13 @@ fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o sel
 | File | Caption |
 |---|---|
 | `farol-01-overview-info-bar.png` | Your info bar for WoW Forever |
-| `farol-02-bar-items-layout-tooltip.png` | 19 items with icons — one line, one column or columns |
+| `farol-02-bar-items-layout-tooltip.png` | 20 items with icons — one line, one column or columns |
 | `farol-03-options-menu-bar-order.png` | Tick what you want — and choose the order |
 | `farol-04-clock-alarms-snooze.png` | Clock alarms with snooze — local or server time |
 | `farol-05-recent-loot-window.png` | Recent loot: when you got it, with quality filter |
 | `farol-06-warnings-break-water-reminders.png` | Warnings + break & water reminders, remind in 2–30 min |
 | `farol-07-appearance-settings.png` | Make it yours: shape, size, background, hide in combat |
-| `farol-08-progress-xp-reputation-resets.png` | Track your progress: XP, reputation and resets |
+| `farol-08-progress-xp-reputation-professions.png` | Track your progress: XP, reputation, professions, resets |
 | `farol-09-session-summary-chat.png` | Session summary: gold, XP, reputation, loot |
 
 ## Regenerate / Gerar de novo

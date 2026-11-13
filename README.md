@@ -4,7 +4,7 @@
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
 **FPS · latency · memory · coordinates · zone · speed · durability · bags · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · clock · daily/weekly resets · session time · friends · guild** — you pick what shows (19 items).
+reputation · professions · clock · daily/weekly resets · session time · friends · guild** — you pick what shows (20 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -137,6 +137,14 @@ your screen and in your own chat** (nothing is sent to anyone), with the game's 
   talent source (the game function name changed between WoW versions, so Farol asks all of them and uses the
   highest value, plus a level-based estimate: level − 9 minus points spent), and lower-rank spells found. Turn them off with `/farol warn talents off` / `/farol warn ranks off`.
 
+### Professions: find a trainer
+
+In the classic style, professions stop leveling at each training limit (75, 150, 225, 300). When one reaches its
+limit, Farol warns once: "Mining 150/150 at the training limit — find a trainer to keep leveling." It warns again at
+the next limit after you train, never at the last one (300/300). Several at once are listed in one warning. It waits
+for combat to end, has Silence / Remind like the others, and turns off with `/farol warn professions off` or in the
+Warnings window. `/farol warn status` shows the professions read and which game function answered.
+
 ### Break and drink-water reminders
 
 Two optional reminders, **both off by default**, turned on in the Warnings window:
@@ -236,6 +244,7 @@ in the menu, or `/farol session reset`, to restart them (e.g. when you move to a
 | Experience (XP) | XP % and rested bonus (hidden at max level)            | `xp`         | off     |
 | XP per hour     | XP/h and time to next level (after 1 min of session)   | `xph`        | off     |
 | Reputation      | Watched faction: standing (game colors), progress %, rep/hour | `rep`        | off     |
+| Professions     | Main professions with level/training limit (yellow near, red at the limit) | `prof` | off |
 | Clock           | Local time, or server time (menu option)               | `clock`      | off     |
 | Resets          | Time until the daily and weekly reset                  | `reset`      | off     |
 | Session time    | How long you've been playing since login / `/reload`   | `playtime`   | off     |
@@ -251,6 +260,9 @@ Example: `/farol hide gold` hides gold; `/farol show gold` brings it back. Portu
 
 **Reputation:** shows the faction you mark as **"Show as Experience Bar"** in the game's reputation panel. The
 tooltip adds progress, reputation per hour and an estimate of the time to the next standing.
+
+**Professions:** the bar shows your main professions (or the secondary ones if you have no main profession); the
+tooltip lists all of them, including cooking, fishing and first aid, with the points gained this session.
 
 **Resets:** counts down to the **daily** and **weekly** reset, using the time the game itself reports. The tooltip
 shows when each one happens in local and server time. Older clients only report the daily reset.

@@ -32,6 +32,7 @@ local DURAB_MIN, DURAB_MAX = 5, 50
 local BAGS_MIN, BAGS_MAX = 0, 10
 local DEFAULTS = {
     durab = true, durabPct = 20, bags = true, bagSlots = 2, sound = true, talents = true, ranks = true,
+    prof = true,                                             -- profissão no máximo do treinamento
     remindMin = 30,                                          -- tempo padrão do "Lembrar em"
     pause = false, pauseMin = 120, pauseAnywhere = false,    -- lembrete de pausa (desligado por padrão)
     water = false, waterMin = 45, waterAnywhere = false,     -- lembrete de beber água (desligado por padrão)
@@ -82,6 +83,9 @@ local STRINGS = {
         warn_reminded_n = "ok: %d aviso(s) de novo às %s (se ainda for preciso).",
         warn_chat_hint  = " — /farol aviso silenciar ou /farol aviso lembrar [minutos]",
         warn_pause      = "Você está jogando há %s — que tal uma pausa?",
+        warn_prof       = "%s no máximo do treinamento — procure um instrutor para continuar subindo.",
+        warn_opt_prof   = "Avisar quando uma profissão chegar ao máximo do treinamento",
+        warn_name_prof  = "profissões",
         warn_water      = "Hora de beber água!",
         warn_opt_pause  = "Lembrete de pausa a cada",
         warn_opt_water  = "Lembrete de beber água a cada",
@@ -118,9 +122,9 @@ local STRINGS = {
         warn_name_sound = "som",
         warn_bad_durab  = "valor inválido: use de 5 a 50 (%).",
         warn_bad_bags   = "valor inválido: use de 0 a 10 espaços.",
-        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || durab/bolsas/talentos/graus/pausa/agua/som on||off || pausa/agua lutas on||off || lembrar N || status || silenciar",
+        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || durab/bolsas/talentos/graus/profissoes/pausa/agua/som on||off || pausa/agua lutas on||off || lembrar N || status || silenciar",
         opt_warnings    = "Avisos...",
-        help_warn       = "  /farol aviso         - abrir a janela de avisos (durabilidade, bolsas, talentos, graus, pausa, água)",
+        help_warn       = "  /farol aviso         - abrir a janela de avisos (durabilidade, bolsas, talentos, graus, profissões, pausa, água)",
     },
     en = {
         warn_title      = "Warnings",
@@ -157,6 +161,9 @@ local STRINGS = {
         warn_reminded_n = "ok: %d warning(s) again at %s (if still needed).",
         warn_chat_hint  = " — /farol warn silence or /farol warn remind [minutes]",
         warn_pause      = "You've been playing for %s — time for a break?",
+        warn_prof       = "%s at the training limit — find a trainer to keep leveling.",
+        warn_opt_prof   = "Warn when a profession reaches its training limit",
+        warn_name_prof  = "professions",
         warn_water      = "Time to drink some water!",
         warn_opt_pause  = "Break reminder every",
         warn_opt_water  = "Drink water reminder every",
@@ -193,9 +200,9 @@ local STRINGS = {
         warn_name_sound = "sound",
         warn_bad_durab  = "invalid value: use 5 to 50 (%).",
         warn_bad_bags   = "invalid value: use 0 to 10 slots.",
-        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || durab/bags/talents/ranks/break/water/sound on||off || break/water fights on||off || remind N || status || silence",
+        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || durab/bags/talents/ranks/professions/break/water/sound on||off || break/water fights on||off || remind N || status || silence",
         opt_warnings    = "Warnings...",
-        help_warn       = "  /farol warn          - open the warnings window (durability, bags, talents, ranks, break, water)",
+        help_warn       = "  /farol warn          - open the warnings window (durability, bags, talents, ranks, professions, break, water)",
     },
 }
 for lang, entries in pairs(STRINGS) do
@@ -221,7 +228,7 @@ end
 function Warnings.Sanitize(saved)
     local clean = {}
     if type(saved) ~= "table" then saved = {} end
-    for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "pause", "pauseAnywhere",
+    for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "pause", "pauseAnywhere",
                            "water", "waterAnywhere" }) do
         if type(saved[key]) == "boolean" then clean[key] = saved[key] else clean[key] = DEFAULTS[key] end
     end
@@ -246,6 +253,7 @@ local state = {
     bags = { armed = true, lastAt = nil, full = false },
     talents = { warnedCount = 0 },      -- quantos pontos já foram avisados
     ranks = { warned = {}, dirty = true, lastScan = nil }, -- magias já avisadas; "dirty" = algo mudou
+    prof = { warned = {} },                             -- limites já avisados ("Mineração@150")
     pause = { nextAt = nil, silenced = false },         -- lembretes por tempo: próxima vez (GetTime)
     water = { nextAt = nil, silenced = false },
 }
@@ -846,6 +854,39 @@ local function CheckRanks(now)
 end
 
 ---------------------------------------------------------------------------
+-- Profissão no máximo do treinamento: "procure um instrutor"
+---------------------------------------------------------------------------
+
+-- Avisa uma vez por limite (ex.: Mineração em 150/150). Treinou e subiu o limite: o próximo limite avisa de novo.
+-- O último limite (300) não avisa: não há mais o que treinar.
+local function CheckProfessions(now)
+    if not Settings().prof or not ns.ReadProfessions then return end
+    local list = ns.ReadProfessions()
+    if not list then return end
+    local entry = state.prof
+    local capped, fresh = {}, {}
+    for _, p in ipairs(list) do
+        if ns.ProfState(p) == "cap" then
+            local id = p.name .. "@" .. p.max
+            capped[#capped + 1] = p
+            if not entry.warned[id] then fresh[#fresh + 1] = p end
+        end
+    end
+    local warned = {}
+    for _, p in ipairs(capped) do warned[p.name .. "@" .. p.max] = true end
+    entry.warned = warned -- treinou: sai da lista
+    if #capped == 0 then entry.remindAt = nil return end
+    local reminding = ReminderDue(entry, now)
+    if reminding then entry.remindAt = nil; fresh = capped end
+    if #fresh == 0 then return end
+    local parts = {}
+    for i, p in ipairs(fresh) do
+        parts[i] = string.gsub(p.name, "[|%c]", "") .. " " .. p.level .. "/" .. p.max
+    end
+    Announce(string.format(T("warn_prof"), table.concat(parts, ", ")), "prof")
+end
+
+---------------------------------------------------------------------------
 -- Lembretes de pausa e de beber água (por tempo)
 ---------------------------------------------------------------------------
 
@@ -907,6 +948,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
     if not InCombat() then -- talentos e graus esperam o combate acabar
         pcall(CheckTalents, now)
         pcall(CheckRanks, now)
+        pcall(CheckProfessions, now)
     end
 end)
 
@@ -920,6 +962,7 @@ local function SetEnabled(key, value)
     Settings()[key] = value
     if key == "talents" then state.talents.warnedCount = 0
     elseif key == "ranks" then state.ranks.warned = {}; state.ranks.dirty = true
+    elseif key == "prof" then state.prof.warned = {}; state.prof.remindAt = nil
     elseif IsBreak(key) then -- recomeça a contagem agora
         state[key].nextAt = value and GetTime() + Settings()[key .. "Min"] * 60 or nil
         state[key].silenced = false
@@ -1005,7 +1048,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolWarnings", UIParent, ns.backdropTemplate)
-    frame:SetSize(470, 410)
+    frame:SetSize(470, 440)
     frame:SetPoint("CENTER", 0, 60)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -1052,9 +1095,10 @@ local function CreateWindow()
 
     frame.talents = Check("FarolWarnTalents", -110, "talents")
     frame.ranks = Check("FarolWarnRanks", -140, "ranks")
+    frame.prof = Check("FarolWarnProf", -170, "prof")
 
     -- Lembretes de pausa e de água: liga/desliga, intervalo em minutos e "também em lutas...".
-    local y = -170
+    local y = -200
     for _, key in ipairs(BREAK_KEYS) do
         local cap = key == "pause" and "Pause" or "Water"
         local check = Check("FarolWarn" .. cap, y, key)
@@ -1114,6 +1158,8 @@ RefreshWindow = function()
     window.talents:SetChecked(settings.talents)
     window.ranks.label:SetText(T("warn_opt_ranks"))
     window.ranks:SetChecked(settings.ranks)
+    window.prof.label:SetText(T("warn_opt_prof"))
+    window.prof:SetChecked(settings.prof)
     window.sound.label:SetText(T("warn_opt_sound"))
     window.sound:SetChecked(settings.sound)
     for _, key in ipairs(BREAK_KEYS) do
@@ -1238,6 +1284,7 @@ local KEYS = {
     som = "sound", sound = "sound",
     talentos = "talents", talento = "talents", talents = "talents", talent = "talents",
     graus = "ranks", grau = "ranks", ranks = "ranks", rank = "ranks",
+    profissoes = "prof", profissao = "prof", prof = "prof", professions = "prof", profession = "prof",
     pausa = "pause", pause = "pause", ["break"] = "pause", descanso = "pause",
     agua = "water", water = "water", hidratacao = "water", hydrate = "water",
 }
@@ -1271,6 +1318,14 @@ local function PrintStatus()
         Print(string.format(T("rep_status"), (string.gsub(tostring(faction.name), "|", "||")), tostring(repSource)))
     else
         Print(T("rep_status_none"))
+    end
+    local okProf, profs, profSource = pcall(ns.ReadProfessions)
+    if okProf and profs and #profs > 0 then
+        local parts = {}
+        for i, p in ipairs(profs) do parts[i] = string.gsub(p.name, "|", "||") .. " " .. p.level .. "/" .. p.max end
+        Print(string.format(T("prof_status"), table.concat(parts, ", "), tostring(profSource)))
+    else
+        Print(string.format(T("prof_status_none"), tostring(okProf and profSource or "--")))
     end
     local okReset, daily, weekly, dailySource, weeklySource = pcall(ns.GetResetTimes)
     if okReset then

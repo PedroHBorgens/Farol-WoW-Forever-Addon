@@ -127,7 +127,9 @@ function Mock.new(opts)
     env._G = env
 
     local H = { env = env, msgs = {}, frames = {}, now = 1000, clock = { hour = 7, min = 29 },
-                dailyReset = 5 * 3600 + 12 * 60, weeklyReset = 2 * 86400 + 4 * 3600 }
+                dailyReset = 5 * 3600 + 12 * 60, weeklyReset = 2 * 86400 + 4 * 3600,
+                -- Profissões: { nome, nível, máximo do treinamento, principal? }
+                profs = { { "Mineração", 148, 150, true }, { "Herborismo", 92, 150, true }, { "Culinária", 60, 75, false } } }
 
     -- Chat e frames
     env.DEFAULT_CHAT_FRAME = { AddMessage = function(_, msg) table.insert(H.msgs, msg) end }
@@ -259,6 +261,23 @@ function Mock.new(opts)
         env.InterfaceOptions_AddCategory = function(panel) H.settingsPanel = panel end
         env.UnitCharacterPoints = function() return H.talentPoints, 0 end
         env.GetQuestResetTime = function() return H.dailyReset end -- 3.3.5a: só o diário
+        -- 3.3.5a: lista de perícias com cabeçalhos; profissões principais podem ser abandonadas.
+        env.GetNumSkillLines = function()
+            H.skillLines = { { "Habilidades de classe", true }, { "Defesa", false, 290, 300, false } ,
+                             { "Profissões", true } }
+            for _, p in ipairs(H.profs) do if p[4] then table.insert(H.skillLines, { p[1], false, p[2], p[3], true }) end end
+            table.insert(H.skillLines, { "Profissões secundárias", true })
+            for _, p in ipairs(H.profs) do if not p[4] then table.insert(H.skillLines, { p[1], false, p[2], p[3], false }) end end
+            table.insert(H.skillLines, { "Armas", true })
+            table.insert(H.skillLines, { "Espadas", false, 150, 150, false })
+            return #H.skillLines
+        end
+        env.GetSkillLineInfo = function(i)
+            local line = H.skillLines[i]
+            if not line then return nil end
+            -- nome, cabeçalho?, expandido?, nível, temp, modificador, máximo, abandonável?
+            return line[1], line[2], true, line[3] or 0, 0, 0, line[4] or 0, line[5] or false
+        end
         env.GetWatchedFactionInfo = function()
             local f = H.faction
             if f then return f.name, f.reaction, f.min, f.max, f.value, f.id end
@@ -309,6 +328,17 @@ function Mock.new(opts)
         }
         env.GetUnspentTalentPoints = function() return H.talentPoints end
         -- Resets: H.dailyReset / H.weeklyReset em segundos (nil = o jogo não informa)
+        -- Cliente moderno: índices das profissões (prof1, prof2, arqueologia, pesca, culinária, primeiros socorros).
+        env.GetProfessions = function()
+            local primary, secondary = {}, {}
+            for i, p in ipairs(H.profs) do if p[4] then primary[#primary + 1] = i else secondary[#secondary + 1] = i end end
+            return primary[1], primary[2], nil, nil, secondary[1], secondary[2]
+        end
+        env.GetProfessionInfo = function(index)
+            local p = H.profs[index]
+            if not p then return nil end
+            return p[1], 136248, p[2], p[3]
+        end
         env.C_DateAndTime = {
             GetSecondsUntilDailyReset = function() return H.dailyReset end,
             GetSecondsUntilWeeklyReset = function() return H.weeklyReset end,

@@ -20,14 +20,14 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags",
-    "gold", "session", "goldh", "xp", "xph", "rep", "clock", "reset", "playtime", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "clock", "reset", "playtime", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
 local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
-    goldh = false, xph = false, rep = false,
+    goldh = false, xph = false, rep = false, prof = false,
     clock = false, reset = false, playtime = false, friends = false, guild = false,
 }
 
@@ -46,6 +46,7 @@ local ITEM_ALIASES = {
     xph = "xph", xphora = "xph", xpperhour = "xph",
     ouroh = "goldh", ourohora = "goldh", goldh = "goldh", goldperhour = "goldh",
     rep = "rep", reputacao = "rep", reputation = "rep", faccao = "rep", faction = "rep",
+    prof = "prof", profissao = "prof", profissoes = "prof", profession = "prof", professions = "prof",
     xp = "xp", experiencia = "xp", experience = "xp",
     hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
     reset = "reset", resets = "reset", reinicio = "reset",
@@ -124,6 +125,7 @@ local STRINGS = {
         name_goldh = "Ouro por hora",  cmd_goldh = "ouroh",
         name_xph = "XP por hora",      cmd_xph = "xph",
         name_rep = "Reputação",        cmd_rep = "rep",
+        name_prof = "Profissões",      cmd_prof = "prof",
         name_xp = "Experiência (XP)",  cmd_xp = "xp",
         name_clock = "Horário",        cmd_clock = "hora",
         name_reset = "Resets (diário/semanal)", cmd_reset = "reset",
@@ -138,6 +140,7 @@ local STRINGS = {
         label_goldh  = "Ouro/h",
         label_xph    = "XP/h",
         label_rep    = "Rep",
+        label_prof   = "Prof",
         label_playtime = "Jogando",
         label_reset  = "Reset",
         label_reset_daily = "Diário",
@@ -177,6 +180,12 @@ local STRINGS = {
         tt_rep_rate  = "Reputação por hora",
         tt_rep_next  = "Próximo nível em",
         tt_rep_none  = "nenhuma facção acompanhada (marque 'Mostrar como barra de experiência' no painel de reputação)",
+        tt_prof      = "Profissões",
+        tt_prof_none = "nenhuma profissão aprendida",
+        tt_prof_gain = " (+%d nesta sessão)",
+        tt_prof_cap  = "no máximo do treinamento — procure um instrutor",
+        prof_status  = "profissões: %s (função: %s).",
+        prof_status_none = "profissões: nenhuma encontrada (função: %s).",
         rep_status   = "reputação: %s (função: %s).",
         rep_status_none = "reputação: nenhuma facção acompanhada.",
         tt_reset_daily  = "Reset diário em",
@@ -268,6 +277,7 @@ local STRINGS = {
         name_goldh = "Gold per hour",  cmd_goldh = "goldh",
         name_xph = "XP per hour",      cmd_xph = "xph",
         name_rep = "Reputation",       cmd_rep = "rep",
+        name_prof = "Professions",     cmd_prof = "prof",
         name_xp = "Experience (XP)",   cmd_xp = "xp",
         name_clock = "Clock",          cmd_clock = "clock",
         name_reset = "Resets (daily/weekly)", cmd_reset = "reset",
@@ -282,6 +292,7 @@ local STRINGS = {
         label_goldh  = "Gold/h",
         label_xph    = "XP/h",
         label_rep    = "Rep",
+        label_prof   = "Prof",
         label_playtime = "Played",
         label_reset  = "Reset",
         label_reset_daily = "Daily",
@@ -321,6 +332,12 @@ local STRINGS = {
         tt_rep_rate  = "Reputation per hour",
         tt_rep_next  = "Next standing in",
         tt_rep_none  = "no watched faction (tick 'Show as Experience Bar' in the reputation panel)",
+        tt_prof      = "Professions",
+        tt_prof_none = "no profession learned",
+        tt_prof_gain = " (+%d this session)",
+        tt_prof_cap  = "at the training limit — find a trainer",
+        prof_status  = "professions: %s (function: %s).",
+        prof_status_none = "professions: none found (function: %s).",
         rep_status   = "reputation: %s (function: %s).",
         rep_status_none = "reputation: no watched faction.",
         tt_reset_daily  = "Daily reset in",
@@ -667,6 +684,104 @@ local function RepProgress(f)
     return cur, total, math.floor(cur / total * 100)
 end
 
+---------------------------------------------------------------------------
+-- Profissões: nível e máximo do treinamento (só leitura).
+-- Clientes modernos: GetProfessions + GetProfessionInfo. Antigos (3.3.5a / clássico): GetSkillLineInfo,
+-- grupo "Profissões" (as que podem ser abandonadas) e o grupo seguinte ("Profissões secundárias").
+---------------------------------------------------------------------------
+
+local PROF_FINAL = 300 -- último limite do estilo clássico: aqui não há mais instrutor para procurar
+
+local function ValidProf(name, level, max)
+    if type(name) ~= "string" or name == "" or IsSecret(name) then return false end
+    for _, v in ipairs({ level, max }) do
+        if type(v) ~= "number" or IsSecret(v) or v ~= v or v < 0 or v > 100000 then return false end
+    end
+    return max > 0
+end
+
+local function AddProf(list, name, level, max, primary)
+    if ValidProf(name, level, max) then
+        list[#list + 1] = { name = name, level = math.floor(math.min(level, max)), max = math.floor(max),
+                            primary = primary and true or false }
+    end
+end
+
+local function ReadProfessions()
+    if GetProfessions and GetProfessionInfo then
+        local ok, p1, p2, _, fishing, cooking, firstAid = pcall(GetProfessions)
+        if ok then
+            local list = {}
+            for _, slot in ipairs({ { p1, true }, { p2, true }, { cooking }, { firstAid }, { fishing } }) do
+                if type(slot[1]) == "number" then
+                    local okInfo, name, _, level, max = pcall(GetProfessionInfo, slot[1])
+                    if okInfo then AddProf(list, name, level, max, slot[2]) end
+                end
+            end
+            if #list > 0 or not (GetNumSkillLines and GetSkillLineInfo) then return list, "GetProfessions" end
+        end
+    end
+    if GetNumSkillLines and GetSkillLineInfo then
+        local ok, count = pcall(GetNumSkillLines)
+        if not ok or type(count) ~= "number" then return nil end
+        local entries, header, profHeader = {}, 0, nil
+        for i = 1, math.min(count, 200) do
+            local okLine, name, isHeader, _, level, _, _, max, abandonable = pcall(GetSkillLineInfo, i)
+            if okLine then
+                if isHeader then
+                    header = header + 1
+                else
+                    entries[#entries + 1] = { name, level, max, abandonable, header }
+                    if abandonable and not profHeader then profHeader = header end
+                end
+            end
+        end
+        local list = {}
+        for _, e in ipairs(entries) do
+            if profHeader and (e[5] == profHeader or (e[5] == profHeader + 1 and not e[4])) then
+                AddProf(list, e[1], e[2], e[3], e[4])
+            end
+        end
+        return list, "GetSkillLineInfo"
+    end
+    return nil
+end
+ns.ReadProfessions = ReadProfessions -- usado pelo aviso de "procure um instrutor"
+ns.PROF_FINAL = PROF_FINAL
+
+-- Situação no treinamento: "cap" (parou: procure um instrutor), "near" (faltam até 5), "final" ou "ok".
+local function ProfState(p)
+    if p.max >= PROF_FINAL then return p.level >= p.max and "final" or "ok" end
+    if p.level >= p.max then return "cap" end
+    if p.max - p.level <= 5 then return "near" end
+    return "ok"
+end
+ns.ProfState = ProfState
+
+local PROF_COLORS = { cap = "|cffff4040", near = "|cffffff3a", final = "|cff40ff40" }
+
+local function ProfText(p)
+    local value = p.level .. "/" .. p.max
+    local color = PROF_COLORS[ProfState(p)]
+    if color then value = color .. value .. "|r" end
+    return value
+end
+
+-- Pontos ganhos nesta sessão, por nome da profissão.
+local function SampleProfs()
+    local list = ReadProfessions()
+    if not list then return end
+    session.profStart = session.profStart or {}
+    for _, p in ipairs(list) do
+        if session.profStart[p.name] == nil then session.profStart[p.name] = p.level end
+    end
+end
+
+local function ProfGain(p)
+    local start = session.profStart and session.profStart[p.name]
+    return start and math.max(0, p.level - start) or 0
+end
+
 -- Soma a reputação ganha na facção acompanhada; trocar de facção recomeça a contagem.
 local function SampleRep()
     local f = GetWatchedFaction()
@@ -692,8 +807,10 @@ local function ResetSession()
     session.xpGained = 0
     session.lastXP = nil
     session.repID = nil -- recomeça a contagem de reputação
+    session.profStart = nil -- e a das profissões
     pcall(SampleXP)
     pcall(SampleRep)
+    pcall(SampleProfs)
 end
 
 local function StartSession()
@@ -1228,6 +1345,15 @@ local ITEM_TEXT = {
         if rate then text = text .. " |cff4dff4d+" .. FormatBig(rate) .. "/h|r" end
         return text
     end,
+    prof = function()
+        local list = ReadProfessions()
+        if not list or #list == 0 then return T("label_prof") .. " --" end
+        local shown, parts = {}, {}
+        for _, p in ipairs(list) do if p.primary then shown[#shown + 1] = p end end
+        if #shown == 0 then shown = list end -- só secundárias: mostra essas
+        for _, p in ipairs(shown) do parts[#parts + 1] = FactionName(p.name) .. " " .. ProfText(p) end
+        return table.concat(parts, " · ")
+    end,
     xph = function()
         if not GetXPInfo() then return nil end -- nível máximo: o item some
         local perHour, toLevel = GetXPRate()
@@ -1361,6 +1487,7 @@ local ITEM_ICONS = {
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
     rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",
+    prof = "Trade_Mining",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
     guild = "INV_Shirt_GuildTabard_01",
 }
@@ -1576,6 +1703,20 @@ local function FillTooltip()
             AddPair(T("tt_rep"), T("tt_rep_none"))
         end
     end
+    if db.items.prof then
+        local list = Safe(ReadProfessions)
+        if list and #list > 0 then
+            for _, p in ipairs(list) do
+                local value = ProfText(p)
+                local gain = ProfGain(p)
+                if gain > 0 then value = value .. string.format(T("tt_prof_gain"), gain) end
+                AddPair(FactionName(p.name), value)
+                if ProfState(p) == "cap" then GameTooltip:AddLine("   " .. T("tt_prof_cap"), 1, 0.4, 0.4) end
+            end
+        else
+            AddPair(T("tt_prof"), T("tt_prof_none"))
+        end
+    end
     if db.items.reset then
         local daily, weekly = Safe(GetResetTimes)
         for _, entry in ipairs({ { "tt_reset_daily", daily }, { "tt_reset_weekly", weekly } }) do
@@ -1623,6 +1764,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
         elapsedSinceUpdate = 0
         pcall(SampleXP) -- mede o XP antes de redesenhar, para a taxa não ficar atrasada
         pcall(SampleRep)
+        if db.items.prof then pcall(SampleProfs) end
         UpdateText()
         if db.items.guild then RequestGuildRoster() end
         if TooltipIsOurs() then ShowTooltip(self) end -- mantém o tooltip atualizado

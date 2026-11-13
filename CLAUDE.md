@@ -114,8 +114,18 @@ lua5.1 tests/run.lua        # ~150 testes; deve terminar com "0 failed"
 1. Branch a partir do `main` atualizado.
 2. Mudança + testes + README.md **e** README.pt-BR.md + `assets/curseforge-description.md` se for algo visível.
 3. Subir a versão em **todos os 4 `.toc`** (`## Version:`) e registrar no `CHANGELOG.md`.
-4. Pull request. O `main` é protegido: o merge exige **`test`** e **`github-advanced-security`** aprovados.
-   Esperar as duas verificações antes do merge.
+4. Pull request. O `main` é protegido: o merge exige **`test`** aprovado. Esperar também o
+   **`github-advanced-security`** (AI Scan / "Code scanning AI findings": análise de segurança por IA do GitHub,
+   a única automática que cobre Lua, já que o CodeQL não analisa Lua).
+   - Ele é **consultivo**: não bloqueia o merge pela regra do repositório, e pode **não rodar** (depende de estar
+     ligado em Settings → Advanced Security e, na versão de teste, de licença/créditos de IA do Copilot). Rodou nos
+     PRs #17–#25 e parou de ser disparado a partir do #26.
+   - Se ele **não rodar** (esperar alguns minutos depois do `test`), o merge só acontece com: (1) a **análise de
+     segurança local completa** passando — testes em Lua 5.1 e 5.4, fuzzing, `test_globals`, varredura de APIs
+     proibidas e de escrita em `_G`, procura de segredos/dados pessoais, workflow sem mudanças e um teste
+     adversarial do código novo (APIs do jogo com erro, valores NaN/infinito/bloqueados, cliques fora de ordem);
+     e (2) a **autorização explícita do dono** do repositório para aquele merge.
+   - Nunca fechar/reabrir PR nem enviar commit vazio só para tentar disparar a verificação.
 5. Pacote para o CurseForge: ZIP com **uma única pasta `Farol` na raiz e mais nada** — `LICENSE.txt` fica
    **dentro** de `Farol/` (`Farol/LICENSE.txt`). Qualquer arquivo solto na raiz do ZIP faz o CurseForge rejeitar
    ("This ZIP contains files at the top level"). O workflow gera esse pacote como *artifact* em cada execução;

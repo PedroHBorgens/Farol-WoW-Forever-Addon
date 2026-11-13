@@ -2,6 +2,13 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.20.0 — Professions
+- New bar item **Professions** (off by default): main professions with level / training limit (yellow when close,
+  red at the limit, green at 300); the tooltip lists all of them with the points gained this session.
+- New warning (on by default): a profession at its training limit → "find a trainer to keep leveling"; once per
+  limit, never at 300/300; waits for combat; Silence / Remind; `/farol warn professions off`.
+- Works with the modern (`GetProfessions`) and classic (`GetSkillLineInfo`) APIs; `/farol warn status` shows which.
+
 ## 2.19.0 — Break and water reminders, flexible "Remind"
 - New optional **break** and **drink water** reminders, **off by default**: choose the interval (15–240 min) and
   whether they may show during fights, raids and dungeons (by default they wait). Silence = until the end of the session.

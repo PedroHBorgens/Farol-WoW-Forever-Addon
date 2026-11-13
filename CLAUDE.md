@@ -37,6 +37,9 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 - Resets: `C_DateAndTime.GetSecondsUntilDailyReset` / `GetSecondsUntilWeeklyReset`; clientes antigos só têm
   `GetQuestResetTime` (diário). Valores fora da faixa (negativo, NaN, infinito, diário > 2 dias, semanal > 8 dias)
   são recusados (`ns.GetResetTimes`).
+- Profissões: clientes modernos usam `GetProfessions` + `GetProfessionInfo`; os antigos, `GetSkillLineInfo` (o grupo
+  com profissões "abandonáveis" e o grupo seguinte, das secundárias; armas e defesa ficam de fora). Não expandimos
+  grupos fechados (isso mexeria na interface do jogador). Limite final do estilo clássico: 300 (`PROF_FINAL`).
 - `PLAYER_ENTERING_WORLD` traz `(isInitialLogin, isReloadingUi)` nos clientes modernos; nos antigos vem sem
   argumentos e também dispara ao trocar de zona/instância. O resumo da sessão usa isso para aparecer só no login.
 - No chat do WoW, `|` inicia códigos (`|c` cor, `|H` link, `|T` textura). **Barra literal = `||`.** Um teste confere
@@ -49,10 +52,10 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
                     Appearance, Order
-  Core.lua          barra (grade de células), 19 itens, tooltip, menu de opções, comandos /farol, dados salvos
+  Core.lua          barra (grade de células), 20 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
-  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, pausa, água), "Silenciar / Lembrar em N min"
+  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, pausa, água), "Silenciar / Lembrar em N min"
                     (2–30), janela agrupada para vários avisos, histórico 📝
   Appearance.lua    escala, fundo, tamanhos de texto/ícone, formato (uma linha / uma coluna), esconder em combate,
                     mostrar/esconder os botões rápidos 📝 👜

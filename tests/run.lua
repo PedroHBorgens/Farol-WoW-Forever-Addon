@@ -64,6 +64,7 @@ local SUITES = {
     "test_reset",
     "test_summary",
     "test_breaks",
+    "test_prof",
     "test_globals",
 }
 

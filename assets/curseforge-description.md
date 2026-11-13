@@ -12,7 +12,7 @@
 **Farol** (Portuguese for *lighthouse*) shows the information you care about in one small, movable bar.
 
 ### Info bar — pick what you see
-FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · Gold · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · **Reputation (standing, progress, rep/hour)** · **Professions (level / training limit)** · Clock (local or server) · **Daily & weekly reset countdown** · Session time · Friends online · Guild online
+FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · **Junk value (gray items)** · Gold · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · **Reputation (standing, progress, rep/hour)** · **Professions (level / training limit)** · Clock (local or server) · **Daily & weekly reset countdown** · Session time · Friends online · Guild online
 
 - **Right-click** the bar (or `/farol menu`) to tick the items you want, and **choose their order** with [▲]/[▼] arrows.
 - **Hover** the bar for a detailed tooltip: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
@@ -25,7 +25,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - Plays a game sound and posts a message **only in your own chat**, every 30 seconds, until you click **Snooze** (1–60 min, configurable) or **Stop**.
 
 ### Durability and bag warnings
-- One-time warning on screen and in your chat when gear durability drops below 20% or your bags are almost full / full.
+- One-time warning on screen and in your chat when gear durability drops below 20% or your bags are almost full / full (it also tells you how much junk you can sell — Farol never sells for you).
 - Configurable limits and sound; never repeats while the number flickers.
 - **Unspent talent points** and **lower-rank spells on your action bars** (never changes your bars for you).
 - **Profession at its training limit**: "find a trainer to keep leveling" (once per limit).
@@ -61,7 +61,7 @@ English and Brazilian Portuguese (follows your client, or `/farol lang en|pt`).
 **Farol** mostra as informações que importam numa barra pequena e móvel.
 
 ### Barra de informações — você escolhe o que aparece
-FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · Ouro · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · **Reputação (nível, progresso, rep/hora)** · **Profissões (nível / limite do treinamento)** · Horário (local ou do servidor) · **Contagem até o reset diário e semanal** · Tempo de sessão · Amigos online · Guilda online
+FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · **Valor do lixo (itens cinzentos)** · Ouro · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · **Reputação (nível, progresso, rep/hora)** · **Profissões (nível / limite do treinamento)** · Horário (local ou do servidor) · **Contagem até o reset diário e semanal** · Tempo de sessão · Amigos online · Guilda online
 
 - **Clique direito** na barra (ou `/farol menu`), marque os itens que quiser e **escolha a ordem** com as setas [▲]/[▼].
 - **Passe o mouse** na barra para ver um tooltip detalhado: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.
@@ -74,7 +74,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 - Toca um som do jogo e mostra uma mensagem **só no seu chat**, a cada 30 segundos, até você clicar em **Soneca** (1–60 min, configurável) ou **Parar**.
 
 ### Avisos de durabilidade e bolsas
-- Aviso único na tela e no seu chat quando a durabilidade cai abaixo de 20% ou as bolsas estão quase cheias / cheias.
+- Aviso único na tela e no seu chat quando a durabilidade cai abaixo de 20% ou as bolsas estão quase cheias / cheias (e diz quanto lixo dá para vender — o Farol nunca vende por você).
 - Limites e som configuráveis; não fica repetindo quando o número oscila.
 - **Pontos de talento não gastos** e **magias de grau antigo na barra de ações** (nunca mexe nas suas barras).
 - **Profissão no máximo do treinamento**: "procure um instrutor para continuar subindo" (uma vez por limite).

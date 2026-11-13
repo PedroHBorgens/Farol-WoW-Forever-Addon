@@ -25,7 +25,7 @@ return {
         end
         local count = 0
         for _ in pairs(H.ns.ITEM_ICONS) do count = count + 1 end
-        T.eq(count, 20, "one icon per item")
+        T.eq(count, 21, "one icon per item")
         H:slash("aparencia icones")
         T.hasnt(H:barRaw(), "|T", "icons off")
         T.has(H:bar(), "60 fps", "values still shown")

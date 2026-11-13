@@ -40,6 +40,10 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 - Profissões: clientes modernos usam `GetProfessions` + `GetProfessionInfo`; os antigos, `GetSkillLineInfo` (o grupo
   com profissões "abandonáveis" e o grupo seguinte, das secundárias; armas e defesa ficam de fora). Não expandimos
   grupos fechados (isso mexeria na interface do jogador). Limite final do estilo clássico: 300 (`PROF_FINAL`).
+- Lixo nas bolsas: clientes modernos usam `C_Container.GetContainerItemInfo` (tabela) e `C_Item.GetItemInfo`; os
+  antigos, `GetContainerItemInfo`/`GetContainerItemLink` e `GetItemInfo`. Preço de venda = 11º valor de `GetItemInfo`.
+  Item ainda não carregado volta `nil`: fica "pendente" e entra na próxima atualização. **Nunca vender** (o
+  `test_toc.lua` proíbe as funções de vender/mover/destruir/equipar itens). `NUM_BAG_SLOTS` é validado (`LastBag`).
 - `PLAYER_ENTERING_WORLD` traz `(isInitialLogin, isReloadingUi)` nos clientes modernos; nos antigos vem sem
   argumentos e também dispara ao trocar de zona/instância. O resumo da sessão usa isso para aparecer só no login.
 - No chat do WoW, `|` inicia códigos (`|c` cor, `|H` link, `|T` textura). **Barra literal = `||`.** Um teste confere
@@ -52,7 +56,7 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
                     Appearance, Order
-  Core.lua          barra (grade de células), 20 itens, tooltip, menu de opções, comandos /farol, dados salvos
+  Core.lua          barra (grade de células), 21 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, pausa, água), "Silenciar / Lembrar em N min"
@@ -72,7 +76,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - Arquivos compartilham a tabela `ns` (`local _, ns = ...`). O Core exporta `ns.T` (tradução), `ns.Print`,
   `ns.GetDB`, `ns.IsSecret`, `ns.frame`, `ns.UpdateText`, `ns.ApplyAppearance`, `ns.ApplyVisibility`,
   `ns.MakeToplevel`, `ns.LayoutQuickButtons`, `ns.SetBarWidth`, `ns.ITEM_ORDER`, `ns.ITEM_ICONS`,
-  `ns.GetWatchedFaction`, `ns.GetResetTimes`, `ns.GetServerClock` (hora do servidor validada: relógio, alarmes e
+  `ns.GetWatchedFaction`, `ns.GetJunk`, `ns.ReadProfessions`, `ns.GetResetTimes`, `ns.GetServerClock` (hora do servidor validada: relógio, alarmes e
   resets usam só ela, nunca `GetGameTime` direto) e `ns.FormatWhen(t, longo)` (datas de histórico: "Hoje 21:42" /
   "Ontem" / "08/11"; longo = "domingo, 08/11/2026 às 21:12"; inválido = "--").
 - Cada módulo adiciona seus textos em `ns.STRINGS.pt` / `ns.STRINGS.en` e usa `T("chave")`.

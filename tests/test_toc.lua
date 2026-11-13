@@ -62,6 +62,11 @@ return {
             "AcceptTrade", "PickupItem", "UseContainerItem", "BuyMerchant", "SellItem", "InviteUnit",
             "LootSlot", "ConfirmLootSlot", "RollOnLoot", "SetCVar", "RepairAllItems",
             "PickupSpell", "PickupAction", "PlaceAction", "SetBinding",
+            -- itens e comerciante: vender, mover, destruir, equipar (o lixo é só mostrado, nunca vendido)
+            "PickupContainerItem", "SplitContainerItem", "SellCursorItem", "DeleteCursorItem", "SellAllJunkItems",
+            "PickupMerchantItem", "EquipItemByName", "UseItemByName", "AutoEquipCursorItem",
+            -- profissões: nunca abandonar, treinar ou fabricar
+            "AbandonSkill", "BuyTrainerService", "DoTradeSkill", "CastTradeSkill", "ExpandSkillHeader",
         }
         for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua" }) do
             local code = read("Farol/" .. file)

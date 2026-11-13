@@ -84,6 +84,7 @@ local STRINGS = {
         warn_chat_hint  = " — /farol aviso silenciar ou /farol aviso lembrar [minutos]",
         warn_pause      = "Você está jogando há %s — que tal uma pausa?",
         warn_prof       = "%s no máximo do treinamento — procure um instrutor para continuar subindo.",
+        warn_bags_junk  = " Há %d espaço(s) com lixo (%s) para vender.",
         warn_opt_prof   = "Avisar quando uma profissão chegar ao máximo do treinamento",
         warn_name_prof  = "profissões",
         warn_water      = "Hora de beber água!",
@@ -162,6 +163,7 @@ local STRINGS = {
         warn_chat_hint  = " — /farol warn silence or /farol warn remind [minutes]",
         warn_pause      = "You've been playing for %s — time for a break?",
         warn_prof       = "%s at the training limit — find a trainer to keep leveling.",
+        warn_bags_junk  = " %d slot(s) hold junk (%s) you can sell.",
         warn_opt_prof   = "Warn when a profession reaches its training limit",
         warn_name_prof  = "professions",
         warn_water      = "Time to drink some water!",
@@ -624,6 +626,22 @@ local function CheckDurability(now)
     end
 end
 
+-- Valor em texto simples ("3g 24s"), sem códigos de cor: vai para o chat e para o histórico.
+local function PlainMoney(copper)
+    local gold, silver, cop = math.floor(copper / 10000), math.floor(copper % 10000 / 100), copper % 100
+    if gold > 0 then return gold .. "g " .. silver .. "s" end
+    if silver > 0 then return silver .. "s " .. cop .. "c" end
+    return cop .. "c"
+end
+
+-- Dica para o aviso de bolsas: quanto lixo dá para vender (o Farol nunca vende sozinho).
+local function JunkHint()
+    if not ns.GetJunk then return "" end
+    local ok, junk = pcall(ns.GetJunk)
+    if not ok or not junk or junk.slots == 0 then return "" end
+    return string.format(T("warn_bags_junk"), junk.slots, PlainMoney(junk.total))
+end
+
 local function CheckBags(now)
     local settings = Settings()
     if not settings.bags then return end
@@ -637,16 +655,17 @@ local function CheckBags(now)
         return
     end
     if free > 0 then entry.full = false end
-    local text = free == 0 and T("warn_bags_full") or string.format(T("warn_bags"), free)
+    -- Texto montado só na hora de avisar (a dica do lixo lê as bolsas).
+    local function Text() return (free == 0 and T("warn_bags_full") or string.format(T("warn_bags"), free)) .. JunkHint() end
     if free == 0 and not entry.full then
         -- Encheu de vez: avisa mesmo que já tenha avisado "quase cheias" há pouco.
         entry.full = true
-        Fire(entry, now, text, "bags")
+        Fire(entry, now, Text(), "bags")
     elseif CanFire(entry, now) then
-        Fire(entry, now, text, "bags")
+        Fire(entry, now, Text(), "bags")
     elseif ReminderDue(entry, now) then
         entry.remindAt = nil
-        Announce(text, "bags")
+        Announce(Text(), "bags")
     end
 end
 
@@ -1318,6 +1337,10 @@ local function PrintStatus()
         Print(string.format(T("rep_status"), (string.gsub(tostring(faction.name), "|", "||")), tostring(repSource)))
     else
         Print(T("rep_status_none"))
+    end
+    local okJunk, junk, junkSource = pcall(ns.GetJunk)
+    if okJunk and junk then
+        Print(string.format(T("junk_status"), PlainMoney(junk.total), junk.slots, tostring(junkSource or "--")))
     end
     local okProf, profs, profSource = pcall(ns.ReadProfessions)
     if okProf and profs and #profs > 0 then

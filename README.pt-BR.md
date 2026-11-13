@@ -3,8 +3,8 @@
 **Português** | [English](README.md)
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
-**FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · horário · resets diário/semanal · tempo de sessão · amigos · guilda** — você escolhe o que aparece (20 itens).
+**FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · valor do lixo · ouro · ouro da sessão · ouro/hora · XP ·
+XP/hora · reputação · profissões · horário · resets diário/semanal · tempo de sessão · amigos · guilda** — você escolhe o que aparece (21 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -119,6 +119,7 @@ Comandos: `/farol aparencia escala 120`, `/farol aparencia fundo 40`, `/farol ap
 O Farol avisa **uma vez** quando a sua peça mais gasta fica abaixo de **20%** de durabilidade, e quando sobram
 **2 ou menos** espaços nas bolsas (com um aviso separado de "Bolsas cheias!"). O aviso aparece **no centro da
 tela e no seu chat** (nada é enviado a ninguém), com o som de checagem de prontidão do jogo.
+Quando há lixo para vender, o aviso de bolsas diz: "… Há 3 espaço(s) com lixo (3g 26s) para vender."
 
 - Só avisa de novo depois que a situação melhora (você reparou / liberou espaço), e no máximo uma vez a cada
   5 minutos, para não ficar repetindo enquanto você saqueia ou vende.
@@ -239,6 +240,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | Velocidade       | Velocidade de movimento (100% = correndo normal)          | `vel`           | desligado  |
 | Durabilidade     | Sua peça **mais danificada** (vermelho abaixo de 20%)     | `durab`         | ligado     |
 | Bolsas           | Espaços livres / total (vermelho com 2 ou menos)          | `bolsas`        | desligado  |
+| Lixo nas bolsas  | Valor de venda dos itens cinzentos e espaços que ocupam   | `lixo`          | desligado  |
 | Ouro             | Dinheiro do personagem                                    | `ouro`          | ligado     |
 | Ouro da sessão   | Quanto ganhou ou gastou desde que entrou / `/reload`      | `sessao`        | desligado  |
 | Ouro por hora    | Ouro da sessão por hora (vermelho quando negativo)        | `ouroh`         | desligado  |
@@ -261,6 +263,10 @@ Exemplo: `/farol hide ouro` esconde o ouro; `/farol show ouro` mostra de volta. 
 
 **Reputação:** mostra a facção que você marcar como **"Mostrar como barra de experiência"** no painel de reputação
 do jogo. O tooltip mostra também o progresso, a reputação por hora e uma estimativa do tempo até o próximo nível.
+
+**Lixo nas bolsas:** soma o preço de venda dos itens cinzentos (Inferior), por exemplo `Lixo 3g 26s (3)`; o
+tooltip mostra os que valem mais. **O Farol nunca vende nada** (isso seria automação): quem vende é você, no
+comerciante. Itens que o jogo ainda não carregou entram na conta assim que as informações chegam.
 
 **Profissões:** a barra mostra as profissões principais (ou as secundárias, se você não tiver principal); o tooltip
 lista todas, incluindo culinária, pesca e primeiros socorros, com os pontos ganhos nesta sessão.

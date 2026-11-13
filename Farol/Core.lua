@@ -19,7 +19,7 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
-    "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags",
+    "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk",
     "gold", "session", "goldh", "xp", "xph", "rep", "prof", "clock", "reset", "playtime", "friends", "guild",
 }
 
@@ -27,7 +27,7 @@ local ITEM_ORDER = {
 local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
-    goldh = false, xph = false, rep = false, prof = false,
+    goldh = false, xph = false, rep = false, prof = false, junk = false,
     clock = false, reset = false, playtime = false, friends = false, guild = false,
 }
 
@@ -47,6 +47,7 @@ local ITEM_ALIASES = {
     ouroh = "goldh", ourohora = "goldh", goldh = "goldh", goldperhour = "goldh",
     rep = "rep", reputacao = "rep", reputation = "rep", faccao = "rep", faction = "rep",
     prof = "prof", profissao = "prof", profissoes = "prof", profession = "prof", professions = "prof",
+    lixo = "junk", junk = "junk", cinza = "junk", cinzas = "junk", gray = "junk", grey = "junk",
     xp = "xp", experiencia = "xp", experience = "xp",
     hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
     reset = "reset", resets = "reset", reinicio = "reset",
@@ -126,6 +127,7 @@ local STRINGS = {
         name_xph = "XP por hora",      cmd_xph = "xph",
         name_rep = "Reputação",        cmd_rep = "rep",
         name_prof = "Profissões",      cmd_prof = "prof",
+        name_junk = "Lixo nas bolsas", cmd_junk = "lixo",
         name_xp = "Experiência (XP)",  cmd_xp = "xp",
         name_clock = "Horário",        cmd_clock = "hora",
         name_reset = "Resets (diário/semanal)", cmd_reset = "reset",
@@ -141,6 +143,7 @@ local STRINGS = {
         label_xph    = "XP/h",
         label_rep    = "Rep",
         label_prof   = "Prof",
+        label_junk   = "Lixo",
         label_playtime = "Jogando",
         label_reset  = "Reset",
         label_reset_daily = "Diário",
@@ -181,6 +184,11 @@ local STRINGS = {
         tt_rep_next  = "Próximo nível em",
         tt_rep_none  = "nenhuma facção acompanhada (marque 'Mostrar como barra de experiência' no painel de reputação)",
         tt_prof      = "Profissões",
+        tt_junk      = "Lixo nas bolsas (valor de venda)",
+        tt_junk_slots = "Espaços ocupados por lixo",
+        tt_junk_pending = "carregando informações de %d item(ns)...",
+        tt_junk_hint = "Venda no comerciante (o Farol só mostra, nunca vende).",
+        junk_status  = "lixo nas bolsas: %s em %d espaço(s) (função: %s).",
         tt_prof_none = "nenhuma profissão aprendida",
         tt_prof_gain = " (+%d nesta sessão)",
         tt_prof_cap  = "no máximo do treinamento — procure um instrutor",
@@ -278,6 +286,7 @@ local STRINGS = {
         name_xph = "XP per hour",      cmd_xph = "xph",
         name_rep = "Reputation",       cmd_rep = "rep",
         name_prof = "Professions",     cmd_prof = "prof",
+        name_junk = "Junk in bags",    cmd_junk = "junk",
         name_xp = "Experience (XP)",   cmd_xp = "xp",
         name_clock = "Clock",          cmd_clock = "clock",
         name_reset = "Resets (daily/weekly)", cmd_reset = "reset",
@@ -293,6 +302,7 @@ local STRINGS = {
         label_xph    = "XP/h",
         label_rep    = "Rep",
         label_prof   = "Prof",
+        label_junk   = "Junk",
         label_playtime = "Played",
         label_reset  = "Reset",
         label_reset_daily = "Daily",
@@ -333,6 +343,11 @@ local STRINGS = {
         tt_rep_next  = "Next standing in",
         tt_rep_none  = "no watched faction (tick 'Show as Experience Bar' in the reputation panel)",
         tt_prof      = "Professions",
+        tt_junk      = "Junk in bags (vendor value)",
+        tt_junk_slots = "Slots taken by junk",
+        tt_junk_pending = "loading information for %d item(s)...",
+        tt_junk_hint = "Sell it at a vendor (Farol only shows it, it never sells).",
+        junk_status  = "junk in bags: %s in %d slot(s) (function: %s).",
         tt_prof_none = "no profession learned",
         tt_prof_gain = " (+%d this session)",
         tt_prof_cap  = "at the training limit — find a trainer",
@@ -829,12 +844,19 @@ local function GetSpeedPercent()
     return speed / base * 100
 end
 
+-- Última bolsa a ler (mochila = 0). Valor do jogo validado: um número estranho nunca vira um laço sem fim.
+local function LastBag()
+    local n = NUM_BAG_SLOTS
+    if type(n) ~= "number" or n ~= n or n < 0 or n > 12 then return 4 end
+    return math.floor(n)
+end
+
 local function GetBagSpace()
     local getFree = (C_Container and C_Container.GetContainerNumFreeSlots) or GetContainerNumFreeSlots
     local getSlots = (C_Container and C_Container.GetContainerNumSlots) or GetContainerNumSlots
     if not getFree or not getSlots then return nil end
     local free, total = 0, 0
-    for bag = 0, (NUM_BAG_SLOTS or 4) do
+    for bag = 0, LastBag() do
         local slots = getSlots(bag) or 0
         local bagFree, family = getFree(bag)
         if slots > 0 and (family == nil or family == 0) then -- só bolsas comuns
@@ -846,6 +868,69 @@ local function GetBagSpace()
     return free, total
 end
 ns.GetBagSpace = GetBagSpace -- usado por Warnings.lua
+
+-- Lixo (itens cinzentos, qualidade 0) nas bolsas: valor de venda total, espaços ocupados e os itens.
+-- SÓ LÊ: o Farol nunca vende nada (isso seria automação). Clientes modernos: C_Container.GetContainerItemInfo
+-- (tabela); antigos: GetContainerItemInfo + GetContainerItemLink. Preço de venda: 11º valor de GetItemInfo.
+-- Itens que o jogo ainda não carregou ficam "pendentes" e entram na conta na próxima atualização.
+local function ItemPrice(item)
+    local getInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
+    if not getInfo or item == nil then return nil end
+    local ok, name, _, quality, _, _, _, _, _, _, _, price = pcall(getInfo, item)
+    if not ok or name == nil then return nil end
+    return name, quality, price
+end
+
+local function ReadSlot(bag, slot)
+    if C_Container and C_Container.GetContainerItemInfo then
+        local ok, info = pcall(C_Container.GetContainerItemInfo, bag, slot)
+        if not ok or type(info) ~= "table" then return nil end
+        return info.hyperlink or info.itemID, info.stackCount, info.quality, info.hasNoValue, "C_Container"
+    end
+    if GetContainerItemInfo then
+        local ok, _, count, _, quality, _, _, link = pcall(GetContainerItemInfo, bag, slot)
+        if not ok then return nil end
+        if link == nil and GetContainerItemLink then
+            local okLink, value = pcall(GetContainerItemLink, bag, slot)
+            if okLink then link = value end
+        end
+        return link, count, quality, nil, "GetContainerItemInfo"
+    end
+    return nil
+end
+
+local function ValidNumber(v, max)
+    return type(v) == "number" and not IsSecret(v) and v == v and v >= 0 and v <= max
+end
+
+local function GetJunk()
+    local getSlots = (C_Container and C_Container.GetContainerNumSlots) or GetContainerNumSlots
+    if not getSlots then return nil end
+    local total, slots, pending, items, source = 0, 0, 0, {}, nil
+    for bag = 0, LastBag() do
+        local okSlots, count = pcall(getSlots, bag)
+        count = (okSlots and ValidNumber(count, 200)) and count or 0
+        for slot = 1, count do
+            local item, stack, quality, noValue, from = ReadSlot(bag, slot)
+            if item ~= nil then
+                source = source or from
+                local name, infoQuality, price = ItemPrice(item)
+                if not ValidNumber(quality, 10) then quality = infoQuality end
+                if name == nil then
+                    if quality == 0 then pending = pending + 1 end
+                elseif quality == 0 and not noValue and ValidNumber(price, 1e9) and price > 0 then
+                    stack = ValidNumber(stack, 10000) and math.max(1, math.floor(stack)) or 1
+                    local value = math.floor(price) * stack
+                    total, slots = total + value, slots + 1
+                    items[#items + 1] = { name = name, count = stack, value = value }
+                end
+            end
+        end
+    end
+    table.sort(items, function(a, b) return a.value > b.value end)
+    return { total = total, slots = slots, pending = pending, items = items }, source
+end
+ns.GetJunk = GetJunk -- usado pelo aviso de bolsas
 
 local function GetSessionMoney()
     if not session.startMoney then return nil end
@@ -1345,6 +1430,12 @@ local ITEM_TEXT = {
         if rate then text = text .. " |cff4dff4d+" .. FormatBig(rate) .. "/h|r" end
         return text
     end,
+    junk = function()
+        local junk = GetJunk()
+        if not junk then return T("label_junk") .. " --" end
+        if junk.slots == 0 then return T("label_junk") .. " 0" end
+        return T("label_junk") .. " " .. FormatMoneyShort(junk.total) .. " (" .. junk.slots .. ")"
+    end,
     prof = function()
         local list = ReadProfessions()
         if not list or #list == 0 then return T("label_prof") .. " --" end
@@ -1487,7 +1578,7 @@ local ITEM_ICONS = {
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
     rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",
-    prof = "Trade_Mining",
+    prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
     guild = "INV_Shirt_GuildTabard_01",
 }
@@ -1701,6 +1792,26 @@ local function FillTooltip()
             end
         else
             AddPair(T("tt_rep"), T("tt_rep_none"))
+        end
+    end
+    if db.items.junk then
+        local junk = Safe(GetJunk)
+        if junk then
+            AddPair(T("tt_junk"), junk.slots > 0 and FormatMoneyShort(junk.total) or "0")
+            if junk.slots > 0 then
+                AddPair(T("tt_junk_slots"), tostring(junk.slots))
+                for i = 1, math.min(5, #junk.items) do
+                    local item = junk.items[i]
+                    local name = "   " .. FactionName(item.name) .. (item.count > 1 and (" x" .. item.count) or "")
+                    GameTooltip:AddDoubleLine(name, FormatMoneyShort(item.value), 0.62, 0.62, 0.62, 1, 1, 1)
+                end
+                GameTooltip:AddLine(T("tt_junk_hint"), 0.6, 0.6, 0.6)
+            end
+            if junk.pending > 0 then
+                GameTooltip:AddLine(string.format(T("tt_junk_pending"), junk.pending), 0.6, 0.6, 0.6)
+            end
+        else
+            AddPair(T("tt_junk"), "--")
         end
     end
     if db.items.prof then

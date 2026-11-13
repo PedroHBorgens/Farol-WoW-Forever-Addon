@@ -1,7 +1,7 @@
 -- Barra de informações: compatibilidade, idioma, itens, tooltip, valores bloqueados, dados salvos.
 -- Info bar: compatibility, language, items, tooltip, secret values, saved data.
 
-local ALL_ITEMS = { "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags",
+local ALL_ITEMS = { "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk",
                     "gold", "session", "goldh", "xp", "xph", "rep", "prof", "clock", "reset", "playtime", "friends", "guild" }
 
 return {
@@ -67,7 +67,7 @@ return {
         T.has(H:bar(), "/farol show <item>", "hint when every item is hidden")
     end },
 
-    { "all 20 items render with correct values", function(T, Mock)
+    { "all 21 items render with correct values", function(T, Mock)
         local H = Mock.new():login()
         for _, key in ipairs(ALL_ITEMS) do H:slash("show " .. key) end
         H:update(3725)
@@ -78,6 +78,7 @@ return {
         T.has(bar, "Ouro/h +0c"); T.has(bar, "XP/h --", "no XP gained yet")
         T.has(bar, "Diário 5h 12m · Semanal 2d 4h")
         T.has(bar, "Mineração 148/150 · Herborismo 92/150")
+        T.has(bar, "Lixo 3g 26s (3)")
         H:slash("alarme add 06:00"); H:update(1)
         T.ok(string.find(H:barRaw(), "PocketWatch", 1, true), "clock shows the alarm icon")
     end },

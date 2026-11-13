@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.21.0 — Junk value
+- New bar item **Junk in bags** (off by default): vendor value of gray items and the slots they take
+  (`Junk 3g 26s (3)`); the tooltip lists the most valuable ones. Farol only shows it — it never sells.
+- The bag warning now says how much junk you can sell.
+- Works with the modern (`C_Container`) and old (`GetContainerItemInfo`) APIs; `/farol warn status` shows which.
+- Robustness: a strange bag count from the game can no longer cause an endless loop. The forbidden-API test now also
+  blocks selling, moving, destroying or equipping items and training/abandoning professions.
+
 ## 2.20.0 — Professions
 - New bar item **Professions** (off by default): main professions with level / training limit (yellow when close,
   red at the limit, green at 300); the tooltip lists all of them with the points gained this session.

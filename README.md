@@ -3,8 +3,8 @@
 [Português](README.pt-BR.md) | **English**
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
-**FPS · latency · memory · coordinates · zone · speed · durability · bags · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · clock · daily/weekly resets · session time · friends · guild** — you pick what shows (20 items).
+**FPS · latency · memory · coordinates · zone · speed · durability · bags · junk value · gold · session gold · gold/hour · XP · XP/hour ·
+reputation · professions · clock · daily/weekly resets · session time · friends · guild** — you pick what shows (21 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -119,6 +119,7 @@ Commands: `/farol appearance scale 120`, `/farol appearance bg 40`, `/farol appe
 Farol warns you **once** when your most damaged item drops below **20%** durability, and when only **2 or
 fewer** bag slots are free (with a separate "Bags full!" warning). The warning appears **in the middle of
 your screen and in your own chat** (nothing is sent to anyone), with the game's ready-check sound.
+When there is junk to sell, the bag warning says so: "… 3 slot(s) hold junk (3g 26s) you can sell."
 
 - It warns again only after things improve (you repaired / freed slots), and at most once every 5 minutes,
   so it won't keep repeating while you loot or sell.
@@ -238,6 +239,7 @@ in the menu, or `/farol session reset`, to restart them (e.g. when you move to a
 | Speed           | Movement speed (100% = normal running)                 | `speed`      | off     |
 | Durability      | Your **most damaged** item (red below 20%)             | `durab`      | on      |
 | Bags            | Free / total bag slots (red at 2 or fewer)             | `bags`       | off     |
+| Junk in bags    | Vendor value of gray items and the slots they take     | `junk`       | off     |
 | Gold            | Money on your character                                | `gold`       | on      |
 | Session gold    | Gold gained or spent since login / `/reload`           | `session`    | off     |
 | Gold per hour   | Session gold per hour (red when negative)              | `goldh`      | off     |
@@ -260,6 +262,10 @@ Example: `/farol hide gold` hides gold; `/farol show gold` brings it back. Portu
 
 **Reputation:** shows the faction you mark as **"Show as Experience Bar"** in the game's reputation panel. The
 tooltip adds progress, reputation per hour and an estimate of the time to the next standing.
+
+**Junk in bags:** adds up the vendor price of your gray (Poor) items, e.g. `Junk 3g 26s (3)`; the tooltip shows
+the most valuable ones. **Farol never sells anything** (that would be automation): you sell at a vendor. Items the
+game has not loaded yet are counted as soon as their information arrives.
 
 **Professions:** the bar shows your main professions (or the secondary ones if you have no main profession); the
 tooltip lists all of them, including cooking, fishing and first aid, with the points gained this session.

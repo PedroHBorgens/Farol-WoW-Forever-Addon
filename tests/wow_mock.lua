@@ -209,6 +209,32 @@ function Mock.new(opts)
     end
     env.UIErrorsFrame = { AddMessage = function(_, text) H.screen = text end }
     H.bagFree = { [0] = 2, 1, 1, 1, 1 } -- espaços livres por bolsa (total 6 de 80)
+    -- Itens conhecidos: [id] = { nome, qualidade, preço de venda (cobre por unidade) }
+    H.items = {
+        [9001] = { "Couro Rasgado", 0, 800 }, [9002] = { "Garra Quebrada", 0, 1250 },
+        [9003] = { "Espada Enferrujada", 0, 25000 }, [9010] = { "Pão de Centeio", 1, 25 },
+        [9020] = { "Pedra Sem Valor", 0, 0 },
+    }
+    -- Bolsas: [bolsa][espaço] = { id, quantidade }. Lixo: 8 couros (64s) + 1 garra (12s 50c) + 1 espada (2g 50s).
+    H.bagItems = { [0] = { [1] = { 9001, 8 }, [2] = { 9010, 5 }, [3] = { 9002, 1 } }, [1] = { [4] = { 9003, 1 },
+                   [5] = { 9020, 1 } } }
+    -- Informação de item: nome, link, qualidade, ..., preço de venda (11º valor). Global nos clientes antigos,
+    -- C_Item.GetItemInfo nos modernos.
+    local function itemInfo(link)
+        local id = type(link) == "number" and link or tonumber(string.match(tostring(link), "Hitem:(%d+)"))
+        local item = H.items[id]
+        if item then
+            if H.itemsLoading and H.itemsLoading[id] then return nil end -- ainda não carregado
+            return item[1], link, item[2], 1, 1, "Misc", "Junk", 20, "", 133784, item[3]
+        end
+        return "item", link, H.itemQuality[id]
+    end
+    local function bagItem(bag, slot)
+        local entry = H.bagItems[bag] and H.bagItems[bag][slot]
+        if not entry then return nil end
+        local item = H.items[entry[1]] or {}
+        return entry, item, "|cff9d9d9d|Hitem:" .. entry[1] .. "::::|h[" .. tostring(item[1]) .. "]|h|r"
+    end
 
     -- Reputação: H.faction = { name, reaction, min, max, value, id } ou nil (nenhuma facção acompanhada)
     local standings = { "Odiado", "Hostil", "Inamistoso", "Neutro", "Amistoso", "Honrado", "Reverenciado", "Exaltado" }
@@ -249,9 +275,15 @@ function Mock.new(opts)
         env.SetMapToCurrentZone = noop
         env.GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end
         env.GetContainerNumFreeSlots = function(bag) return H.bagFree[bag] or 0, 0 end
-        env.GetItemInfo = function(link)
-            local id = tonumber(string.match(link, "Hitem:(%d+)"))
-            return "item", link, H.itemQuality[id]
+        env.GetItemInfo = itemInfo
+        env.GetContainerItemInfo = function(bag, slot) -- 3.3.5a
+            local entry, item, link = bagItem(bag, slot)
+            if not entry then return nil end
+            return "icon", entry[2], false, item[2], false, false, link
+        end
+        env.GetContainerItemLink = function(bag, slot)
+            local _, _, link = bagItem(bag, slot)
+            return link
         end
         env.GetItemIcon = function(id) return "icon" .. id end
         env.GetNumFriends = function() return 7, 3 end
@@ -309,8 +341,15 @@ function Mock.new(opts)
         env.C_Container = {
             GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end,
             GetContainerNumFreeSlots = function(bag) return H.bagFree[bag] or 0, 0 end,
+            GetContainerItemInfo = function(bag, slot) -- cliente moderno: tabela
+                local entry, item, link = bagItem(bag, slot)
+                if not entry then return nil end
+                return { stackCount = entry[2], quality = item[2], hyperlink = link, itemID = entry[1],
+                         hasNoValue = (item[3] or 0) == 0 }
+            end,
         }
         env.C_Item = {
+            GetItemInfo = itemInfo,
             GetItemQualityByID = function(link)
                 return H.itemQuality[tonumber(string.match(link, "Hitem:(%d+)"))]
             end,

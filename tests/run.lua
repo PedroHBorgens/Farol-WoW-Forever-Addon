@@ -65,6 +65,7 @@ local SUITES = {
     "test_summary",
     "test_breaks",
     "test_prof",
+    "test_junk",
     "test_globals",
 }
 

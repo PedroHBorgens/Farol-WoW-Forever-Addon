@@ -11,6 +11,8 @@
 
 **Farol** (Portuguese for *lighthouse*) shows the information you care about in one small, movable bar.
 
+> **Most features start turned off** — right-click the bar (or `/farol menu`) to choose what you want. Hover each item to see what it shows. After an update, Farol lists what is new in your chat, once.
+
 ### Info bar — pick what you see
 FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · **Junk value (gray items)** · Gold (**+ total and rested XP of all your characters**) · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · **Reputation (standing, progress, rep/hour)** · **Professions (level / training limit)** · Clock (local or server) · **Daily & weekly reset countdown** · Session time · Friends online · Guild online
 
@@ -59,6 +61,8 @@ English and Brazilian Portuguese (follows your client, or `/farol lang en|pt`).
 ## Português (Brasil)
 
 **Farol** mostra as informações que importam numa barra pequena e móvel.
+
+> **A maioria das funções começa desligada** — clique com o botão direito na barra (ou `/farol menu`) para escolher o que quiser. Passe o mouse em cada item para ver o que ele mostra. Depois de uma atualização, o Farol lista as novidades no seu chat, uma vez.
 
 ### Barra de informações — você escolhe o que aparece
 FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · **Valor do lixo (itens cinzentos)** · Ouro (**+ total e descanso de todos os seus personagens**) · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · **Reputação (nível, progresso, rep/hora)** · **Profissões (nível / limite do treinamento)** · Horário (local ou do servidor) · **Contagem até o reset diário e semanal** · Tempo de sessão · Amigos online · Guilda online

@@ -119,13 +119,17 @@ lua5.1 tests/run.lua        # ~150 testes; deve terminar com "0 failed"
 - Leituras do jogo que decidem quando avisar (`InCombatLockdown`, `IsInInstance`) passam por `pcall`; se falharem,
   o aviso **espera** (conta como "em combate"), nunca quebra a verificação.
 - Rode também em Lua 5.4 (`lupa.lua54`): ele recusa frações em `date()` e `%d`, e pega erros que o 5.1 deixa passar.
+  O 5.4 **embaralha a ordem do `pairs`** a cada execução: nunca dependa dela (use `KeepRecent`/`table.sort`). Rode o
+  5.4 algumas vezes seguidas para pegar testes que só falham às vezes.
 - Sem Lua instalado, dá para rodar com a biblioteca Python `lupa` (`lupa.lua51`).
 
 ## Fluxo de trabalho
 
 1. Branch a partir do `main` atualizado.
 2. Mudança + testes + README.md **e** README.pt-BR.md + `assets/curseforge-description.md` se for algo visível.
-3. Subir a versão em **todos os 4 `.toc`** (`## Version:`) e registrar no `CHANGELOG.md`.
+3. Subir a versão em **todos os 4 `.toc`** (`## Version:`) e registrar no `CHANGELOG.md`. Função nova e visível:
+   acrescentar uma chave **no fim** de `NEWS` (Core.lua) com o texto `news_*` em PT/EN — quem atualizar vê só o que
+   ainda não viu. Item novo na barra: também `desc_<item>` em PT/EN (explicação ao passar o mouse; um teste confere).
 4. Pull request. O `main` é protegido: o merge exige **`test`** aprovado. Esperar também o
    **`github-advanced-security`** (AI Scan / "Code scanning AI findings": análise de segurança por IA do GitHub,
    a única automática que cobre Lua, já que o CodeQL não analisa Lua).

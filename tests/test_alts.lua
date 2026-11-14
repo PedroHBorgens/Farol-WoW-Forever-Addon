@@ -113,6 +113,7 @@ return {
         local realms = 0
         for _ in pairs(saved) do realms = realms + 1 end
         T.ok(realms <= 21, "at most 20 saved realms (+ the current one)")
+        T.ok(saved.Azralon, "the most recently active realm is kept (fixed order, not random)")
         if saved.Grande then
             local n = 0
             for _ in pairs(saved.Grande) do n = n + 1 end

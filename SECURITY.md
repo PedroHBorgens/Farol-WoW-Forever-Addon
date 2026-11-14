@@ -24,15 +24,20 @@ e o branch `main` recebem correções.
 - **Sends nothing**: no chat or add-on messages, no network access (add-ons cannot reach the internet). / **Não envia
   nada**: nenhuma mensagem de chat ou de addon.
 - Friends and guild items read **counts only**, never names. / Amigos e guilda: só **quantidades**, nunca nomes.
-- Saved data (`FarolDB`, `FarolCharDB`) holds only settings, alarms, your own loot links and warning texts, and is
-  **validated on load**. / Os dados salvos guardam só configurações, alarmes, seus links de saque e textos de avisos, e
-  são **validados ao carregar**.
+- Saved data (`FarolDB`, `FarolCharDB`) holds only settings, alarms, your own loot links, warning texts, the last
+  session summary (numbers) and the gold/level of **your own** characters, and is **validated on load**. It never
+  leaves your computer. / Os dados salvos guardam só configurações, alarmes, seus links de saque, textos de avisos,
+  o resumo da última sessão (números) e o ouro/nível dos **seus próprios** personagens, e são **validados ao
+  carregar**. Nunca saem do seu computador.
+- The add-on never sells, moves, destroys or equips items. / O addon nunca vende, move, destrói ou equipa itens.
 
 ## How this is enforced / Como isso é garantido
 
 - Automated tests (`tests/`) run on every push and pull request, including:
-  - a scan that fails if the code uses automation, messaging or dynamic-code APIs;
+  - a scan that fails if the code uses automation, messaging, item/vendor or dynamic-code APIs;
+  - a check that no generic global names are created;
   - fuzzing with random and malicious commands, chat messages and tampered saved data.
-- The `main` branch is protected: changes only by pull request with passing tests and code scanning.
+- The `main` branch is protected: changes only by pull request with passing tests. GitHub's AI code scanning is used
+  when it runs; when it does not, a full local security review is required before merging.
 - GitHub Actions run with read-only permissions, no secrets, `persist-credentials: false`, and actions pinned by
   commit SHA (kept up to date by Dependabot).

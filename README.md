@@ -31,6 +31,9 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol loot clear` | Clear this character's loot history |
 | `/farol session reset`| Restart session gold, gold/h, XP/h, rep/h and time |
 | `/farol summary`    | Summary of the current session (gold, XP, reputation, loot, warnings) |
+| `/farol gold`       | Gold of all your characters on this realm |
+| `/farol gold total on` / `off` | Show / hide the realm total next to your gold on the bar |
+| `/farol gold forget Name` | Forget a character you deleted or no longer play |
 | `/farol summary on` / `off` | Show / don't show the last session's summary at login |
 | `/farol warn`       | Open the warnings window (durability, bags, talents, spell ranks, break, water) |
 | `/farol warn status`| Show what Farol can read on your client (talents, reputation, resets) |
@@ -60,7 +63,7 @@ Tick or untick each item — no commands needed. Open it in any of these ways:
 - Type `/farol menu`
 - **Esc → Options → AddOns → Farol**
 
-The menu lets you choose bar items, show/lock the panel, switch the clock to server time, turn the session summary at login on/off, pick the language (Auto / Português / English)
+The menu lets you choose bar items, show/lock the panel, switch the clock to server time, turn the session summary at login on/off, show the gold of all your characters on the bar, forget characters, pick the language (Auto / Português / English)
 and reset the position. Press **Esc** to close it. If you hide the panel, use `/farol menu` to bring it back.
 
 ## Clock alarms
@@ -240,7 +243,7 @@ in the menu, or `/farol session reset`, to restart them (e.g. when you move to a
 | Durability      | Your **most damaged** item (red below 20%)             | `durab`      | on      |
 | Bags            | Free / total bag slots (red at 2 or fewer)             | `bags`       | off     |
 | Junk in bags    | Vendor value of gray items and the slots they take     | `junk`       | off     |
-| Gold            | Money on your character                                | `gold`       | on      |
+| Gold            | Money on your character (optional total of all your characters) | `gold` | on      |
 | Session gold    | Gold gained or spent since login / `/reload`           | `session`    | off     |
 | Gold per hour   | Session gold per hour (red when negative)              | `goldh`      | off     |
 | Experience (XP) | XP % and rested bonus (hidden at max level)            | `xp`         | off     |
@@ -262,6 +265,12 @@ Example: `/farol hide gold` hides gold; `/farol show gold` brings it back. Portu
 
 **Reputation:** shows the faction you mark as **"Show as Experience Bar"** in the game's reputation panel. The
 tooltip adds progress, reputation per hour and an estimate of the time to the next standing.
+
+**Gold of all your characters:** Farol remembers the gold and level of each of **your** characters when you play
+with it, and the gold tooltip lists them per realm (richest first, with when you last played each one) plus the
+total. Tick **Gold of all characters on the bar** (or `/farol gold total on`) to see `123g 45s 67c (Total 1482g 10s)`.
+It only knows a character after you log in with it once with Farol on. Use **Forget characters** in the options
+(click twice to confirm) or `/farol gold forget Name` for characters you deleted. This stays on your computer only.
 
 **Junk in bags:** adds up the vendor price of your gray (Poor) items, e.g. `Junk 3g 26s (3)`; the tooltip shows
 the most valuable ones. **Farol never sells anything** (that would be automation): you sell at a vendor. Items the
@@ -312,7 +321,8 @@ Information security is this project's first rule:
 - **No automation.** It only reads and displays information; it never plays for you (which would break server rules).
 - **Saved data is validated.** `FarolDB` only stores your settings: panel position and state, language, visible
   items and their order, appearance, alarms (time, clock type, on/off, a cleaned-up name and the snooze time),
-  loot window and warning settings. `FarolCharDB` (per character) stores only your loot history (validated item
+  loot window and warning settings, and the gold and level of **your own** characters per realm (for the account
+  total). `FarolCharDB` (per character) stores only your loot history (validated item
   links), the last 10 warnings and the last session's summary (numbers only). Everything is checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official sources** (this repository or the CurseForge page). Addons are plain Lua text:
   you can read all of it in the `Farol` folder.

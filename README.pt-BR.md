@@ -31,6 +31,9 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol saque limpar`| Apaga o histórico de saques deste personagem |
 | `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h, rep/h e tempo |
 | `/farol resumo`     | Resumo da sessão atual (ouro, XP, reputação, saques, avisos) |
+| `/farol ouro`       | Ouro de todos os seus personagens deste reino |
+| `/farol ouro total on` / `off` | Mostra / esconde o total do reino ao lado do ouro na barra |
+| `/farol ouro esquecer Nome` | Esquece um personagem que você apagou ou não usa mais |
 | `/farol resumo on` / `off` | Mostra / não mostra o resumo da última sessão ao entrar |
 | `/farol aviso`      | Abre a janela de avisos (durabilidade, bolsas, talentos, graus de magia, pausa, água) |
 | `/farol aviso status`| Mostra o que o Farol consegue ler no seu cliente (talentos, reputação, resets) |
@@ -60,7 +63,7 @@ Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um des
 - Digite `/farol menu`
 - **Esc → Opções → AddOns → Farol**
 
-No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, liga/desliga o resumo da sessão ao entrar, escolhe o idioma (Auto / Português /
+No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, liga/desliga o resumo da sessão ao entrar, mostra o ouro de todos os personagens na barra, esquece personagens, escolhe o idioma (Auto / Português /
 English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/farol menu` para trazê-lo de volta.
 
 ## Alarmes do relógio
@@ -241,7 +244,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | Durabilidade     | Sua peça **mais danificada** (vermelho abaixo de 20%)     | `durab`         | ligado     |
 | Bolsas           | Espaços livres / total (vermelho com 2 ou menos)          | `bolsas`        | desligado  |
 | Lixo nas bolsas  | Valor de venda dos itens cinzentos e espaços que ocupam   | `lixo`          | desligado  |
-| Ouro             | Dinheiro do personagem                                    | `ouro`          | ligado     |
+| Ouro             | Dinheiro do personagem (total opcional de todos os seus personagens) | `ouro` | ligado     |
 | Ouro da sessão   | Quanto ganhou ou gastou desde que entrou / `/reload`      | `sessao`        | desligado  |
 | Ouro por hora    | Ouro da sessão por hora (vermelho quando negativo)        | `ouroh`         | desligado  |
 | Experiência (XP) | % de XP e bônus descansado (some no nível máximo)         | `xp`            | desligado  |
@@ -263,6 +266,13 @@ Exemplo: `/farol hide ouro` esconde o ouro; `/farol show ouro` mostra de volta. 
 
 **Reputação:** mostra a facção que você marcar como **"Mostrar como barra de experiência"** no painel de reputação
 do jogo. O tooltip mostra também o progresso, a reputação por hora e uma estimativa do tempo até o próximo nível.
+
+**Ouro de todos os seus personagens:** o Farol lembra do ouro e do nível de cada personagem **seu** quando você
+joga com ele, e o tooltip do ouro lista todos por reino (do mais rico ao mais pobre, com a última vez que você jogou
+com cada um) e o total. Marque **Ouro de todos os personagens na barra** (ou `/farol ouro total on`) para ver
+`123g 45s 67c (Total 1482g 10s)`. Ele só conhece um personagem depois que você entra com ele uma vez com o Farol
+ligado. Use **Esquecer personagens** nas opções (dois cliques para confirmar) ou `/farol ouro esquecer Nome` para
+personagens que você apagou. Tudo fica só no seu computador.
 
 **Lixo nas bolsas:** soma o preço de venda dos itens cinzentos (Inferior), por exemplo `Lixo 3g 26s (3)`; o
 tooltip mostra os que valem mais. **O Farol nunca vende nada** (isso seria automação): quem vende é você, no
@@ -314,7 +324,8 @@ Segurança da informação é a primeira regra deste projeto:
 - **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
 - **Dados salvos são validados.** `FarolDB` guarda só as suas configurações: posição e estado do painel, idioma,
   itens visíveis e a ordem deles, aparência, alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o
-  tempo da soneca), ajustes da janela de saques e dos avisos. `FarolCharDB` (por personagem) guarda só o histórico
+  tempo da soneca), ajustes da janela de saques e dos avisos, e o ouro e o nível dos **seus próprios** personagens
+  por reino (para o total da conta). `FarolCharDB` (por personagem) guarda só o histórico
   de saques (links de item validados), os 10 últimos avisos e o resumo da última sessão (só números). Tudo é verificado ao carregar — um arquivo corrompido
   ou adulterado volta para os valores padrão.
 - **Baixe só das fontes oficiais** (este repositório ou a página do CurseForge). Addons são texto Lua: você pode ler

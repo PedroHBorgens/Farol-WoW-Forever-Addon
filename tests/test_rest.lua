@@ -6,7 +6,7 @@ local H8 = 8 * 3600
 local function alts(now)
     return { chars = { Azralon = {
         Jaina = { gold = 100, level = 34, t = now - 30 * H8, rest = 0, max = 10000, inn = true },  -- 30 x 5% = cheio
-        Arthas = { gold = 100, level = 22, t = now - H8, rest = 0, max = 10000, inn = true },      -- 5%
+        Arthas = { gold = 100, level = 22, t = now - H8 + 60, rest = 0, max = 10000, inn = true }, -- ~5% (folga de 1 min)
         Uther = { gold = 100, level = 40, t = now - 4 * H8, rest = 1000, max = 10000 },            -- fora: 10% + 5% = 15%
         Thrall = { gold = 100, level = 60, t = now },                                              -- nível máximo
     } } }
@@ -41,7 +41,8 @@ return {
         T.has(text, "Uther (40) = 15%  cheio em ~")
         T.has(text, "fora")
         T.has(text, "Arthas (22) = 5%  cheio em ~9d 16h  estalagem/cidade") -- (15000 - 500) / (500 por 8 h)
-        local block = string.match(text, "Descanso dos seus personagens %(estimativa%)(.-)Ouro na sessão") or ""
+        local block = string.match(text, "Descanso dos seus personagens %(estimativa%)(.-)Bolsas") or ""
+        T.ok(block ~= "", "rest block found")
         T.hasnt(block, "Thrall", "max level not listed in the rest block")
         T.hasnt(block, "Garrosh", "current character not listed")
         local jaina, uther, arthas = string.find(text, "Jaina (34) = 150", 1, true), string.find(text, "Uther (40) = 15", 1, true),

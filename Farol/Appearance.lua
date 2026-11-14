@@ -47,6 +47,7 @@ local STRINGS = {
         app_icons     = "Mostrar ícones na barra",
         app_warnbutton = "Mostrar botão do histórico de avisos",
         app_lootbutton = "Mostrar botão de saques",
+        app_tooltipfull = "Tooltip completo (todas as informações em qualquer item)",
         app_reset     = "Restaurar padrão",
         app_set_scale = "escala: %d%%.",
         app_set_bg    = "fundo: %d%% de opacidade.",
@@ -83,6 +84,7 @@ local STRINGS = {
         app_icons     = "Show icons on the bar",
         app_warnbutton = "Show the warning history button",
         app_lootbutton = "Show the loot button",
+        app_tooltipfull = "Full tooltip (all information on every item)",
         app_reset     = "Restore defaults",
         app_set_scale = "scale: %d%%.",
         app_set_bg    = "background: %d%% opacity.",
@@ -114,6 +116,7 @@ local TOGGLES = {
     icons = "app_icons",
     warnButton = "app_warnbutton",
     lootButton = "app_lootbutton",
+    tooltipFull = "app_tooltipfull",
 }
 
 ---------------------------------------------------------------------------
@@ -214,6 +217,7 @@ local function RestoreDefaults()
     db.scale, db.bgAlpha, db.border = 1, 0.7, true
     db.barWidth, db.hideCombat, db.hideInstance = 0, false, false
     db.icons, db.warnButton, db.lootButton = true, true, true
+    db.tooltipFull = false
     db.fontSize, db.iconSize = FONT_DEFAULT, ICON_DEFAULT
     Apply()
     Print(T("app_restored"))
@@ -247,7 +251,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolAppearance", UIParent, ns.backdropTemplate)
-    frame:SetSize(470, 432)
+    frame:SetSize(470, 458)
     frame:SetPoint("CENTER", 0, 40)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -292,7 +296,7 @@ local function CreateWindow()
 
     frame.checks = {}
     local y = -218
-    for _, key in ipairs({ "icons", "border", "warnButton", "lootButton", "hideCombat", "hideInstance" }) do
+    for _, key in ipairs({ "icons", "border", "warnButton", "lootButton", "tooltipFull", "hideCombat", "hideInstance" }) do
         local check = CreateFrame("CheckButton", "FarolApp_" .. key, frame, "UICheckButtonTemplate")
         check:SetSize(24, 24)
         check:SetPoint("TOPLEFT", 20, y)
@@ -367,6 +371,7 @@ local WORDS = {
     icones = "icons", icons = "icons",
     botao = "warnButton", button = "warnButton",
     botaosaques = "lootButton", lootbutton = "lootButton",
+    tooltip = "tooltipFull", dica = "tooltipFull",
     padrao = "reset", default = "reset", reset = "reset",
 }
 

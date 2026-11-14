@@ -21,7 +21,7 @@ return {
         H:login({ warnings = { pause = true, pauseMin = 15, water = true, waterMin = 15, pauseAnywhere = true } })
         for _, cmd in ipairs({ "menu", "alarme", "alarme add 07:30 Teste", "saque", "aviso", "aparencia", "historico",
                                "ordem", "aparencia coluna", "aparencia largura 400", "aviso status", "help", "version",
-                               "sessao zerar", "show xph", "show rep", "show reset", "show prof", "show lixo", "ouro", "ouro total on", "ouro esquecer Ninguem", "aviso descansado on", "novidades", "instancias", "aviso profissoes off", "aviso profissoes on", "resumo", "resumo off", "lang en",
+                               "sessao zerar", "show xph", "show rep", "show reset", "show prof", "show lixo", "ouro", "ouro total on", "ouro esquecer Ninguem", "aviso descansado on", "novidades", "instancias", "aparencia tooltip", "aviso profissoes off", "aviso profissoes on", "resumo", "resumo off", "lang en",
                                "lock", "lock", "aviso padrao 5", "aviso agua 20", "aviso pausa lutas off" }) do
             H:slash(cmd)
         end

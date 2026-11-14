@@ -115,14 +115,15 @@ Open **Appearance...** in the options menu (or `/farol appearance`):
   Items rearrange into **left-aligned columns** that fit: wide = one line, narrow = one item per line, anything in
   between = 2, 3, 4… columns. The height adjusts automatically. Shortcuts: **One line** / **One column**. Locking the
   bar (`/farol lock`) hides the grip.
-- **Show border** on/off, **show icons on the bar** (one per item) and **show the warning history button** and **show the loot button**.
+- **Show border** on/off, **show icons on the bar** (one per item) and **show the warning history button**, **show the loot button** and **full tooltip** (all information on every item).
 - **Hide in combat** (comes back when the fight ends) and **hide in dungeons, raids, arenas and battlegrounds**.
   Alarms and warnings keep working while the bar is hidden.
 - **Restore defaults** puts everything back.
 
 Commands: `/farol appearance scale 120`, `/farol appearance bg 40`, `/farol appearance text 14`, `/farol appearance icons 20`, `/farol appearance row`, `/farol appearance column`, `/farol appearance width 400`,
 `/farol appearance border`, `/farol appearance combat`, `/farol appearance instance`, `/farol appearance icons` (on/off),
-`/farol appearance button` (warning history button), `/farol appearance lootbutton`, `/farol appearance default`.
+`/farol appearance button` (warning history button), `/farol appearance lootbutton`, `/farol appearance tooltip`,
+`/farol appearance default`.
 
 ## Durability and bag warnings
 
@@ -300,9 +301,11 @@ The tooltip also lists your **saved instances** (raid/dungeon lockouts) — e.g.
 lockouts disappear by themselves). `/farol lockouts` lists everything in your chat. To get the list, Farol asks the
 server once at login and at most once a minute after that (the same request as the game's own Raid window).
 
-**Tooltip:** hover the panel to see every detail at once — home/world latency, subzone, each damaged
-item, exact XP and rested, reputation progress, when the daily/weekly reset happens, local *and* server time,
-friends split by WoW / Battle.net, and more.
+**Tooltip:** hover an item to see **only its details** — e.g. gold shows your gold, gold per hour, your characters
+and their rested XP/lockouts; durability shows each damaged item; Resets shows the reset times and saved instances.
+Hold **Shift** (or hover the edge of the bar) to see **everything** at once: home/world latency, subzone, exact XP,
+local *and* server time, friends split by WoW / Battle.net, and more. Long lists show 5 lines and "and N more".
+Prefer the old way? Tick **Full tooltip** in the Appearance window (`/farol appearance tooltip`).
 
 **Privacy:** friends and guild items only read **counts**; no names are read or stored.
 

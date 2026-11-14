@@ -90,21 +90,18 @@ gitems = [("🔭",'<span class="g">60</span> fps'),("⚡",'<span class="y">172</
 grid = ('<div class="vbar" style="display:grid;grid-template-columns:repeat(3,auto);column-gap:14px;row-gap:6px;position:relative;padding-bottom:16px;font-size:12px;white-space:nowrap">'
         + "".join(item(e,h) for e,h in gitems)
         + '<span style="position:absolute;right:4px;bottom:0;color:#ccc;font-size:14px">◢</span></div>')
-tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol</div>
-<div class="row"><span class="k">Latency</span><span>home 40 ms / world 60 ms</span></div>
-<div class="row"><span class="k">Durability (lowest)</span><span class="y">31%</span></div>
-<div class="row"><span>&nbsp; [Helm of Valor]</span><span class="y">31%</span></div>
-<div class="row"><span class="k">XP per hour</span><span>18.4k</span></div>
+tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol · Gold</div>
+<div class="row"><span class="k">Gold</span><span>123g 45s 67c</span></div>
+<div class="row"><span class="k">Gold this session</span><span><span class="g">+</span>38g 12s</span></div>
+<div class="row"><span class="k">Gold per hour</span><span><span class="g">+</span>17g 6s</span></div>
 <div class="row"><span class="k">Gold on this account</span><span>1482g 10s</span></div>
 <div class="row"><span>&nbsp; Thrall (60)</span><span>1020g 50s <span class="dim">Today</span></span></div>
-<div class="row"><span class="k">Reputation</span><span>Orgrimmar</span></div>
-<div class="row"><span class="k">Daily reset in</span><span>5h 12m</span></div>
-<div class="row"><span class="k">Server time</span><span>21:05</span></div>
-<div class="dim" style="margin-top:6px">Right-click: options.</div></div>"""
+<div class="row"><span>&nbsp; Jaina (34)</span><span>338g 15s <span class="dim">Yesterday</span></span></div>
+<div class="dim" style="margin-top:6px">Hold Shift to see all information.</div></div>"""
 page("farol-02-bar-items-layout-tooltip", f"""
 <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
-     "21 items with icons — one line, one column or columns", "21 informações com ícones — em linha, coluna ou colunas alinhadas, com tooltip")
+     "21 items, each with its own short tooltip (Shift: all)", "21 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
 names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Junk in bags","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Clock","Resets (daily/weekly)","Session time","Friends online","Guild online"]
@@ -189,6 +186,7 @@ app = f"""<div class="win" style="width:470px"><div class="x">×</div><div class
 <div class="ck"><span class="box"></span>Hide in dungeons, raids, arenas and battlegrounds</div>
 <div class="ck"><span class="box">✓</span>Show the warning history button 📝</div>
 <div class="ck"><span class="box">✓</span>Show the loot button 👜</div>
+<div class="ck"><span class="box"></span>Full tooltip (all information on every item)</div>
 <div style="text-align:right;margin-top:8px"><span class="btn">Restore defaults</span></div></div>"""
 small = hbar(BAR_ITEMS[:4], "font-size:12px;transform:scale(.9)")
 big = hbar(BAR_ITEMS[:4], "font-size:19px;background:#0004;border-color:#0000")

@@ -115,14 +115,15 @@ Abra **Aparência...** no menu de opções (ou `/farol aparencia`):
   largura. As informações se reorganizam em **colunas alinhadas à esquerda** que caibam: larga = uma linha, estreita =
   uma informação por linha, e no meio = 2, 3, 4… colunas. A altura se ajusta sozinha. Atalhos: **Uma linha** / **Uma
   coluna**. Travar a barra (`/farol lock`) esconde a alça.
-- **Mostrar borda**, **mostrar ícones na barra** (um por item) e **mostrar o botão do histórico de avisos** e **mostrar o botão de saques**.
+- **Mostrar borda**, **mostrar ícones na barra** (um por item) e **mostrar o botão do histórico de avisos**, **mostrar o botão de saques** e **tooltip completo** (todas as informações em qualquer item).
 - **Esconder em combate** (volta quando a luta acaba) e **esconder em masmorras, raides, arenas e campos de batalha**.
   Os alarmes e os avisos continuam funcionando com a barra escondida.
 - **Restaurar padrão** volta tudo ao normal.
 
 Comandos: `/farol aparencia escala 120`, `/farol aparencia fundo 40`, `/farol aparencia texto 14`, `/farol aparencia icones 20`, `/farol aparencia linha`, `/farol aparencia coluna`, `/farol aparencia largura 400`,
 `/farol aparencia borda`, `/farol aparencia combate`, `/farol aparencia instancia`, `/farol aparencia icones` (liga/desliga),
-`/farol aparencia botao` (botão do histórico de avisos), `/farol aparencia botaosaques`, `/farol aparencia padrao`.
+`/farol aparencia botao` (botão do histórico de avisos), `/farol aparencia botaosaques`, `/farol aparencia tooltip`,
+`/farol aparencia padrao`.
 
 ## Avisos de durabilidade e bolsas
 
@@ -303,9 +304,12 @@ salvos (guardado ao sair; bloqueios vencidos somem sozinhos). `/farol instancias
 lista, o Farol pede ao servidor uma vez ao entrar e, depois, no máximo uma vez por minuto (o mesmo pedido da janela de
 Raide do próprio jogo).
 
-**Tooltip:** passe o mouse no painel para ver todos os detalhes de uma vez — latência local/mundo,
-subzona, cada peça danificada, XP exato e descansado, progresso da reputação, quando acontece o reset diário/semanal,
-hora local *e* do servidor, amigos separados por WoW / Battle.net, e mais.
+**Tooltip:** passe o mouse num item para ver **só os detalhes dele** — por exemplo, o ouro mostra seu ouro, ouro por
+hora, seus personagens e o descanso/instâncias deles; a durabilidade mostra cada peça danificada; os Resets mostram os
+horários e as instâncias salvas. Segure **Shift** (ou passe o mouse na borda da barra) para ver **tudo** de uma vez:
+latência local/mundo, subzona, XP exato, hora local *e* do servidor, amigos separados por WoW / Battle.net, e mais.
+Listas longas mostram 5 linhas e "e mais N". Prefere o jeito antigo? Marque **Tooltip completo** na janela de
+Aparência (`/farol aparencia tooltip`).
 
 **Privacidade:** os itens de amigos e guilda leem só **quantidades**; nenhum nome é lido ou guardado.
 

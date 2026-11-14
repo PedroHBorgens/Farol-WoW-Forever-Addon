@@ -47,6 +47,11 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 - Descanso de personagens deslogados: o jogo não informa; o Core **estima** (`EstimateRest`) pelas regras do estilo
   clássico — estalagem/cidade (`IsResting` ao sair) 5% do XP do nível a cada 8 h, fora 1/4 disso, máximo 150%.
   Se o WoW Forever usar outras taxas, ajuste `REST_INN_RATE`/`REST_OUT_RATE`.
+- Instâncias salvas: `GetNumSavedInstances`/`GetSavedInstanceInfo` (12º/11º valores = chefes mortos/total nos clientes
+  modernos; o 3.3.5a não tem). A lista só existe depois de `RequestRaidInfo` → evento `UPDATE_INSTANCE_INFO`
+  (`locksLoaded`). Pedido ao servidor: 1 vez no login (`isInitialLogin`) e no máximo 1 vez por minuto
+  (`RequestLockouts`). Guardado em `chars[...].locks = { {n, k, b, r = data do fim} }` (máx. 20), validado ao carregar.
+  São os **dois únicos** pedidos ao servidor do addon (este e a lista da guilda): nunca adicionar outro sem limite.
 - Apelidos de comando (`ITEM_ALIASES`, `KEYS`, `WORDS`) não podem repetir nome: em Lua o segundo sobrescreve o
   primeiro em silêncio. Um teste do `test_toc.lua` confere. Ex.: "descanso" = pausa; XP descansado = "descansado".
 - `PLAYER_ENTERING_WORLD` traz `(isInitialLogin, isReloadingUi)` nos clientes modernos; nos antigos vem sem
@@ -88,7 +93,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - **Globais:** só nomes começando com `Farol` (janelas/botões), `FarolDB`, `FarolCharDB`, `SLASH_FAROL1`,
   `Farol_ToggleWarnHistory`, `BINDING_*`. Nada de globais genéricos.
 - **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`, `chars` = ouro
-  e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn? }`
+  e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks? }`
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle
   e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores) e
   `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `lastSession` = resumo da última sessão,

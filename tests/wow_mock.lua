@@ -181,6 +181,19 @@ function Mock.new(opts)
     env.UnitName = function(unit) if unit == "player" then return H.playerName end return nil end
     env.GetRealmName = function() return H.realm end
     env.IsResting = function() return H.resting or false end -- estalagem/cidade
+    -- Instâncias salvas: { nome, chefes mortos, total, segundos até o reset }. Só aparecem depois do RequestRaidInfo.
+    H.lockouts = { { "Núcleo Derretido", 7, 10, 2 * 86400 + 4 * 3600 }, { "Covil de Onyxia", 1, 1, 2 * 86400 + 4 * 3600 } }
+    H.raidInfoRequests = 0
+    env.RequestRaidInfo = function() H.raidInfoRequests = H.raidInfoRequests + 1; H.raidInfoReady = true end
+    env.GetNumSavedInstances = function() return H.raidInfoReady and #H.lockouts or 0 end
+    env.GetSavedInstanceInfo = function(i)
+        local l = H.lockouts[i]
+        if not l then return nil end
+        if mode == "wotlk" then -- 3.3.5a: sem contagem de chefes
+            return l[1], 100 + i, l[4], 3, true, false, 0, true, 40, "40 Player"
+        end
+        return l[1], 100 + i, l[4], 9, true, false, 0, true, 40, "40 Player", l[3], l[2]
+    end
     env.GetMoney = function() return H.money or 1234567 end
     env.GetRealZoneText = function() return "Floresta de Elwynn" end
     env.GetSubZoneText = function() return "Vale Norte" end

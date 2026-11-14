@@ -82,7 +82,7 @@ page("farol-01-overview-info-bar", f"""
 # 2. Bar: aligned columns (flexible layout) + tooltip
 gitems = [("🔭",'<span class="g">60</span> fps'),("⚡",'<span class="y">172</span> ms'),("🧠",'Mem <span class="y">235 MB</span>'),
           ("🗺️",'58.5, 54.1'),("🌍",'<span class="zone">Orgrimmar</span>'),("👟",'Speed 100%'),("🔨",'Dur <span class="g">77%</span>'),
-          ("🎒",'Bags <span class="g">13</span>/38'),("🦴",'Junk <span class="gold">3g</span> <span class="silver">26s</span> (3)'),("💰",'<span class="gold">0g</span> <span class="silver">97s</span> <span class="copper">23c</span>'),
+          ("🎒",'Bags <span class="g">13</span>/38'),("🦴",'Junk <span class="gold">3g</span> <span class="silver">26s</span> (3)'),("🏹",'Ammo <span class="y">310</span>'),("💰",'<span class="gold">0g</span> <span class="silver">97s</span> <span class="copper">23c</span>'),
           ("🪙",'Session <span class="g">+</span><span class="silver">5s</span> <span class="copper">34c</span>'),
           ("📈",'Gold/h <span class="g">+</span><span class="gold">1g</span> <span class="silver">33s</span>'),
           ("📖",'XP 46% <span class="blue">+0%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,PROF_ITEM,("⏰",'18:49'),
@@ -101,20 +101,20 @@ tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
 page("farol-02-bar-items-layout-tooltip", f"""
 <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
-     "21 items, each with its own short tooltip (Shift: all)", "21 informações, cada uma com o seu tooltip curto (Shift: tudo)")
+     "22 items, each with its own short tooltip (Shift: all)", "22 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Junk in bags","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Clock","Resets (daily/weekly)","Session time","Friends online","Guild online"]
-on = {0,1,3,4,6,7,8,9,11,13,14,15,17}
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Clock","Resets (daily/weekly)","Session time","Friends online","Guild online"]
+on = {0,1,3,4,6,7,8,9,10,12,14,15,16,18}
 half = 11
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
 menu = f"""<div class="win" style="width:620px;padding-top:12px;padding-bottom:14px;transform:scale(.88);transform-origin:center"><div class="x">×</div><div class="t">Farol</div>
-<div class="dim" style="font-size:13px">Bar items: 13 of 21 on — tick the ones you want (hover to see what each one shows).</div>
-<div class="h">Bar items</div><div style="display:flex;gap:30px"><div>{col(range(0,half))}</div><div>{col(range(half,21))}</div></div>
+<div class="dim" style="font-size:13px">Bar items: 14 of 22 on — tick the ones you want (hover to see what each one shows).</div>
+<div class="h">Bar items</div><div style="display:flex;gap:30px"><div>{col(range(0,half))}</div><div>{col(range(half,22))}</div></div>
 <div class="h">General</div><div style="display:grid;grid-template-columns:150px auto;column-gap:16px"><div class="ck"><span class="box">✓</span>Show panel</div><div class="ck"><span class="box"></span>Lock position</div><div class="ck"><span class="box">✓</span>Server time</div><div class="ck"><span class="box">✓</span>Session summary at login</div><div class="ck" style="grid-column:1 / span 2"><span class="box">✓</span>Gold of all characters on the bar</div></div>
 <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="k" style="font-size:14px">Language:</span><span class="btn" style="padding:2px 10px">Auto</span><span class="btn" style="padding:2px 10px">Português</span><span class="btn hl" style="padding:2px 10px">English</span></div>
 <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><span class="btn">Alarms...</span><span class="btn">Loot...</span><span class="btn">Warnings...</span><span class="btn">Appearance...</span><span class="btn hl">Order...</span><span class="btn">Reset position</span><span class="btn">Reset session</span><span class="btn">Forget characters</span></div></div>"""
-hover_tip = """<div class="tip" style="position:absolute;left:150px;top:300px;width:300px;font-size:13px;z-index:3">
+hover_tip = """<div class="tip" style="position:absolute;left:400px;top:200px;width:200px;font-size:12px;z-index:3">
 <div class="k">Junk in bags</div><div>Vendor value of gray items (Farol never sells).</div></div>"""
 order_names = [("🌍","Zone"),("🔭","FPS"),("⚡","Latency"),("💰","Gold"),("🏅","Reputation"),("📜","Resets (daily/weekly)"),("🔨","Durability"),("🎒","Bags"),("⏰","Clock (hidden)")]
 order = '<div class="win" style="width:330px"><div class="x">×</div><div class="t">Bar order</div>' + "".join(

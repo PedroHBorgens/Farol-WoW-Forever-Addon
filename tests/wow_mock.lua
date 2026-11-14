@@ -182,6 +182,11 @@ function Mock.new(opts)
     env.UnitName = function(unit) if unit == "player" then return H.playerName end return nil end
     env.GetRealmName = function() return H.realm end
     env.IsResting = function() return H.resting or false end -- estalagem/cidade
+    -- Classe e contagens: H.class ("WARRIOR" não usa reagentes), H.itemCounts[id], H.ammo (espaço da munição).
+    H.class, H.itemCounts, H.ammo = "WARRIOR", {}, 0
+    env.UnitClass = function() return "Classe", H.class, 1 end
+    env.GetItemCount = function(id) return H.itemCounts[id] or 0 end
+    env.GetInventoryItemCount = function(_, slot) if slot == 0 then return H.ammo end return 0 end
     -- Instâncias salvas: { nome, chefes mortos, total, segundos até o reset }. Só aparecem depois do RequestRaidInfo.
     H.lockouts = { { "Núcleo Derretido", 7, 10, 2 * 86400 + 4 * 3600 }, { "Covil de Onyxia", 1, 1, 2 * 86400 + 4 * 3600 } }
     H.raidInfoRequests = 0
@@ -369,6 +374,7 @@ function Mock.new(opts)
         }
         env.C_Item = {
             GetItemInfo = itemInfo,
+            GetItemCount = function(id) return H.itemCounts[id] or 0 end,
             GetItemQualityByID = function(link)
                 return H.itemQuality[tonumber(string.match(link, "Hitem:(%d+)"))]
             end,

@@ -3,8 +3,8 @@
 [Português](README.pt-BR.md) | **English**
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
-**FPS · latency · memory · coordinates · zone · speed · durability · bags · junk value · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · clock · daily/weekly resets · session time · friends · guild** — you pick what shows (21 items).
+**FPS · latency · memory · coordinates · zone · speed · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
+reputation · professions · clock · daily/weekly resets · session time · friends · guild** — you pick what shows (22 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -149,6 +149,17 @@ When there is junk to sell, the bag warning says so: "… 3 slot(s) hold junk (3
   talent source (the game function name changed between WoW versions, so Farol asks all of them and uses the
   highest value, plus a level-based estimate: level − 9 minus points spent), and lower-rank spells found. Turn them off with `/farol warn talents off` / `/farol warn ranks off`.
 
+### Ammo and reagents
+
+The **Ammo & reagents** bar item (off by default) counts what your class uses: hunter ammo, warlock Soul Shards,
+mage Arcane Powder and runes, priest candles, paladin symbols, druid seeds and Gift reagents, shaman Ankhs, rogue
+powders. **You choose when the number turns yellow and red** in the Warnings window (defaults: ammo 400 / 200,
+reagents 10 / 5; red must be lower than yellow, 0 in yellow = never yellow), or with `/farol warn ammo 400 200` and
+`/farol warn reagents 10 5`. Optional warnings (off by default) fire once below red, wait for combat to end, and come
+back after you restock: "Ammo: 150 running low — restock before leaving town." A reagent is only tracked after the
+character has had at least one (a level 10 mage is not warned about Arcane Powder). Farol only **counts** — it never
+buys, uses or moves items. `/farol warn status` shows what was found.
+
 ### Professions: find a trainer
 
 In the classic style, professions stop leveling at each training limit (75, 150, 225, 300). When one reaches its
@@ -251,6 +262,7 @@ in the menu, or `/farol session reset`, to restart them (e.g. when you move to a
 | Durability      | Your **most damaged** item (red below 20%)             | `durab`      | on      |
 | Bags            | Free / total bag slots (red at 2 or fewer)             | `bags`       | off     |
 | Junk in bags    | Vendor value of gray items and the slots they take     | `junk`       | off     |
+| Ammo & reagents | Ammo/reagents of your class, colored by your limits    | `ammo`       | off     |
 | Gold            | Money on your character (optional total of all your characters) | `gold` | on      |
 | Session gold    | Gold gained or spent since login / `/reload`           | `session`    | off     |
 | Gold per hour   | Session gold per hour (red when negative)              | `goldh`      | off     |

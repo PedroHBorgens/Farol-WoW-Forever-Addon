@@ -19,7 +19,7 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
-    "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk",
+    "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk", "ammo",
     "gold", "session", "goldh", "xp", "xph", "rep", "prof", "clock", "reset", "playtime", "friends", "guild",
 }
 
@@ -27,7 +27,7 @@ local ITEM_ORDER = {
 local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
-    goldh = false, xph = false, rep = false, prof = false, junk = false,
+    goldh = false, xph = false, rep = false, prof = false, junk = false, ammo = false,
     clock = false, reset = false, playtime = false, friends = false, guild = false,
 }
 
@@ -48,6 +48,7 @@ local ITEM_ALIASES = {
     rep = "rep", reputacao = "rep", reputation = "rep", faccao = "rep", faction = "rep",
     prof = "prof", profissao = "prof", profissoes = "prof", profession = "prof", professions = "prof",
     lixo = "junk", junk = "junk", cinza = "junk", cinzas = "junk", gray = "junk", grey = "junk",
+    municao = "ammo", ammo = "ammo", reagentes = "ammo", reagents = "ammo", reagente = "ammo",
     xp = "xp", experiencia = "xp", experience = "xp",
     hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
     reset = "reset", resets = "reset", reinicio = "reset",
@@ -131,6 +132,7 @@ local STRINGS = {
         name_rep = "Reputação",        cmd_rep = "rep",
         name_prof = "Profissões",      cmd_prof = "prof",
         name_junk = "Lixo nas bolsas", cmd_junk = "lixo",
+        name_ammo = "Munição e reagentes", cmd_ammo = "municao",
         name_xp = "Experiência (XP)",  cmd_xp = "xp",
         name_clock = "Horário",        cmd_clock = "hora",
         name_reset = "Resets (diário/semanal)", cmd_reset = "reset",
@@ -147,6 +149,22 @@ local STRINGS = {
         label_rep    = "Rep",
         label_prof   = "Prof",
         label_junk   = "Lixo",
+        label_ammo   = "Munição",
+        sup_ammo     = "Munição",
+        sup_shard    = "Fragmentos",
+        sup_powder   = "Pó Arcano",
+        sup_runes    = "Runas",
+        sup_candle   = "Velas",
+        sup_symbol   = "Símbolos",
+        sup_seed     = "Sementes",
+        sup_gift     = "Dádiva",
+        sup_ankh     = "Ankhs",
+        sup_flash    = "Pó de Lampejo",
+        sup_blind    = "Pó Cegante",
+        tt_supply    = "Munição e reagentes",
+        tt_supply_limits = "Amarelo / vermelho abaixo de",
+        tt_supply_hint = "Reabasteça num vendedor (o Farol só conta, nunca compra).",
+        tt_supply_none = "nenhum reagente acompanhado para a sua classe ainda",
         label_playtime = "Jogando",
         label_reset  = "Reset",
         label_reset_daily = "Diário",
@@ -297,6 +315,7 @@ local STRINGS = {
         news_rested  = "descanso dos seus personagens",
         news_locks   = "instâncias salvas (/farol instancias)",
         news_tooltip = "tooltip menor: cada item mostra só o seu (Shift mostra tudo)",
+        news_supply  = "munição e reagentes, com limites que você escolhe",
         help_news    = "  /farol novidades     - ver de novo as novidades das últimas versões",
         desc_fps      = "Quadros por segundo (verde 50+, amarelo 25+).",
         desc_ms       = "Latência: a maior entre local e mundo.",
@@ -307,6 +326,7 @@ local STRINGS = {
         desc_durab    = "Sua peça mais gasta (vermelho abaixo de 20%).",
         desc_bags     = "Espaços livres / total nas bolsas.",
         desc_junk     = "Valor de venda dos itens cinzentos (o Farol nunca vende).",
+        desc_ammo     = "Munição e reagentes da sua classe; cores pelos limites da janela de Avisos.",
         desc_gold     = "Seu ouro (e, opcional, o total dos seus personagens).",
         desc_session  = "Ouro ganho ou gasto desde que você entrou.",
         desc_goldh    = "Ouro da sessão por hora.",
@@ -361,6 +381,7 @@ local STRINGS = {
         name_rep = "Reputation",       cmd_rep = "rep",
         name_prof = "Professions",     cmd_prof = "prof",
         name_junk = "Junk in bags",    cmd_junk = "junk",
+        name_ammo = "Ammo & reagents", cmd_ammo = "ammo",
         name_xp = "Experience (XP)",   cmd_xp = "xp",
         name_clock = "Clock",          cmd_clock = "clock",
         name_reset = "Resets (daily/weekly)", cmd_reset = "reset",
@@ -377,6 +398,22 @@ local STRINGS = {
         label_rep    = "Rep",
         label_prof   = "Prof",
         label_junk   = "Junk",
+        label_ammo   = "Ammo",
+        sup_ammo     = "Ammo",
+        sup_shard    = "Shards",
+        sup_powder   = "Arcane Powder",
+        sup_runes    = "Runes",
+        sup_candle   = "Candles",
+        sup_symbol   = "Symbols",
+        sup_seed     = "Seeds",
+        sup_gift     = "Gift",
+        sup_ankh     = "Ankhs",
+        sup_flash    = "Flash Powder",
+        sup_blind    = "Blinding Powder",
+        tt_supply    = "Ammo & reagents",
+        tt_supply_limits = "Yellow / red below",
+        tt_supply_hint = "Restock at a vendor (Farol only counts, it never buys).",
+        tt_supply_none = "no reagent tracked for your class yet",
         label_playtime = "Played",
         label_reset  = "Reset",
         label_reset_daily = "Daily",
@@ -527,6 +564,7 @@ local STRINGS = {
         news_rested  = "rested XP of your characters",
         news_locks   = "saved instances (/farol lockouts)",
         news_tooltip = "smaller tooltip: each item shows its own (Shift shows everything)",
+        news_supply  = "ammo and reagents, with limits you choose",
         help_news    = "  /farol news          - show the news of the latest versions again",
         desc_fps      = "Frames per second (green 50+, yellow 25+).",
         desc_ms       = "Latency: the higher of home and world.",
@@ -537,6 +575,7 @@ local STRINGS = {
         desc_durab    = "Your most damaged item (red below 20%).",
         desc_bags     = "Free / total bag slots.",
         desc_junk     = "Vendor value of gray items (Farol never sells).",
+        desc_ammo     = "Ammo and reagents of your class; colors follow the limits in the Warnings window.",
         desc_gold     = "Your gold (and, optionally, all your characters' total).",
         desc_session  = "Gold gained or spent since you logged in.",
         desc_goldh    = "Session gold per hour.",
@@ -1353,6 +1392,89 @@ local function ValidNumber(v, max)
     return type(v) == "number" and not IsSecret(v) and v == v and v >= 0 and v <= max
 end
 
+---------------------------------------------------------------------------
+-- Munição e reagentes da classe (só CONTA: nunca compra, usa ou move). IDs do jogo clássico.
+-- Um grupo só passa a ser acompanhado depois que o personagem já teve pelo menos 1 (FarolCharDB.supplySeen):
+-- assim um mago de nível 10 não é avisado por falta de Pó Arcano que ele ainda nem usa.
+---------------------------------------------------------------------------
+
+local SUPPLIES = {
+    HUNTER  = { { key = "ammo", kind = "ammo", ammoSlot = true } },
+    WARLOCK = { { key = "shard", ids = { 6265 } } },
+    MAGE    = { { key = "powder", ids = { 17020 } }, { key = "runes", ids = { 17031, 17032 } } },
+    PRIEST  = { { key = "candle", ids = { 17028, 17029 } } },
+    PALADIN = { { key = "symbol", ids = { 17033, 21177 } } },
+    DRUID   = { { key = "seed", ids = { 17034, 17035, 17036, 17037, 17038 } }, { key = "gift", ids = { 17021, 17026 } } },
+    SHAMAN  = { { key = "ankh", ids = { 17030 } } },
+    ROGUE   = { { key = "flash", ids = { 5140 } }, { key = "blind", ids = { 5530 } } },
+}
+ns.SUPPLIES = SUPPLIES
+
+local function SafeCount(fn, ...)
+    if type(fn) ~= "function" then return nil end
+    local ok, n = pcall(fn, ...)
+    if not ok or type(n) ~= "number" or IsSecret(n) or n ~= n or n < 0 or n > 100000 then return nil end
+    return math.floor(n)
+end
+
+local function ItemCount(id)
+    local getCount = (C_Item and C_Item.GetItemCount) or GetItemCount
+    return SafeCount(getCount, id)
+end
+
+local function PlayerClass()
+    if not UnitClass then return nil end
+    local ok, _, classFile = pcall(UnitClass, "player")
+    if ok and type(classFile) == "string" and SUPPLIES[classFile] then return classFile end
+    return nil
+end
+
+-- Limites (amarelo, vermelho) escolhidos na janela de Avisos.
+local function SupplyLimits(kind)
+    local w = db and db.warnings
+    if not w then return 0, 0 end
+    if kind == "ammo" then return w.ammoYellow or 400, w.ammoRed or 200 end
+    return w.reagYellow or 10, w.reagRed or 5
+end
+ns.SupplyLimits = SupplyLimits
+
+-- Grupos acompanhados: { key, kind, count, yellow, red, state = "ok"|"low"|"out" }. nil se a classe não usa nada.
+local function GetSupplies()
+    local class = PlayerClass()
+    if not class then return nil end
+    local seen = type(FarolCharDB) == "table" and FarolCharDB.supplySeen
+    local list = {}
+    for _, group in ipairs(SUPPLIES[class]) do
+        local count
+        if group.ammoSlot then
+            count = SafeCount(GetInventoryItemCount, "player", 0) -- espaço da munição (aljava/bolsas)
+        else
+            for _, id in ipairs(group.ids) do
+                local n = ItemCount(id)
+                if n then count = (count or 0) + n end
+            end
+        end
+        if count then
+            if count > 0 and type(seen) == "table" then seen[group.key] = true end
+            if count > 0 or (type(seen) == "table" and seen[group.key]) then
+                local kind = group.kind or "reagent"
+                local yellow, red = SupplyLimits(kind)
+                local state = (red > 0 and count < red) and "out" or ((yellow > 0 and count < yellow) and "low" or "ok")
+                list[#list + 1] = { key = group.key, kind = kind, count = count, yellow = yellow, red = red, state = state }
+            end
+        end
+    end
+    return list
+end
+ns.GetSupplies = GetSupplies
+
+local SUPPLY_COLORS = { low = "|cffffff3a", out = "|cffff4040" }
+local function SupplyText(s)
+    local n = tostring(s.count)
+    if SUPPLY_COLORS[s.state] then n = SUPPLY_COLORS[s.state] .. n .. "|r" end
+    return T("sup_" .. s.key) .. " " .. n
+end
+
 local function GetJunk()
     local getSlots = (C_Container and C_Container.GetContainerNumSlots) or GetContainerNumSlots
     if not getSlots then return nil end
@@ -1802,7 +1924,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip" }
+               "news_tooltip", "news_supply" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -1928,6 +2050,14 @@ local ITEM_TEXT = {
         local rate = GetRepRate()
         if rate then text = text .. " |cff4dff4d+" .. FormatBig(rate) .. "/h|r" end
         return text
+    end,
+    ammo = function()
+        local list = GetSupplies()
+        if not list then return nil end -- classe sem munição/reagentes: o item some
+        if #list == 0 then return T("label_ammo") .. " --" end
+        local parts = {}
+        for _, s in ipairs(list) do parts[#parts + 1] = SupplyText(s) end
+        return table.concat(parts, " · ")
     end,
     junk = function()
         local junk = GetJunk()
@@ -2100,6 +2230,7 @@ local ITEM_ICONS = {
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
     rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
+    ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
     guild = "INV_Shirt_GuildTabard_01",
 }
@@ -2319,6 +2450,22 @@ TIP.bags = function()
     AddPair(T("tt_bags"), free and string.format("%d / %d", free, total) or "--")
 end
 
+TIP.supply = function()
+    local list = Safe(GetSupplies)
+    if not list then return end
+    if #list == 0 then AddPair(T("tt_supply"), T("tt_supply_none")) return end
+    for _, s in ipairs(list) do
+        local value = tostring(s.count)
+        if SUPPLY_COLORS[s.state] then value = SUPPLY_COLORS[s.state] .. value .. "|r" end
+        AddPair(T("sup_" .. s.key), value)
+    end
+    local ay, ar = SupplyLimits("ammo")
+    local ry, rr = SupplyLimits("reagent")
+    local kind = list[1].kind
+    AddPair(T("tt_supply_limits"), kind == "ammo" and (ay .. " / " .. ar) or (ry .. " / " .. rr))
+    GameTooltip:AddLine(T("tt_supply_hint"), 0.6, 0.6, 0.6)
+end
+
 TIP.junk = function()
     local junk = Safe(GetJunk)
     if not junk then AddPair(T("tt_junk"), "--") return end
@@ -2431,7 +2578,7 @@ end
 local TIP_SECTIONS = {
     fps = { "perf" }, ms = { "perf" }, mem = { "perf" },
     coords = { "place" }, zone = { "place" }, speed = { "place" },
-    durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" },
+    durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
     xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" },
     clock = { "clock" }, reset = { "reset" }, playtime = { "playtime" },
@@ -2441,8 +2588,8 @@ ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
 local TIP_ORDER = { "perf", "place", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
-                    "rep", "junk", "prof", "reset", "playtime", "social" }
-local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", prof = "prof", reset = "reset" }
+                    "rep", "junk", "supply", "prof", "reset", "playtime", "social" }
+local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -2942,6 +3089,16 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         FarolCharDB = ns.Loot.SanitizeHistory(savedChar) -- histórico de saques deste personagem
         FarolCharDB.warnHistory = ns.Warnings.SanitizeHistory(type(savedChar) == "table" and savedChar.warnHistory or nil)
         FarolCharDB.lastSession = SanitizeSummary(type(savedChar) == "table" and savedChar.lastSession or nil)
+        -- Reagentes que este personagem já teve (só chaves conhecidas, só "true").
+        local seenSaved, seen = type(savedChar) == "table" and savedChar.supplySeen, {}
+        if type(seenSaved) == "table" then
+            for _, groups in pairs(SUPPLIES) do
+                for _, group in ipairs(groups) do
+                    if seenSaved[group.key] == true then seen[group.key] = true end
+                end
+            end
+        end
+        FarolCharDB.supplySeen = seen
         ApplyPosition()
         UpdateGrip()
         ApplyAppearance()

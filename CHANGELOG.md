@@ -2,6 +2,13 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.27.0 — Ammo and reagents
+- New bar item **Ammo & reagents** (off by default): what your class uses (hunter ammo, soul shards, arcane powder and
+  runes, candles, symbols, seeds, ankhs, rogue powders), yellow/red by the limits **you choose** in the Warnings window
+  (`/farol warn ammo 400 200`, `/farol warn reagents 10 5`).
+- Optional warnings (off by default) below red: once, wait for combat, again after restocking.
+- A reagent is tracked only after the character has had one. Farol only counts — it never buys, uses or moves items.
+
 ## 2.26.0 — Smaller tooltip
 - Each bar item now has its own short tooltip with only its details (e.g. gold: gold, gold/h, your characters,
   their rested XP and lockouts). Hold **Shift**, or hover the edge of the bar, for the full tooltip.

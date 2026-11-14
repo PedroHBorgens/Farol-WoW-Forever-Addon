@@ -14,7 +14,7 @@
 > **Most features start turned off** — right-click the bar (or `/farol menu`) to choose what you want. Hover each item to see what it shows. After an update, Farol lists what is new in your chat, once.
 
 ### Info bar — pick what you see
-FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · **Junk value (gray items)** · Gold (**+ total and rested XP of all your characters**) · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · **Reputation (standing, progress, rep/hour)** · **Professions (level / training limit)** · Clock (local or server) · **Daily & weekly reset countdown + saved instances (raid lockouts)** · Session time · Friends online · Guild online
+FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · **Junk value (gray items)** · **Ammo & reagents (your limits)** · Gold (**+ total and rested XP of all your characters**) · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · **Reputation (standing, progress, rep/hour)** · **Professions (level / training limit)** · Clock (local or server) · **Daily & weekly reset countdown + saved instances (raid lockouts)** · Session time · Friends online · Guild online
 
 - **Right-click** the bar (or `/farol menu`) to tick the items you want, and **choose their order** with [▲]/[▼] arrows.
 - **Hover** an item for its own short tooltip (gold, durability, resets…); hold **Shift** to see everything: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
@@ -31,6 +31,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - Configurable limits and sound; never repeats while the number flickers.
 - **Unspent talent points** and **lower-rank spells on your action bars** (never changes your bars for you).
 - **Profession at its training limit**: "find a trainer to keep leveling" (once per limit).
+- **Ammo and reagents running low**, with the yellow/red limits you choose (off by default; Farol never buys anything).
 - Each warning lets you **Silence** it or get a **reminder in 2, 5, 10, 15 or 30 minutes** (your choice). Several warnings at once appear together in one window.
 - Optional **break** and **drink water** reminders (off by default): you choose how often (15–240 min) and whether they can show during fights, raids and dungeons.
 - **History of the last 10 warnings**: button next to the bar (with unread counter), key binding or `/farol history`.
@@ -65,7 +66,7 @@ English and Brazilian Portuguese (follows your client, or `/farol lang en|pt`).
 > **A maioria das funções começa desligada** — clique com o botão direito na barra (ou `/farol menu`) para escolher o que quiser. Passe o mouse em cada item para ver o que ele mostra. Depois de uma atualização, o Farol lista as novidades no seu chat, uma vez.
 
 ### Barra de informações — você escolhe o que aparece
-FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · **Valor do lixo (itens cinzentos)** · Ouro (**+ total e descanso de todos os seus personagens**) · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · **Reputação (nível, progresso, rep/hora)** · **Profissões (nível / limite do treinamento)** · Horário (local ou do servidor) · **Contagem até o reset diário e semanal + instâncias salvas (bloqueios de raide)** · Tempo de sessão · Amigos online · Guilda online
+FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · **Valor do lixo (itens cinzentos)** · **Munição e reagentes (seus limites)** · Ouro (**+ total e descanso de todos os seus personagens**) · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · **Reputação (nível, progresso, rep/hora)** · **Profissões (nível / limite do treinamento)** · Horário (local ou do servidor) · **Contagem até o reset diário e semanal + instâncias salvas (bloqueios de raide)** · Tempo de sessão · Amigos online · Guilda online
 
 - **Clique direito** na barra (ou `/farol menu`), marque os itens que quiser e **escolha a ordem** com as setas [▲]/[▼].
 - **Passe o mouse** num item para ver um tooltip curto só dele (ouro, durabilidade, resets…); segure **Shift** para ver tudo: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.
@@ -82,6 +83,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 - Limites e som configuráveis; não fica repetindo quando o número oscila.
 - **Pontos de talento não gastos** e **magias de grau antigo na barra de ações** (nunca mexe nas suas barras).
 - **Profissão no máximo do treinamento**: "procure um instrutor para continuar subindo" (uma vez por limite).
+- **Munição e reagentes acabando**, com os limites amarelo/vermelho que você escolhe (desligado por padrão; o Farol nunca compra nada).
 - Cada aviso deixa você **Silenciar** ou ser **lembrado em 2, 5, 10, 15 ou 30 minutos** (você escolhe). Vários avisos ao mesmo tempo aparecem juntos numa janela só.
 - Lembretes opcionais de **pausa** e de **beber água** (desligados por padrão): você escolhe de quanto em quanto tempo (15–240 min) e se podem aparecer em lutas, raides e masmorras.
 - **Histórico dos 10 últimos avisos**: botão ao lado da barra (com contador de novos), atalho de teclado ou `/farol historico`.

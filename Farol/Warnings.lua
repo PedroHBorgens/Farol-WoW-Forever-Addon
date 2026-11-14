@@ -34,6 +34,8 @@ local DEFAULTS = {
     durab = true, durabPct = 20, bags = true, bagSlots = 2, sound = true, talents = true, ranks = true,
     prof = true,                                             -- profissão no máximo do treinamento
     restFull = false,                                        -- outro personagem com descanso cheio (ao entrar)
+    ammo = false, ammoYellow = 400, ammoRed = 200,           -- munição: aviso (desligado) e limites das cores
+    reag = false, reagYellow = 10, reagRed = 5,              -- reagentes: aviso (desligado) e limites das cores
     remindMin = 30,                                          -- tempo padrão do "Lembrar em"
     pause = false, pauseMin = 120, pauseAnywhere = false,    -- lembrete de pausa (desligado por padrão)
     water = false, waterMin = 45, waterAnywhere = false,     -- lembrete de beber água (desligado por padrão)
@@ -87,6 +89,17 @@ local STRINGS = {
         warn_prof       = "%s no máximo do treinamento — procure um instrutor para continuar subindo.",
         warn_bags_junk  = " Há %d espaço(s) com lixo (%s) para vender.",
         warn_restFull   = "Descanso cheio (150%%): %s — bom momento para jogar com eles.",
+        warn_supply     = "%s acabando — reabasteça antes de sair da cidade.",
+        supply_status   = "munição/reagentes: %s.",
+        supply_status_none = "munição/reagentes: nada para a sua classe (ou ainda não encontrado nas bolsas).",
+        warn_opt_ammo   = "Avisar quando a munição acabar",
+        warn_opt_reag   = "Avisar quando os reagentes acabarem",
+        warn_yellow     = "amarelo abaixo de",
+        warn_red        = "vermelho abaixo de",
+        warn_name_ammo  = "munição",
+        warn_name_reag  = "reagentes",
+        warn_set_supply = "%s: amarelo abaixo de %d, vermelho abaixo de %d.",
+        warn_bad_supply = "valores inválidos: use amarelo e vermelho de 0 a %d, com o vermelho menor que o amarelo.",
         warn_opt_restFull = "Avisar ao entrar se outro personagem estiver com o descanso cheio",
         warn_name_restFull = "descanso cheio",
         warn_opt_prof   = "Avisar quando uma profissão chegar ao máximo do treinamento",
@@ -127,7 +140,7 @@ local STRINGS = {
         warn_name_sound = "som",
         warn_bad_durab  = "valor inválido: use de 5 a 50 (%).",
         warn_bad_bags   = "valor inválido: use de 0 a 10 espaços.",
-        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || durab/bolsas/talentos/graus/profissoes/descansado/pausa/agua/som on||off || pausa/agua lutas on||off || lembrar N || status || silenciar",
+        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || durab/bolsas/talentos/graus/profissoes/descansado/municao/reagentes/pausa/agua/som on||off || municao A V || reagentes A V || pausa/agua lutas on||off || lembrar N || status || silenciar",
         opt_warnings    = "Avisos...",
         help_warn       = "  /farol aviso         - abrir a janela de avisos (durabilidade, bolsas, talentos, graus, profissões, pausa, água)",
     },
@@ -169,6 +182,17 @@ local STRINGS = {
         warn_prof       = "%s at the training limit — find a trainer to keep leveling.",
         warn_bags_junk  = " %d slot(s) hold junk (%s) you can sell.",
         warn_restFull   = "Rested XP full (150%%): %s — a good time to play them.",
+        warn_supply     = "%s running low — restock before leaving town.",
+        supply_status   = "ammo/reagents: %s.",
+        supply_status_none = "ammo/reagents: nothing for your class (or not found in your bags yet).",
+        warn_opt_ammo   = "Warn when ammo runs low",
+        warn_opt_reag   = "Warn when reagents run low",
+        warn_yellow     = "yellow below",
+        warn_red        = "red below",
+        warn_name_ammo  = "ammo",
+        warn_name_reag  = "reagents",
+        warn_set_supply = "%s: yellow below %d, red below %d.",
+        warn_bad_supply = "invalid values: use yellow and red from 0 to %d, with red lower than yellow.",
         warn_opt_restFull = "Warn at login if another character has full rested XP",
         warn_name_restFull = "full rested XP",
         warn_opt_prof   = "Warn when a profession reaches its training limit",
@@ -209,7 +233,7 @@ local STRINGS = {
         warn_name_sound = "sound",
         warn_bad_durab  = "invalid value: use 5 to 50 (%).",
         warn_bad_bags   = "invalid value: use 0 to 10 slots.",
-        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || durab/bags/talents/ranks/professions/rested/break/water/sound on||off || break/water fights on||off || remind N || status || silence",
+        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || durab/bags/talents/ranks/professions/rested/ammo/reagents/break/water/sound on||off || ammo Y R || reagents Y R || break/water fights on||off || remind N || status || silence",
         opt_warnings    = "Warnings...",
         help_warn       = "  /farol warn          - open the warnings window (durability, bags, talents, ranks, professions, break, water)",
     },
@@ -237,7 +261,7 @@ end
 function Warnings.Sanitize(saved)
     local clean = {}
     if type(saved) ~= "table" then saved = {} end
-    for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "restFull", "pause", "pauseAnywhere",
+    for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "restFull", "ammo", "reag", "pause", "pauseAnywhere",
                            "water", "waterAnywhere" }) do
         if type(saved[key]) == "boolean" then clean[key] = saved[key] else clean[key] = DEFAULTS[key] end
     end
@@ -245,6 +269,15 @@ function Warnings.Sanitize(saved)
     clean.bagSlots = InRange(saved.bagSlots, BAGS_MIN, BAGS_MAX) or DEFAULTS.bagSlots
     clean.pauseMin = InRange(saved.pauseMin, BREAK_MIN, BREAK_MAX) or DEFAULTS.pauseMin
     clean.waterMin = InRange(saved.waterMin, BREAK_MIN, BREAK_MAX) or DEFAULTS.waterMin
+    -- Limites de munição (0 a 5000) e reagentes (0 a 200): vermelho menor que amarelo (0 no amarelo = sem amarelo).
+    for _, pair in ipairs({ { "ammo", 5000 }, { "reag", 200 } }) do
+        local y = InRange(saved[pair[1] .. "Yellow"], 0, pair[2])
+        local r = InRange(saved[pair[1] .. "Red"], 0, pair[2])
+        if not y or not r or (y > 0 and r >= y) then
+            y, r = DEFAULTS[pair[1] .. "Yellow"], DEFAULTS[pair[1] .. "Red"]
+        end
+        clean[pair[1] .. "Yellow"], clean[pair[1] .. "Red"] = y, r
+    end
     clean.remindMin = DEFAULTS.remindMin
     for _, minutes in ipairs(REMIND_CHOICES) do
         if saved.remindMin == minutes then clean.remindMin = minutes end
@@ -264,6 +297,7 @@ local state = {
     ranks = { warned = {}, dirty = true, lastScan = nil }, -- magias já avisadas; "dirty" = algo mudou
     prof = { warned = {} },                             -- limites já avisados ("Mineração@150")
     restFull = { checked = false },                     -- descanso cheio: confere uma vez por sessão
+    supply = { warned = {} },                           -- munição/reagentes já avisados (por grupo)
     pause = { nextAt = nil, silenced = false },         -- lembretes por tempo: próxima vez (GetTime)
     water = { nextAt = nil, silenced = false },
 }
@@ -914,6 +948,35 @@ local function CheckProfessions(now)
 end
 
 ---------------------------------------------------------------------------
+-- Munição e reagentes abaixo do vermelho (contagem feita pelo Core; o Farol nunca compra nada).
+-- Avisa uma vez por grupo; avisa de novo depois que você reabastecer e o número cair outra vez.
+---------------------------------------------------------------------------
+
+local function CheckSupplies(now)
+    local settings = Settings()
+    if not (settings.ammo or settings.reag) or not ns.GetSupplies then return end
+    local list = ns.GetSupplies()
+    if not list then return end
+    local entry = state.supply
+    local out, fresh, warned = {}, {}, {}
+    for _, s in ipairs(list) do
+        local enabled = (s.kind == "ammo" and settings.ammo) or (s.kind ~= "ammo" and settings.reag)
+        if enabled and s.state == "out" then
+            out[#out + 1] = s
+            warned[s.key] = true
+            if not entry.warned[s.key] then fresh[#fresh + 1] = s end
+        end
+    end
+    entry.warned = warned -- reabasteceu: sai da lista e pode avisar de novo no futuro
+    if #out == 0 then entry.remindAt = nil return end
+    if ReminderDue(entry, now) then entry.remindAt = nil; fresh = out end
+    if #fresh == 0 then return end
+    local parts = {}
+    for i, s in ipairs(fresh) do parts[i] = T("sup_" .. s.key) .. ": " .. s.count end
+    Announce(string.format(T("warn_supply"), table.concat(parts, ", ")), "supply")
+end
+
+---------------------------------------------------------------------------
 -- Outro personagem com o descanso cheio (estimativa feita pelo Core). Confere uma vez por sessão.
 ---------------------------------------------------------------------------
 
@@ -999,6 +1062,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         pcall(CheckRanks, now)
         pcall(CheckProfessions, now)
         pcall(CheckRestFull, now)
+        pcall(CheckSupplies, now)
     end
 end)
 
@@ -1014,6 +1078,7 @@ local function SetEnabled(key, value)
     elseif key == "ranks" then state.ranks.warned = {}; state.ranks.dirty = true
     elseif key == "prof" then state.prof.warned = {}; state.prof.remindAt = nil
     elseif key == "restFull" then state.restFull.checked = false; state.restFull.remindAt = nil
+    elseif key == "ammo" or key == "reag" then state.supply.warned = {}; state.supply.remindAt = nil
     elseif IsBreak(key) then -- recomeça a contagem agora
         state[key].nextAt = value and GetTime() + Settings()[key .. "Min"] * 60 or nil
         state[key].silenced = false
@@ -1045,6 +1110,19 @@ local function SetBreakMinutes(key, value)
     Settings()[key .. "Min"] = minutes
     state[key].nextAt = GetTime() + minutes * 60 -- a contagem recomeça agora
     Print(string.format(T("warn_set_break"), T("warn_name_" .. key), minutes))
+    if RefreshWindow then RefreshWindow() end
+    return true
+end
+
+-- Limites de munição/reagentes: amarelo e vermelho (vermelho menor que o amarelo; 0 no amarelo = sem amarelo).
+local function SetSupplyLimits(kind, yellow, red)
+    local max = kind == "ammo" and 5000 or 200
+    local y, r = InRange(yellow, 0, max), InRange(red, 0, max)
+    if not y or not r or (y > 0 and r >= y) then Print(string.format(T("warn_bad_supply"), max)) return false end
+    Settings()[kind .. "Yellow"], Settings()[kind .. "Red"] = y, r
+    state.supply.warned = {}
+    Print(string.format(T("warn_set_supply"), T("warn_name_" .. kind), y, r))
+    if ns.UpdateText then ns.UpdateText() end
     if RefreshWindow then RefreshWindow() end
     return true
 end
@@ -1099,7 +1177,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolWarnings", UIParent, ns.backdropTemplate)
-    frame:SetSize(500, 470)
+    frame:SetSize(500, 582)
     frame:SetPoint("CENTER", 0, 60)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -1149,8 +1227,24 @@ local function CreateWindow()
     frame.prof = Check("FarolWarnProf", -170, "prof")
     frame.restFull = Check("FarolWarnRestFull", -200, "restFull")
 
-    -- Lembretes de pausa e de água: liga/desliga, intervalo em minutos e "também em lutas...".
+    -- Munição e reagentes: liga/desliga e, na linha de baixo, os limites amarelo e vermelho.
     local y = -230
+    for _, kind in ipairs({ "ammo", "reag" }) do
+        local cap = kind == "ammo" and "Ammo" or "Reag"
+        frame[kind] = Check("FarolWarn" .. cap, y, kind)
+        local yl = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        yl:SetPoint("TOPLEFT", 48, y - 30)
+        frame[kind .. "YellowLabel"] = yl
+        local function save() -- lê as duas caixas e grava juntas
+            return SetSupplyLimits(kind, frame[kind .. "YellowBox"]:GetText(), frame[kind .. "RedBox"]:GetText())
+        end
+        frame[kind .. "YellowBox"] = NumberBox(frame, "FarolWarn" .. cap .. "Yellow", yl, save, 4)
+        local rl = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        rl:SetPoint("LEFT", frame[kind .. "YellowBox"], "RIGHT", 14, 0)
+        frame[kind .. "RedLabel"] = rl
+        frame[kind .. "RedBox"] = NumberBox(frame, "FarolWarn" .. cap .. "Red", rl, save, 4)
+        y = y - 56
+    end
     for _, key in ipairs(BREAK_KEYS) do
         local cap = key == "pause" and "Pause" or "Water"
         local check = Check("FarolWarn" .. cap, y, key)
@@ -1214,6 +1308,14 @@ RefreshWindow = function()
     window.prof:SetChecked(settings.prof)
     window.restFull.label:SetText(T("warn_opt_restFull"))
     window.restFull:SetChecked(settings.restFull)
+    for _, kind in ipairs({ "ammo", "reag" }) do
+        window[kind].label:SetText(T("warn_opt_" .. kind))
+        window[kind]:SetChecked(settings[kind])
+        window[kind .. "YellowLabel"]:SetText(T("warn_yellow"))
+        window[kind .. "RedLabel"]:SetText(T("warn_red"))
+        if not window[kind .. "YellowBox"]:HasFocus() then window[kind .. "YellowBox"]:SetText(tostring(settings[kind .. "Yellow"])) end
+        if not window[kind .. "RedBox"]:HasFocus() then window[kind .. "RedBox"]:SetText(tostring(settings[kind .. "Red"])) end
+    end
     window.sound.label:SetText(T("warn_opt_sound"))
     window.sound:SetChecked(settings.sound)
     for _, key in ipairs(BREAK_KEYS) do
@@ -1340,6 +1442,8 @@ local KEYS = {
     graus = "ranks", grau = "ranks", ranks = "ranks", rank = "ranks",
     profissoes = "prof", profissao = "prof", prof = "prof", professions = "prof", profession = "prof",
     descansado = "restFull", xpdescansado = "restFull", rested = "restFull", restedxp = "restFull", -- "descanso" = pausa
+    municao = "ammo", ammo = "ammo", flechas = "ammo", balas = "ammo",
+    reagentes = "reag", reagente = "reag", reagents = "reag", reagent = "reag",
     pausa = "pause", pause = "pause", ["break"] = "pause", descanso = "pause",
     agua = "water", water = "water", hidratacao = "water", hydrate = "water",
 }
@@ -1377,6 +1481,16 @@ local function PrintStatus()
     local okJunk, junk, junkSource = pcall(ns.GetJunk)
     if okJunk and junk then
         Print(string.format(T("junk_status"), PlainMoney(junk.total), junk.slots, tostring(junkSource or "--")))
+    end
+    if ns.GetSupplies then
+        local okSup, list = pcall(ns.GetSupplies)
+        if okSup and list and #list > 0 then
+            local parts = {}
+            for i, sup in ipairs(list) do parts[i] = T("sup_" .. sup.key) .. " " .. sup.count end
+            Print(string.format(T("supply_status"), table.concat(parts, ", ")))
+        else
+            Print(T("supply_status_none"))
+        end
     end
     if ns.ReadLockouts then
         local okLocks, locks = pcall(ns.ReadLockouts)
@@ -1434,6 +1548,8 @@ function Warnings.HandleCommand(rest)
         SetDurabPct(value)
     elseif key == "bags" and value ~= "" then
         SetBagSlots(value)
+    elseif (key == "ammo" or key == "reag") and value ~= "" then
+        SetSupplyLimits(key, value, extra)              -- /farol aviso municao 400 200
     elseif IsBreak(key) and FIGHTS[value] and (ON[extra] or OFF[extra]) then
         SetAnywhere(key, ON[extra] and true or false)  -- /farol aviso pausa lutas on
     elseif IsBreak(key) and value ~= "" then

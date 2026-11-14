@@ -2,6 +2,9 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.24.1
+- The list of news after an update shows one item per line (easier to read).
+
 ## 2.24.0 — Getting started
 - First time: a welcome in your chat explains that the bar starts with the basics and how to turn on the rest
   (right-click the bar). After an update: the news since your version are listed once. `/farol news` shows them again.

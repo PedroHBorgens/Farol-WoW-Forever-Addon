@@ -161,6 +161,17 @@ local STRINGS = {
         tt_gold_total = "Ouro na conta (%s)",
         tt_gold_this = "este",
         tt_rest_title = "Descanso dos seus personagens (estimativa)",
+        tt_locks     = "Instâncias salvas",
+        tt_locks_none = "nenhuma",
+        tt_locks_wait = "carregando...",
+        tt_locks_bosses = "%d/%d chefes",
+        tt_locks_reset = "reset em %s",
+        tt_locks_alts = "Instâncias salvas dos seus personagens",
+        locks_title  = "instâncias salvas deste personagem:",
+        locks_none   = "este personagem não está salvo em nenhuma instância.",
+        locks_alts   = "outros personagens deste reino:",
+        locks_status = "instâncias salvas: %d (função: %s).",
+        help_locks   = "  /farol instancias    - instâncias salvas (bloqueios de raide) deste e dos outros personagens",
         tt_rest_full = "cheio",
         tt_rest_eta  = "cheio em ~%s",
         tt_rest_inn  = "estalagem/cidade",
@@ -281,6 +292,7 @@ local STRINGS = {
         news_junk    = "valor do lixo nas bolsas",
         news_alts    = "ouro de todos os personagens (/farol ouro)",
         news_rested  = "descanso dos seus personagens",
+        news_locks   = "instâncias salvas (/farol instancias)",
         help_news    = "  /farol novidades     - ver de novo as novidades das últimas versões",
         desc_fps      = "Quadros por segundo (verde 50+, amarelo 25+).",
         desc_ms       = "Latência: a maior entre local e mundo.",
@@ -376,6 +388,17 @@ local STRINGS = {
         tt_gold_total = "Gold on this account (%s)",
         tt_gold_this = "this one",
         tt_rest_title = "Rested XP of your characters (estimate)",
+        tt_locks     = "Saved instances",
+        tt_locks_none = "none",
+        tt_locks_wait = "loading...",
+        tt_locks_bosses = "%d/%d bosses",
+        tt_locks_reset = "reset in %s",
+        tt_locks_alts = "Saved instances of your characters",
+        locks_title  = "saved instances of this character:",
+        locks_none   = "this character is not saved to any instance.",
+        locks_alts   = "other characters on this realm:",
+        locks_status = "saved instances: %d (function: %s).",
+        help_locks   = "  /farol lockouts      - saved instances (raid lockouts) of this and your other characters",
         tt_rest_full = "full",
         tt_rest_eta  = "full in ~%s",
         tt_rest_inn  = "inn/city",
@@ -496,6 +519,7 @@ local STRINGS = {
         news_junk    = "junk value in bags",
         news_alts    = "gold of all your characters (/farol gold)",
         news_rested  = "rested XP of your characters",
+        news_locks   = "saved instances (/farol lockouts)",
         help_news    = "  /farol news          - show the news of the latest versions again",
         desc_fps      = "Frames per second (green 50+, yellow 25+).",
         desc_ms       = "Latency: the higher of home and world.",
@@ -1006,6 +1030,24 @@ local function SanitizeChars(saved)
                             entry.rest, entry.max = math.floor(rest), math.floor(max)
                             entry.inn = info.inn == true
                         end
+                        -- Instâncias salvas (opcional): nome, chefes mortos/total e quando o bloqueio acaba.
+                        if type(info.locks) == "table" then
+                            local locks = {}
+                            for _, lock in ipairs(info.locks) do
+                                if #locks >= 20 then break end
+                                if type(lock) == "table" and type(lock.n) == "string" and #lock.n >= 1 and #lock.n <= 64
+                                        and not string.find(lock.n, "[|%c]")
+                                        and type(lock.r) == "number" and lock.r == lock.r and lock.r > 0 and lock.r < 4102444800 then
+                                    local k, b = lock.k, lock.b
+                                    if type(k) ~= "number" or k ~= k or k < 0 or k > 50 then k = nil end
+                                    if type(b) ~= "number" or b ~= b or b < 1 or b > 50 then b = nil end
+                                    if k and b and k > b then k = b end
+                                    locks[#locks + 1] = { n = lock.n, r = math.floor(lock.r),
+                                                          k = k and math.floor(k) or nil, b = b and math.floor(b) or nil }
+                                end
+                            end
+                            if #locks > 0 then entry.locks = locks end
+                        end
                         list[name] = entry
                         count = count + 1
                     end
@@ -1060,6 +1102,62 @@ local function CurrentRest()
     return math.floor(rest), math.floor(max), inn
 end
 
+---------------------------------------------------------------------------
+-- Instâncias salvas (bloqueios de raide/masmorra). SÓ LÊ a lista oficial do jogo.
+-- O jogo só atualiza a lista depois de pedir ao servidor (RequestRaidInfo, a mesma consulta da janela de Raide):
+-- pedimos uma vez ao entrar e, depois, no máximo uma vez por minuto (tooltip/comando).
+---------------------------------------------------------------------------
+
+local LOCK_REQUEST_INTERVAL = 60
+local lastLockRequest
+local locksLoaded = false     -- já chegou a resposta do servidor (UPDATE_INSTANCE_INFO)?
+
+local function RequestLockouts(force)
+    if not RequestRaidInfo then return end
+    local now = GetTime()
+    if not force and lastLockRequest and now - lastLockRequest < LOCK_REQUEST_INTERVAL then return end
+    lastLockRequest = now
+    pcall(RequestRaidInfo)
+end
+
+-- Lista do personagem atual: { name, killed, total, reset (segundos) }, só bloqueios ativos. nil se a API não existe.
+local function ReadLockouts()
+    if not GetNumSavedInstances or not GetSavedInstanceInfo then return nil end
+    local ok, count = pcall(GetNumSavedInstances)
+    if not ok or type(count) ~= "number" or count ~= count or count < 0 then return nil end
+    local list = {}
+    for i = 1, math.min(math.floor(count), 50) do
+        local okInfo, name, _, reset, _, locked, _, _, _, _, _, total, killed = pcall(GetSavedInstanceInfo, i)
+        if okInfo and type(name) == "string" and not IsSecret(name) and #name >= 1 and #name <= 64
+                and not string.find(name, "[|%c]") and locked
+                and type(reset) == "number" and not IsSecret(reset) and reset == reset and reset > 0 and reset < 30 * 86400 then
+            if type(total) ~= "number" or total ~= total or total < 1 or total > 50 then total = nil end
+            if type(killed) ~= "number" or killed ~= killed or killed < 0 or killed > 50 or not total then killed = nil end
+            if killed and killed > total then killed = total end
+            list[#list + 1] = { name = name, reset = math.floor(reset),
+                                total = total and math.floor(total), killed = killed and math.floor(killed) }
+        end
+    end
+    table.sort(list, function(a, b)
+        if a.reset ~= b.reset then return a.reset < b.reset end
+        return a.name < b.name
+    end)
+    return list
+end
+
+ns.ReadLockouts = ReadLockouts -- usado por /farol aviso status
+
+-- Formato para guardar: data do fim do bloqueio (não "segundos a partir de agora").
+local function LocksToSave(list)
+    if not list or #list == 0 then return nil end
+    local saved, now = {}, time()
+    for i = 1, math.min(20, #list) do
+        local l = list[i]
+        saved[i] = { n = l.name, k = l.killed, b = l.total, r = now + l.reset }
+    end
+    return saved
+end
+
 -- Registra o ouro e o nível do personagem atual (force = ao sair: grava também o descanso atual).
 local function RecordCharacter(force)
     if not db or type(db.chars) ~= "table" then return end
@@ -1087,7 +1185,11 @@ local function RecordCharacter(force)
     local rest, max, inn = CurrentRest()
     if not force and entry and entry.gold == gold and entry.level == level and entry.rest == rest
             and entry.inn == inn and time() - entry.t < 60 then return end
-    chars[name] = { gold = gold, level = level, t = time(), rest = rest, max = max, inn = rest and inn or nil }
+    -- Instâncias salvas: atualizadas só quando a resposta do servidor já chegou; senão, mantém as anteriores.
+    local locks = entry and entry.locks
+    if locksLoaded then locks = LocksToSave(ReadLockouts()) end
+    chars[name] = { gold = gold, level = level, t = time(), rest = rest, max = max, inn = rest and inn or nil,
+                    locks = locks }
 end
 
 -- Estimativa do descanso de um personagem deslogado, pelas regras do estilo clássico: em estalagem/cidade ganha
@@ -1123,6 +1225,27 @@ local function RestedAlts()
     return list
 end
 ns.RestedAlts = RestedAlts -- usado pelo aviso de "descanso cheio"
+
+-- Outros personagens do reino com instâncias ainda salvas (bloqueios vencidos somem sozinhos).
+local function AltLockouts()
+    local name, realm = CurrentCharacter()
+    if not name or not db or type(db.chars) ~= "table" then return nil end
+    local list, now = {}, time()
+    for charName, info in pairs(db.chars[realm] or {}) do
+        if charName ~= name and info.locks then
+            local names = {}
+            for _, lock in ipairs(info.locks) do
+                if lock.r > now then names[#names + 1] = lock.n end
+            end
+            if #names > 0 then
+                table.sort(names)
+                list[#list + 1] = { name = charName, level = info.level, locks = names }
+            end
+        end
+    end
+    table.sort(list, function(a, b) return a.name < b.name end)
+    return list
+end
 
 -- Personagens do reino atual, do mais rico para o mais pobre, e o total. O atual vem marcado (current = true).
 local function RealmCharacters()
@@ -1671,7 +1794,7 @@ end
 
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
-               "news_prof", "news_junk", "news_alts", "news_rested" }
+               "news_prof", "news_junk", "news_alts", "news_rested", "news_locks" }
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
 
@@ -2116,6 +2239,15 @@ local function FillTooltip()
                 FormatMoneyShort(c.gold) .. "  |cff8c8c8c" .. when .. "|r", 0.8, 0.8, 0.8, 1, 1, 1)
         end
     end
+    local altLocks = Safe(AltLockouts)
+    if altLocks and #altLocks > 0 then
+        GameTooltip:AddLine(T("tt_locks_alts"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
+        for i = 1, math.min(10, #altLocks) do
+            local a = altLocks[i]
+            GameTooltip:AddLine("   " .. FactionName(a.name) .. " (" .. a.level .. "): " .. table.concat(a.locks, ", "),
+                0.8, 0.8, 0.8, true)
+        end
+    end
     local rested = Safe(RestedAlts)
     if rested and #rested > 0 then
         GameTooltip:AddLine(T("tt_rest_title"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
@@ -2225,6 +2357,21 @@ local function FillTooltip()
                 AddPair(T(entry[1]), string.format(T("tt_reset_at"), FormatCountdown(entry[2]), localText, serverText))
             else
                 AddPair(T(entry[1]), T("tt_reset_none"))
+            end
+        end
+        RequestLockouts(false) -- no máximo uma vez por minuto
+        local locks = Safe(ReadLockouts)
+        if locks then
+            if #locks == 0 then
+                AddPair(T("tt_locks"), locksLoaded and T("tt_locks_none") or T("tt_locks_wait"))
+            else
+                GameTooltip:AddLine(T("tt_locks"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
+                for i = 1, math.min(10, #locks) do
+                    local l = locks[i]
+                    local value = string.format(T("tt_locks_reset"), FormatCountdown(l.reset))
+                    if l.killed then value = string.format(T("tt_locks_bosses"), l.killed, l.total) .. "  " .. value end
+                    GameTooltip:AddDoubleLine("   " .. l.name, value, 0.8, 0.8, 0.8, 1, 1, 1)
+                end
             end
         end
     end
@@ -2679,6 +2826,7 @@ frame:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 frame:RegisterEvent("PLAYER_XP_UPDATE")
 frame:RegisterEvent("UPDATE_FACTION")
+pcall(frame.RegisterEvent, frame, "UPDATE_INSTANCE_INFO") -- resposta do RequestRaidInfo
 frame:RegisterEvent("PLAYER_REGEN_DISABLED") -- entrou em combate
 frame:RegisterEvent("PLAYER_REGEN_ENABLED")  -- saiu do combate
 
@@ -2725,6 +2873,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
     if event == "PLAYER_ENTERING_WORLD" then
         pcall(ShowLastSummary, arg1, arg2) -- antes de StartSession: o registro é da sessão anterior
         pcall(ShowOnboarding)
+        RequestLockouts(arg1 == true) -- login: pede já; troca de zona (ou cliente antigo): no máximo 1x por minuto
         StartSession()
         pcall(RecordCharacter)
         ResetMapToCurrentZone()
@@ -2738,6 +2887,9 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
     elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
         inCombat = (event == "PLAYER_REGEN_DISABLED")
         ApplyVisibility()
+    elseif event == "UPDATE_INSTANCE_INFO" then
+        locksLoaded = true
+        pcall(RecordCharacter, true)
     elseif event == "UPDATE_FACTION" then
         pcall(SampleRep)
     elseif event == "PLAYER_XP_UPDATE" then
@@ -2755,7 +2907,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_news", "help_warn", "help_history", "help_appearance", "help_order",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -2823,6 +2975,26 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Warnings.ToggleHistory()
     elseif cmd == "aviso" or cmd == "avisos" or cmd == "warn" or cmd == "warning" or cmd == "warnings" then
         ns.Warnings.HandleCommand(rest)
+    elseif cmd == "instancias" or cmd == "instancia" or cmd == "lockouts" or cmd == "lockout" or cmd == "raides" then
+        RequestLockouts(false)
+        local locks = ReadLockouts() or {}
+        if #locks == 0 then
+            Print(T("locks_none"))
+        else
+            Print(T("locks_title"))
+            for _, l in ipairs(locks) do
+                local value = string.format(T("tt_locks_reset"), FormatCountdown(l.reset))
+                if l.killed then value = string.format(T("tt_locks_bosses"), l.killed, l.total) .. " · " .. value end
+                Print("  " .. l.name .. " — " .. value)
+            end
+        end
+        local alts = AltLockouts()
+        if alts and #alts > 0 then
+            Print(T("locks_alts"))
+            for _, a in ipairs(alts) do
+                Print("  " .. FactionName(a.name) .. " (" .. a.level .. "): " .. table.concat(a.locks, ", "))
+            end
+        end
     elseif cmd == "novidades" or cmd == "news" then
         ShowNews(0)
     elseif cmd == "ouro" or cmd == "gold" then

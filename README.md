@@ -36,6 +36,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol loot clear` | Clear this character's loot history |
 | `/farol session reset`| Restart session gold, gold/h, XP/h, rep/h and time |
 | `/farol news`       | Show again what is new in the latest versions |
+| `/farol lockouts`   | Saved instances (raid lockouts) of this and your other characters |
 | `/farol summary`    | Summary of the current session (gold, XP, reputation, loot, warnings) |
 | `/farol gold`       | Gold of all your characters on this realm |
 | `/farol gold total on` / `off` | Show / hide the realm total next to your gold on the bar |
@@ -294,6 +295,10 @@ tooltip lists all of them, including cooking, fishing and first aid, with the po
 
 **Resets:** counts down to the **daily** and **weekly** reset, using the time the game itself reports. The tooltip
 shows when each one happens in local and server time. Older clients only report the daily reset.
+The tooltip also lists your **saved instances** (raid/dungeon lockouts) — e.g. `Molten Core 7/10 bosses, reset in
+2d 4h` — and the gold tooltip shows where your **other characters** are saved (saved when you log out; expired
+lockouts disappear by themselves). `/farol lockouts` lists everything in your chat. To get the list, Farol asks the
+server once at login and at most once a minute after that (the same request as the game's own Raid window).
 
 **Tooltip:** hover the panel to see every detail at once — home/world latency, subzone, each damaged
 item, exact XP and rested, reputation progress, when the daily/weekly reset happens, local *and* server time,
@@ -379,7 +384,7 @@ This addon follows Blizzard's [UI Add-On Development Policy](https://us.forums.b
 | Must be free | ✅ Free, MIT license — no paid version, no paid features |
 | Code must be visible (no obfuscation) | ✅ Plain, commented Lua in the `Farol` folder |
 | No ads or donation requests | ✅ None, in game or in this repository |
-| Must not hurt realm performance | ✅ Only server request is the guild roster, at most once a minute and only if the Guild item is on (the same thing the game's own Guild window does) |
+| Must not hurt realm performance | ✅ Only two server requests, both read-only and rate-limited: the guild roster (at most once a minute, only if the Guild item is on) and the saved-instance list (once at login, then at most once a minute) — the same requests the game's own Guild and Raid windows make |
 | Must not automate gameplay | ✅ Uses only the official addon API to **read and display** information; it never casts, moves, targets, buys, sells or sends chat |
 | Must follow the Terms of Use / EULA | ✅ No external programs, no memory reading, no injection — it is not a `.exe` |
 

@@ -2,6 +2,13 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.25.0 — Saved instances
+- The Resets tooltip lists your saved instances (raid/dungeon lockouts) with bosses killed and time to reset; the
+  gold tooltip shows where your other characters are saved (saved on logout; expired lockouts disappear).
+- `/farol lockouts` (`/farol instancias`) lists everything; `/farol warn status` shows the count.
+- Reads the game's saved-instance list; asks the server (RequestRaidInfo, like the Raid window) once at login and
+  at most once a minute after that. Saved data validated on load.
+
 ## 2.24.1
 - The list of news after an update shows one item per line (easier to read).
 

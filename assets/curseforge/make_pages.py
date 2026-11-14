@@ -216,7 +216,9 @@ ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-we
 <div class="row"><span>&nbsp; Arthas (22)</span><span>84% full in ~2d 1h <span class="dim">inn/city</span></span></div>
 <div style="height:6px"></div>
 <div class="row"><span class="k">Daily reset in</span><span>5h 12m (02:17 local · 05:17 server)</span></div>
-<div class="row"><span class="k">Weekly reset in</span><span>2d 4h (Wed 01:05 local · 04:05 server)</span></div></div>"""
+<div class="row"><span class="k">Weekly reset in</span><span>2d 4h (Wed 01:05 local · 04:05 server)</span></div>
+<div class="k">Saved instances</div>
+<div class="row"><span>&nbsp; Molten Core</span><span>7/10 bosses &nbsp;reset in 2d 4h</span></div></div>"""
 page("farol-08-progress-xp-reputation-professions", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:center;transform:scale(.86);margin-top:40px">{pbar}{ptip}</div>',
      "Progress: XP, reputation, professions, rested XP", "Seu progresso: XP, reputação, profissões, descanso e resets")
 # 9. Session summary (chat only)

@@ -36,6 +36,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol saque limpar`| Apaga o histórico de saques deste personagem |
 | `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h, rep/h e tempo |
 | `/farol novidades`  | Mostra de novo as novidades das últimas versões |
+| `/farol instancias` | Instâncias salvas (bloqueios de raide) deste e dos outros personagens |
 | `/farol resumo`     | Resumo da sessão atual (ouro, XP, reputação, saques, avisos) |
 | `/farol ouro`       | Ouro de todos os seus personagens deste reino |
 | `/farol ouro total on` / `off` | Mostra / esconde o total do reino ao lado do ouro na barra |
@@ -296,6 +297,11 @@ lista todas, incluindo culinária, pesca e primeiros socorros, com os pontos gan
 
 **Resets:** contagem regressiva até o reset **diário** e o **semanal**, com o tempo que o próprio jogo informa. O
 tooltip mostra quando cada um acontece, na hora local e na do servidor. Clientes antigos só informam o diário.
+O tooltip também lista as suas **instâncias salvas** (bloqueios de raide/masmorra) — por exemplo
+`Núcleo Derretido 7/10 chefes, reset em 2d 4h` — e o tooltip do ouro mostra onde os seus **outros personagens** estão
+salvos (guardado ao sair; bloqueios vencidos somem sozinhos). `/farol instancias` lista tudo no seu chat. Para ter a
+lista, o Farol pede ao servidor uma vez ao entrar e, depois, no máximo uma vez por minuto (o mesmo pedido da janela de
+Raide do próprio jogo).
 
 **Tooltip:** passe o mouse no painel para ver todos os detalhes de uma vez — latência local/mundo,
 subzona, cada peça danificada, XP exato e descansado, progresso da reputação, quando acontece o reset diário/semanal,
@@ -384,7 +390,7 @@ Este addon segue a [Política de Desenvolvimento de AddOns da Blizzard](https://
 | Deve ser gratuito | ✅ Gratuito, licença MIT — sem versão paga nem funções pagas |
 | Código visível (sem ofuscação) | ✅ Lua simples e comentado na pasta `Farol` |
 | Sem propaganda ou pedidos de doação | ✅ Nenhum, nem no jogo nem neste repositório |
-| Não pode prejudicar o desempenho do servidor | ✅ O único pedido ao servidor é a lista da guilda, no máximo 1 vez por minuto e só com o item Guilda ligado (o mesmo que a janela de Guilda do jogo faz) |
+| Não pode prejudicar o desempenho do servidor | ✅ Só dois pedidos ao servidor, ambos de leitura e com limite: a lista da guilda (no máximo 1 vez por minuto, só com o item Guilda ligado) e a lista de instâncias salvas (1 vez ao entrar e depois no máximo 1 vez por minuto) — os mesmos pedidos que as janelas de Guilda e de Raide do jogo fazem |
 | Não pode automatizar o jogo | ✅ Usa só a API oficial de addons para **ler e mostrar** informações; nunca lança magias, move, seleciona alvos, compra, vende ou manda mensagens |
 | Deve seguir os Termos de Uso / EULA | ✅ Sem programas externos, sem leitura de memória, sem injeção — não é um `.exe` |
 

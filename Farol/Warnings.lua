@@ -1378,6 +1378,11 @@ local function PrintStatus()
     if okJunk and junk then
         Print(string.format(T("junk_status"), PlainMoney(junk.total), junk.slots, tostring(junkSource or "--")))
     end
+    if ns.ReadLockouts then
+        local okLocks, locks = pcall(ns.ReadLockouts)
+        Print(string.format(T("locks_status"), (okLocks and locks) and #locks or 0,
+            (okLocks and locks) and "GetSavedInstanceInfo" or "--"))
+    end
     local okProf, profs, profSource = pcall(ns.ReadProfessions)
     if okProf and profs and #profs > 0 then
         local parts = {}

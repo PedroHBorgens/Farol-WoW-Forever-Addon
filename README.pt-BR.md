@@ -274,6 +274,13 @@ com cada um) e o total. Marque **Ouro de todos os personagens na barra** (ou `/f
 ligado. Use **Esquecer personagens** nas opções (dois cliques para confirmar) ou `/farol ouro esquecer Nome` para
 personagens que você apagou. Tudo fica só no seu computador.
 
+**Descanso dos seus personagens:** ao sair, o Farol também guarda o seu XP descansado e se você estava numa estalagem
+ou cidade. O tooltip do ouro mostra então uma **estimativa** para os outros personagens — por exemplo
+`Jaina (34) 150% cheio` ou `Arthas (22) 5% cheio em ~9d 16h` — pelas regras do estilo clássico: em estalagem/cidade,
+5% de um nível a cada 8 horas; fora, um quarto disso; até 150%. O valor real substitui a estimativa quando você entra
+com o personagem. Aviso opcional (desligado por padrão) na janela de Avisos ou com `/farol aviso descansado on`:
+"Descanso cheio (150%): Jaina (34)…", uma vez por sessão.
+
 **Lixo nas bolsas:** soma o preço de venda dos itens cinzentos (Inferior), por exemplo `Lixo 3g 26s (3)`; o
 tooltip mostra os que valem mais. **O Farol nunca vende nada** (isso seria automação): quem vende é você, no
 comerciante. Itens que o jogo ainda não carregou entram na conta assim que as informações chegam.

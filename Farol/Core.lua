@@ -159,6 +159,11 @@ local STRINGS = {
         label_gold_total = "Total %s",
         tt_gold_total = "Ouro na conta (%s)",
         tt_gold_this = "este",
+        tt_rest_title = "Descanso dos seus personagens (estimativa)",
+        tt_rest_full = "cheio",
+        tt_rest_eta  = "cheio em ~%s",
+        tt_rest_inn  = "estalagem/cidade",
+        tt_rest_out  = "fora",
         gold_forgot  = "personagem esquecido: %s.",
         gold_forgot_all = "%d personagem(ns) deste reino esquecido(s) (o atual continua).",
         gold_forget_self = "não dá para esquecer o personagem em que você está.",
@@ -332,6 +337,11 @@ local STRINGS = {
         label_gold_total = "Total %s",
         tt_gold_total = "Gold on this account (%s)",
         tt_gold_this = "this one",
+        tt_rest_title = "Rested XP of your characters (estimate)",
+        tt_rest_full = "full",
+        tt_rest_eta  = "full in ~%s",
+        tt_rest_inn  = "inn/city",
+        tt_rest_out  = "outside",
         gold_forgot  = "character forgotten: %s.",
         gold_forgot_all = "%d character(s) on this realm forgotten (the current one stays).",
         gold_forget_self = "you cannot forget the character you are playing.",
@@ -899,7 +909,15 @@ local function SanitizeChars(saved)
                     if type(gold) == "number" and gold == gold and gold >= 0 and gold <= 1e12
                             and type(level) == "number" and level >= 1 and level <= 200
                             and type(t) == "number" and t >= 0 and t < 4102444800 then
-                        list[name] = { gold = math.floor(gold), level = math.floor(level), t = math.floor(t) }
+                        local entry = { gold = math.floor(gold), level = math.floor(level), t = math.floor(t) }
+                        -- Descanso (opcional): XP descansado, XP do nível e se estava em estalagem/cidade.
+                        local rest, max = info.rest, info.max
+                        if type(rest) == "number" and rest == rest and rest >= 0 and rest <= 1e9
+                                and type(max) == "number" and max >= 1 and max <= 1e9 then
+                            entry.rest, entry.max = math.floor(rest), math.floor(max)
+                            entry.inn = info.inn == true
+                        end
+                        list[name] = entry
                         count = count + 1
                     end
                 end
@@ -922,8 +940,34 @@ local function CurrentCharacter()
     return name, realm
 end
 
--- Registra o ouro e o nível do personagem atual.
-local function RecordCharacter()
+-- XP descansado do personagem atual: descanso, XP do nível e se está em estalagem/cidade (nil no nível máximo).
+local function CurrentRest()
+    if IsPlayerAtEffectiveMaxLevel then
+        local ok, maxed = pcall(IsPlayerAtEffectiveMaxLevel)
+        if ok and maxed then return nil end
+    end
+    local okMax, maxLevel = pcall(function() return GetMaxPlayerLevel and GetMaxPlayerLevel() end)
+    local okLevel, level = pcall(UnitLevel, "player")
+    if okMax and okLevel and type(maxLevel) == "number" and type(level) == "number" and level >= maxLevel then return nil end
+    local okXP, max = pcall(UnitXPMax, "player")
+    if not okXP or type(max) ~= "number" or IsSecret(max) or max ~= max or max < 1 or max > 1e9 then return nil end
+    local rest = 0
+    if GetXPExhaustion then
+        local okRest, value = pcall(GetXPExhaustion)
+        if okRest and type(value) == "number" and not IsSecret(value) and value == value and value >= 0 and value <= 1e9 then
+            rest = value
+        end
+    end
+    local inn = false
+    if IsResting then
+        local okInn, value = pcall(IsResting)
+        inn = okInn and value and true or false
+    end
+    return math.floor(rest), math.floor(max), inn
+end
+
+-- Registra o ouro e o nível do personagem atual (force = ao sair: grava também o descanso atual).
+local function RecordCharacter(force)
     if not db or type(db.chars) ~= "table" then return end
     local name, realm = CurrentCharacter()
     if not name then return end
@@ -946,9 +990,45 @@ local function RecordCharacter()
     end
     local entry = chars[name]
     gold, level = math.floor(gold), math.floor(level)
-    if entry and entry.gold == gold and entry.level == level and time() - entry.t < 60 then return end
-    chars[name] = { gold = gold, level = level, t = time() }
+    local rest, max, inn = CurrentRest()
+    if not force and entry and entry.gold == gold and entry.level == level and entry.rest == rest
+            and entry.inn == inn and time() - entry.t < 60 then return end
+    chars[name] = { gold = gold, level = level, t = time(), rest = rest, max = max, inn = rest and inn or nil }
 end
+
+-- Estimativa do descanso de um personagem deslogado, pelas regras do estilo clássico: em estalagem/cidade ganha
+-- 5% do XP do nível a cada 8 h; fora, 1/4 disso; máximo 150% (1,5 nível). Devolve %, cheio? e segundos até encher.
+local REST_CAP, REST_INN_RATE, REST_OUT_RATE = 1.5, 0.05 / (8 * 3600), 0.0125 / (8 * 3600)
+local function EstimateRest(info, now)
+    if not info.rest or not info.max then return nil end
+    local rate = (info.inn and REST_INN_RATE or REST_OUT_RATE) * info.max
+    local cap = REST_CAP * info.max
+    local elapsed = math.max(0, (now or time()) - info.t)
+    local value = math.min(cap, info.rest + rate * elapsed)
+    local eta = value >= cap and 0 or (cap - value) / rate
+    return math.floor(value / info.max * 100 + 0.5), value >= cap, eta
+end
+
+-- Outros personagens do reino com descanso conhecido (o atual tem o valor real no tooltip de XP).
+local function RestedAlts()
+    local name, realm = CurrentCharacter()
+    if not name or not db or type(db.chars) ~= "table" then return nil end
+    local list, now = {}, time()
+    for charName, info in pairs(db.chars[realm] or {}) do
+        if charName ~= name then
+            local pct, full, eta = EstimateRest(info, now)
+            if pct then
+                list[#list + 1] = { name = charName, level = info.level, pct = pct, full = full, eta = eta, inn = info.inn }
+            end
+        end
+    end
+    table.sort(list, function(a, b)
+        if a.pct ~= b.pct then return a.pct > b.pct end
+        return a.name < b.name
+    end)
+    return list
+end
+ns.RestedAlts = RestedAlts -- usado pelo aviso de "descanso cheio"
 
 -- Personagens do reino atual, do mais rico para o mais pobre, e o total. O atual vem marcado (current = true).
 local function RealmCharacters()
@@ -1902,6 +1982,18 @@ local function FillTooltip()
                 FormatMoneyShort(c.gold) .. "  |cff8c8c8c" .. when .. "|r", 0.8, 0.8, 0.8, 1, 1, 1)
         end
     end
+    local rested = Safe(RestedAlts)
+    if rested and #rested > 0 then
+        GameTooltip:AddLine(T("tt_rest_title"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
+        for i = 1, math.min(10, #rested) do
+            local r = rested[i]
+            local status = r.full and ("|cff40ff40" .. T("tt_rest_full") .. "|r")
+                or string.format(T("tt_rest_eta"), FormatCountdown(r.eta))
+            local place = "|cff8c8c8c" .. (r.inn and T("tt_rest_inn") or T("tt_rest_out")) .. "|r"
+            GameTooltip:AddDoubleLine("   " .. FactionName(r.name) .. " (" .. r.level .. ")",
+                r.pct .. "%  " .. status .. "  " .. place, 0.8, 0.8, 0.8, 1, 1, 1)
+        end
+    end
     local goldRate = Safe(GetGoldRate)
     local delta = Safe(GetSessionMoney)
     if delta then AddPair(T("tt_session"), FormatMoneyDelta(delta)) end
@@ -2472,7 +2564,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
 
     if event == "PLAYER_LOGOUT" then
         SaveSummary()
-        pcall(RecordCharacter)
+        pcall(RecordCharacter, true) -- grava o descanso e se está em estalagem/cidade ao sair
         return
     end
 

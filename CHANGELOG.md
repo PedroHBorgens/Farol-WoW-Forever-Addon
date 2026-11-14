@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.23.0 — Rested XP of your characters
+- On logout Farol saves your rested XP and whether you were in an inn/city; the gold tooltip shows an estimate for
+  your other characters (classic rules: 5% of a level per 8 h in an inn/city, 1/4 of that outside, up to 150%) with
+  "full" or the time until full.
+- Optional warning (off by default): at login, another character has full rested XP. `/farol warn rested on|off`
+  (`descansado` in Portuguese — `descanso` still means the break reminder).
+- New test: command alias tables cannot repeat a name (found a clash between the two "rest" words).
+
 ## 2.22.0 — Gold of all your characters
 - Farol remembers the gold and level of each of your characters (only on your computer) and the gold tooltip lists
   them per realm, richest first, with the total and when you last played each one.

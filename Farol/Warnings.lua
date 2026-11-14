@@ -33,6 +33,7 @@ local BAGS_MIN, BAGS_MAX = 0, 10
 local DEFAULTS = {
     durab = true, durabPct = 20, bags = true, bagSlots = 2, sound = true, talents = true, ranks = true,
     prof = true,                                             -- profissão no máximo do treinamento
+    restFull = false,                                        -- outro personagem com descanso cheio (ao entrar)
     remindMin = 30,                                          -- tempo padrão do "Lembrar em"
     pause = false, pauseMin = 120, pauseAnywhere = false,    -- lembrete de pausa (desligado por padrão)
     water = false, waterMin = 45, waterAnywhere = false,     -- lembrete de beber água (desligado por padrão)
@@ -85,6 +86,9 @@ local STRINGS = {
         warn_pause      = "Você está jogando há %s — que tal uma pausa?",
         warn_prof       = "%s no máximo do treinamento — procure um instrutor para continuar subindo.",
         warn_bags_junk  = " Há %d espaço(s) com lixo (%s) para vender.",
+        warn_restFull   = "Descanso cheio (150%%): %s — bom momento para jogar com eles.",
+        warn_opt_restFull = "Avisar ao entrar se outro personagem estiver com o descanso cheio",
+        warn_name_restFull = "descanso cheio",
         warn_opt_prof   = "Avisar quando uma profissão chegar ao máximo do treinamento",
         warn_name_prof  = "profissões",
         warn_water      = "Hora de beber água!",
@@ -123,7 +127,7 @@ local STRINGS = {
         warn_name_sound = "som",
         warn_bad_durab  = "valor inválido: use de 5 a 50 (%).",
         warn_bad_bags   = "valor inválido: use de 0 a 10 espaços.",
-        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || durab/bolsas/talentos/graus/profissoes/pausa/agua/som on||off || pausa/agua lutas on||off || lembrar N || status || silenciar",
+        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || durab/bolsas/talentos/graus/profissoes/descansado/pausa/agua/som on||off || pausa/agua lutas on||off || lembrar N || status || silenciar",
         opt_warnings    = "Avisos...",
         help_warn       = "  /farol aviso         - abrir a janela de avisos (durabilidade, bolsas, talentos, graus, profissões, pausa, água)",
     },
@@ -164,6 +168,9 @@ local STRINGS = {
         warn_pause      = "You've been playing for %s — time for a break?",
         warn_prof       = "%s at the training limit — find a trainer to keep leveling.",
         warn_bags_junk  = " %d slot(s) hold junk (%s) you can sell.",
+        warn_restFull   = "Rested XP full (150%%): %s — a good time to play them.",
+        warn_opt_restFull = "Warn at login if another character has full rested XP",
+        warn_name_restFull = "full rested XP",
         warn_opt_prof   = "Warn when a profession reaches its training limit",
         warn_name_prof  = "professions",
         warn_water      = "Time to drink some water!",
@@ -202,7 +209,7 @@ local STRINGS = {
         warn_name_sound = "sound",
         warn_bad_durab  = "invalid value: use 5 to 50 (%).",
         warn_bad_bags   = "invalid value: use 0 to 10 slots.",
-        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || durab/bags/talents/ranks/professions/break/water/sound on||off || break/water fights on||off || remind N || status || silence",
+        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || durab/bags/talents/ranks/professions/rested/break/water/sound on||off || break/water fights on||off || remind N || status || silence",
         opt_warnings    = "Warnings...",
         help_warn       = "  /farol warn          - open the warnings window (durability, bags, talents, ranks, professions, break, water)",
     },
@@ -230,7 +237,7 @@ end
 function Warnings.Sanitize(saved)
     local clean = {}
     if type(saved) ~= "table" then saved = {} end
-    for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "pause", "pauseAnywhere",
+    for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "restFull", "pause", "pauseAnywhere",
                            "water", "waterAnywhere" }) do
         if type(saved[key]) == "boolean" then clean[key] = saved[key] else clean[key] = DEFAULTS[key] end
     end
@@ -256,6 +263,7 @@ local state = {
     talents = { warnedCount = 0 },      -- quantos pontos já foram avisados
     ranks = { warned = {}, dirty = true, lastScan = nil }, -- magias já avisadas; "dirty" = algo mudou
     prof = { warned = {} },                             -- limites já avisados ("Mineração@150")
+    restFull = { checked = false },                     -- descanso cheio: confere uma vez por sessão
     pause = { nextAt = nil, silenced = false },         -- lembretes por tempo: próxima vez (GetTime)
     water = { nextAt = nil, silenced = false },
 }
@@ -906,6 +914,28 @@ local function CheckProfessions(now)
 end
 
 ---------------------------------------------------------------------------
+-- Outro personagem com o descanso cheio (estimativa feita pelo Core). Confere uma vez por sessão.
+---------------------------------------------------------------------------
+
+local function CheckRestFull(now)
+    if not Settings().restFull or not ns.RestedAlts then return end
+    local entry = state.restFull
+    local reminding = ReminderDue(entry, now)
+    if entry.checked and not reminding then return end
+    local list = ns.RestedAlts()
+    if not list then return end -- nome/reino ainda não carregados: tenta de novo
+    entry.checked = true
+    if reminding then entry.remindAt = nil end
+    local names = {}
+    for _, r in ipairs(list) do
+        if r.full then names[#names + 1] = string.gsub(r.name, "[|%c]", "") .. " (" .. r.level .. ")" end
+    end
+    if #names == 0 then return end
+    if #names > 4 then names = { names[1], names[2], names[3], names[4] .. string.format(T("warn_more"), #names - 4) } end
+    Announce(string.format(T("warn_restFull"), table.concat(names, ", ")), "restFull")
+end
+
+---------------------------------------------------------------------------
 -- Lembretes de pausa e de beber água (por tempo)
 ---------------------------------------------------------------------------
 
@@ -968,6 +998,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         pcall(CheckTalents, now)
         pcall(CheckRanks, now)
         pcall(CheckProfessions, now)
+        pcall(CheckRestFull, now)
     end
 end)
 
@@ -982,6 +1013,7 @@ local function SetEnabled(key, value)
     if key == "talents" then state.talents.warnedCount = 0
     elseif key == "ranks" then state.ranks.warned = {}; state.ranks.dirty = true
     elseif key == "prof" then state.prof.warned = {}; state.prof.remindAt = nil
+    elseif key == "restFull" then state.restFull.checked = false; state.restFull.remindAt = nil
     elseif IsBreak(key) then -- recomeça a contagem agora
         state[key].nextAt = value and GetTime() + Settings()[key .. "Min"] * 60 or nil
         state[key].silenced = false
@@ -1067,7 +1099,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolWarnings", UIParent, ns.backdropTemplate)
-    frame:SetSize(470, 440)
+    frame:SetSize(500, 470)
     frame:SetPoint("CENTER", 0, 60)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -1115,9 +1147,10 @@ local function CreateWindow()
     frame.talents = Check("FarolWarnTalents", -110, "talents")
     frame.ranks = Check("FarolWarnRanks", -140, "ranks")
     frame.prof = Check("FarolWarnProf", -170, "prof")
+    frame.restFull = Check("FarolWarnRestFull", -200, "restFull")
 
     -- Lembretes de pausa e de água: liga/desliga, intervalo em minutos e "também em lutas...".
-    local y = -200
+    local y = -230
     for _, key in ipairs(BREAK_KEYS) do
         local cap = key == "pause" and "Pause" or "Water"
         local check = Check("FarolWarn" .. cap, y, key)
@@ -1179,6 +1212,8 @@ RefreshWindow = function()
     window.ranks:SetChecked(settings.ranks)
     window.prof.label:SetText(T("warn_opt_prof"))
     window.prof:SetChecked(settings.prof)
+    window.restFull.label:SetText(T("warn_opt_restFull"))
+    window.restFull:SetChecked(settings.restFull)
     window.sound.label:SetText(T("warn_opt_sound"))
     window.sound:SetChecked(settings.sound)
     for _, key in ipairs(BREAK_KEYS) do
@@ -1304,6 +1339,7 @@ local KEYS = {
     talentos = "talents", talento = "talents", talents = "talents", talent = "talents",
     graus = "ranks", grau = "ranks", ranks = "ranks", rank = "ranks",
     profissoes = "prof", profissao = "prof", prof = "prof", professions = "prof", profession = "prof",
+    descansado = "restFull", xpdescansado = "restFull", rested = "restFull", restedxp = "restFull", -- "descanso" = pausa
     pausa = "pause", pause = "pause", ["break"] = "pause", descanso = "pause",
     agua = "water", water = "water", hidratacao = "water", hydrate = "water",
 }

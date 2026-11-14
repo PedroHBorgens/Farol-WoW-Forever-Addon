@@ -77,4 +77,21 @@ return {
             end
         end
     end },
+
+    { "command alias tables have no duplicate names (a repeated name silently overrides the first)", function(T)
+        local tables = { { "Core.lua", "local ITEM_ALIASES = {" }, { "Warnings.lua", "local KEYS = {" },
+                         { "Appearance.lua", "local WORDS = {" } }
+        for _, entry in ipairs(tables) do
+            local code = read("Farol/" .. entry[1])
+            local start = string.find(code, entry[2], 1, true)
+            T.ok(start, entry[1] .. ": table " .. entry[2] .. " found")
+            local body = string.match(code, "%b{}", start)
+            body = string.gsub(body, "%-%-[^\n]*", "")
+            local seen = {}
+            for name in string.gmatch(body, "[%[\"]*([%w_]+)[\"%]]*%s*=%s*\"") do
+                T.ok(not seen[name], entry[1] .. ": alias '" .. name .. "' appears twice")
+                seen[name] = true
+            end
+        end
+    end },
 }

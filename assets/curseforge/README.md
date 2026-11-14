@@ -16,7 +16,7 @@ fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o sel
 | `farol-05-recent-loot-window.png` | Recent loot: when you got it, with quality filter |
 | `farol-06-warnings-break-water-reminders.png` | Warnings + break & water reminders, remind in 2–30 min |
 | `farol-07-appearance-settings.png` | Make it yours: shape, size, background, hide in combat |
-| `farol-08-progress-xp-reputation-professions.png` | Track your progress: XP, reputation, professions, resets |
+| `farol-08-progress-xp-reputation-professions.png` | Progress: XP, reputation, professions, rested XP |
 | `farol-09-session-summary-chat.png` | Session summary: gold, XP, reputation, loot |
 
 ## Regenerate / Gerar de novo

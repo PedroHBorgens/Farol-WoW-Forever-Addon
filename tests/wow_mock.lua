@@ -180,6 +180,7 @@ function Mock.new(opts)
     H.playerName, H.realm = "Garrosh", "Azralon"
     env.UnitName = function(unit) if unit == "player" then return H.playerName end return nil end
     env.GetRealmName = function() return H.realm end
+    env.IsResting = function() return H.resting or false end -- estalagem/cidade
     env.GetMoney = function() return H.money or 1234567 end
     env.GetRealZoneText = function() return "Floresta de Elwynn" end
     env.GetSubZoneText = function() return "Vale Norte" end

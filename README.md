@@ -272,6 +272,13 @@ total. Tick **Gold of all characters on the bar** (or `/farol gold total on`) to
 It only knows a character after you log in with it once with Farol on. Use **Forget characters** in the options
 (click twice to confirm) or `/farol gold forget Name` for characters you deleted. This stays on your computer only.
 
+**Rested XP of your characters:** when you log out, Farol also saves your rested XP and whether you were in an inn or
+city. The gold tooltip then shows an **estimate** for your other characters — e.g. `Jaina (34) 150% full` or
+`Arthas (22) 5% full in ~9d 16h` — using the classic rules: in an inn/city, 5% of a level every 8 hours; outside, a
+quarter of that; up to 150%. The real value replaces the estimate when you log in with that character. Optional
+warning (off by default) in the Warnings window or `/farol warn rested on`: "Rested XP full (150%): Jaina (34)…",
+once per session.
+
 **Junk in bags:** adds up the vendor price of your gray (Poor) items, e.g. `Junk 3g 26s (3)`; the tooltip shows
 the most valuable ones. **Farol never sells anything** (that would be automation): you sell at a vendor. Items the
 game has not loaded yet are counted as soon as their information arrives.

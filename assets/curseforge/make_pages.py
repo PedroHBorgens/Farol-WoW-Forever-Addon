@@ -209,10 +209,14 @@ ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-we
 <div style="color:#ff6666;font-size:13px">&nbsp;&nbsp;&nbsp;at the training limit — find a trainer</div>
 <div class="row"><span class="k">Cooking</span><span>60/75</span></div>
 <div style="height:6px"></div>
+<div class="k">Rested XP of your characters (estimate)</div>
+<div class="row"><span>&nbsp; Jaina (34)</span><span>150% <span class="g">full</span> <span class="dim">inn/city</span></span></div>
+<div class="row"><span>&nbsp; Arthas (22)</span><span>84% full in ~2d 1h <span class="dim">inn/city</span></span></div>
+<div style="height:6px"></div>
 <div class="row"><span class="k">Daily reset in</span><span>5h 12m (02:17 local · 05:17 server)</span></div>
 <div class="row"><span class="k">Weekly reset in</span><span>2d 4h (Wed 01:05 local · 04:05 server)</span></div></div>"""
-page("farol-08-progress-xp-reputation-professions", f'<div style="display:flex;flex-direction:column;gap:22px;align-items:center">{pbar}{ptip}</div>',
-     "Track your progress: XP, reputation, professions, resets", "Acompanhe seu progresso: XP, reputação, profissões e resets")
+page("farol-08-progress-xp-reputation-professions", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:center;transform:scale(.86);margin-top:40px">{pbar}{ptip}</div>',
+     "Progress: XP, reputation, professions, rested XP", "Seu progresso: XP, reputação, profissões, descanso e resets")
 # 9. Session summary (chat only)
 def chatline(text): return f'<div><span style="color:#33ccff">Farol:</span> {text}</div>'
 G = lambda g, sv: f'<span class="g">+</span><span class="gold">{g}g</span> <span class="silver">{sv}s</span>'

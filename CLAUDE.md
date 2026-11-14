@@ -44,6 +44,11 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
   antigos, `GetContainerItemInfo`/`GetContainerItemLink` e `GetItemInfo`. Preço de venda = 11º valor de `GetItemInfo`.
   Item ainda não carregado volta `nil`: fica "pendente" e entra na próxima atualização. **Nunca vender** (o
   `test_toc.lua` proíbe as funções de vender/mover/destruir/equipar itens). `NUM_BAG_SLOTS` é validado (`LastBag`).
+- Descanso de personagens deslogados: o jogo não informa; o Core **estima** (`EstimateRest`) pelas regras do estilo
+  clássico — estalagem/cidade (`IsResting` ao sair) 5% do XP do nível a cada 8 h, fora 1/4 disso, máximo 150%.
+  Se o WoW Forever usar outras taxas, ajuste `REST_INN_RATE`/`REST_OUT_RATE`.
+- Apelidos de comando (`ITEM_ALIASES`, `KEYS`, `WORDS`) não podem repetir nome: em Lua o segundo sobrescreve o
+  primeiro em silêncio. Um teste do `test_toc.lua` confere. Ex.: "descanso" = pausa; XP descansado = "descansado".
 - `PLAYER_ENTERING_WORLD` traz `(isInitialLogin, isReloadingUi)` nos clientes modernos; nos antigos vem sem
   argumentos e também dispara ao trocar de zona/instância. O resumo da sessão usa isso para aparecer só no login.
 - No chat do WoW, `|` inicia códigos (`|c` cor, `|H` link, `|T` textura). **Barra literal = `||`.** Um teste confere
@@ -83,7 +88,8 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - **Globais:** só nomes começando com `Farol` (janelas/botões), `FarolDB`, `FarolCharDB`, `SLASH_FAROL1`,
   `Farol_ToggleWarnHistory`, `BINDING_*`. Nada de globais genéricos.
 - **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`, `chars` = ouro
-  e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t }`, nomes sem `|`/controle
+  e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn? }`
+  (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle
   e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores) e
   `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `lastSession` = resumo da última sessão,
   só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em

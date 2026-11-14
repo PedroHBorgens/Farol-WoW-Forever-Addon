@@ -360,7 +360,7 @@ Segurança da informação é a primeira regra deste projeto:
 - **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
 - **Dados salvos são validados.** `FarolDB` guarda só as suas configurações: posição e estado do painel, idioma,
   itens visíveis e a ordem deles, aparência, alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o
-  tempo da soneca), ajustes da janela de saques e dos avisos, e o ouro e o nível dos **seus próprios** personagens
+  tempo da soneca), ajustes da janela de saques e dos avisos (desde a 3.0 os ajustes da barra ficam agrupados num perfil), e o ouro e o nível dos **seus próprios** personagens
   por reino (para o total da conta). `FarolCharDB` (por personagem) guarda só o histórico
   de saques (links de item validados), os 10 últimos avisos e o resumo da última sessão (só números). Tudo é verificado ao carregar — um arquivo corrompido
   ou adulterado volta para os valores padrão.

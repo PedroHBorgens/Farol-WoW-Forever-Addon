@@ -62,6 +62,16 @@ return {
                     db.warnings[key] = pick(BAD)
                 end
             end
+            if random(2) == 1 then -- perfis da 3.x: estrutura e cada campo da barra adulterados
+                local bar = {}
+                for _, key in ipairs(KEYS) do if random(2) == 1 then bar[key] = pick(BAD) end end
+                local shape = random(5)
+                db.profiles = shape == 1 and pick(BAD) or shape == 2 and { account = pick(BAD) }
+                    or shape == 3 and { account = { bars = pick(BAD) } }
+                    or shape == 4 and { account = { bars = { pick(BAD), bar } } }
+                    or { account = { bars = { bar } }, [pick({ "x", 1, true })] = pick(BAD) }
+                db.activeBar, db.dataVersion = pick(BAD), pick(BAD)
+            end
             local char = {
                 items = { { link = "|cff1eff00|Hitem:1|h[Ok]|h|r", count = pick(BAD), q = pick(BAD), t = pick(BAD) } },
                 warnHistory = { { t = pick(BAD), text = "Aviso " .. i }, pick(BAD) },
@@ -80,6 +90,11 @@ return {
                 end
             end)
             T.ok(ok, "saved data #" .. i .. ": " .. tostring(err))
+            if ok then
+                local saved = Mock.new():login(db, char).env.FarolDB
+                T.eq(rawget(saved, "activeBar"), 1, "active bar reset #" .. i)
+                T.eq(type(rawget(saved, "profiles").account.bars[1].items), "table", "bar items #" .. i)
+            end
         end
     end },
 

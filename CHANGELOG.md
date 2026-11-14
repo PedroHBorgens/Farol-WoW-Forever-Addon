@@ -2,6 +2,13 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.0.0 — New settings structure (profiles and bars)
+- Internal change preparing for multiple bars and per-character profiles: the bar's settings (position, appearance,
+  visible items and their order) now live in `profiles.account.bars[1]` inside `FarolDB`.
+- Your 2.x settings are converted automatically on the first login: **the bar looks exactly the same**.
+- Old and new data go through the same validation as before; tampered profiles fall back to defaults.
+- Alarms, loot window, warnings and characters stay account-wide, as before.
+
 ## 2.27.0 — Ammo and reagents
 - New bar item **Ammo & reagents** (off by default): what your class uses (hunter ammo, soul shards, arcane powder and
   runes, candles, symbols, seeds, ankhs, rogue powders), yellow/red by the limits **you choose** in the Warnings window

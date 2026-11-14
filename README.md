@@ -354,7 +354,7 @@ Information security is this project's first rule:
 - **No automation.** It only reads and displays information; it never plays for you (which would break server rules).
 - **Saved data is validated.** `FarolDB` only stores your settings: panel position and state, language, visible
   items and their order, appearance, alarms (time, clock type, on/off, a cleaned-up name and the snooze time),
-  loot window and warning settings, and the gold and level of **your own** characters per realm (for the account
+  loot window and warning settings (since 3.0 the bar settings are grouped in a profile), and the gold and level of **your own** characters per realm (for the account
   total). `FarolCharDB` (per character) stores only your loot history (validated item
   links), the last 10 warnings and the last session's summary (numbers only). Everything is checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official sources** (this repository or the CurseForge page). Addons are plain Lua text:

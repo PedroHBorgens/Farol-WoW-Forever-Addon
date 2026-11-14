@@ -96,6 +96,13 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - Cada módulo adiciona seus textos em `ns.STRINGS.pt` / `ns.STRINGS.en` e usa `T("chave")`.
 - **Globais:** só nomes começando com `Farol` (janelas/botões), `FarolDB`, `FarolCharDB`, `SLASH_FAROL1`,
   `Farol_ToggleWarnHistory`, `BINDING_*`. Nada de globais genéricos.
+- **Perfis (3.x):** no disco, os campos de cada barra (`ns.BAR_KEYS`: posição, aparência, `items`, `order`…) ficam
+  em `FarolDB.profiles.account.bars[N]`; `activeBar` e `dataVersion = 3` ao lado. No código, `db.items`, `db.scale`
+  etc. continuam valendo: um metatable (`Profiles.PROXY` no Core) leva essas chaves para a barra ativa. Por isso
+  **nunca percorra o `db` com `pairs`/`next`** (não vê os campos da barra) e use `rawget` só de propósito. Ao carregar,
+  `Profiles.Flatten` monta a visão "solta" (2.x e 3.x iguais), passa pela validação de sempre e `Profiles.Build`
+  remonta o formato novo; perfis desconhecidos e chaves estranhas são descartados. Campo novo de barra: entra em
+  `BAR_KEYS`. O Core está perto do limite de 200 variáveis locais do Lua: agrupe funções novas numa tabela.
 - **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`, `chars` = ouro
   e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks? }`
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle

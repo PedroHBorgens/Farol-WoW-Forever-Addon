@@ -1686,7 +1686,7 @@ local function ShowNews(from)
     for i = (from or 0) + 1, #NEWS do names[#names + 1] = T(NEWS[i]) end
     if #names == 0 then return end
     Print(T("news_title"))
-    Print("  " .. table.concat(names, " · "))
+    for _, name in ipairs(names) do Print("  • " .. name) end -- uma novidade por linha, mais fácil de ler
 end
 
 local function ShowOnboarding()

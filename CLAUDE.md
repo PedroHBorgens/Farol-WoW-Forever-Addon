@@ -47,6 +47,10 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 - Descanso de personagens deslogados: o jogo não informa; o Core **estima** (`EstimateRest`) pelas regras do estilo
   clássico — estalagem/cidade (`IsResting` ao sair) 5% do XP do nível a cada 8 h, fora 1/4 disso, máximo 150%.
   Se o WoW Forever usar outras taxas, ajuste `REST_INN_RATE`/`REST_OUT_RATE`.
+- Munição e reagentes: tabela `SUPPLIES` por classe (`UnitClass` → arquivo da classe), IDs do jogo clássico; contagem
+  com `C_Item.GetItemCount`/`GetItemCount` e, para munição, `GetInventoryItemCount("player", 0)`. Grupo só é
+  acompanhado depois de visto (`FarolCharDB.supplySeen`). Limites em `warnings.ammoYellow/ammoRed/reagYellow/reagRed`
+  (vermelho < amarelo; 0 no amarelo = sem amarelo). Se o WoW Forever usar outros IDs, ajuste `SUPPLIES`.
 - Instâncias salvas: `GetNumSavedInstances`/`GetSavedInstanceInfo` (12º/11º valores = chefes mortos/total nos clientes
   modernos; o 3.3.5a não tem). A lista só existe depois de `RequestRaidInfo` → evento `UPDATE_INSTANCE_INFO`
   (`locksLoaded`). Pedido ao servidor: 1 vez no login (`isInitialLogin`) e no máximo 1 vez por minuto
@@ -66,10 +70,10 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
                     Appearance, Order
-  Core.lua          barra (grade de células), 21 itens, tooltip, menu de opções, comandos /farol, dados salvos
+  Core.lua          barra (grade de células), 22 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
-  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, pausa, água), "Silenciar / Lembrar em N min"
+  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água), "Silenciar / Lembrar em N min"
                     (2–30), janela agrupada para vários avisos, histórico 📝
   Appearance.lua    escala, fundo, tamanhos de texto/ícone, formato (uma linha / uma coluna), esconder em combate,
                     mostrar/esconder os botões rápidos 📝 👜

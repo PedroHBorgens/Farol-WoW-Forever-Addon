@@ -3,8 +3,8 @@
 **Português** | [English](README.md)
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
-**FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · valor do lixo · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · horário · resets diário/semanal · tempo de sessão · amigos · guilda** — você escolhe o que aparece (21 itens).
+**FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
+XP/hora · reputação · profissões · horário · resets diário/semanal · tempo de sessão · amigos · guilda** — você escolhe o que aparece (22 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -149,6 +149,18 @@ Quando há lixo para vender, o aviso de bolsas diz: "… Há 3 espaço(s) com li
   fonte de talentos (o nome da função do jogo mudou entre versões do WoW, então o Farol consulta todas e usa o maior
   valor, além de uma estimativa pelo nível: nível − 9 menos os pontos gastos) e as magias de grau antigo encontradas. Para desligar: `/farol aviso talentos off` / `/farol aviso graus off`.
 
+### Munição e reagentes
+
+O item **Munição e reagentes** (desligado por padrão) conta o que a sua classe usa: munição do caçador, Fragmentos
+de Alma do bruxo, Pó Arcano e runas do mago, velas do sacerdote, símbolos do paladino, sementes e reagentes de Dádiva
+do druida, Ankhs do xamã, pós do ladino. **Você escolhe quando o número fica amarelo e vermelho** na janela de Avisos
+(padrão: munição 400 / 200, reagentes 10 / 5; o vermelho precisa ser menor que o amarelo, 0 no amarelo = nunca
+amarelo), ou com `/farol aviso municao 400 200` e `/farol aviso reagentes 10 5`. Os avisos opcionais (desligados por
+padrão) aparecem uma vez abaixo do vermelho, esperam a luta acabar e voltam depois que você reabastecer:
+"Munição: 150 acabando — reabasteça antes de sair da cidade." Um reagente só passa a ser acompanhado depois que o
+personagem já teve pelo menos um (um mago de nível 10 não é avisado sobre Pó Arcano). O Farol só **conta** — nunca
+compra, usa ou move itens. `/farol aviso status` mostra o que foi encontrado.
+
 ### Profissões: procure um instrutor
 
 No estilo clássico, as profissões param de subir em cada limite de treinamento (75, 150, 225, 300). Quando uma
@@ -252,6 +264,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | Durabilidade     | Sua peça **mais danificada** (vermelho abaixo de 20%)     | `durab`         | ligado     |
 | Bolsas           | Espaços livres / total (vermelho com 2 ou menos)          | `bolsas`        | desligado  |
 | Lixo nas bolsas  | Valor de venda dos itens cinzentos e espaços que ocupam   | `lixo`          | desligado  |
+| Munição e reagentes | Munição/reagentes da sua classe, com cores pelos seus limites | `municao` | desligado  |
 | Ouro             | Dinheiro do personagem (total opcional de todos os seus personagens) | `ouro` | ligado     |
 | Ouro da sessão   | Quanto ganhou ou gastou desde que entrou / `/reload`      | `sessao`        | desligado  |
 | Ouro por hora    | Ouro da sessão por hora (vermelho quando negativo)        | `ouroh`         | desligado  |

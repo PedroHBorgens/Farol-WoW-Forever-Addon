@@ -10,7 +10,7 @@ fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o sel
 | File | Caption |
 |---|---|
 | `farol-01-overview-info-bar.png` | Your info bar for WoW Forever |
-| `farol-02-bar-items-layout-tooltip.png` | 21 items, each with its own short tooltip (Shift: all) |
+| `farol-02-bar-items-layout-tooltip.png` | 22 items, each with its own short tooltip (Shift: all) |
 | `farol-03-options-menu-bar-order.png` | Tick what you want — and choose the order |
 | `farol-04-clock-alarms-snooze.png` | Clock alarms with snooze — local or server time |
 | `farol-05-recent-loot-window.png` | Recent loot: when you got it, with quality filter |

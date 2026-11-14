@@ -1,7 +1,7 @@
 -- Barra de informações: compatibilidade, idioma, itens, tooltip, valores bloqueados, dados salvos.
 -- Info bar: compatibility, language, items, tooltip, secret values, saved data.
 
-local ALL_ITEMS = { "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk",
+local ALL_ITEMS = { "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk", "ammo",
                     "gold", "session", "goldh", "xp", "xph", "rep", "prof", "clock", "reset", "playtime", "friends", "guild" }
 
 return {
@@ -67,7 +67,7 @@ return {
         T.has(H:bar(), "/farol show <item>", "hint when every item is hidden")
     end },
 
-    { "all 21 items render with correct values", function(T, Mock)
+    { "all 22 items render with correct values", function(T, Mock)
         local H = Mock.new():login()
         for _, key in ipairs(ALL_ITEMS) do H:slash("show " .. key) end
         H:update(3725)

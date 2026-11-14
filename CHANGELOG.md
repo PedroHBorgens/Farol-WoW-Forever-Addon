@@ -2,6 +2,15 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.24.0 — Getting started
+- First time: a welcome in your chat explains that the bar starts with the basics and how to turn on the rest
+  (right-click the bar). After an update: the news since your version are listed once. `/farol news` shows them again.
+  Nothing is turned on automatically.
+- Options menu: counter "Bar items: 6 of 21 on" and, on hover, what each item shows (both languages).
+- Bar tooltip: "Right-click: options (15 more items you can turn on)".
+- Fix: when a tampered file had too many realms/characters, the ones kept were random (Lua 5.4 shuffles tables);
+  now the most recently active are kept, in a fixed order.
+
 ## 2.23.0 — Rested XP of your characters
 - On logout Farol saves your rested XP and whether you were in an inn/city; the gold tooltip shows an estimate for
   your other characters (classic rules: 5% of a level per 8 h in an inn/city, 1/4 of that outside, up to 150%) with

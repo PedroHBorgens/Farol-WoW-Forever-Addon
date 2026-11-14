@@ -68,6 +68,7 @@ local SUITES = {
     "test_junk",
     "test_alts",
     "test_rest",
+    "test_onboarding",
     "test_globals",
 }
 

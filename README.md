@@ -8,6 +8,11 @@ reputation · professions · clock · daily/weekly resets · session time · fri
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
+> **Most features start turned off.** The bar begins with the basics (FPS, latency, coordinates, zone, durability,
+> gold). **Right-click the bar** (or `/farol menu`) to turn on the others — hover each item to see what it shows.
+> The first time, Farol says this in your chat; after an update it lists what is new, once (`/farol news` shows it
+> again).
+
 ## Installation
 
 > **Upgrading from "WoW Forever Info"?** The addon was renamed. Delete the old
@@ -30,6 +35,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol loot`       | Open the recent loot window |
 | `/farol loot clear` | Clear this character's loot history |
 | `/farol session reset`| Restart session gold, gold/h, XP/h, rep/h and time |
+| `/farol news`       | Show again what is new in the latest versions |
 | `/farol summary`    | Summary of the current session (gold, XP, reputation, loot, warnings) |
 | `/farol gold`       | Gold of all your characters on this realm |
 | `/farol gold total on` / `off` | Show / hide the realm total next to your gold on the bar |

@@ -67,6 +67,7 @@ local DEFAULTS = {
     serverTime = false, -- relógio mostra o horário do servidor em vez do local
     summary = true,     -- mostrar o resumo da última sessão ao entrar no jogo
     goldTotal = false,  -- item Ouro mostra também o total de todos os seus personagens do reino
+    newsSeen = 0,       -- quantas novidades (NEWS) o jogador já viu; boas-vindas/novidades aparecem uma vez
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
     -- Aparência
     scale = 1,              -- escala da barra (0.5 a 2)
@@ -265,6 +266,43 @@ local STRINGS = {
         opt_reset    = "Resetar posição",
         opt_alarms   = "Alarmes...",
         opt_hint     = "Marque o que deseja ver na barra.",
+        opt_hint_count = "Itens na barra: %d de %d ligados — marque os que quiser (passe o mouse para ver o que cada um mostra).",
+        tt_rightclick_more = "Clique direito: opções (mais %d informações para ligar).",
+        welcome1     = "bem-vindo! A barra começa só com o básico: %s.",
+        welcome2     = "há mais %d informações e vários avisos desligados — clique com o botão direito na barra para escolher (ou /farol menu). /farol ajuda lista os comandos.",
+        news_title   = "novidades desde a sua última versão (a maioria vem desligada — ative no menu: clique direito na barra):",
+        news_rep     = "reputação na barra",
+        news_reset   = "contagem até os resets",
+        news_lootdates = "datas na janela de saques",
+        news_summary = "resumo da sessão (/farol resumo)",
+        news_breaks  = "lembretes de pausa e de água",
+        news_remind  = "\"Lembrar em\" de 2 a 30 min",
+        news_prof    = "profissões e aviso de instrutor",
+        news_junk    = "valor do lixo nas bolsas",
+        news_alts    = "ouro de todos os personagens (/farol ouro)",
+        news_rested  = "descanso dos seus personagens",
+        help_news    = "  /farol novidades     - ver de novo as novidades das últimas versões",
+        desc_fps      = "Quadros por segundo (verde 50+, amarelo 25+).",
+        desc_ms       = "Latência: a maior entre local e mundo.",
+        desc_mem      = "Memória Lua usada pela interface e addons.",
+        desc_coords   = "Sua posição no mapa (some em instâncias).",
+        desc_zone     = "Nome da zona atual.",
+        desc_speed    = "Velocidade de movimento (100% = correr normal).",
+        desc_durab    = "Sua peça mais gasta (vermelho abaixo de 20%).",
+        desc_bags     = "Espaços livres / total nas bolsas.",
+        desc_junk     = "Valor de venda dos itens cinzentos (o Farol nunca vende).",
+        desc_gold     = "Seu ouro (e, opcional, o total dos seus personagens).",
+        desc_session  = "Ouro ganho ou gasto desde que você entrou.",
+        desc_goldh    = "Ouro da sessão por hora.",
+        desc_xp       = "Porcentagem de XP e bônus descansado.",
+        desc_xph      = "XP por hora e tempo até o próximo nível.",
+        desc_rep      = "Facção acompanhada: nível, progresso e rep/hora.",
+        desc_prof     = "Profissões com nível / limite do treinamento.",
+        desc_clock    = "Hora local ou do servidor (alarmes ficam aqui).",
+        desc_reset    = "Tempo até o reset diário e o semanal.",
+        desc_playtime = "Quanto tempo você está jogando nesta sessão.",
+        desc_friends  = "Quantos amigos estão online (sem nomes).",
+        desc_guild    = "Quantos membros da guilda estão online (sem nomes).",
         tt_rightclick = "Clique direito: opções.",
     },
     en = {
@@ -443,6 +481,43 @@ local STRINGS = {
         opt_reset    = "Reset position",
         opt_alarms   = "Alarms...",
         opt_hint     = "Tick what you want to see on the bar.",
+        opt_hint_count = "Bar items: %d of %d on — tick the ones you want (hover to see what each one shows).",
+        tt_rightclick_more = "Right-click: options (%d more items you can turn on).",
+        welcome1     = "welcome! The bar starts with the basics only: %s.",
+        welcome2     = "there are %d more items and several warnings turned off — right-click the bar to choose (or /farol menu). /farol help lists the commands.",
+        news_title   = "new since your last version (most are off by default — turn them on in the menu: right-click the bar):",
+        news_rep     = "reputation on the bar",
+        news_reset   = "reset countdown",
+        news_lootdates = "dates in the loot window",
+        news_summary = "session summary (/farol summary)",
+        news_breaks  = "break and water reminders",
+        news_remind  = "\"Remind in\" 2 to 30 min",
+        news_prof    = "professions and trainer warning",
+        news_junk    = "junk value in bags",
+        news_alts    = "gold of all your characters (/farol gold)",
+        news_rested  = "rested XP of your characters",
+        help_news    = "  /farol news          - show the news of the latest versions again",
+        desc_fps      = "Frames per second (green 50+, yellow 25+).",
+        desc_ms       = "Latency: the higher of home and world.",
+        desc_mem      = "Lua memory used by the UI and add-ons.",
+        desc_coords   = "Your map position (hidden in instances).",
+        desc_zone     = "Current zone name.",
+        desc_speed    = "Movement speed (100% = normal running).",
+        desc_durab    = "Your most damaged item (red below 20%).",
+        desc_bags     = "Free / total bag slots.",
+        desc_junk     = "Vendor value of gray items (Farol never sells).",
+        desc_gold     = "Your gold (and, optionally, all your characters' total).",
+        desc_session  = "Gold gained or spent since you logged in.",
+        desc_goldh    = "Session gold per hour.",
+        desc_xp       = "XP percentage and rested bonus.",
+        desc_xph      = "XP per hour and time to the next level.",
+        desc_rep      = "Watched faction: standing, progress and rep/hour.",
+        desc_prof     = "Professions with level / training limit.",
+        desc_clock    = "Local or server time (alarms live here).",
+        desc_reset    = "Time until the daily and weekly reset.",
+        desc_playtime = "How long you have been playing this session.",
+        desc_friends  = "How many friends are online (no names).",
+        desc_guild    = "How many guild members are online (no names).",
         tt_rightclick = "Right-click: options.",
     },
 }
@@ -896,15 +971,29 @@ local function ValidName(name)
         and not string.find(name, "[|%c]")
 end
 
+-- Mantém os "limit" itens mais recentes (maior t; empate: nome), em ordem fixa (pairs não tem ordem garantida).
+local function KeepRecent(map, limit, recentOf)
+    local keys = {}
+    for key in pairs(map) do keys[#keys + 1] = key end
+    if #keys <= limit then return map end
+    table.sort(keys, function(a, b)
+        local ta, tb = recentOf(map[a]), recentOf(map[b])
+        if ta ~= tb then return ta > tb end
+        return a < b
+    end)
+    local kept = {}
+    for i = 1, limit do kept[keys[i]] = map[keys[i]] end
+    return kept
+end
+
 local function SanitizeChars(saved)
     local clean = {}
     if type(saved) ~= "table" then return clean end
-    local realms = 0
     for realm, chars in pairs(saved) do
-        if ValidName(realm) and type(chars) == "table" and realms < MAX_REALMS then
+        if ValidName(realm) and type(chars) == "table" then
             local list, count = {}, 0
             for name, info in pairs(chars) do
-                if ValidName(name) and type(info) == "table" and count < MAX_CHARS then
+                if ValidName(name) and type(info) == "table" then
                     local gold, level, t = info.gold, info.level, info.t
                     if type(gold) == "number" and gold == gold and gold >= 0 and gold <= 1e12
                             and type(level) == "number" and level >= 1 and level <= 200
@@ -922,10 +1011,15 @@ local function SanitizeChars(saved)
                     end
                 end
             end
-            if count > 0 then clean[realm] = list; realms = realms + 1 end
+            if count > 0 then clean[realm] = KeepRecent(list, MAX_CHARS, function(e) return e.t end) end
         end
     end
-    return clean
+    -- Arquivo adulterado com reinos demais: fica com os de atividade mais recente.
+    return KeepRecent(clean, MAX_REALMS, function(chars)
+        local latest = 0
+        for _, e in pairs(chars) do if e.t > latest then latest = e.t end end
+        return latest
+    end)
 end
 
 -- Quem está jogando agora: nome e reino (nil se o jogo ainda não informou).
@@ -1570,6 +1664,46 @@ local function ShowLastSummary(isInitialLogin, isReloadingUi)
     FarolCharDB.lastSession = nil
 end
 
+---------------------------------------------------------------------------
+-- Orientação ao jogador: quase tudo vem desligado. Boas-vindas (primeira vez) ou novidades (atualização),
+-- uma única vez, só no SEU chat. Nada é ligado sozinho: só informa.
+---------------------------------------------------------------------------
+
+-- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
+local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
+               "news_prof", "news_junk", "news_alts", "news_rested" }
+local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
+local onboardingShown = false
+
+local function ItemCounts()
+    local on = 0
+    for _, key in ipairs(ITEM_ORDER) do if db.items[key] then on = on + 1 end end
+    return on, #ITEM_ORDER
+end
+
+local function ShowNews(from)
+    local names = {}
+    for i = (from or 0) + 1, #NEWS do names[#names + 1] = T(NEWS[i]) end
+    if #names == 0 then return end
+    Print(T("news_title"))
+    Print("  " .. table.concat(names, " · "))
+end
+
+local function ShowOnboarding()
+    if onboardingShown or not onboarding then return end
+    onboardingShown = true
+    if onboarding == "welcome" then
+        local shown = {}
+        for _, key in ipairs(ITEM_ORDER) do if db.items[key] then shown[#shown + 1] = T("name_" .. key) end end
+        local on, total = ItemCounts()
+        Print(string.format(T("welcome1"), table.concat(shown, ", ")))
+        Print(string.format(T("welcome2"), total - on))
+    else
+        ShowNews(db.newsSeen)
+    end
+    db.newsSeen = #NEWS
+end
+
 -- No 3.3.5a as coordenadas dependem do mapa "ativo"; ao trocar de zona,
 -- voltamos o mapa para a zona atual (sem mexer se o jogador estiver com o mapa aberto).
 local function ResetMapToCurrentZone()
@@ -2104,7 +2238,9 @@ local function FillTooltip()
 
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(db.locked and T("tt_locked") or T("tt_drag"), 0.6, 0.6, 0.6)
-    GameTooltip:AddLine(T("tt_rightclick"), 0.6, 0.6, 0.6)
+    local itemsOn, itemsTotal = ItemCounts()
+    GameTooltip:AddLine(itemsOn < itemsTotal and string.format(T("tt_rightclick_more"), itemsTotal - itemsOn)
+        or T("tt_rightclick"), 0.6, 0.6, 0.6)
     GameTooltip:AddLine(T("tt_help"), 0.6, 0.6, 0.6)
 end
 
@@ -2339,6 +2475,14 @@ local function BuildControls(parent, top)
         local row = (index - 1) % perColumn
         set.items[key] = CreateCheck(parent, 20 + column * 165, y - row * 26,
             function(value) SetItemVisible(key, value) end)
+        -- Passar o mouse: o que este item mostra.
+        set.items[key]:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(T("name_" .. key))
+            GameTooltip:AddLine(T("desc_" .. key), 1, 1, 1, true)
+            GameTooltip:Show()
+        end)
+        set.items[key]:SetScript("OnLeave", function() GameTooltip:Hide() end)
     end
     y = y - perColumn * 26
 
@@ -2413,7 +2557,8 @@ end
 RefreshOptions = function()
     if not db then return end
     for _, set in ipairs(controlSets) do
-        set.hint:SetText(T("opt_hint"))
+        local on, total = ItemCounts()
+        set.hint:SetText(string.format(T("opt_hint_count"), on, total))
         set.itemsHeader:SetText(T("opt_items"))
         set.generalHeader:SetText(T("opt_general"))
         set.langHeader:SetText(T("opt_lang"))
@@ -2542,6 +2687,15 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         if arg1 ~= ADDON_NAME then return end
         local saved = FarolDB
         db = SanitizeDB(saved)
+        -- Nova instalação = sem dados salvos. Quem já usava (dados sem "newsSeen") vê as novidades uma vez.
+        if type(saved) ~= "table" or next(saved) == nil then
+            onboarding = "welcome"
+        else
+            local seen = saved.newsSeen
+            if type(seen) ~= "number" or seen ~= seen or seen < 0 then seen = 0 end
+            db.newsSeen = math.min(math.floor(seen), #NEWS)
+            if db.newsSeen < #NEWS then onboarding = "news" end
+        end
         db.alarms = ns.Alarm.Sanitize(type(saved) == "table" and saved.alarms or nil)
         db.loot = ns.Loot.SanitizeSettings(type(saved) == "table" and saved.loot or nil)
         db.warnings = ns.Warnings.Sanitize(type(saved) == "table" and saved.warnings or nil)
@@ -2570,6 +2724,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
 
     if event == "PLAYER_ENTERING_WORLD" then
         pcall(ShowLastSummary, arg1, arg2) -- antes de StartSession: o registro é da sessão anterior
+        pcall(ShowOnboarding)
         StartSession()
         pcall(RecordCharacter)
         ResetMapToCurrentZone()
@@ -2600,7 +2755,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_warn", "help_history", "help_appearance", "help_order",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_news", "help_warn", "help_history", "help_appearance", "help_order",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -2668,6 +2823,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Warnings.ToggleHistory()
     elseif cmd == "aviso" or cmd == "avisos" or cmd == "warn" or cmd == "warning" or cmd == "warnings" then
         ns.Warnings.HandleCommand(rest)
+    elseif cmd == "novidades" or cmd == "news" then
+        ShowNews(0)
     elseif cmd == "ouro" or cmd == "gold" then
         local word, target = string.match(rest or "", "^%s*(%a*)%s*(.-)%s*$")
         word, target = string.lower(word or ""), target or ""

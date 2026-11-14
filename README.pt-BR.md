@@ -8,6 +8,11 @@ XP/hora · reputação · profissões · horário · resets diário/semanal · t
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
+> **A maioria das funções começa desligada.** A barra começa com o básico (FPS, latência, coordenadas, zona,
+> durabilidade, ouro). **Clique com o botão direito na barra** (ou `/farol menu`) para ligar as outras — passe o mouse
+> em cada item para ver o que ele mostra. Na primeira vez, o Farol avisa isso no seu chat; depois de uma atualização,
+> lista as novidades uma vez (`/farol novidades` mostra de novo).
+
 ## Instalação
 
 > **Vindo do "WoW Forever Info"?** O addon mudou de nome. Apague a pasta antiga
@@ -30,6 +35,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol saque`      | Abre a janela de últimos saques |
 | `/farol saque limpar`| Apaga o histórico de saques deste personagem |
 | `/farol sessao zerar`| Recomeça ouro da sessão, ouro/h, XP/h, rep/h e tempo |
+| `/farol novidades`  | Mostra de novo as novidades das últimas versões |
 | `/farol resumo`     | Resumo da sessão atual (ouro, XP, reputação, saques, avisos) |
 | `/farol ouro`       | Ouro de todos os seus personagens deste reino |
 | `/farol ouro total on` / `off` | Mostra / esconde o total do reino ao lado do ouro na barra |

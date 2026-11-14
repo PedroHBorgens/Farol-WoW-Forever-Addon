@@ -70,6 +70,7 @@ local SUITES = {
     "test_rest",
     "test_onboarding",
     "test_lockouts",
+    "test_tooltip",
     "test_globals",
 }
 

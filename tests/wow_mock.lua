@@ -146,6 +146,7 @@ function Mock.new(opts)
     env.wipe = function(t) for k in pairs(t) do t[k] = nil end return t end
     env.SlashCmdList = {}
     env.InCombatLockdown = function() return H.inCombat or false end
+    env.IsShiftKeyDown = function() return H.shift or false end
     env.IsInInstance = function()
         if H.instanceType then return true, H.instanceType end
         return false, "none"

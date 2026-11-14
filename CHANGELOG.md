@@ -2,6 +2,13 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.26.0 — Smaller tooltip
+- Each bar item now has its own short tooltip with only its details (e.g. gold: gold, gold/h, your characters,
+  their rested XP and lockouts). Hold **Shift**, or hover the edge of the bar, for the full tooltip.
+- Long lists (characters, damaged items, lockouts, junk) show at most 5 lines and "and N more".
+- Option **Full tooltip** in the Appearance window (`/farol appearance tooltip`) for the old behavior.
+- Dragging the bar and right-clicking for the options still work anywhere on the bar.
+
 ## 2.25.0 — Saved instances
 - The Resets tooltip lists your saved instances (raid/dungeon lockouts) with bosses killed and time to reset; the
   gold tooltip shows where your other characters are saved (saved on logout; expired lockouts disappear).

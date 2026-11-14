@@ -67,6 +67,7 @@ local DEFAULTS = {
     serverTime = false, -- relógio mostra o horário do servidor em vez do local
     summary = true,     -- mostrar o resumo da última sessão ao entrar no jogo
     goldTotal = false,  -- item Ouro mostra também o total de todos os seus personagens do reino
+    tooltipFull = false, -- false = cada item mostra só o seu tooltip (Shift mostra tudo); true = sempre completo
     newsSeen = 0,       -- quantas novidades (NEWS) o jogador já viu; boas-vindas/novidades aparecem uma vez
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
     -- Aparência
@@ -279,6 +280,8 @@ local STRINGS = {
         opt_hint     = "Marque o que deseja ver na barra.",
         opt_hint_count = "Itens na barra: %d de %d ligados — marque os que quiser (passe o mouse para ver o que cada um mostra).",
         tt_rightclick_more = "Clique direito: opções (mais %d informações para ligar).",
+        tt_shift_full = "Segure Shift para ver todas as informações.",
+        tt_more      = "e mais %d",
         welcome1     = "bem-vindo! A barra começa só com o básico: %s.",
         welcome2     = "há mais %d informações e vários avisos desligados — clique com o botão direito na barra para escolher (ou /farol menu). /farol ajuda lista os comandos.",
         news_title   = "novidades desde a sua última versão (a maioria vem desligada — ative no menu: clique direito na barra):",
@@ -293,6 +296,7 @@ local STRINGS = {
         news_alts    = "ouro de todos os personagens (/farol ouro)",
         news_rested  = "descanso dos seus personagens",
         news_locks   = "instâncias salvas (/farol instancias)",
+        news_tooltip = "tooltip menor: cada item mostra só o seu (Shift mostra tudo)",
         help_news    = "  /farol novidades     - ver de novo as novidades das últimas versões",
         desc_fps      = "Quadros por segundo (verde 50+, amarelo 25+).",
         desc_ms       = "Latência: a maior entre local e mundo.",
@@ -506,6 +510,8 @@ local STRINGS = {
         opt_hint     = "Tick what you want to see on the bar.",
         opt_hint_count = "Bar items: %d of %d on — tick the ones you want (hover to see what each one shows).",
         tt_rightclick_more = "Right-click: options (%d more items you can turn on).",
+        tt_shift_full = "Hold Shift to see all information.",
+        tt_more      = "and %d more",
         welcome1     = "welcome! The bar starts with the basics only: %s.",
         welcome2     = "there are %d more items and several warnings turned off — right-click the bar to choose (or /farol menu). /farol help lists the commands.",
         news_title   = "new since your last version (most are off by default — turn them on in the menu: right-click the bar):",
@@ -520,6 +526,7 @@ local STRINGS = {
         news_alts    = "gold of all your characters (/farol gold)",
         news_rested  = "rested XP of your characters",
         news_locks   = "saved instances (/farol lockouts)",
+        news_tooltip = "smaller tooltip: each item shows its own (Shift shows everything)",
         help_news    = "  /farol news          - show the news of the latest versions again",
         desc_fps      = "Frames per second (green 50+, yellow 25+).",
         desc_ms       = "Latency: the higher of home and world.",
@@ -1794,7 +1801,9 @@ end
 
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
-               "news_prof", "news_junk", "news_alts", "news_rested", "news_locks" }
+               "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
+               "news_tooltip" }
+ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
 
@@ -2012,7 +2021,28 @@ measure:Hide()
 local FONT_PATH, _, FONT_FLAGS = text:GetFont()
 text:SetText("...")
 
+-- Área invisível de mouse sobre o item: tooltip só deste item. Arrastar e clicar continuam indo para a barra.
+local function AttachHover(cell)
+    local hover = CreateFrame("Frame", nil, frame)
+    hover:EnableMouse(true)
+    if hover.RegisterForDrag then hover:RegisterForDrag("LeftButton") end
+    local function forward(script)
+        return function(_, ...)
+            local handler = frame:GetScript(script)
+            if handler then handler(frame, ...) end
+        end
+    end
+    hover:SetScript("OnDragStart", forward("OnDragStart"))
+    hover:SetScript("OnDragStop", forward("OnDragStop"))
+    hover:SetScript("OnMouseUp", forward("OnMouseUp"))
+    hover:SetScript("OnEnter", function() if ns.ShowTooltip then ns.ShowTooltip(frame, cell.farolKey) end end)
+    hover:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    hover:Hide()
+    cell.hover = hover
+end
+
 local cells = { text }
+AttachHover(text)
 local function Cell(index)
     local cell = cells[index]
     if not cell then
@@ -2020,6 +2050,7 @@ local function Cell(index)
         cell:SetJustifyH("LEFT")
         cell.farolCell = index
         if FONT_PATH and db then cell:SetFont(FONT_PATH, db.fontSize, FONT_FLAGS) end
+        AttachHover(cell)
         cells[index] = cell
     end
     return cell
@@ -2086,7 +2117,7 @@ local isSizing = false   -- o jogador está arrastando a alça de largura
 local layoutRows = 1     -- quantas linhas a barra tem agora
 
 local function UpdateText()
-    local parts = {}
+    local parts, keys = {}, {}
     for _, key in ipairs(db.order or ITEM_ORDER) do -- ordem escolhida pelo jogador
         if db.items[key] then
             local ok, value = pcall(ITEM_TEXT[key])
@@ -2094,6 +2125,7 @@ local function UpdateText()
             if value then
                 if db.icons then value = IconTag(key) .. value end
                 parts[#parts + 1] = value
+                keys[#parts] = key
             end
         end
     end
@@ -2147,8 +2179,13 @@ local function UpdateText()
         cell:SetPoint("TOPLEFT", frame, "TOPLEFT", colX[col], -PAD_Y - row * lineHeight - 2)
         cell:SetText(parts[i])
         cell:Show()
+        cell.farolKey = keys[i]
+        cell.hover:ClearAllPoints()
+        cell.hover:SetPoint("TOPLEFT", cell, "TOPLEFT", -GAP_X / 2, 2)
+        cell.hover:SetSize(widths[i] + GAP_X, lineHeight)
+        if keys[i] then cell.hover:Show() else cell.hover:Hide() end
     end
-    for i = n + 1, #cells do cells[i]:Hide() end
+    for i = n + 1, #cells do cells[i]:Hide(); cells[i].hover:Hide() end
 
     layoutRows = math.ceil(n / cols)
     if not isSizing then frame:SetWidth(math.max(60, total)) end -- a barra encolhe até o conteúdo
@@ -2183,75 +2220,79 @@ local function AddPair(label, value)
     GameTooltip:AddDoubleLine(label, value, GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3], WHITE[1], WHITE[2], WHITE[3])
 end
 
-local function FillTooltip()
-    GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
+-- Listas longas: no máximo LIST_MAX linhas e um "e mais N" no fim.
+local LIST_MAX = 5
+local function More(count)
+    if count > LIST_MAX then GameTooltip:AddLine("   " .. string.format(T("tt_more"), count - LIST_MAX), 0.6, 0.6, 0.6) end
+end
 
+-- Seções do tooltip. Cada item da barra mostra só as suas (TIP_SECTIONS); Shift ou a opção "Tooltip completo"
+-- mostram todas, na ordem de TIP_ORDER.
+local TIP = {}
+
+TIP.perf = function()
     local fps = Safe(GetFPS)
     AddPair("FPS", fps and tostring(fps) or "--")
-
     local _, home, world = Safe(GetLatency)
     AddPair(T("tt_latency"), home and string.format(T("tt_lat_value"), home, world) or "--")
-
     local mb = Safe(GetMemoryMB)
     AddPair(T("tt_mem"), mb and string.format("%.1f MB", mb) or "--")
+end
 
+TIP.place = function()
     local x, y = GetCoords()
     AddPair(T("tt_coords"), x and string.format("%.1f, %.1f", x * 100, y * 100) or "--, --")
-
     local zone, sub = Safe(GetZones)
     AddPair(T("tt_zone"), (zone and zone ~= "") and zone or "--")
-    if sub and sub ~= "" and sub ~= zone then
-        AddPair(T("tt_subzone"), sub)
-    end
+    if sub and sub ~= "" and sub ~= zone then AddPair(T("tt_subzone"), sub) end
     local speed = Safe(GetSpeedPercent)
     AddPair(T("tt_speed"), (speed and not IsSecret(speed)) and string.format("%d%%", math.floor(speed + 0.5)) or "--")
+end
 
-    GameTooltip:AddLine(" ")
-    if durability.lowest then
-        AddPair(T("tt_durab"), string.format("%s%d%%|r",
-            ColorHighIsGood(durability.lowest, 50, 20), math.floor(durability.lowest)))
-        if #durability.damaged == 0 then
-            GameTooltip:AddLine(T("tt_all_ok"), 0.6, 0.6, 0.6)
-        else
-            for _, entry in ipairs(durability.damaged) do
-                local link = Safe(GetInventoryItemLink, "player", entry.slot)
-                if type(link) ~= "string" or IsSecret(link) then
-                    link = string.format(T("tt_slot"), entry.slot)
-                end
-                GameTooltip:AddDoubleLine("  " .. link, string.format("%s%d%%|r",
-                    ColorHighIsGood(entry.pct, 50, 20), math.floor(entry.pct)))
-            end
-        end
-    else
-        GameTooltip:AddLine(T("tt_no_gear"), 0.6, 0.6, 0.6)
+TIP.durab = function()
+    if not durability.lowest then GameTooltip:AddLine(T("tt_no_gear"), 0.6, 0.6, 0.6) return end
+    AddPair(T("tt_durab"), string.format("%s%d%%|r", ColorHighIsGood(durability.lowest, 50, 20), math.floor(durability.lowest)))
+    if #durability.damaged == 0 then GameTooltip:AddLine(T("tt_all_ok"), 0.6, 0.6, 0.6) return end
+    for i = 1, math.min(LIST_MAX, #durability.damaged) do
+        local entry = durability.damaged[i]
+        local link = Safe(GetInventoryItemLink, "player", entry.slot)
+        if type(link) ~= "string" or IsSecret(link) then link = string.format(T("tt_slot"), entry.slot) end
+        GameTooltip:AddDoubleLine("  " .. link, string.format("%s%d%%|r", ColorHighIsGood(entry.pct, 50, 20), math.floor(entry.pct)))
     end
+    More(#durability.damaged)
+end
 
-    GameTooltip:AddLine(" ")
+TIP.gold = function()
     local money = Safe(GetMoney)
     AddPair(T("tt_gold"), money and FormatMoney(money) or "--")
+    local delta = Safe(GetSessionMoney)
+    if delta then AddPair(T("tt_session"), FormatMoneyDelta(delta)) end
+    local goldRate = Safe(GetGoldRate)
+    if goldRate then
+        local copper = goldRate >= 0 and math.floor(goldRate) or -math.floor(-goldRate)
+        AddPair(T("tt_goldh"), FormatMoneyDelta(copper))
+    else
+        AddPair(T("tt_goldh"), T("tt_rate_wait"))
+    end
     local chars, charsTotal, realm = Safe(RealmCharacters)
     if chars and #chars > 1 then
         AddPair(string.format(T("tt_gold_total"), FactionName(realm)), FormatMoneyShort(charsTotal))
-        for i = 1, math.min(10, #chars) do
+        for i = 1, math.min(LIST_MAX, #chars) do
             local c = chars[i]
             local when = c.current and T("tt_gold_this") or FormatWhen(c.t)
             GameTooltip:AddDoubleLine("   " .. FactionName(c.name) .. " (" .. c.level .. ")",
                 FormatMoneyShort(c.gold) .. "  |cff8c8c8c" .. when .. "|r", 0.8, 0.8, 0.8, 1, 1, 1)
         end
+        More(#chars)
     end
-    local altLocks = Safe(AltLockouts)
-    if altLocks and #altLocks > 0 then
-        GameTooltip:AddLine(T("tt_locks_alts"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
-        for i = 1, math.min(10, #altLocks) do
-            local a = altLocks[i]
-            GameTooltip:AddLine("   " .. FactionName(a.name) .. " (" .. a.level .. "): " .. table.concat(a.locks, ", "),
-                0.8, 0.8, 0.8, true)
-        end
-    end
+end
+
+-- Seus outros personagens: descanso estimado e instâncias salvas.
+TIP.alts = function()
     local rested = Safe(RestedAlts)
     if rested and #rested > 0 then
         GameTooltip:AddLine(T("tt_rest_title"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
-        for i = 1, math.min(10, #rested) do
+        for i = 1, math.min(LIST_MAX, #rested) do
             local r = rested[i]
             local status = r.full and ("|cff40ff40" .. T("tt_rest_full") .. "|r")
                 or string.format(T("tt_rest_eta"), FormatCountdown(r.eta))
@@ -2259,131 +2300,167 @@ local function FillTooltip()
             GameTooltip:AddDoubleLine("   " .. FactionName(r.name) .. " (" .. r.level .. ")",
                 r.pct .. "%  " .. status .. "  " .. place, 0.8, 0.8, 0.8, 1, 1, 1)
         end
+        More(#rested)
     end
-    local goldRate = Safe(GetGoldRate)
-    local delta = Safe(GetSessionMoney)
-    if delta then AddPair(T("tt_session"), FormatMoneyDelta(delta)) end
-    if goldRate then
-        local copper = goldRate >= 0 and math.floor(goldRate) or -math.floor(-goldRate)
-        AddPair(T("tt_goldh"), FormatMoneyDelta(copper))
-    else
-        AddPair(T("tt_goldh"), T("tt_rate_wait"))
-    end
-    local free, total = Safe(GetBagSpace)
-    if free then AddPair(T("tt_bags"), string.format("%d / %d", free, total)) end
-
-    local cur, max, rested = Safe(GetXPInfo)
-    if cur then
-        AddPair(T("tt_xp"), string.format("%d / %d (%d%%)", cur, max, math.floor(cur / max * 100)))
-        if rested and rested > 0 then
-            AddPair(T("tt_rested"), string.format("%d (%d%%)", rested, math.floor(rested / max * 100)))
+    local altLocks = Safe(AltLockouts)
+    if altLocks and #altLocks > 0 then
+        GameTooltip:AddLine(T("tt_locks_alts"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
+        for i = 1, math.min(LIST_MAX, #altLocks) do
+            local a = altLocks[i]
+            GameTooltip:AddLine("   " .. FactionName(a.name) .. " (" .. a.level .. "): " .. table.concat(a.locks, ", "),
+                0.8, 0.8, 0.8, true)
         end
-    else
-        AddPair(T("tt_xp"), T("tt_maxlevel"))
+        More(#altLocks)
     end
+end
 
-    GameTooltip:AddLine(" ")
+TIP.bags = function()
+    local free, total = Safe(GetBagSpace)
+    AddPair(T("tt_bags"), free and string.format("%d / %d", free, total) or "--")
+end
+
+TIP.junk = function()
+    local junk = Safe(GetJunk)
+    if not junk then AddPair(T("tt_junk"), "--") return end
+    AddPair(T("tt_junk"), junk.slots > 0 and FormatMoneyShort(junk.total) or "0")
+    if junk.slots > 0 then
+        AddPair(T("tt_junk_slots"), tostring(junk.slots))
+        for i = 1, math.min(LIST_MAX, #junk.items) do
+            local item = junk.items[i]
+            local name = "   " .. FactionName(item.name) .. (item.count > 1 and (" x" .. item.count) or "")
+            GameTooltip:AddDoubleLine(name, FormatMoneyShort(item.value), 0.62, 0.62, 0.62, 1, 1, 1)
+        end
+        More(#junk.items)
+        GameTooltip:AddLine(T("tt_junk_hint"), 0.6, 0.6, 0.6)
+    end
+    if junk.pending > 0 then GameTooltip:AddLine(string.format(T("tt_junk_pending"), junk.pending), 0.6, 0.6, 0.6) end
+end
+
+TIP.xp = function()
+    local cur, max, rested = Safe(GetXPInfo)
+    if not cur then AddPair(T("tt_xp"), T("tt_maxlevel")) return end
+    AddPair(T("tt_xp"), string.format("%d / %d (%d%%)", cur, max, math.floor(cur / max * 100)))
+    if rested and rested > 0 then
+        AddPair(T("tt_rested"), string.format("%d (%d%%)", rested, math.floor(rested / max * 100)))
+    end
+    local perHour, toLevel = Safe(GetXPRate)
+    if perHour then
+        AddPair(T("tt_xph"), FormatBig(perHour))
+        if toLevel then AddPair(T("tt_tolevel"), FormatDuration(toLevel)) end
+    else
+        AddPair(T("tt_xph"), T("tt_rate_wait"))
+    end
+end
+
+TIP.rep = function()
+    local f = Safe(GetWatchedFaction)
+    if not ValidFaction(f) then AddPair(T("tt_rep"), T("tt_rep_none")) return end
+    AddPair(T("tt_rep"), FactionName(f.name))
+    AddPair(T("tt_rep_standing"), StandingText(f.reaction))
+    local cur, total, pct = RepProgress(f)
+    if cur then
+        AddPair(T("tt_rep_progress"), string.format("%s / %s (%d%%)", FormatBig(cur), FormatBig(total), pct))
+        local rate = Safe(GetRepRate)
+        if rate then
+            AddPair(T("tt_rep_rate"), "+" .. FormatBig(rate))
+            AddPair(T("tt_rep_next"), FormatDuration((total - cur) / rate * 3600))
+        else
+            AddPair(T("tt_rep_rate"), T("tt_rate_wait"))
+        end
+    end
+end
+
+TIP.prof = function()
+    local list = Safe(ReadProfessions)
+    if not list or #list == 0 then AddPair(T("tt_prof"), T("tt_prof_none")) return end
+    for _, p in ipairs(list) do
+        local value = ProfText(p)
+        local gain = ProfGain(p)
+        if gain > 0 then value = value .. string.format(T("tt_prof_gain"), gain) end
+        AddPair(FactionName(p.name), value)
+        if ProfState(p) == "cap" then GameTooltip:AddLine("   " .. T("tt_prof_cap"), 1, 0.4, 0.4) end
+    end
+end
+
+TIP.clock = function()
     AddPair(T("tt_clock_local"), Safe(GetClockText, false) or "--")
     AddPair(T("tt_clock_server"), Safe(GetClockText, true) or "--")
     if ns.Alarm then pcall(ns.Alarm.AddTooltipLines, AddPair) end
-    if Safe(GetXPInfo) then
-        local perHour, toLevel = Safe(GetXPRate)
-        if perHour then
-            AddPair(T("tt_xph"), FormatBig(perHour))
-            if toLevel then AddPair(T("tt_tolevel"), FormatDuration(toLevel)) end
-        else
-            AddPair(T("tt_xph"), T("tt_rate_wait"))
-        end
-    end
-    if db.items.rep then
-        local f = Safe(GetWatchedFaction)
-        if ValidFaction(f) then
-            AddPair(T("tt_rep"), FactionName(f.name))
-            AddPair(T("tt_rep_standing"), StandingText(f.reaction))
-            local cur, total, pct = RepProgress(f)
-            if cur then
-                AddPair(T("tt_rep_progress"), string.format("%s / %s (%d%%)", FormatBig(cur), FormatBig(total), pct))
-                local rate = Safe(GetRepRate)
-                if rate then
-                    AddPair(T("tt_rep_rate"), "+" .. FormatBig(rate))
-                    AddPair(T("tt_rep_next"), FormatDuration((total - cur) / rate * 3600))
-                else
-                    AddPair(T("tt_rep_rate"), T("tt_rate_wait"))
-                end
-            end
-        else
-            AddPair(T("tt_rep"), T("tt_rep_none"))
-        end
-    end
-    if db.items.junk then
-        local junk = Safe(GetJunk)
-        if junk then
-            AddPair(T("tt_junk"), junk.slots > 0 and FormatMoneyShort(junk.total) or "0")
-            if junk.slots > 0 then
-                AddPair(T("tt_junk_slots"), tostring(junk.slots))
-                for i = 1, math.min(5, #junk.items) do
-                    local item = junk.items[i]
-                    local name = "   " .. FactionName(item.name) .. (item.count > 1 and (" x" .. item.count) or "")
-                    GameTooltip:AddDoubleLine(name, FormatMoneyShort(item.value), 0.62, 0.62, 0.62, 1, 1, 1)
-                end
-                GameTooltip:AddLine(T("tt_junk_hint"), 0.6, 0.6, 0.6)
-            end
-            if junk.pending > 0 then
-                GameTooltip:AddLine(string.format(T("tt_junk_pending"), junk.pending), 0.6, 0.6, 0.6)
-            end
-        else
-            AddPair(T("tt_junk"), "--")
-        end
-    end
-    if db.items.prof then
-        local list = Safe(ReadProfessions)
-        if list and #list > 0 then
-            for _, p in ipairs(list) do
-                local value = ProfText(p)
-                local gain = ProfGain(p)
-                if gain > 0 then value = value .. string.format(T("tt_prof_gain"), gain) end
-                AddPair(FactionName(p.name), value)
-                if ProfState(p) == "cap" then GameTooltip:AddLine("   " .. T("tt_prof_cap"), 1, 0.4, 0.4) end
-            end
-        else
-            AddPair(T("tt_prof"), T("tt_prof_none"))
-        end
-    end
-    if db.items.reset then
-        local daily, weekly = Safe(GetResetTimes)
-        for _, entry in ipairs({ { "tt_reset_daily", daily }, { "tt_reset_weekly", weekly } }) do
-            if entry[2] then
-                local localText, serverText = ResetMoment(entry[2])
-                AddPair(T(entry[1]), string.format(T("tt_reset_at"), FormatCountdown(entry[2]), localText, serverText))
-            else
-                AddPair(T(entry[1]), T("tt_reset_none"))
-            end
-        end
-        RequestLockouts(false) -- no máximo uma vez por minuto
-        local locks = Safe(ReadLockouts)
-        if locks then
-            if #locks == 0 then
-                AddPair(T("tt_locks"), locksLoaded and T("tt_locks_none") or T("tt_locks_wait"))
-            else
-                GameTooltip:AddLine(T("tt_locks"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
-                for i = 1, math.min(10, #locks) do
-                    local l = locks[i]
-                    local value = string.format(T("tt_locks_reset"), FormatCountdown(l.reset))
-                    if l.killed then value = string.format(T("tt_locks_bosses"), l.killed, l.total) .. "  " .. value end
-                    GameTooltip:AddDoubleLine("   " .. l.name, value, 0.8, 0.8, 0.8, 1, 1, 1)
-                end
-            end
-        end
-    end
-    local seconds = Safe(GetSessionSeconds)
-    if seconds then AddPair(T("tt_playtime"), FormatDuration(seconds)) end
+end
 
+TIP.reset = function()
+    local daily, weekly = Safe(GetResetTimes)
+    for _, entry in ipairs({ { "tt_reset_daily", daily }, { "tt_reset_weekly", weekly } }) do
+        if entry[2] then
+            local localText, serverText = ResetMoment(entry[2])
+            AddPair(T(entry[1]), string.format(T("tt_reset_at"), FormatCountdown(entry[2]), localText, serverText))
+        else
+            AddPair(T(entry[1]), T("tt_reset_none"))
+        end
+    end
+    RequestLockouts(false) -- no máximo uma vez por minuto
+    local locks = Safe(ReadLockouts)
+    if not locks then return end
+    if #locks == 0 then
+        AddPair(T("tt_locks"), locksLoaded and T("tt_locks_none") or T("tt_locks_wait"))
+        return
+    end
+    GameTooltip:AddLine(T("tt_locks"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
+    for i = 1, math.min(LIST_MAX, #locks) do
+        local l = locks[i]
+        local value = string.format(T("tt_locks_reset"), FormatCountdown(l.reset))
+        if l.killed then value = string.format(T("tt_locks_bosses"), l.killed, l.total) .. "  " .. value end
+        GameTooltip:AddDoubleLine("   " .. l.name, value, 0.8, 0.8, 0.8, 1, 1, 1)
+    end
+    More(#locks)
+end
+
+TIP.playtime = function()
+    local seconds = Safe(GetSessionSeconds)
+    AddPair(T("tt_playtime"), seconds and FormatDuration(seconds) or "--")
+end
+
+TIP.social = function()
     local wow, bnet = Safe(GetFriendsOnline)
     AddPair(T("tt_friends"), wow and string.format(T("tt_friends_value"), wow, bnet) or "--")
     local gOnline, gTotal = Safe(GetGuildOnline)
     AddPair(T("tt_guild"), gOnline and string.format("%d / %d", gOnline, gTotal or 0) or T("tt_noguild"))
+end
 
+-- Item da barra -> seções do seu tooltip.
+local TIP_SECTIONS = {
+    fps = { "perf" }, ms = { "perf" }, mem = { "perf" },
+    coords = { "place" }, zone = { "place" }, speed = { "place" },
+    durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" },
+    gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
+    xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" },
+    clock = { "clock" }, reset = { "reset" }, playtime = { "playtime" },
+    friends = { "social" }, guild = { "social" },
+}
+ns.TIP_SECTIONS = TIP_SECTIONS
+
+-- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
+local TIP_ORDER = { "perf", "place", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
+                    "rep", "junk", "prof", "reset", "playtime", "social" }
+local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", prof = "prof", reset = "reset" }
+
+local function FillTooltip(key, full)
+    GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
+    if full or not key then -- tooltip completo: Shift, a opção, ou o mouse no fundo da barra
+        do
+            for _, section in ipairs(TIP_ORDER) do
+                if section == " " then
+                    GameTooltip:AddLine(" ")
+                elseif not TIP_NEEDS_ITEM[section] or db.items[TIP_NEEDS_ITEM[section]] then
+                    pcall(TIP[section])
+                end
+            end
+        end
+    else
+        for _, section in ipairs(TIP_SECTIONS[key] or {}) do pcall(TIP[section]) end
+    end
     GameTooltip:AddLine(" ")
+    if not full then GameTooltip:AddLine(T("tt_shift_full"), 0.6, 0.6, 0.6) end
     GameTooltip:AddLine(db.locked and T("tt_locked") or T("tt_drag"), 0.6, 0.6, 0.6)
     local itemsOn, itemsTotal = ItemCounts()
     GameTooltip:AddLine(itemsOn < itemsTotal and string.format(T("tt_rightclick_more"), itemsTotal - itemsOn)
@@ -2391,15 +2468,26 @@ local function FillTooltip()
     GameTooltip:AddLine(T("tt_help"), 0.6, 0.6, 0.6)
 end
 
-local function ShowTooltip(self)
-    if not db then return end
-    GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-    GameTooltip:ClearLines()
-    pcall(FillTooltip)
-    GameTooltip:Show()
+-- Qual item está sob o mouse (nil = fundo da barra). Shift ou a opção "Tooltip completo" mostram tudo.
+local tipKey
+local function ShiftDown()
+    if not IsShiftKeyDown then return false end
+    local ok, value = pcall(IsShiftKeyDown)
+    return ok and value and true or false
 end
 
-frame:SetScript("OnEnter", ShowTooltip)
+local function ShowTooltip(_, key)
+    if not db then return end
+    tipKey = key
+    GameTooltip:SetOwner(frame, "ANCHOR_BOTTOM")
+    GameTooltip:ClearLines()
+    local full = db.tooltipFull or ShiftDown() or key == nil
+    pcall(FillTooltip, key, full)
+    GameTooltip:Show()
+end
+ns.ShowTooltip = ShowTooltip
+
+frame:SetScript("OnEnter", function() ShowTooltip(frame, nil) end)
 frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 local function TooltipIsOurs()
@@ -2417,7 +2505,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
         pcall(RecordCharacter) -- ouro e nível deste personagem (para o total da conta)
         UpdateText()
         if db.items.guild then RequestGuildRoster() end
-        if TooltipIsOurs() then ShowTooltip(self) end -- mantém o tooltip atualizado
+        if TooltipIsOurs() then ShowTooltip(self, tipKey) end -- mantém o tooltip atualizado (mesmo item)
     end
 end)
 

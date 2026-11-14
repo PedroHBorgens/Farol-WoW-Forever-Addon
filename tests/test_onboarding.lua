@@ -47,12 +47,12 @@ return {
         T.has(text, "  • descanso dos seus personagens")
         local lines = 0
         for _ in string.gmatch(text, "•") do lines = lines + 1 end
-        T.eq(lines, 11, "one news item per line")
+        T.eq(lines, #H.ns.NEWS, "one news item per line")
         T.hasnt(text, "bem-vindo")
-        T.eq(H.env.FarolDB.newsSeen, 11)
+        T.eq(H.env.FarolDB.newsSeen, #H.ns.NEWS)
         T.hasnt(chat(relog(H, Mock)), "novidades", "once")
         local P = Mock.new():login({ items = { fps = true }, newsSeen = 8 })
-        T.has(chat(P), "  • ouro de todos os personagens (/farol ouro)\nFarol:   • descanso dos seus personagens\nFarol:   • instâncias salvas (/farol instancias)")
+        T.has(chat(P), "  • ouro de todos os personagens (/farol ouro)\nFarol:   • descanso dos seus personagens\nFarol:   • instâncias salvas (/farol instancias)\nFarol:   • tooltip menor")
         T.hasnt(chat(P), "reputação na barra", "older news are not repeated")
         P.msgs = {}; P:slash("novidades")
         T.has(chat(P), "reputação na barra", "/farol novidades shows all again")
@@ -61,7 +61,7 @@ return {
     { "tampered 'newsSeen' falls back safely", function(T, Mock)
         for _, bad in ipairs({ 0 / 0, -1, "x", math.huge, 1e9, {} }) do
             local H = Mock.new():login({ items = { fps = true }, newsSeen = bad })
-            T.ok(H.env.FarolDB.newsSeen >= 0 and H.env.FarolDB.newsSeen <= 11, "valid after " .. tostring(bad))
+            T.ok(H.env.FarolDB.newsSeen >= 0 and H.env.FarolDB.newsSeen <= #H.ns.NEWS, "valid after " .. tostring(bad))
         end
     end },
 

@@ -5,7 +5,7 @@
 local ALPHA = { "a", "0", "9", " ", ":", "%", "|", "c", "H", "T", "\n", "\0", "é", "[", "]", "(", ".", "-",
                 "%s", "%d", "%1$s", "|cff", "|H", "|T", "|A", "|r" }
 local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", "durab", "bolsas", "talentos",
-                "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "15", "240", "2",
+                "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "15", "240", "2",
                 "graus", "som", "status", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
                 "sessao", "zerar", "historico", "on", "off", "07:30", "25:99", "-1", "99999" }
@@ -50,7 +50,7 @@ return {
     { "tampered saved data with wrong types never breaks any window", function(T, Mock)
         local KEYS = { "x", "y", "point", "lang", "scale", "bgAlpha", "fontSize", "iconSize", "barWidth", "items",
                        "alarms", "loot", "warnings", "order", "snoozeMinutes", "shown", "locked", "icons", "vertical",
-                       "summary", "serverTime", "goldTotal", "chars", "newsSeen" }
+                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull" }
         for i = 1, 60 do
             local db = {}
             for _, key in ipairs(KEYS) do if random(3) > 1 then db[key] = pick(BAD) end end

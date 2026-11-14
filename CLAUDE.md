@@ -99,6 +99,9 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `lastSession` = resumo da última sessão,
   só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
   `ADDON_LOADED` chamando o `Sanitize` de cada módulo; chaves desconhecidas são descartadas.
+- **Tooltip:** dividido em seções (`TIP.perf`, `TIP.gold`, `TIP.reset`…). Cada célula tem uma área invisível de
+  mouse (`AttachHover`) que mostra só as seções do item (`TIP_SECTIONS`) e repassa arrastar/clique para a barra.
+  Shift, a opção `tooltipFull` ou o fundo da barra mostram tudo (`TIP_ORDER`). Listas: no máximo `LIST_MAX` (5).
 - **Barra:** cada informação é uma **célula** (FontString) numa grade de **colunas alinhadas à esquerda**. O número
   de colunas é o máximo que cabe em `db.barWidth` (0 = uma linha, 1 = uma coluna, N = pixels escolhidos pela alça).
   A altura segue as linhas. Botões rápidos (📝 👜) via `ns.quickButtons` + `ns.LayoutQuickButtons()`.
@@ -134,7 +137,8 @@ lua5.1 tests/run.lua        # ~150 testes; deve terminar com "0 failed"
 2. Mudança + testes + README.md **e** README.pt-BR.md + `assets/curseforge-description.md` se for algo visível.
 3. Subir a versão em **todos os 4 `.toc`** (`## Version:`) e registrar no `CHANGELOG.md`. Função nova e visível:
    acrescentar uma chave **no fim** de `NEWS` (Core.lua) com o texto `news_*` em PT/EN — quem atualizar vê só o que
-   ainda não viu. Item novo na barra: também `desc_<item>` em PT/EN (explicação ao passar o mouse; um teste confere).
+   ainda não viu. Item novo na barra: também `desc_<item>` em PT/EN (explicação ao passar o mouse; um teste confere) e uma
+   entrada em `TIP_SECTIONS` (quais seções `TIP.*` o tooltip daquele item mostra; um teste confere).
 4. Pull request. O `main` é protegido: o merge exige **`test`** aprovado. Esperar também o
    **`github-advanced-security`** (AI Scan / "Code scanning AI findings": análise de segurança por IA do GitHub,
    a única automática que cobre Lua, já que o CodeQL não analisa Lua).

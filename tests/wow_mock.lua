@@ -176,6 +176,10 @@ function Mock.new(opts)
 
     -- Personagem e mundo
     env.GetFramerate = function() return 60.2 end
+    -- Personagem atual e reino (o ouro de outros personagens vem do FarolDB salvo).
+    H.playerName, H.realm = "Garrosh", "Azralon"
+    env.UnitName = function(unit) if unit == "player" then return H.playerName end return nil end
+    env.GetRealmName = function() return H.realm end
     env.GetMoney = function() return H.money or 1234567 end
     env.GetRealZoneText = function() return "Floresta de Elwynn" end
     env.GetSubZoneText = function() return "Vale Norte" end

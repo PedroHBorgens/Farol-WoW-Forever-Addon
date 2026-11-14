@@ -82,7 +82,9 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - Cada módulo adiciona seus textos em `ns.STRINGS.pt` / `ns.STRINGS.en` e usa `T("chave")`.
 - **Globais:** só nomes começando com `Farol` (janelas/botões), `FarolDB`, `FarolCharDB`, `SLASH_FAROL1`,
   `Farol_ToggleWarnHistory`, `BINDING_*`. Nada de globais genéricos.
-- **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`) e
+- **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`, `chars` = ouro
+  e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t }`, nomes sem `|`/controle
+  e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores) e
   `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `lastSession` = resumo da última sessão,
   só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
   `ADDON_LOADED` chamando o `Sanitize` de cada módulo; chaves desconhecidas são descartadas.

@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 2.22.0 — Gold of all your characters
+- Farol remembers the gold and level of each of your characters (only on your computer) and the gold tooltip lists
+  them per realm, richest first, with the total and when you last played each one.
+- Option **Gold of all characters on the bar** (off by default): `123g 45s 67c (Total 1482g 10s)`.
+- `/farol gold` lists them; `/farol gold forget Name` or **Forget characters** in the options (click twice to
+  confirm) removes characters you no longer play. Saved names and values are validated on load (limits: 20 realms,
+  60 characters each).
+
 ## 2.21.0 — Junk value
 - New bar item **Junk in bags** (off by default): vendor value of gray items and the slots they take
   (`Junk 3g 26s (3)`); the tooltip lists the most valuable ones. Farol only shows it — it never sells.

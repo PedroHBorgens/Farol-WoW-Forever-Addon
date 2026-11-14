@@ -66,6 +66,7 @@ local DEFAULTS = {
     lang = "auto", -- "auto" (segue o idioma do cliente), "pt" ou "en"
     serverTime = false, -- relógio mostra o horário do servidor em vez do local
     summary = true,     -- mostrar o resumo da última sessão ao entrar no jogo
+    goldTotal = false,  -- item Ouro mostra também o total de todos os seus personagens do reino
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
     -- Aparência
     scale = 1,              -- escala da barra (0.5 a 2)
@@ -152,6 +153,20 @@ local STRINGS = {
         label_guild  = "Guilda",
         opt_servertime = "Horário do servidor",
         opt_summary  = "Resumo da sessão ao entrar",
+        opt_goldtotal = "Ouro de todos os personagens na barra",
+        opt_forget   = "Esquecer personagens",
+        opt_forget_confirm = "Clique de novo para confirmar",
+        label_gold_total = "Total %s",
+        tt_gold_total = "Ouro na conta (%s)",
+        tt_gold_this = "este",
+        gold_forgot  = "personagem esquecido: %s.",
+        gold_forgot_all = "%d personagem(ns) deste reino esquecido(s) (o atual continua).",
+        gold_forget_self = "não dá para esquecer o personagem em que você está.",
+        gold_not_found = "personagem não encontrado neste reino: %s.",
+        gold_list    = "ouro dos seus personagens em %s (total %s):",
+        gold_total_on = "total de ouro na barra: ligado.",
+        gold_total_off = "total de ouro na barra: desligado.",
+        help_gold    = "  /farol ouro [total on||off || esquecer Nome] - ouro de todos os seus personagens do reino",
         sum_title    = "resumo da sessão (%s):",
         sum_last     = "última sessão (%s, %s):",
         sum_gold     = "Ouro: %s",
@@ -311,6 +326,20 @@ local STRINGS = {
         label_guild  = "Guild",
         opt_servertime = "Server time",
         opt_summary  = "Session summary at login",
+        opt_goldtotal = "Gold of all characters on the bar",
+        opt_forget   = "Forget characters",
+        opt_forget_confirm = "Click again to confirm",
+        label_gold_total = "Total %s",
+        tt_gold_total = "Gold on this account (%s)",
+        tt_gold_this = "this one",
+        gold_forgot  = "character forgotten: %s.",
+        gold_forgot_all = "%d character(s) on this realm forgotten (the current one stays).",
+        gold_forget_self = "you cannot forget the character you are playing.",
+        gold_not_found = "character not found on this realm: %s.",
+        gold_list    = "gold of your characters on %s (total %s):",
+        gold_total_on = "gold total on the bar: on.",
+        gold_total_off = "gold total on the bar: off.",
+        help_gold    = "  /farol gold [total on||off || forget Name] - gold of all your characters on this realm",
         sum_title    = "session summary (%s):",
         sum_last     = "last session (%s, %s):",
         sum_gold     = "Gold: %s",
@@ -842,6 +871,123 @@ local function GetSpeedPercent()
     local base = BASE_MOVEMENT_SPEED or 7
     local speed = (current and current > 0) and current or run or 0
     return speed / base * 100
+end
+
+---------------------------------------------------------------------------
+-- Ouro dos seus personagens (FarolDB.chars[reino][nome] = { gold, level, t }).
+-- Cada personagem só registra o PRÓPRIO ouro e nível, quando você joga com ele. Fica só no seu computador.
+---------------------------------------------------------------------------
+
+local MAX_REALMS, MAX_CHARS = 20, 60
+
+-- Nome de personagem ou reino aceitável: texto de 1 a 48 bytes, sem "|" nem caracteres de controle.
+local function ValidName(name)
+    return type(name) == "string" and not IsSecret(name) and #name >= 1 and #name <= 48
+        and not string.find(name, "[|%c]")
+end
+
+local function SanitizeChars(saved)
+    local clean = {}
+    if type(saved) ~= "table" then return clean end
+    local realms = 0
+    for realm, chars in pairs(saved) do
+        if ValidName(realm) and type(chars) == "table" and realms < MAX_REALMS then
+            local list, count = {}, 0
+            for name, info in pairs(chars) do
+                if ValidName(name) and type(info) == "table" and count < MAX_CHARS then
+                    local gold, level, t = info.gold, info.level, info.t
+                    if type(gold) == "number" and gold == gold and gold >= 0 and gold <= 1e12
+                            and type(level) == "number" and level >= 1 and level <= 200
+                            and type(t) == "number" and t >= 0 and t < 4102444800 then
+                        list[name] = { gold = math.floor(gold), level = math.floor(level), t = math.floor(t) }
+                        count = count + 1
+                    end
+                end
+            end
+            if count > 0 then clean[realm] = list; realms = realms + 1 end
+        end
+    end
+    return clean
+end
+
+-- Quem está jogando agora: nome e reino (nil se o jogo ainda não informou).
+local function CurrentCharacter()
+    local okName, name = pcall(UnitName, "player")
+    local getRealm = GetNormalizedRealmName or GetRealmName
+    local okRealm, realm = false, nil
+    if GetRealmName then okRealm, realm = pcall(GetRealmName) end
+    if (not okRealm or not ValidName(realm)) and getRealm then okRealm, realm = pcall(getRealm) end
+    if not okName or not ValidName(name) or name == UNKNOWNOBJECT or name == "Unknown" then return nil end
+    if not okRealm or not ValidName(realm) then return nil end
+    return name, realm
+end
+
+-- Registra o ouro e o nível do personagem atual.
+local function RecordCharacter()
+    if not db or type(db.chars) ~= "table" then return end
+    local name, realm = CurrentCharacter()
+    if not name then return end
+    local okMoney, gold = pcall(GetMoney)
+    local okLevel, level = pcall(UnitLevel, "player")
+    if not okMoney or type(gold) ~= "number" or IsSecret(gold) or gold ~= gold or gold < 0 or gold > 1e12 then return end
+    if not okLevel or type(level) ~= "number" or IsSecret(level) or level < 1 or level > 200 then return end
+    local chars = db.chars[realm]
+    if not chars then
+        local realms = 0
+        for _ in pairs(db.chars) do realms = realms + 1 end
+        if realms >= MAX_REALMS then return end
+        chars = {}
+        db.chars[realm] = chars
+    end
+    if not chars[name] then
+        local count = 0
+        for _ in pairs(chars) do count = count + 1 end
+        if count >= MAX_CHARS then return end
+    end
+    local entry = chars[name]
+    gold, level = math.floor(gold), math.floor(level)
+    if entry and entry.gold == gold and entry.level == level and time() - entry.t < 60 then return end
+    chars[name] = { gold = gold, level = level, t = time() }
+end
+
+-- Personagens do reino atual, do mais rico para o mais pobre, e o total. O atual vem marcado (current = true).
+local function RealmCharacters()
+    local name, realm = CurrentCharacter()
+    if not name or not db or type(db.chars) ~= "table" then return nil end
+    local list, total = {}, 0
+    for charName, info in pairs(db.chars[realm] or {}) do
+        list[#list + 1] = { name = charName, gold = info.gold, level = info.level, t = info.t, current = charName == name }
+        total = total + info.gold
+    end
+    table.sort(list, function(a, b)
+        if a.gold ~= b.gold then return a.gold > b.gold end
+        return a.name < b.name
+    end)
+    return list, total, realm
+end
+
+-- Esquece um personagem deste reino (ou todos, menos o atual, com name = nil).
+local function ForgetCharacters(target)
+    local name, realm = CurrentCharacter()
+    local chars = name and db.chars[realm]
+    if not chars then return end
+    if target == nil then
+        local count = 0
+        for charName in pairs(chars) do
+            if charName ~= name then chars[charName] = nil; count = count + 1 end
+        end
+        Print(string.format(T("gold_forgot_all"), count))
+        return
+    end
+    for charName in pairs(chars) do
+        if string.lower(charName) == string.lower(target) then
+            if charName == name then Print(T("gold_forget_self")) return end
+            chars[charName] = nil
+            Print(string.format(T("gold_forgot"), (string.gsub(charName, "|", "||"))))
+            return
+        end
+    end
+    Print(string.format(T("gold_not_found"), (string.gsub(target, "|", "||"))))
 end
 
 -- Última bolsa a ler (mochila = 0). Valor do jogo validado: um número estranho nunca vira um laço sem fim.
@@ -1383,7 +1529,14 @@ local ITEM_TEXT = {
         return string.format("%s %s%d%%|r", T("label_durab"), ColorHighIsGood(pct, 50, 20), math.floor(pct))
     end,
     gold = function()
-        return FormatMoney(GetMoney())
+        local text = FormatMoney(GetMoney())
+        if db.goldTotal then
+            local list, total = RealmCharacters()
+            if list and #list > 1 then
+                text = text .. " |cffaaaaaa(" .. string.format(T("label_gold_total"), FormatMoneyShort(total)) .. ")|r"
+            end
+        end
+        return text
     end,
     mem = function()
         local mb = GetMemoryMB()
@@ -1739,6 +1892,16 @@ local function FillTooltip()
     GameTooltip:AddLine(" ")
     local money = Safe(GetMoney)
     AddPair(T("tt_gold"), money and FormatMoney(money) or "--")
+    local chars, charsTotal, realm = Safe(RealmCharacters)
+    if chars and #chars > 1 then
+        AddPair(string.format(T("tt_gold_total"), FactionName(realm)), FormatMoneyShort(charsTotal))
+        for i = 1, math.min(10, #chars) do
+            local c = chars[i]
+            local when = c.current and T("tt_gold_this") or FormatWhen(c.t)
+            GameTooltip:AddDoubleLine("   " .. FactionName(c.name) .. " (" .. c.level .. ")",
+                FormatMoneyShort(c.gold) .. "  |cff8c8c8c" .. when .. "|r", 0.8, 0.8, 0.8, 1, 1, 1)
+        end
+    end
     local goldRate = Safe(GetGoldRate)
     local delta = Safe(GetSessionMoney)
     if delta then AddPair(T("tt_session"), FormatMoneyDelta(delta)) end
@@ -1876,6 +2039,7 @@ frame:SetScript("OnUpdate", function(self, elapsed)
         pcall(SampleXP) -- mede o XP antes de redesenhar, para a taxa não ficar atrasada
         pcall(SampleRep)
         if db.items.prof then pcall(SampleProfs) end
+        pcall(RecordCharacter) -- ouro e nível deste personagem (para o total da conta)
         UpdateText()
         if db.items.guild then RequestGuildRoster() end
         if TooltipIsOurs() then ShowTooltip(self) end -- mantém o tooltip atualizado
@@ -1995,6 +2159,12 @@ local function SetSummary(value)
     RefreshOptions()
 end
 
+local function SetGoldTotal(value)
+    db.goldTotal = value
+    UpdateText()
+    RefreshOptions()
+end
+
 local function ResetPosition()
     db.point, db.relPoint, db.x, db.y = DEFAULTS.point, DEFAULTS.relPoint, DEFAULTS.x, DEFAULTS.y
     ApplyPosition()
@@ -2088,6 +2258,8 @@ local function BuildControls(parent, top)
     y = y - 26
     set.serverTime = CreateCheck(parent, 20, y, SetServerTime)
     set.summary = CreateCheck(parent, 185, y, SetSummary)
+    y = y - 26
+    set.goldTotal = CreateCheck(parent, 20, y, SetGoldTotal)
     y = y - 36
 
     set.langHeader = CreateHeader(parent, y)
@@ -2124,6 +2296,22 @@ local function BuildControls(parent, top)
     y = y - 26
     set.order = CreateButton(parent, 150, function() ns.Order.ToggleWindow() end)
     set.order:SetPoint("TOPLEFT", 20, y)
+    -- "Esquecer personagens": pede um segundo clique (em até 5 s) para confirmar.
+    set.forget = CreateButton(parent, 150, nil)
+    set.forget:SetScript("OnClick", function(self)
+        local now = GetTime()
+        if self.confirmAt and now - self.confirmAt <= 5 then
+            self.confirmAt = nil
+            ForgetCharacters(nil)
+            UpdateText()
+        else
+            self.confirmAt = now
+            self:SetText(T("opt_forget_confirm"))
+            return
+        end
+        RefreshOptions()
+    end)
+    set.forget:SetPoint("TOPLEFT", 176, y)
     y = y - 30
 
     controlSets[#controlSets + 1] = set
@@ -2149,6 +2337,10 @@ RefreshOptions = function()
         set.serverTime:SetChecked(db.serverTime)
         set.summary.label:SetText(T("opt_summary"))
         set.summary:SetChecked(db.summary)
+        set.goldTotal.label:SetText(T("opt_goldtotal"))
+        set.goldTotal:SetChecked(db.goldTotal)
+        set.forget.confirmAt = nil
+        set.forget:SetText(T("opt_forget"))
         for lang, button in pairs(set.langs) do
             if lang == db.lang then button:LockHighlight() else button:UnlockHighlight() end
         end
@@ -2262,6 +2454,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         db.loot = ns.Loot.SanitizeSettings(type(saved) == "table" and saved.loot or nil)
         db.warnings = ns.Warnings.Sanitize(type(saved) == "table" and saved.warnings or nil)
         db.order = ns.Order.Sanitize(type(saved) == "table" and saved.order or nil)
+        db.chars = SanitizeChars(type(saved) == "table" and saved.chars or nil)
         FarolDB = db
         local savedChar = FarolCharDB
         FarolCharDB = ns.Loot.SanitizeHistory(savedChar) -- histórico de saques deste personagem
@@ -2279,12 +2472,14 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
 
     if event == "PLAYER_LOGOUT" then
         SaveSummary()
+        pcall(RecordCharacter)
         return
     end
 
     if event == "PLAYER_ENTERING_WORLD" then
         pcall(ShowLastSummary, arg1, arg2) -- antes de StartSession: o registro é da sessão anterior
         StartSession()
+        pcall(RecordCharacter)
         ResetMapToCurrentZone()
         ScanDurability()
         local okCombat, combat = pcall(function() return InCombatLockdown and InCombatLockdown() end)
@@ -2313,7 +2508,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_warn", "help_history", "help_appearance", "help_order",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_warn", "help_history", "help_appearance", "help_order",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -2381,6 +2576,28 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Warnings.ToggleHistory()
     elseif cmd == "aviso" or cmd == "avisos" or cmd == "warn" or cmd == "warning" or cmd == "warnings" then
         ns.Warnings.HandleCommand(rest)
+    elseif cmd == "ouro" or cmd == "gold" then
+        local word, target = string.match(rest or "", "^%s*(%a*)%s*(.-)%s*$")
+        word, target = string.lower(word or ""), target or ""
+        local switch = string.lower(target)
+        if word == "total" and (switch == "on" or switch == "ligar") then
+            SetGoldTotal(true); Print(T("gold_total_on"))
+        elseif word == "total" and (switch == "off" or switch == "desligar") then
+            SetGoldTotal(false); Print(T("gold_total_off"))
+        elseif (word == "esquecer" or word == "forget") and target ~= "" then
+            ForgetCharacters(string.sub(target, 1, 48))
+            UpdateText()
+        else
+            pcall(RecordCharacter)
+            local list, total, realm = RealmCharacters()
+            if list then
+                Print(string.format(T("gold_list"), (string.gsub(realm, "|", "||")), FormatMoneyShort(total)))
+                for _, c in ipairs(list) do
+                    Print("  " .. FactionName(c.name) .. " (" .. c.level .. "): " .. FormatMoneyShort(c.gold)
+                        .. (c.current and (" — " .. T("tt_gold_this")) or ""))
+                end
+            end
+        end
     elseif cmd == "resumo" or cmd == "summary" then
         if arg == "on" or arg == "ligar" then
             SetSummary(true); Print(T("sum_on"))

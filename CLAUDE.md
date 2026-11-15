@@ -81,7 +81,7 @@ Farol/
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
   Media/Farol.tga   ícone original (64×64)
 tests/              suíte de testes em Lua 5.1 com simulador da API do WoW
-assets/             ícones, texto do CurseForge, imagens de divulgação (assets/curseforge/ + gerador)
+assets/             ícones, texto do CurseForge, imagens de divulgação (assets/curseforge/ + gerador), vídeo (assets/video/)
 .github/            workflow de testes (ações fixadas por SHA) e Dependabot
 ```
 
@@ -195,3 +195,9 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.
+
+**Vídeo de divulgação** (`assets/video/`, 60 s, 1920×1080, sem áudio): `python3 assets/video/make_video.py` e
+`node assets/video/record.js video` (precisa de `ffmpeg`). Cenas e legendas em `make_video.py` (`CAPS`), o que acontece
+a cada segundo em `timeline.js` (`render(t)`, `PATH`, `CLICKS`). Mesmo estilo e mesmas regras das imagens (selo
+"Illustration · Ilustração", nomes genéricos, nada da Blizzard). Ao mudar uma janela mostrada no vídeo, atualize a cena.
+`.html`/`.mp4`/prévias não são versionados.

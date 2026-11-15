@@ -33,18 +33,22 @@ def ck(id_, label, checked=False):
 names = ["FPS", "Latency", "Zone", "Durability", "Bags", "Junk in bags", "Ammo & reagents", "Gold", "Gold per hour",
          "XP per hour", "Reputation", "Professions", "Clock", "Resets (daily/weekly)", "Friends online", "Guild online"]
 on = {0, 1, 2, 3, 7, 8, 9}
-colA = "".join(ck(f"m{i}", n, i in on) for i, n in enumerate(names[:8]))
-colB = "".join(ck(f"m{i}", n, i in on) for i, n in enumerate(names[8:], 8))
+GROUPS16 = [("Performance", [0, 1]), ("Location", [2]), ("Gear and bags", [3, 4, 5, 6]),
+            ("Gold", [7, 8]), ("Progress", [9, 10, 11]), ("Time and social", [12, 13, 14, 15])]  # mesma ordem do addon
+TABS_HTML = ('<div class="tabs"><span class="tab on">Bar</span><span class="tab">Warnings</span>'
+             '<span class="tab">Tools</span><span class="tab">General</span></div>')
+groups_html = "".join(f'<div><div class="gh">{title}</div>{"".join(ck(f"m{i}", names[i], i in on) for i in idx)}</div>'
+                      for title, idx in GROUPS16)
 menu = f"""<div class="win" id="menu" style="width:620px;padding-top:12px;padding-bottom:12px"><div class="x">×</div><div class="t">Farol</div>
+{TABS_HTML}
 <div style="display:flex;gap:8px;align-items:center;margin-top:2px"><span class="k" style="font-size:14px">Bar:</span>
 <span class="btn" id="b1" style="padding:2px 10px">Bar 1</span><span class="btn" id="b2" style="padding:2px 10px">Bar 2 (off)</span>
 <span class="btn" id="b3" style="padding:2px 10px">Bar 3 (off)</span><span id="newbadge">NEW · NOVO</span></div>
 <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="k" style="font-size:14px">Profile:</span>
 <span class="btn" style="padding:2px 10px">Account ▾</span><span class="btn" style="padding:2px 10px">Copy from... ▾</span></div>
-<div class="h" style="margin-top:6px">Bar items</div><div style="display:flex;gap:60px"><div>{colA}</div><div>{colB}</div></div>
-<div class="h">General</div><div style="display:flex;gap:40px">{ck("mshow", "Show panel", True)}{ck("mlock", "Lock position")}</div>
-<div style="display:flex;gap:8px;margin-top:8px;white-space:nowrap"><span class="btn">Alarms...</span><span class="btn">Loot...</span>
-<span class="btn">Warnings...</span><span class="btn" id="mapp">Appearance...</span><span class="btn">Order...</span></div></div>"""
+<div style="display:flex;gap:40px;margin-top:4px">{ck("mshow", "Show this bar", True)}{ck("mlock", "Lock position")}</div>
+<div class="gcols">{groups_html}</div>
+<div style="display:flex;gap:8px;margin-top:8px;white-space:nowrap"><span class="btn" id="mapp">Appearance...</span><span class="btn">Order...</span></div></div>"""
 
 def stepper(label, vid, value, minus_id, plus_id):
     return (f'<div style="display:flex;align-items:center;gap:10px;margin:7px 0"><span class="k" style="width:110px">{label}</span>'
@@ -125,6 +129,13 @@ EXTRA_CSS = """
 #shift{position:absolute;z-index:40;font:700 18px 'Inter';color:#111;background:#e8e8e8;border-radius:6px;padding:6px 14px;box-shadow:0 3px 0 #888,0 6px 18px #000a}
 .chat{font-size:15px;line-height:1.7}
 #menu .ck{margin:1px 0}
+.tabs{display:flex;gap:4px;border-bottom:2px solid #6e5b2e;margin:0 0 6px}
+.tab{font:bold 13px 'DejaVu Sans';color:#c9b88a;padding:4px 14px;border:1px solid #6e5b2e;border-bottom:none;border-radius:6px 6px 0 0;background:#1a1a22}
+.tab.on{color:#ffd100;background:#3a2a10;box-shadow:inset 0 2px 0 #ffd100}
+.gcols{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 14px}
+.gh{color:#ffd100;font-weight:bold;font-size:13px;margin:6px 0 1px;border-bottom:1px solid #6e5b2e55}
+.gcols .ck{font-size:13px;margin:1px 0}.gcols .box{width:16px;height:16px;font-size:12px}
+
 """
 
 html = f"""<!doctype html><html><head><meta charset="utf-8"><style>{CSS}{EXTRA_CSS}</style></head><body>

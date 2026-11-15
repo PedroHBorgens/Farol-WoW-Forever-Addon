@@ -81,15 +81,21 @@ def ck(id_, label, checked=False):
     return f'<div class="ck"><span class="box" id="{id_}">{"✓" if checked else ""}</span>{label}</div>'
 NAMES = ["FPS", "Latency", "Zone", "Durability", "Bags", "Junk in bags", "Ammo & reagents", "Gold", "Gold per hour",
          "XP per hour", "Reputation", "Professions", "Clock", "Resets (daily/weekly)", "Friends online", "Guild online"]
+GROUPS16 = [("Performance", [0, 1]), ("Location", [2]), ("Gear and bags", [3, 4, 5, 6]),
+            ("Gold", [7, 8]), ("Progress", [9, 10, 11]), ("Time and social", [12, 13, 14, 15])]  # mesma ordem do addon
+TABS_HTML = ('<div class="tabs"><span class="tab on">Bar</span><span class="tab">Warnings</span>'
+             '<span class="tab">Tools</span><span class="tab">General</span></div>')
 def menu(p, on, selected=1, profile="Account ▾"):
-    cols = "".join(f'<div>{"".join(ck(f"{p}m{i}", NAMES[i], i in on) for i in rng)}</div>' for rng in (range(0, 8), range(8, 16)))
+    groups = "".join(f'<div><div class="gh">{title}</div>{"".join(ck(f"{p}m{i}", NAMES[i], i in on) for i in idx)}</div>'
+                     for title, idx in GROUPS16)
     btn = lambda n, label: f'<span class="btn{" hl" if n == selected else ""}" id="{p}b{n}" style="padding:2px 10px">{label}</span>'
     return f"""<div class="win menu" id="{p}menu" style="width:620px;padding-top:12px;padding-bottom:12px"><div class="x" id="{p}x">×</div><div class="t">Farol</div>
+{TABS_HTML}
 <div class="line"><span class="k">Bar:</span>{btn(1, "Bar 1")}{btn(2, "Bar 2 (off)")}{btn(3, "Bar 3 (off)")}</div>
 <div class="line"><span class="k">Profile:</span><span class="btn" id="{p}prof" style="padding:2px 10px">{profile}</span><span class="btn" id="{p}copy" style="padding:2px 10px">Copy from... ▾</span></div>
-<div class="h" style="margin-top:6px">Bar items</div><div style="display:flex;gap:60px">{cols}</div>
-<div class="h">General</div><div style="display:flex;gap:40px">{ck(p + "show", "Show panel", True)}{ck(p + "lock", "Lock position")}</div>
-<div style="display:flex;gap:8px;margin-top:8px;white-space:nowrap"><span class="btn">Alarms...</span><span class="btn">Loot...</span><span class="btn">Warnings...</span><span class="btn">Appearance...</span><span class="btn">Order...</span></div></div>"""
+<div style="display:flex;gap:40px;margin-top:4px">{ck(p + "show", "Show this bar", True)}{ck(p + "lock", "Lock position")}</div>
+<div class="gcols">{groups}</div>
+<div style="display:flex;gap:8px;margin-top:8px;white-space:nowrap"><span class="btn">Appearance...</span><span class="btn">Order...</span></div></div>"""
 def tip(id_, title, rows, width=360, foot=""):
     body = "".join(r if r.startswith("<") else "" for r in rows)
     return f'<div class="tip" id="{id_}" style="width:{width}px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">{title}</div>{body}{foot}</div>'
@@ -194,6 +200,13 @@ EXTRA = """
 .bi,.bx{display:inline-flex}
 .bar,.vbar{white-space:nowrap}
 .menu .ck{margin:1px 0}
+.tabs{display:flex;gap:4px;border-bottom:2px solid #6e5b2e;margin:0 0 6px}
+.tab{font:bold 13px 'DejaVu Sans';color:#c9b88a;padding:4px 14px;border:1px solid #6e5b2e;border-bottom:none;border-radius:6px 6px 0 0;background:#1a1a22}
+.tab.on{color:#ffd100;background:#3a2a10;box-shadow:inset 0 2px 0 #ffd100}
+.gcols{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 14px}
+.gh{color:#ffd100;font-weight:bold;font-size:13px;margin:6px 0 1px;border-bottom:1px solid #6e5b2e55}
+.gcols .ck{font-size:13px;margin:1px 0}.gcols .box{width:16px;height:16px;font-size:12px}
+
 .line{display:flex;gap:8px;align-items:center;margin-top:6px}.line .k{font-size:14px;width:58px}
 .biglogo{width:170px;height:170px;border-radius:16px;box-shadow:0 0 0 3px #c9a24a,0 12px 50px #000}
 .bigtitle{font:800 88px 'Inter';color:#ffd75a;text-shadow:0 4px 16px #000;margin-top:18px}
@@ -203,7 +216,7 @@ EXTRA = """
 .dd div{padding:0 8px;border-radius:3px}
 .orow{position:absolute;left:0;right:0;display:flex;justify-content:space-between;align-items:center;font-size:15px;height:30px}
 .onum{display:inline-block;width:22px;text-align:right}
-#newbadge{position:absolute;font:800 13px 'Inter';color:#111;background:#ffd75a;border-radius:999px;padding:4px 10px;box-shadow:0 0 12px #ffd75a;left:900px;top:196px}
+#newbadge{position:absolute;font:800 13px 'Inter';color:#111;background:#ffd75a;border-radius:999px;padding:4px 10px;box-shadow:0 0 12px #ffd75a;left:648px;top:242px}
 .pill{font:600 18px 'Inter';color:#fff;background:#0007;border:1px solid #c9a24a88;border-radius:999px;padding:8px 18px}
 .pill.big{font-size:24px;padding:10px 26px}
 #cursor{position:absolute;width:26px;height:34px;z-index:50;pointer-events:none}

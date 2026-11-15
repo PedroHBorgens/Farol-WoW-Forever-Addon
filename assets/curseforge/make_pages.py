@@ -108,21 +108,34 @@ names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bag
 on = {0,1,3,4,6,7,8,9,10,12,14,15,16,18}
 half = 12
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
-menu = f"""<div class="win" style="width:620px;padding-top:12px;padding-bottom:14px;transform:scale(.8);transform-origin:center"><div class="x">×</div><div class="t">Farol</div>
-<div class="dim" style="font-size:13px">Bar items: 14 of 23 on — tick the ones you want (hover to see what each one shows).</div>
-<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="k" style="font-size:14px">Bar:</span><span class="btn hl" style="padding:2px 10px;white-space:nowrap">Bar 1</span><span class="btn" style="padding:2px 10px;white-space:nowrap">Bar 2</span><span class="btn" style="padding:2px 10px;white-space:nowrap">Bar 3 (off)</span><span class="dim" style="font-size:12px;white-space:nowrap">· up to 3 bars</span></div>
-<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="k" style="font-size:14px">Profile:</span><span class="btn" style="padding:2px 10px;white-space:nowrap">Account ▾</span><span class="btn" style="padding:2px 10px;white-space:nowrap">Copy from... ▾</span><span class="dim" style="font-size:12px;white-space:nowrap">· or this character only</span></div>
-<div class="h">Bar items</div><div style="display:flex;gap:30px"><div>{col(range(0,half))}</div><div>{col(range(half,23))}</div></div>
-<div class="h">General</div><div style="display:grid;grid-template-columns:150px auto;column-gap:16px"><div class="ck"><span class="box">✓</span>Show panel</div><div class="ck"><span class="box"></span>Lock position</div><div class="ck"><span class="box">✓</span>Server time</div><div class="ck"><span class="box">✓</span>Session summary at login</div><div class="ck" style="grid-column:1 / span 2"><span class="box">✓</span>Gold of all characters on the bar</div></div>
-<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="k" style="font-size:14px">Language:</span><span class="btn" style="padding:2px 10px">Auto</span><span class="btn" style="padding:2px 10px">Português</span><span class="btn hl" style="padding:2px 10px">English</span></div>
-<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><span class="btn">Alarms...</span><span class="btn">Loot...</span><span class="btn">Warnings...</span><span class="btn">Appearance...</span><span class="btn hl">Order...</span><span class="btn">Reset position</span><span class="btn">Reset session</span><span class="btn">Forget characters</span><span class="btn">Tasks...</span></div></div>"""
-hover_tip = """<div class="tip" style="position:absolute;left:400px;top:200px;width:200px;font-size:12px;z-index:3">
-<div class="k">Junk in bags</div><div>Vendor value of gray items (Farol never sells).</div></div>"""
+GROUPS = [("Performance", [0, 1, 2]), ("Location", [3, 4, 5]), ("Gear and bags", [6, 7, 8, 9]), ("Gold", [10, 11, 12]),
+          ("Progress", [13, 14, 15, 16]), ("Time and social", [17, 18, 19, 20, 21, 22])]
+grp = lambda title, idx: (f'<div class="grp"><div class="gh">{title}</div>'
+                          + "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in idx) + '</div>')
+tabs = lambda active: '<div class="tabs">' + "".join(f'<span class="tab{" on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
+menu = f"""<div class="win menu3" style="width:640px;padding-top:12px;padding-bottom:14px;transform:scale(.86);transform-origin:center"><div class="x">×</div><div class="t">Farol</div>
+{tabs("Bar")}
+<div class="line"><span class="k">Bar:</span><span class="btn hl" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span></div>
+<div class="line"><span class="k">Profile:</span><span class="btn" style="padding:2px 10px">Account ▾</span><span class="btn" style="padding:2px 10px">Copy from... ▾</span></div>
+<div class="line"><span class="ck" style="margin:0"><span class="box">✓</span>Show this bar</span><span class="ck" style="margin:0 0 0 24px"><span class="box"></span>Lock position</span></div>
+<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 14 of 23 on — tick the ones you want (hover to see what each one shows).</div>
+<div class="cols">{"".join(grp(t, i) for t, i in GROUPS)}</div>
+<div class="line" style="margin-top:10px"><span class="btn">Appearance...</span><span class="btn hl">Order...</span></div></div>"""
+TAB_CSS = """
+.tabs{display:flex;gap:4px;border-bottom:2px solid #6e5b2e;margin:0 0 8px}
+.tab{font:bold 14px 'DejaVu Sans';color:#c9b88a;padding:5px 16px;border:1px solid #6e5b2e;border-bottom:none;border-radius:6px 6px 0 0;background:#1a1a22}
+.tab.on{color:#ffd100;background:#3a2a10;box-shadow:inset 0 2px 0 #ffd100}
+.menu3 .line{display:flex;gap:8px;align-items:center;margin:6px 0}.menu3 .line .k{width:56px;font-size:14px}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 16px}
+.grp .ck{margin:2px 0;font-size:13px}.gh{color:#ffd100;font-weight:bold;font-size:13px;margin:6px 0 2px;border-bottom:1px solid #6e5b2e55}
+.menu3 .box{width:16px;height:16px;font-size:12px}
+"""
+hover_tip = ""  # a explicação de cada item aparece ao passar o mouse (não cabe junto com a janela de ordem)
 order_names = [("🌍","Zone"),("🔭","FPS"),("⚡","Latency"),("💰","Gold"),("🏅","Reputation"),("📜","Resets (daily/weekly)"),("🔨","Durability"),("🎒","Bags"),("⏰","Clock (hidden)")]
 order = '<div class="win" style="width:330px"><div class="x">×</div><div class="t">Bar order</div>' + "".join(
     f'<div class="ck" style="justify-content:space-between"><span><span class="dim" style="display:inline-block;width:22px;text-align:right">{i+1}.</span> {ic(e)} <span class="{"dim" if "hidden" in n else ""}">{n}</span></span><span>▲ ▼</span></div>'
     for i,(e,n) in enumerate(order_names)) + '<div style="text-align:right;margin-top:10px"><span class="btn">Restore default order</span></div></div>'
-page("farol-03-options-menu-bar-order", menu.replace('<div class="x">×</div><div class="t">Farol</div>', '<div class="x">×</div><div class="t">Farol</div>' + hover_tip, 1) + order, "Tick what you want — and choose the order", "Marque o que quiser e escolha a ordem com as setas")
+page("farol-03-options-menu-bar-order", menu.replace('<div class="x">×</div><div class="t">Farol</div>', '<div class="x">×</div><div class="t">Farol</div>' + hover_tip, 1) + order, "Tabbed menu: items in groups — and choose the order", "Menu em abas: itens em grupos — e escolha a ordem", TAB_CSS)
 
 # 4. Alarms
 alarms = """<div class="win" style="width:470px"><div class="x">×</div><div class="t">Alarms</div>

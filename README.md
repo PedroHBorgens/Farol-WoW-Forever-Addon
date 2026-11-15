@@ -42,7 +42,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol gold total on` / `off` | Show / hide the realm total next to your gold on the bar |
 | `/farol gold forget Name` | Forget a character you deleted or no longer play |
 | `/farol summary on` / `off` | Show / don't show the last session's summary at login |
-| `/farol warn`       | Open the warnings window (durability, bags, talents, spell ranks, break, water) |
+| `/farol warn`       | Open the menu on the Warnings tab (durability, bags, talents, spell ranks, break, water) |
 | `/farol warn status`| Show what Farol can read on your client (talents, reputation, resets) |
 | `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
@@ -73,13 +73,24 @@ Tick or untick each item — no commands needed. Open it in any of these ways:
 - Type `/farol menu`
 - **Esc → Options → AddOns → Farol**
 
-The menu lets you choose bar items, show/lock the panel, switch the clock to server time, turn the session summary at login on/off, show the gold of all your characters on the bar, forget characters, pick the language (Auto / Português / English)
-and reset the position. Press **Esc** to close it. If you hide the panel, use `/farol menu` to bring it back.
+The menu has **four tabs**:
+
+- **Bar** — what belongs to the chosen bar: **Bar 1 / 2 / 3**, the **profile**, **Show this bar**, **Lock position**,
+  the items in groups (Performance, Location, Gear and bags, Gold, Progress, Time and social — hover each one to see
+  what it shows), and the **Appearance...** and **Order...** buttons of this bar.
+- **Warnings** — every warning, in sections: Gear and bags, Character, Breaks, How to warn (sound, "Remind in",
+  test, history). `/farol warn` opens the menu on this tab.
+- **Tools** — one button per window, with what it does: Alarms, Tasks, Loot, History and **Summary now**.
+- **General** — what applies to all your characters: language (Auto / Português / English), server time, session
+  summary at login, gold of all characters, full tooltip, the quick buttons next to bar 1; and **Restore**: bar
+  position, reset session, forget characters.
+
+Press **Esc** to close it. If you hide the bar, use `/farol menu` to bring it back.
 
 ### Up to 3 bars
 
 At the top of the menu, **Bar: [Bar 1] [Bar 2] [Bar 3]** chooses which bar the menu, **Appearance...** and
-**Order...** change. Pick **Bar 2**, tick **Show panel** and the items you want: each bar has its **own items,
+**Order...** change. Pick **Bar 2**, tick **Show this bar** and the items you want: each bar has its **own items,
 position, appearance (scale, background, text, layout, hide in combat) and order**. Right-clicking a bar opens the
 menu with that bar already chosen. Bars 2 and 3 start off (and below bar 1); `/farol bar 2 show` / `/farol bar 2 hide`
 also work. Alarms, loot, warnings, language and the quick buttons (📝 👜, next to bar 1) are shared.
@@ -154,7 +165,7 @@ When there is junk to sell, the bag warning says so: "… 3 slot(s) hold junk (3
 
 - It warns again only after things improve (you repaired / freed slots), and at most once every 5 minutes,
   so it won't keep repeating while you loot or sell.
-- Open **Warnings...** in the options menu (or `/farol warn`) to turn each warning on/off, change the limits
+- Open the **Warnings** tab of the menu (or `/farol warn`) to turn each warning on/off, change the limits
   (durability 5–50%, bags 0–10 slots), turn the sound off or test it.
 - Commands: `/farol warn durab 25`, `/farol warn bags 4`, `/farol warn durab off`, `/farol warn sound off`.
 
@@ -173,7 +184,7 @@ When there is junk to sell, the bag warning says so: "… 3 slot(s) hold junk (3
 
 The **Ammo & reagents** bar item (off by default) counts what your class uses: hunter ammo, warlock Soul Shards,
 mage Arcane Powder and runes, priest candles, paladin symbols, druid seeds and Gift reagents, shaman Ankhs, rogue
-powders. **You choose when the number turns yellow and red** in the Warnings window (defaults: ammo 400 / 200,
+powders. **You choose when the number turns yellow and red** in the Warnings tab (defaults: ammo 400 / 200,
 reagents 10 / 5; red must be lower than yellow, 0 in yellow = never yellow), or with `/farol warn ammo 400 200` and
 `/farol warn reagents 10 5`. Optional warnings (off by default) fire once below red, wait for combat to end, and come
 back after you restock: "Ammo: 150 running low — restock before leaving town." A reagent is only tracked after the
@@ -186,11 +197,11 @@ In the classic style, professions stop leveling at each training limit (75, 150,
 limit, Farol warns once: "Mining 150/150 at the training limit — find a trainer to keep leveling." It warns again at
 the next limit after you train, never at the last one (300/300). Several at once are listed in one warning. It waits
 for combat to end, has Silence / Remind like the others, and turns off with `/farol warn professions off` or in the
-Warnings window. `/farol warn status` shows the professions read and which game function answered.
+Warnings tab. `/farol warn status` shows the professions read and which game function answered.
 
 ### Break and drink-water reminders
 
-Two optional reminders, **both off by default**, turned on in the Warnings window:
+Two optional reminders, **both off by default**, turned on in the Warnings tab:
 
 - **Break reminder**: "You've been playing for 2h 00m — time for a break?"
 - **Drink water reminder**: "Time to drink some water!"
@@ -209,7 +220,7 @@ Every warning opens a small window with two choices:
 - **Silence**: the warning stays quiet and only comes back if the situation changes (e.g. you repair and the
   durability drops again, or you gain a new talent point).
 - **Remind in [30 min ▾]**: choose **2, 5, 10, 15 or 30 minutes** in the dropdown; if the problem is still there
-  then, the warning shows up again. The time that comes selected is set in the Warnings window (default 30).
+  then, the warning shows up again. The time that comes selected is set in the Warnings tab (default 30).
 
 - **Several warnings at once appear together** in one window, one line each (with its own Silence / Remind),
   plus **Silence all** and **Remind all in [N min ▾]**.
@@ -224,7 +235,7 @@ The **last 10 warnings** (with date and time) are kept per character. Open them 
 - clicking the **note button next to the bar**: a red number shows how many new warnings you haven't seen;
 - a **key binding** of your choice: Esc → Options → Keybindings → AddOns → Farol (uses the game's official
   `Bindings.xml`; it only opens the window);
-- `/farol history`, or **History...** in the Warnings window.
+- `/farol history`, or **History...** in the Warnings tab.
 
 ## Daily and weekly tasks
 
@@ -327,7 +338,7 @@ It only knows a character after you log in with it once with Farol on. Use **For
 city. The gold tooltip then shows an **estimate** for your other characters — e.g. `Jaina (34) 150% full` or
 `Arthas (22) 5% full in ~9d 16h` — using the classic rules: in an inn/city, 5% of a level every 8 hours; outside, a
 quarter of that; up to 150%. The real value replaces the estimate when you log in with that character. Optional
-warning (off by default) in the Warnings window or `/farol warn rested on`: "Rested XP full (150%): Jaina (34)…",
+warning (off by default) in the Warnings tab or `/farol warn rested on`: "Rested XP full (150%): Jaina (34)…",
 once per session.
 
 **Junk in bags:** adds up the vendor price of your gray (Poor) items, e.g. `Junk 3g 26s (3)`; the tooltip shows

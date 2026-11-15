@@ -42,7 +42,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol ouro total on` / `off` | Mostra / esconde o total do reino ao lado do ouro na barra |
 | `/farol ouro esquecer Nome` | Esquece um personagem que você apagou ou não usa mais |
 | `/farol resumo on` / `off` | Mostra / não mostra o resumo da última sessão ao entrar |
-| `/farol aviso`      | Abre a janela de avisos (durabilidade, bolsas, talentos, graus de magia, pausa, água) |
+| `/farol aviso`      | Abre o menu na aba Avisos (durabilidade, bolsas, talentos, graus de magia, pausa, água) |
 | `/farol aviso status`| Mostra o que o Farol consegue ler no seu cliente (talentos, reputação, resets) |
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
@@ -73,13 +73,24 @@ Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um des
 - Digite `/farol menu`
 - **Esc → Opções → AddOns → Farol**
 
-No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, liga/desliga o resumo da sessão ao entrar, mostra o ouro de todos os personagens na barra, esquece personagens, escolhe o idioma (Auto / Português /
-English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/farol menu` para trazê-lo de volta.
+O menu tem **quatro abas**:
+
+- **Barra** — o que é da barra escolhida: **Barra 1 / 2 / 3**, o **perfil**, **Mostrar esta barra**, **Travar
+  posição**, os itens em grupos (Desempenho, Lugar, Equipamento e bolsas, Ouro, Progresso, Tempo e social — passe o
+  mouse em cada um para ver o que mostra) e os botões **Aparência...** e **Ordem...** desta barra.
+- **Avisos** — todos os avisos, em seções: Equipamento e bolsas, Personagem, Pausas, Como avisar (som, "Lembrar em",
+  testar, histórico). `/farol aviso` abre o menu nesta aba.
+- **Ferramentas** — um botão para cada janela, com o que ela faz: Alarmes, Tarefas, Saques, Histórico e **Resumo agora**.
+- **Geral** — o que vale para todos os seus personagens: idioma (Auto / Português / English), hora do servidor, resumo
+  da sessão ao entrar, ouro de todos os personagens, tooltip completo, os botões rápidos ao lado da barra 1; e
+  **Restaurar**: posição da barra, zerar sessão, esquecer personagens.
+
+Aperte **Esc** para fechar. Se esconder a barra, use `/farol menu` para trazê-la de volta.
 
 ### Até 3 barras
 
 No alto do menu, **Barra: [Barra 1] [Barra 2] [Barra 3]** escolhe qual barra o menu, a **Aparência...** e a
-**Ordem...** mudam. Escolha **Barra 2**, marque **Mostrar painel** e os itens que quiser: cada barra tem **itens,
+**Ordem...** mudam. Escolha **Barra 2**, marque **Mostrar esta barra** e os itens que quiser: cada barra tem **itens,
 posição, aparência (escala, fundo, texto, formato, esconder em combate) e ordem próprios**. O clique direito numa barra
 abre o menu já com ela escolhida. As barras 2 e 3 começam desligadas (e abaixo da barra 1); também dá para usar
 `/farol barra 2 mostrar` / `/farol barra 2 esconder`. Alarmes, saques, avisos, idioma e os botões rápidos (📝 👜, ao lado
@@ -155,7 +166,7 @@ Quando há lixo para vender, o aviso de bolsas diz: "… Há 3 espaço(s) com li
 
 - Só avisa de novo depois que a situação melhora (você reparou / liberou espaço), e no máximo uma vez a cada
   5 minutos, para não ficar repetindo enquanto você saqueia ou vende.
-- Abra **Avisos...** no menu de opções (ou `/farol aviso`) para ligar/desligar cada aviso, mudar os limites
+- Abra a aba **Avisos** do menu (ou `/farol aviso`) para ligar/desligar cada aviso, mudar os limites
   (durabilidade 5–50%, bolsas 0–10 espaços), desligar o som ou testar.
 - Comandos: `/farol aviso durab 25`, `/farol aviso bolsas 4`, `/farol aviso durab off`, `/farol aviso som off`.
 

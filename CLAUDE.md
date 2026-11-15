@@ -73,8 +73,8 @@ Farol/
   Core.lua          barras (até 3, grade de células), 23 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
-  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água), "Silenciar / Lembrar em N min"
-                    (2–30), janela agrupada para vários avisos, histórico 📝
+  Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água, tarefas),
+                    "Silenciar / Lembrar em N min" (2–30), janela agrupada para vários avisos, histórico 📝, controles da aba Avisos
   Appearance.lua    escala, fundo, tamanhos de texto/ícone, formato (uma linha / uma coluna), esconder em combate,
                     mostrar/esconder os botões rápidos 📝 👜
   Order.lua         ordem dos itens na barra
@@ -135,6 +135,13 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   A altura segue as linhas. Botões rápidos (📝 👜) via `ns.quickButtons` + `ns.LayoutQuickButtons()`.
 - **Janelas:** todas chamam `ns.MakeToplevel(frame)` (abrem na frente; clique traz para a frente) e entram em
   `UISpecialFrames` (Esc fecha).
+- **Menu de opções (3.4):** abas `Profiles.TABS` = Barra / Avisos / Ferramentas / Geral (`BuildControls` no Core, um
+  conjunto de controles para a janela `FarolOptions` e outro para o painel Esc → Opções → AddOns; `RefreshOptions`
+  sincroniza os dois). Itens em grupos `Profiles.GROUPS` (`ns.ITEM_GROUPS`) **na mesma ordem de `ITEM_ORDER`** (um
+  teste confere; os testes de menu contam as caixinhas por posição). A aba Avisos usa `Warnings.BuildControls(página,
+  prefixo)` (`FarolWarn…` no menu, `FarolPanelWarn…` no painel); não existe mais a janela `FarolWarnings`.
+  `ns.OpenOptions(aba)` abre/fecha numa aba (`/farol aviso` → "warnings"; clique direito → "bar"). Item novo na barra:
+  também entra num grupo. Opção que existe em duas janelas: chame `ns.RefreshOptions()` depois de mudar.
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 
@@ -196,8 +203,8 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Mudança | Imagens |
 |---|---|
 | Item novo na barra / no tooltip | 02 (contagem de itens, grade, tooltip), 03 (caixinhas e ordem); 08 se for de progresso; 01 se for destaque |
-| Opção nova no menu (Geral, idioma, botões) | 03 |
-| Alarmes | 04 · Janela de saques: 05 · Avisos / histórico: 06 |
+| Opção nova no menu (abas Barra / Geral / Ferramentas) | 03 |
+| Alarmes | 04 · Janela de saques: 05 · Avisos (aba Avisos do menu) / histórico: 06 |
 | Aparência (escala, fundo, formato, botões rápidos) | 07 (e 02 se mudar o formato da barra) |
 | Resumo da sessão (textos no chat) | 09 |
 | Tarefas (janela, item, aviso) | 10 |

@@ -21,7 +21,7 @@ return {
         local H = Mock.new():login()
         openMenu(H)
         H:slash("alarme"); H:slash("saque"); H:slash("aviso"); H:slash("aparencia"); H:slash("historico")
-        for _, name in ipairs({ "FarolOptions", "FarolAlarms", "FarolLoot", "FarolWarnings",
+        for _, name in ipairs({ "FarolOptions", "FarolAlarms", "FarolLoot",
                                 "FarolAppearance", "FarolWarnHistory" }) do
             T.eq(H.env[name]._toplevel, true, name .. " is top-level")
         end
@@ -32,7 +32,7 @@ return {
         local menu = openMenu(H)
         T.ok(menu._raisedAt, "menu raised when opened")
         for _, entry in ipairs({ { "Alarmes...", "FarolAlarms" }, { "Saques...", "FarolLoot" },
-                                 { "Avisos...", "FarolWarnings" }, { "Aparência...", "FarolAppearance" } }) do
+                                 { "Tarefas...", "FarolTasks" }, { "Aparência...", "FarolAppearance" } }) do
             H:click(buttonByText(H, entry[1]))
             local window = H.env[entry[2]]
             T.ok(window:IsShown(), entry[2] .. " open")

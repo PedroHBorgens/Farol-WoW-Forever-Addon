@@ -129,6 +129,7 @@ local function Apply()
     ns.ApplyAppearance()
     ns.ApplyVisibility()
     if RefreshWindow then RefreshWindow() end
+    if ns.RefreshOptions then ns.RefreshOptions() end -- botões e tooltip completo também ficam na aba Geral
 end
 
 local function Percent(value) return math.floor(value * 100 + 0.5) end

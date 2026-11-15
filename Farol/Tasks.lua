@@ -271,6 +271,7 @@ local function SetWarning(value)
     if not settings then return end
     settings.tasks = value
     if ns.Warnings and ns.Warnings.TasksChanged then ns.Warnings.TasksChanged() end
+    if ns.Warnings and ns.Warnings.RefreshControls then ns.Warnings.RefreshControls() end
     Print(string.format(value and T("warn_on") or T("warn_off"), T("warn_name_tasks")))
     Changed()
 end

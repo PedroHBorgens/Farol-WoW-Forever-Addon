@@ -22,7 +22,8 @@ return {
         for _, cmd in ipairs({ "menu", "alarme", "alarme add 07:30 Teste", "saque", "aviso", "aparencia", "historico",
                                "ordem", "aparencia coluna", "aparencia largura 400", "aviso status", "help", "version",
                                "sessao zerar", "show xph", "show rep", "show reset", "show prof", "show lixo", "ouro", "ouro total on", "ouro esquecer Ninguem", "aviso descansado on", "novidades", "instancias", "aparencia tooltip", "show municao", "aviso municao 300 100", "aviso reagentes on", "aviso profissoes off", "aviso profissoes on", "resumo", "resumo off", "lang en",
-                               "lock", "lock", "aviso padrao 5", "aviso agua 20", "aviso pausa lutas off" }) do
+                               "lock", "lock", "aviso padrao 5", "aviso agua 20", "aviso pausa lutas off",
+                               "barra", "barra 2 mostrar", "barra 3 mostrar", "aparencia escala 120", "ordem", "lock", "barra 1" }) do
             H:slash(cmd)
         end
         H:event("CHAT_MSG_LOOT", "Você recebe saque: |cff1eff00|Hitem:1|h[X]|h|r.")
@@ -30,6 +31,8 @@ return {
         for _ = 1, 16 do H:update(60) end
         H:click(H.env.FarolWarnRemindTime); H:click(H.env.FarolWarnRow1Time); H:click(H.env.FarolWarnRemind)
         H.env.FarolFrame._scripts.OnEnter(H.env.FarolFrame)
+        H.env.FarolBar2._scripts.OnEnter(H.env.FarolBar2); H.env.FarolBar2._scripts.OnDragStop(H.env.FarolBar2)
+        H.env.FarolBar3._scripts.OnMouseUp(H.env.FarolBar3, "RightButton")
         H:event("PLAYER_LOGOUT")
         local bad = {}
         for k in pairs(H.env) do

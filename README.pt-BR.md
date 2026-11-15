@@ -47,6 +47,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
+| `/farol barra 2 mostrar` | Liga a barra 2 (ou 3) e escolhe ela para o menu, a Aparência e a Ordem (`/farol barra` lista as barras) |
 | `/farol alarme`     | Abre a janela de alarmes |
 | `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
 | `/farol soneca`     | Adia o alarme que está tocando (tempo configurado, padrão 5 min) |
@@ -72,6 +73,15 @@ Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um des
 
 No menu você escolhe os itens da barra, mostra/trava o painel, troca o relógio para a hora do servidor, liga/desliga o resumo da sessão ao entrar, mostra o ouro de todos os personagens na barra, esquece personagens, escolhe o idioma (Auto / Português /
 English) e reseta a posição. Aperte **Esc** para fechar. Se esconder o painel, use `/farol menu` para trazê-lo de volta.
+
+### Até 3 barras
+
+No alto do menu, **Barra: [Barra 1] [Barra 2] [Barra 3]** escolhe qual barra o menu, a **Aparência...** e a
+**Ordem...** mudam. Escolha **Barra 2**, marque **Mostrar painel** e os itens que quiser: cada barra tem **itens,
+posição, aparência (escala, fundo, texto, formato, esconder em combate) e ordem próprios**. O clique direito numa barra
+abre o menu já com ela escolhida. As barras 2 e 3 começam desligadas (e abaixo da barra 1); também dá para usar
+`/farol barra 2 mostrar` / `/farol barra 2 esconder`. Alarmes, saques, avisos, idioma e os botões rápidos (📝 👜, ao lado
+da barra 1) são compartilhados.
 
 ## Alarmes do relógio
 

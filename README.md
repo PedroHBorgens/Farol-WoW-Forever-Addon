@@ -47,6 +47,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
 | `/farol order`      | Choose the order of the items on the bar |
+| `/farol bar 2 show` | Turn on bar 2 (or 3) and pick it for the menu, Appearance and Order (`/farol bar` lists the bars) |
 | `/farol alarm`      | Open the alarms window |
 | `/farol alarm add 07:30`| Create an alarm (see below) |
 | `/farol snooze`     | Snooze the ringing alarm (configured time, default 5 min) |
@@ -72,6 +73,14 @@ Tick or untick each item — no commands needed. Open it in any of these ways:
 
 The menu lets you choose bar items, show/lock the panel, switch the clock to server time, turn the session summary at login on/off, show the gold of all your characters on the bar, forget characters, pick the language (Auto / Português / English)
 and reset the position. Press **Esc** to close it. If you hide the panel, use `/farol menu` to bring it back.
+
+### Up to 3 bars
+
+At the top of the menu, **Bar: [Bar 1] [Bar 2] [Bar 3]** chooses which bar the menu, **Appearance...** and
+**Order...** change. Pick **Bar 2**, tick **Show panel** and the items you want: each bar has its **own items,
+position, appearance (scale, background, text, layout, hide in combat) and order**. Right-clicking a bar opens the
+menu with that bar already chosen. Bars 2 and 3 start off (and below bar 1); `/farol bar 2 show` / `/farol bar 2 hide`
+also work. Alarms, loot, warnings, language and the quick buttons (📝 👜, next to bar 1) are shared.
 
 ## Clock alarms
 

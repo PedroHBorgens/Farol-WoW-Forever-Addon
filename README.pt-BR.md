@@ -19,7 +19,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 > `Interface/AddOns/WoWForeverInfo` antes de instalar o `Farol`. As configurações antigas não são
 > levadas junto (é só marcar seus itens de novo no menu), e o comando agora é `/farol`.
 
-1. Instale pelo **CurseForge** (procure por *Farol*), ou baixe este repositório (botão **Code → Download ZIP**).
+1. Instale pelo **[CurseForge](https://www.curseforge.com/wow/addons/farol)**, ou baixe este repositório (botão **Code → Download ZIP**).
 2. Copie a pasta `Farol` para `World of Warcraft/_forever_/Interface/AddOns/`
    (a pasta final deve ser `_forever_/Interface/AddOns/Farol/Core.lua`).
    Outros clientes usam a própria pasta, como `_retail_` ou `_classic_era_`.

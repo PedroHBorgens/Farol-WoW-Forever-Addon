@@ -74,6 +74,7 @@ local SUITES = {
     "test_supplies",
     "test_profiles",
     "test_bars",
+    "test_charprofiles",
     "test_globals",
 }
 

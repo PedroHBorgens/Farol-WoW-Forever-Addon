@@ -8,7 +8,7 @@ local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", 
                 "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "municao", "reagentes", "400", "5000", "15", "240", "2",
                 "graus", "som", "status", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
-                "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "on", "off", "07:30", "25:99", "-1", "99999" }
+                "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "Garrosh", "on", "off", "07:30", "25:99", "-1", "99999" }
 local BAD = { "x", 1e309, -1e309, 0 / 0, true, false, {}, { 1, 2 }, -5, 3.7, "" }
 
 local seed = 1
@@ -71,8 +71,13 @@ return {
                     or shape == 4 and { account = { bars = { pick(BAD), bar } } }
                     or { account = { bars = { bar } }, [pick({ "x", 1, true })] = pick(BAD) }
                 db.activeBar, db.dataVersion = pick(BAD), pick(BAD)
+                if type(db.profiles) == "table" then -- perfis por personagem (3.2) adulterados
+                    db.profiles.chars = random(3) == 1 and pick(BAD) or { Azralon = { Garrosh = random(2) == 1 and pick(BAD) or { bars = { bar, pick(BAD) } },
+                        [pick({ "x", 1, true })] = pick(BAD) }, [pick({ "y", 2, false })] = pick(BAD) }
+                end
             end
             local char = {
+                profile = pick({ "char", "account", 5, true, "evil" }),
                 items = { { link = "|cff1eff00|Hitem:1|h[Ok]|h|r", count = pick(BAD), q = pick(BAD), t = pick(BAD) } },
                 warnHistory = { { t = pick(BAD), text = "Aviso " .. i }, pick(BAD) },
                 lastSession = random(4) == 1 and pick(BAD) or {

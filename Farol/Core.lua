@@ -317,6 +317,27 @@ local STRINGS = {
         news_tooltip = "tooltip menor: cada item mostra só o seu (Shift mostra tudo)",
         news_supply  = "munição e reagentes, com limites que você escolhe",
         news_bars    = "até 3 barras: no menu (clique direito) escolha Barra 2 ou 3 e marque \"Mostrar\"",
+        news_profiles = "perfil só deste personagem e \"Copiar de...\" (menu ou /farol perfil)",
+        opt_profile  = "Perfil:",
+        opt_copy     = "Copiar de...",
+        pfl_account  = "Conta",
+        pfl_account_all = "Conta (todos os personagens)",
+        pfl_char_only = "Só este personagem",
+        pfl_char_short = "Este personagem",
+        pfl_none     = "nenhum outro perfil ainda",
+        pfl_status_account = "perfil: o da conta (o mesmo para todos os personagens que usam a conta).",
+        pfl_status_char = "perfil: só deste personagem.",
+        pfl_set_account = "agora este personagem usa o perfil da conta.",
+        pfl_set_char = "agora este personagem tem um perfil só dele (começa igual ao da conta).",
+        pfl_copied   = "barras copiadas de %s para o perfil em uso (para voltar: /farol perfil desfazer).",
+        pfl_undone   = "cópia desfeita.",
+        pfl_nothing_undo = "nada para desfazer.",
+        pfl_not_found = "perfil não encontrado: %s.",
+        pfl_sources  = "dá para copiar de: %s.",
+        pfl_no_name  = "o jogo ainda não informou o nome do personagem; tente de novo em instantes.",
+        pfl_full     = "limite de perfis atingido; este personagem continua com o perfil da conta.",
+        pfl_usage    = "uso: /farol perfil || /farol perfil conta || /farol perfil personagem || /farol perfil copiar Nome (ou conta) || /farol perfil desfazer",
+        help_profile = "  /farol perfil        - perfil da conta ou só deste personagem; copiar de outro (\"copiar Nome\")",
         opt_bar      = "Barra:",
         bar_n        = "Barra %d",
         bar_off_short = "(off)",
@@ -577,6 +598,27 @@ local STRINGS = {
         news_tooltip = "smaller tooltip: each item shows its own (Shift shows everything)",
         news_supply  = "ammo and reagents, with limits you choose",
         news_bars    = "up to 3 bars: in the menu (right-click) pick Bar 2 or 3 and tick \"Show\"",
+        news_profiles = "a profile just for this character and \"Copy from...\" (menu or /farol profile)",
+        opt_profile  = "Profile:",
+        opt_copy     = "Copy from...",
+        pfl_account  = "Account",
+        pfl_account_all = "Account (all characters)",
+        pfl_char_only = "This character only",
+        pfl_char_short = "This character",
+        pfl_none     = "no other profile yet",
+        pfl_status_account = "profile: the account one (the same for every character using it).",
+        pfl_status_char = "profile: this character only.",
+        pfl_set_account = "this character now uses the account profile.",
+        pfl_set_char = "this character now has its own profile (starts as a copy of the account one).",
+        pfl_copied   = "bars copied from %s to the profile in use (to go back: /farol profile undo).",
+        pfl_undone   = "copy undone.",
+        pfl_nothing_undo = "nothing to undo.",
+        pfl_not_found = "profile not found: %s.",
+        pfl_sources  = "you can copy from: %s.",
+        pfl_no_name  = "the game has not told the character name yet; try again in a moment.",
+        pfl_full     = "profile limit reached; this character keeps the account profile.",
+        pfl_usage    = "usage: /farol profile || /farol profile account || /farol profile character || /farol profile copy Name (or account) || /farol profile undo",
+        help_profile = "  /farol profile       - account profile or this character only; copy from another (\"copy Name\")",
         opt_bar      = "Bar:",
         bar_n        = "Bar %d",
         bar_off_short = "(off)",
@@ -748,15 +790,25 @@ function Profiles.DefaultY(n) return DEFAULTS.y - 40 * ((n or 1) - 1) end
 
 -- Barras 2 e 3: a mesma validação da barra 1 (SanitizeDB e Order.Sanitize), só com os campos de barra.
 -- Começam escondidas; o jogador liga no menu (Barra 2 / Barra 3 → Mostrar) ou com /farol barra 2 mostrar.
-function Profiles.SanitizeBar(saved, n)
-    local raw = Profiles.SavedBar(saved, n) or {}
+-- Também serve de cópia validada de uma barra (tabelas novas, nada compartilhado com o original).
+function Profiles.CleanBar(raw, n)
+    if type(raw) ~= "table" then raw = {} end
     local clean = SanitizeDB(raw)
     local bar = {}
     for _, key in ipairs(Profiles.BAR_KEYS) do bar[key] = clean[key] end
     bar.order = ns.Order.Sanitize(raw.order)
-    if type(raw.shown) ~= "boolean" then bar.shown = false end
+    if type(raw.shown) ~= "boolean" then bar.shown = (n == 1) end
     if type(raw.y) ~= "number" or bar.y ~= raw.y then bar.y = Profiles.DefaultY(n) end
     return bar
+end
+
+function Profiles.SanitizeBar(saved, n) return Profiles.CleanBar(Profiles.SavedBar(saved, n), n) end
+
+-- Cópia validada das barras 1..3 (para perfis novos, "Copiar de..." e "desfazer").
+function Profiles.CopyBars(bars)
+    local copy = {}
+    for n = 1, Profiles.MAX_BARS do copy[n] = Profiles.CleanBar(type(bars) == "table" and bars[n] or nil, n) end
+    return copy
 end
 
 -- Visão "solta" (como na 2.x) dos dados salvos, para a validação de sempre: campos da barra vêm do perfil.
@@ -777,14 +829,12 @@ end
 Profiles.PROXY = {
     __index = function(t, key)
         if Profiles.BAR_KEY[key] then
-            local profiles = rawget(t, "profiles")
-            return profiles.account.bars[Profiles.cur or 1][key]
+            return Profiles.active[Profiles.cur or 1][key]
         end
     end,
     __newindex = function(t, key, value)
         if Profiles.BAR_KEY[key] then
-            local profiles = rawget(t, "profiles")
-            profiles.account.bars[Profiles.cur or 1][key] = value
+            Profiles.active[Profiles.cur or 1][key] = value
         else
             rawset(t, key, value)
         end
@@ -802,7 +852,8 @@ function Profiles.Build(clean, extra)
     end
     local bars = { bar }
     for n = 2, Profiles.MAX_BARS do bars[n] = extra and extra[n] or Profiles.SanitizeBar(nil, n) end
-    rawset(clean, "profiles", { account = { bars = bars } })
+    rawset(clean, "profiles", { account = { bars = bars }, chars = {} })
+    Profiles.active, Profiles.mode = bars, "account" -- perfil em uso (conta ou só deste personagem)
     rawset(clean, "activeBar", 1)
     rawset(clean, "dataVersion", Profiles.DATA_VERSION)
     Profiles.cur = 1
@@ -810,7 +861,7 @@ function Profiles.Build(clean, extra)
 end
 
 -- Dados (validados) da barra N, sem passar pelo metatable.
-function Profiles.Data(n) return rawget(db, "profiles").account.bars[n] end
+function Profiles.Data(n) return Profiles.active[n] end
 
 -- Executa uma leitura de dados isolada: qualquer erro/bloqueio vira nil.
 local function Safe(fn, ...)
@@ -1431,8 +1482,9 @@ local function ForgetCharacters(target)
     if not chars then return end
     if target == nil then
         local count = 0
+        local own = rawget(db, "profiles").chars[realm] or {}
         for charName in pairs(chars) do
-            if charName ~= name then chars[charName] = nil; count = count + 1 end
+            if charName ~= name then chars[charName] = nil; own[charName] = nil; count = count + 1 end
         end
         Print(string.format(T("gold_forgot_all"), count))
         return
@@ -1441,11 +1493,112 @@ local function ForgetCharacters(target)
         if string.lower(charName) == string.lower(target) then
             if charName == name then Print(T("gold_forget_self")) return end
             chars[charName] = nil
+            local own = rawget(db, "profiles").chars[realm]
+            if own then own[charName] = nil end -- o perfil dele também
             Print(string.format(T("gold_forgot"), (string.gsub(charName, "|", "||"))))
             return
         end
     end
     Print(string.format(T("gold_not_found"), (string.gsub(target, "|", "||"))))
+end
+
+---------------------------------------------------------------------------
+-- Perfis por personagem (3.2): FarolDB.profiles.chars[reino][nome] = { bars = {1..3} }, só dos seus personagens.
+-- Cada personagem escolhe em FarolCharDB.profile: "account" (o da conta, padrão) ou "char" (o próprio).
+---------------------------------------------------------------------------
+
+-- Valida os perfis salvos: nomes como os de chars (ValidName), no máximo 20 reinos × 60 nomes (ordem alfabética,
+-- fixa), cada barra pela validação de sempre. Qualquer outra coisa é descartada.
+function Profiles.SanitizeChars(saved)
+    local profiles = type(saved) == "table" and rawget(saved, "profiles")
+    local src = type(profiles) == "table" and profiles.chars
+    local clean = {}
+    if type(src) ~= "table" then return clean end
+    local realms = {}
+    for realm, list in pairs(src) do
+        if ValidName(realm) and type(list) == "table" then realms[#realms + 1] = realm end
+    end
+    table.sort(realms)
+    for i = 1, math.min(#realms, MAX_REALMS) do
+        local realm, names = realms[i], {}
+        for name, profile in pairs(src[realm]) do
+            if ValidName(name) and type(profile) == "table" and type(profile.bars) == "table" then
+                names[#names + 1] = name
+            end
+        end
+        table.sort(names)
+        if #names > 0 then
+            clean[realm] = {}
+            for j = 1, math.min(#names, MAX_CHARS) do
+                clean[realm][names[j]] = { bars = Profiles.CopyBars(src[realm][names[j]].bars) }
+            end
+        end
+    end
+    return clean
+end
+
+-- Perfil próprio do personagem (create = cria uma cópia do perfil da conta se ainda não existir).
+function Profiles.Own(name, realm, create)
+    local chars = rawget(db, "profiles").chars
+    local list = chars[realm]
+    local own = list and list[name]
+    if own or not create then return own end
+    if not list then
+        local realms = 0
+        for _ in pairs(chars) do realms = realms + 1 end
+        if realms >= MAX_REALMS then return nil end
+        list = {}
+        chars[realm] = list
+    end
+    local count = 0
+    for _ in pairs(list) do count = count + 1 end
+    if count >= MAX_CHARS then return nil end
+    own = { bars = Profiles.CopyBars(rawget(db, "profiles").account.bars) }
+    list[name] = own
+    return own
+end
+
+-- Escolhe as barras em uso. Devolve true se mudou (o personagem pode ainda não ser conhecido no carregamento).
+function Profiles.Activate()
+    local target = rawget(db, "profiles").account
+    if Profiles.mode == "char" then
+        local name, realm = CurrentCharacter()
+        local own = name and Profiles.Own(name, realm, true)
+        if own then target = own end
+    end
+    local changed = Profiles.active ~= target.bars
+    Profiles.active = target.bars
+    return changed
+end
+
+-- Perfis de onde dá para copiar: a conta e os outros personagens (o reino atual primeiro, depois por nome).
+function Profiles.Sources()
+    local name, realm = CurrentCharacter()
+    local list = {}
+    local account = rawget(db, "profiles").account
+    if account.bars ~= Profiles.active then list[1] = { account = true, bars = account.bars } end
+    local chars = {}
+    for r, names in pairs(rawget(db, "profiles").chars) do
+        for n, profile in pairs(names) do
+            if profile.bars ~= Profiles.active then
+                chars[#chars + 1] = { name = n, realm = r, bars = profile.bars, here = r == realm }
+            end
+        end
+    end
+    table.sort(chars, function(a, b)
+        if a.here ~= b.here then return a.here end
+        if a.name ~= b.name then return a.name < b.name end
+        return a.realm < b.realm
+    end)
+    for _, c in ipairs(chars) do list[#list + 1] = c end
+    return list, name
+end
+
+function Profiles.SourceLabel(source)
+    if source.account then return T("pfl_account") end
+    local _, realm = CurrentCharacter()
+    if source.realm == realm then return source.name end
+    return source.name .. " (" .. source.realm .. ")"
 end
 
 -- Última bolsa a ler (mochila = 0). Valor do jogo validado: um número estranho nunca vira um laço sem fim.
@@ -2039,7 +2192,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -3016,6 +3169,28 @@ local function BuildControls(parent, top)
     end
     y = y - 30
 
+    -- Perfil: o da conta (todos os personagens) ou só deste personagem; e "Copiar de..." outro perfil.
+    set.profileLabel = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    set.profileLabel:SetPoint("TOPLEFT", 16, y - 4)
+    local index = #controlSets + 1
+    set.profile = ns.CreateDropdown(parent, "FarolProfile" .. index, 170, function()
+        return {
+            { text = T("pfl_account_all"), checked = Profiles.mode ~= "char", onClick = function() Profiles.SetMode("account") end },
+            { text = T("pfl_char_only"), checked = Profiles.mode == "char", onClick = function() Profiles.SetMode("char") end },
+        }
+    end)
+    set.profile:SetPoint("TOPLEFT", 72, y)
+    set.copy = ns.CreateDropdown(parent, "FarolProfileCopy" .. index, 120, function()
+        local items = {}
+        for _, source in ipairs(Profiles.Sources()) do
+            items[#items + 1] = { text = Profiles.SourceLabel(source), onClick = function() Profiles.CopyFrom(source) end }
+        end
+        if #items == 0 then items[1] = { text = T("pfl_none"), r = .6, g = .6, b = .6, onClick = function() end } end
+        return items
+    end)
+    set.copy:SetPoint("TOPLEFT", 248, y)
+    y = y - 30
+
     set.itemsHeader = CreateHeader(parent, y)
     y = y - 20
     -- Duas colunas para caber todos os itens.
@@ -3110,6 +3285,9 @@ RefreshOptions = function()
         local on, total = ItemCounts()
         set.hint:SetText(string.format(T("opt_hint_count"), on, total))
         set.barLabel:SetText(T("opt_bar"))
+        set.profileLabel:SetText(T("opt_profile"))
+        set.profile:SetText(Profiles.mode == "char" and T("pfl_char_short") or T("pfl_account"))
+        set.copy:SetText(T("opt_copy"))
         for n, button in ipairs(set.bars) do
             button:SetText(string.format(T("bar_n"), n) .. (Profiles.Data(n).shown and "" or " " .. T("bar_off_short")))
             if n == rawget(db, "activeBar") then button:LockHighlight() else button:UnlockHighlight() end
@@ -3306,10 +3484,85 @@ function ns.BarSuffix()
     return many and (" — " .. string.format(T("bar_n"), n)) or ""
 end
 
+-- Depois de trocar ou copiar um perfil: cria/mostra/esconde as barras e atualiza janelas.
+function Profiles.Refresh()
+    for n = 2, Profiles.MAX_BARS do
+        if Profiles.Data(n).shown then Profiles.Ensure(n) end
+    end
+    Profiles.Each(ApplyPosition)
+    UpdateGrip()
+    ApplyAppearance()
+    ApplyVisibility()
+    RefreshOptions()
+    if ns.Appearance then ns.Appearance.Refresh() end
+    if ns.Order then ns.Order.Refresh() end
+end
+
+function Profiles.SetMode(mode)
+    if mode == "char" and not CurrentCharacter() then Print(T("pfl_no_name")) return false end
+    Profiles.mode = mode == "char" and "char" or "account"
+    FarolCharDB.profile = Profiles.mode
+    Profiles.Activate()
+    if Profiles.mode == "char" and Profiles.active == rawget(db, "profiles").account.bars then
+        Profiles.mode, FarolCharDB.profile = "account", "account" -- limite de perfis: continua no da conta
+        Print(T("pfl_full"))
+        return false
+    end
+    Profiles.backup = nil
+    Profiles.Refresh()
+    Print(Profiles.mode == "char" and T("pfl_set_char") or T("pfl_set_account"))
+    return true
+end
+
+-- Copia (validando) as 3 barras de outro perfil para o perfil em uso. Dá para desfazer nesta sessão.
+function Profiles.CopyFrom(source)
+    Profiles.backup = Profiles.CopyBars(Profiles.active)
+    local copy = Profiles.CopyBars(source.bars)
+    for n = 1, Profiles.MAX_BARS do Profiles.active[n] = copy[n] end
+    Profiles.Refresh()
+    Print(string.format(T("pfl_copied"), Profiles.SourceLabel(source)))
+end
+
+function Profiles.Undo()
+    if not Profiles.backup then Print(T("pfl_nothing_undo")) return end
+    for n = 1, Profiles.MAX_BARS do Profiles.active[n] = Profiles.backup[n] end
+    Profiles.backup = nil
+    Profiles.Refresh()
+    Print(T("pfl_undone"))
+end
+
+-- /farol perfil [conta|personagem|copiar Nome|desfazer]
+Profiles.WORDS = { conta = "account", account = "account", personagem = "char", character = "char", char = "char",
+                   copiar = "copy", copy = "copy", desfazer = "undo", undo = "undo" }
+function Profiles.Command(rest)
+    local word, target = string.match(rest or "", "^%s*(%a*)%s*(.-)%s*$")
+    local action = Profiles.WORDS[string.lower(word or "")]
+    target = string.sub(target or "", 1, 48)
+    if word == "" then
+        Print(Profiles.mode == "char" and T("pfl_status_char") or T("pfl_status_account"))
+        local names = {}
+        for _, source in ipairs(Profiles.Sources()) do names[#names + 1] = Profiles.SourceLabel(source) end
+        if #names > 0 then Print(string.format(T("pfl_sources"), table.concat(names, ", "))) end
+        Print(T("pfl_usage"))
+    elseif (action == "account" or action == "char" or action == "undo") and target == "" then
+        if action == "undo" then Profiles.Undo() else Profiles.SetMode(action) end
+    elseif action == "copy" and target ~= "" then
+        local wanted = string.lower(target)
+        for _, source in ipairs(Profiles.Sources()) do
+            local match = source.account and (wanted == "conta" or wanted == "account")
+                or (not source.account and string.lower(source.name) == wanted)
+            if match then Profiles.CopyFrom(source) return end
+        end
+        Print(string.format(T("pfl_not_found"), (string.gsub(target, "|", "||"))))
+    else
+        Print(T("pfl_usage"))
+    end
+end
+
 -- /farol barra [N] [mostrar|esconder]
 Profiles.SHOW = { mostrar = true, show = true, on = true, ligar = true }
 Profiles.HIDE = { esconder = true, ocultar = true, hide = true, off = true, desligar = true }
-function Profiles.Command(rest)
+function Profiles.BarCommand(rest)
     local num, word = string.match(rest or "", "^%s*(%d*)%s*(%a*)%s*$")
     if not num then Print(T("bar_usage")) return end
     word = string.lower(word or "")
@@ -3375,6 +3628,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         local extra = {} -- barras 2 e 3, validadas do mesmo jeito
         for n = 2, Profiles.MAX_BARS do extra[n] = Profiles.SanitizeBar(FarolDB, n) end
         db = Profiles.Build(db, extra) -- formato 3.x: campos de cada barra em profiles.account.bars[N]
+        rawget(db, "profiles").chars = Profiles.SanitizeChars(FarolDB) -- perfis por personagem (3.2)
         FarolDB = db
         local savedChar = FarolCharDB
         FarolCharDB = ns.Loot.SanitizeHistory(savedChar) -- histórico de saques deste personagem
@@ -3390,6 +3644,10 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
             end
         end
         FarolCharDB.supplySeen = seen
+        -- Perfil deste personagem: o da conta (padrão) ou o próprio.
+        FarolCharDB.profile = type(savedChar) == "table" and savedChar.profile == "char" and "char" or "account"
+        Profiles.mode = FarolCharDB.profile
+        Profiles.Activate()
         for n = 2, Profiles.MAX_BARS do
             if Profiles.Data(n).shown then Profiles.Ensure(n) end
         end
@@ -3410,6 +3668,8 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
     end
 
     if event == "PLAYER_ENTERING_WORLD" then
+        -- Perfil próprio: se o nome do personagem só chegou agora, troca para ele.
+        if Profiles.mode == "char" and Profiles.Activate() then Profiles.Refresh() end
         pcall(ShowLastSummary, arg1, arg2) -- antes de StartSession: o registro é da sessão anterior
         pcall(ShowOnboarding)
         RequestLockouts(arg1 == true) -- login: pede já; troca de zona (ou cliente antigo): no máximo 1x por minuto
@@ -3446,7 +3706,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -3507,6 +3767,8 @@ SlashCmdList["FAROL"] = function(msg)
     elseif cmd == "alarme" or cmd == "alarmes" or cmd == "alarm" or cmd == "alarms" then
         ns.Alarm.HandleCommand(rest)
     elseif cmd == "barra" or cmd == "barras" or cmd == "bar" or cmd == "bars" then
+        Profiles.BarCommand(rest)
+    elseif cmd == "perfil" or cmd == "perfis" or cmd == "profile" or cmd == "profiles" then
         Profiles.Command(rest)
     elseif cmd == "ordem" or cmd == "order" then
         ns.Order.HandleCommand(rest)

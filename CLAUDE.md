@@ -112,6 +112,12 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   quadro de barra passa por `Profiles.With(n, ...)` (`Profiles.Wire`). Fora disso, a atual é a escolhida no menu
   (`activeBar`, volta para 1 ao carregar). A atualização periódica roda só pela primeira barra visível
   (`Profiles.Leader`); pedidos ao servidor só se uma barra visível mostra o item (`Profiles.AnyItem`).
+- **Perfis por personagem (3.2):** `FarolDB.profiles.chars[reino][nome] = { bars = {1..3} }` (só os próprios
+  personagens, `ValidName`, 20 reinos × 60 nomes em ordem alfabética, `Profiles.SanitizeChars`); a escolha de cada um em
+  `FarolCharDB.profile` ("account"/"char"). `Profiles.active` = as barras em uso (o metatable lê/escreve nelas);
+  `Profiles.Activate()` escolhe (o nome do personagem pode só chegar no `PLAYER_ENTERING_WORLD`, que reaplica).
+  Toda cópia passa por `Profiles.CleanBar`/`CopyBars` (validação + tabelas novas, nunca compartilhadas). "Copiar de..."
+  guarda `Profiles.backup` (só na sessão) para `/farol perfil desfazer`. Esquecer um personagem apaga o perfil dele.
 - **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`, `chars` = ouro
   e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks? }`
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle

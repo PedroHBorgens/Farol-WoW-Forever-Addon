@@ -47,6 +47,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
 | `/farol order`      | Choose the order of the items on the bar |
+| `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
 | `/farol bar 2 show` | Turn on bar 2 (or 3) and pick it for the menu, Appearance and Order (`/farol bar` lists the bars) |
 | `/farol alarm`      | Open the alarms window |
 | `/farol alarm add 07:30`| Create an alarm (see below) |
@@ -81,6 +82,15 @@ At the top of the menu, **Bar: [Bar 1] [Bar 2] [Bar 3]** chooses which bar the m
 position, appearance (scale, background, text, layout, hide in combat) and order**. Right-clicking a bar opens the
 menu with that bar already chosen. Bars 2 and 3 start off (and below bar 1); `/farol bar 2 show` / `/farol bar 2 hide`
 also work. Alarms, loot, warnings, language and the quick buttons (📝 👜, next to bar 1) are shared.
+
+### Profiles: account or this character only
+
+**Profile: [Account ▾]** in the menu: by default every character uses the **account** profile (the same bars).
+Choose **This character only** to give the current character its own bars (it starts as a copy of the account
+profile; the account profile is kept). **Copy from... ▾** copies the 3 bars of the account or of another of your
+characters into the profile in use — `/farol profile undo` puts it back (until you log out). Commands:
+`/farol profile`, `/farol profile account`, `/farol profile character`, `/farol profile copy Name` (or `account`).
+Profiles of your own characters only; forgetting a character (`/farol gold forget Name`) also forgets its profile.
 
 ## Clock alarms
 

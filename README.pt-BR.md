@@ -47,6 +47,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
+| `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
 | `/farol barra 2 mostrar` | Liga a barra 2 (ou 3) e escolhe ela para o menu, a Aparência e a Ordem (`/farol barra` lista as barras) |
 | `/farol alarme`     | Abre a janela de alarmes |
 | `/farol alarme add 07:30`| Cria um alarme (veja abaixo) |
@@ -82,6 +83,15 @@ posição, aparência (escala, fundo, texto, formato, esconder em combate) e ord
 abre o menu já com ela escolhida. As barras 2 e 3 começam desligadas (e abaixo da barra 1); também dá para usar
 `/farol barra 2 mostrar` / `/farol barra 2 esconder`. Alarmes, saques, avisos, idioma e os botões rápidos (📝 👜, ao lado
 da barra 1) são compartilhados.
+
+### Perfis: da conta ou só deste personagem
+
+**Perfil: [Conta ▾]** no menu: por padrão todos os personagens usam o perfil da **conta** (as mesmas barras).
+Escolha **Só este personagem** para dar ao personagem atual barras só dele (começa como cópia do perfil da conta; o
+da conta continua guardado). **Copiar de... ▾** copia as 3 barras da conta ou de outro personagem seu para o perfil em
+uso — `/farol perfil desfazer` volta como estava (até você sair do jogo). Comandos: `/farol perfil`,
+`/farol perfil conta`, `/farol perfil personagem`, `/farol perfil copiar Nome` (ou `conta`). Só perfis dos seus
+próprios personagens; esquecer um personagem (`/farol ouro esquecer Nome`) também esquece o perfil dele.
 
 ## Alarmes do relógio
 

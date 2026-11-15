@@ -23,7 +23,8 @@ return {
                                "ordem", "aparencia coluna", "aparencia largura 400", "aviso status", "help", "version",
                                "sessao zerar", "show xph", "show rep", "show reset", "show prof", "show lixo", "ouro", "ouro total on", "ouro esquecer Ninguem", "aviso descansado on", "novidades", "instancias", "aparencia tooltip", "show municao", "aviso municao 300 100", "aviso reagentes on", "aviso profissoes off", "aviso profissoes on", "resumo", "resumo off", "lang en",
                                "lock", "lock", "aviso padrao 5", "aviso agua 20", "aviso pausa lutas off",
-                               "barra", "barra 2 mostrar", "barra 3 mostrar", "aparencia escala 120", "ordem", "lock", "barra 1" }) do
+                               "barra", "barra 2 mostrar", "barra 3 mostrar", "aparencia escala 120", "ordem", "lock", "barra 1",
+                               "perfil", "perfil personagem", "perfil copiar conta", "perfil desfazer", "perfil conta" }) do
             H:slash(cmd)
         end
         H:event("CHAT_MSG_LOOT", "Você recebe saque: |cff1eff00|Hitem:1|h[X]|h|r.")

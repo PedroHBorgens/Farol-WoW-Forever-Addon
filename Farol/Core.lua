@@ -697,6 +697,75 @@ local function SanitizeDB(saved)
     return clean
 end
 
+---------------------------------------------------------------------------
+-- Versão 3: perfis e barras. No disco, o que é de cada barra fica em profiles.account.bars[N]; o resto (idioma,
+-- alarmes, avisos, saques, personagens...) continua no FarolDB. No código, db.items, db.scale etc. continuam
+-- funcionando: um metatable leva essas chaves para a barra ativa. Dados antigos (2.x, tudo "solto") e novos (3.x)
+-- passam pela MESMA validação de sempre (SanitizeDB, Order.Sanitize) antes de serem montados no formato novo.
+---------------------------------------------------------------------------
+
+local Profiles = { DATA_VERSION = 3 } -- uma só variável local (o arquivo já está perto do limite de 200 do Lua)
+Profiles.BAR_KEYS = { "shown", "locked", "point", "relPoint", "x", "y", "scale", "bgAlpha", "border", "barWidth",
+                   "fontSize", "iconSize", "icons", "hideCombat", "hideInstance", "items", "order" }
+Profiles.BAR_KEY = {}
+for _, key in ipairs(Profiles.BAR_KEYS) do Profiles.BAR_KEY[key] = true end
+ns.BAR_KEYS = Profiles.BAR_KEYS
+
+-- Barra 1 do perfil da conta, se o arquivo salvo tiver o formato 3.x (tudo validado depois, como sempre).
+function Profiles.SavedBar(saved)
+    if type(saved) ~= "table" then return nil end
+    local profiles = rawget(saved, "profiles")
+    local account = type(profiles) == "table" and profiles.account
+    local bars = type(account) == "table" and account.bars
+    local bar = type(bars) == "table" and bars[1]
+    return type(bar) == "table" and bar or nil
+end
+
+-- Visão "solta" (como na 2.x) dos dados salvos, para a validação de sempre: campos da barra vêm do perfil.
+function Profiles.Flatten(saved)
+    if type(saved) ~= "table" then return saved end
+    local flat = {}
+    for key, value in pairs(saved) do flat[key] = value end
+    local bar = Profiles.SavedBar(saved)
+    if bar then
+        for _, key in ipairs(Profiles.BAR_KEYS) do
+            if bar[key] ~= nil then flat[key] = bar[key] end
+        end
+    end
+    flat.profiles, flat.activeBar, flat.dataVersion = nil, nil, nil
+    return flat
+end
+
+Profiles.PROXY = {
+    __index = function(t, key)
+        if Profiles.BAR_KEY[key] then
+            local profiles = rawget(t, "profiles")
+            return profiles.account.bars[rawget(t, "activeBar") or 1][key]
+        end
+    end,
+    __newindex = function(t, key, value)
+        if Profiles.BAR_KEY[key] then
+            local profiles = rawget(t, "profiles")
+            profiles.account.bars[rawget(t, "activeBar") or 1][key] = value
+        else
+            rawset(t, key, value)
+        end
+    end,
+}
+
+-- Move os campos de barra (já validados) para profiles.account.bars[1] e liga o metatable.
+function Profiles.Build(clean)
+    local bar = {}
+    for _, key in ipairs(Profiles.BAR_KEYS) do
+        bar[key] = rawget(clean, key)
+        rawset(clean, key, nil)
+    end
+    rawset(clean, "profiles", { account = { bars = { bar } } })
+    rawset(clean, "activeBar", 1)
+    rawset(clean, "dataVersion", Profiles.DATA_VERSION)
+    return setmetatable(clean, Profiles.PROXY)
+end
+
 -- Executa uma leitura de dados isolada: qualquer erro/bloqueio vira nil.
 local function Safe(fn, ...)
     local ok, a, b, c = pcall(fn, ...)
@@ -3068,7 +3137,7 @@ frame:RegisterEvent("PLAYER_REGEN_ENABLED")  -- saiu do combate
 frame:SetScript("OnEvent", function(self, event, arg1, arg2)
     if event == "ADDON_LOADED" then
         if arg1 ~= ADDON_NAME then return end
-        local saved = FarolDB
+        local saved = Profiles.Flatten(FarolDB) -- 2.x e 3.x viram a mesma visão, validada abaixo como sempre
         db = SanitizeDB(saved)
         -- Nova instalação = sem dados salvos. Quem já usava (dados sem "newsSeen") vê as novidades uma vez.
         if type(saved) ~= "table" or next(saved) == nil then
@@ -3084,6 +3153,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         db.warnings = ns.Warnings.Sanitize(type(saved) == "table" and saved.warnings or nil)
         db.order = ns.Order.Sanitize(type(saved) == "table" and saved.order or nil)
         db.chars = SanitizeChars(type(saved) == "table" and saved.chars or nil)
+        db = Profiles.Build(db) -- formato 3.x: campos da barra em profiles.account.bars[1]
         FarolDB = db
         local savedChar = FarolCharDB
         FarolCharDB = ns.Loot.SanitizeHistory(savedChar) -- histórico de saques deste personagem

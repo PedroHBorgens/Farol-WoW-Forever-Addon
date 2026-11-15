@@ -39,6 +39,8 @@ menu = f"""<div class="win" id="menu" style="width:620px;padding-top:12px;paddin
 <div style="display:flex;gap:8px;align-items:center;margin-top:2px"><span class="k" style="font-size:14px">Bar:</span>
 <span class="btn" id="b1" style="padding:2px 10px">Bar 1</span><span class="btn" id="b2" style="padding:2px 10px">Bar 2 (off)</span>
 <span class="btn" id="b3" style="padding:2px 10px">Bar 3 (off)</span><span id="newbadge">NEW · NOVO</span></div>
+<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="k" style="font-size:14px">Profile:</span>
+<span class="btn" style="padding:2px 10px">Account ▾</span><span class="btn" style="padding:2px 10px">Copy from... ▾</span></div>
 <div class="h" style="margin-top:6px">Bar items</div><div style="display:flex;gap:60px"><div>{colA}</div><div>{colB}</div></div>
 <div class="h">General</div><div style="display:flex;gap:40px">{ck("mshow", "Show panel", True)}{ck("mlock", "Lock position")}</div>
 <div style="display:flex;gap:8px;margin-top:8px;white-space:nowrap"><span class="btn">Alarms...</span><span class="btn">Loot...</span>
@@ -122,7 +124,7 @@ EXTRA_CSS = """
 #ring{position:absolute;width:44px;height:44px;border-radius:50%;border:3px solid #ffd75a;z-index:49;pointer-events:none}
 #shift{position:absolute;z-index:40;font:700 18px 'Inter';color:#111;background:#e8e8e8;border-radius:6px;padding:6px 14px;box-shadow:0 3px 0 #888,0 6px 18px #000a}
 .chat{font-size:15px;line-height:1.7}
-#menu .ck{margin:3px 0}
+#menu .ck{margin:1px 0}
 """
 
 html = f"""<!doctype html><html><head><meta charset="utf-8"><style>{CSS}{EXTRA_CSS}</style></head><body>

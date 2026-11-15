@@ -2,6 +2,15 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.2.0 — Per-character profiles
+- New **Profile: [Account ▾]** in the menu: every character uses the account profile by default; choose
+  **This character only** to give the current character its own 3 bars (starts as a copy of the account profile).
+- **Copy from... ▾** copies the bars of the account or of another of your characters into the profile in use;
+  `/farol profile undo` puts them back (this session).
+- `/farol profile` (`/farol perfil`): status, `account`, `character`, `copy Name`, `undo`.
+- Profiles of your own characters only, validated on load (same limits as the gold list: 20 realms × 60 characters);
+  forgetting a character also forgets its profile.
+
 ## 3.1.0 — Up to 3 bars
 - New **Bar: [Bar 1] [Bar 2] [Bar 3]** buttons at the top of the menu choose which bar the menu, Appearance and Order
   change. Each bar has its own items, position (drag), appearance, layout, lock, hide in combat/instance and order.

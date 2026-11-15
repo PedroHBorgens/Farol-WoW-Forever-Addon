@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.1.0 — Up to 3 bars
+- New **Bar: [Bar 1] [Bar 2] [Bar 3]** buttons at the top of the menu choose which bar the menu, Appearance and Order
+  change. Each bar has its own items, position (drag), appearance, layout, lock, hide in combat/instance and order.
+- Bars 2 and 3 start off, below bar 1. Turn them on in the menu (pick the bar, tick **Show panel**) or with
+  `/farol bar 2 show`; `/farol bar` lists the bars. Right-clicking a bar opens the menu with that bar chosen.
+- Alarms, loot, warnings, language and the quick buttons (next to bar 1) stay shared.
+- Bars that were never turned on are not created. Saved bars are validated on load like bar 1.
+
 ## 3.0.0 — New settings structure (profiles and bars)
 - Internal change preparing for multiple bars and per-character profiles: the bar's settings (position, appearance,
   visible items and their order) now live in `profiles.account.bars[1]` inside `FarolDB`.

@@ -8,7 +8,7 @@ local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", 
                 "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "municao", "reagentes", "400", "5000", "15", "240", "2",
                 "graus", "som", "status", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
-                "sessao", "zerar", "historico", "on", "off", "07:30", "25:99", "-1", "99999" }
+                "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "on", "off", "07:30", "25:99", "-1", "99999" }
 local BAD = { "x", 1e309, -1e309, 0 / 0, true, false, {}, { 1, 2 }, -5, 3.7, "" }
 
 local seed = 1

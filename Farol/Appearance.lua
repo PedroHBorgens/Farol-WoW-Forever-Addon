@@ -322,7 +322,7 @@ end
 RefreshWindow = function()
     if not window or not window:IsShown() then return end
     local db = DB()
-    window.title:SetText(T("app_title"))
+    window.title:SetText(T("app_title") .. (ns.BarSuffix and ns.BarSuffix() or ""))
     window.scale.label:SetText(T("app_scale"))
     window.scale.value:SetText(Percent(db.scale) .. "%")
     window.bg.label:SetText(T("app_bg"))

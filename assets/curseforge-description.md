@@ -17,6 +17,7 @@
 FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · **Junk value (gray items)** · **Ammo & reagents (your limits)** · Gold (**+ total and rested XP of all your characters**) · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · **Reputation (standing, progress, rep/hour)** · **Professions (level / training limit)** · Clock (local or server) · **Daily & weekly reset countdown + saved instances (raid lockouts)** · Session time · Friends online · Guild online
 
 - **Right-click** the bar (or `/farol menu`) to tick the items you want, and **choose their order** with [▲]/[▼] arrows.
+- **Up to 3 bars**, each with its own items, position, appearance and order (menu → Bar 2 / Bar 3 → Show).
 - **Hover** an item for its own short tooltip (gold, durability, resets…); hold **Shift** to see everything: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
 
 ### Appearance
@@ -69,6 +70,7 @@ English and Brazilian Portuguese (follows your client, or `/farol lang en|pt`).
 FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · **Valor do lixo (itens cinzentos)** · **Munição e reagentes (seus limites)** · Ouro (**+ total e descanso de todos os seus personagens**) · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · **Reputação (nível, progresso, rep/hora)** · **Profissões (nível / limite do treinamento)** · Horário (local ou do servidor) · **Contagem até o reset diário e semanal + instâncias salvas (bloqueios de raide)** · Tempo de sessão · Amigos online · Guilda online
 
 - **Clique direito** na barra (ou `/farol menu`), marque os itens que quiser e **escolha a ordem** com as setas [▲]/[▼].
+- **Até 3 barras**, cada uma com itens, posição, aparência e ordem próprios (menu → Barra 2 / Barra 3 → Mostrar).
 - **Passe o mouse** num item para ver um tooltip curto só dele (ouro, durabilidade, resets…); segure **Shift** para ver tudo: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.
 
 ### Aparência

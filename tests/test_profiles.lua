@@ -79,7 +79,8 @@ return {
             T.eq(profiles.other, nil, "unknown profile dropped")
             local bar = profiles.account.bars[1]
             T.eq(bar.evil, nil); T.eq(bar.scale, 1); T.eq(bar.point, "TOP"); T.eq(bar.x, 0)
-            T.eq(#profiles.account.bars, 1)
+            T.eq(#profiles.account.bars, 3, "bar 1 plus bars 2 and 3")
+            T.eq(profiles.account.bars[2].shown, false); T.eq(profiles.account.bars[3].y, -100)
         end
     end },
 

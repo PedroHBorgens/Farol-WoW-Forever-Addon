@@ -73,6 +73,7 @@ local SUITES = {
     "test_tooltip",
     "test_supplies",
     "test_profiles",
+    "test_bars",
     "test_globals",
 }
 

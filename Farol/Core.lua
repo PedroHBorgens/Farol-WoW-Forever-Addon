@@ -316,6 +316,17 @@ local STRINGS = {
         news_locks   = "instâncias salvas (/farol instancias)",
         news_tooltip = "tooltip menor: cada item mostra só o seu (Shift mostra tudo)",
         news_supply  = "munição e reagentes, com limites que você escolhe",
+        news_bars    = "até 3 barras: no menu (clique direito) escolha Barra 2 ou 3 e marque \"Mostrar\"",
+        opt_bar      = "Barra:",
+        bar_n        = "Barra %d",
+        bar_off_short = "(off)",
+        bar_on       = "ligada",
+        bar_off      = "desligada",
+        bar_editing  = "editando agora",
+        bars_title   = "Farol — barras (cada uma com itens, posição, aparência e ordem próprios):",
+        bar_selected = "Barra %d escolhida (%s): o menu, a Aparência e a Ordem agora mudam esta barra.",
+        bar_usage    = "uso: /farol barra || /farol barra N || /farol barra N mostrar || /farol barra N esconder (N = 1 a 3)",
+        help_bars    = "  /farol barra N       - escolher a barra 1, 2 ou 3 (\"mostrar\" / \"esconder\" para ligar/desligar)",
         help_news    = "  /farol novidades     - ver de novo as novidades das últimas versões",
         desc_fps      = "Quadros por segundo (verde 50+, amarelo 25+).",
         desc_ms       = "Latência: a maior entre local e mundo.",
@@ -565,6 +576,17 @@ local STRINGS = {
         news_locks   = "saved instances (/farol lockouts)",
         news_tooltip = "smaller tooltip: each item shows its own (Shift shows everything)",
         news_supply  = "ammo and reagents, with limits you choose",
+        news_bars    = "up to 3 bars: in the menu (right-click) pick Bar 2 or 3 and tick \"Show\"",
+        opt_bar      = "Bar:",
+        bar_n        = "Bar %d",
+        bar_off_short = "(off)",
+        bar_on       = "on",
+        bar_off      = "off",
+        bar_editing  = "editing now",
+        bars_title   = "Farol — bars (each with its own items, position, appearance and order):",
+        bar_selected = "Bar %d selected (%s): the menu, Appearance and Order now change this bar.",
+        bar_usage    = "usage: /farol bar || /farol bar N || /farol bar N show || /farol bar N hide (N = 1 to 3)",
+        help_bars    = "  /farol bar N         - pick bar 1, 2 or 3 (\"show\" / \"hide\" to turn it on/off)",
         help_news    = "  /farol news          - show the news of the latest versions again",
         desc_fps      = "Frames per second (green 50+, yellow 25+).",
         desc_ms       = "Latency: the higher of home and world.",
@@ -704,21 +726,37 @@ end
 -- passam pela MESMA validação de sempre (SanitizeDB, Order.Sanitize) antes de serem montados no formato novo.
 ---------------------------------------------------------------------------
 
-local Profiles = { DATA_VERSION = 3 } -- uma só variável local (o arquivo já está perto do limite de 200 do Lua)
+local Profiles = { DATA_VERSION = 3, MAX_BARS = 3 } -- uma só variável local (o Core está perto do limite de 200 do Lua)
 Profiles.BAR_KEYS = { "shown", "locked", "point", "relPoint", "x", "y", "scale", "bgAlpha", "border", "barWidth",
                    "fontSize", "iconSize", "icons", "hideCombat", "hideInstance", "items", "order" }
 Profiles.BAR_KEY = {}
 for _, key in ipairs(Profiles.BAR_KEYS) do Profiles.BAR_KEY[key] = true end
 ns.BAR_KEYS = Profiles.BAR_KEYS
 
--- Barra 1 do perfil da conta, se o arquivo salvo tiver o formato 3.x (tudo validado depois, como sempre).
-function Profiles.SavedBar(saved)
+-- Barra N do perfil da conta, se o arquivo salvo tiver o formato 3.x (tudo validado depois, como sempre).
+function Profiles.SavedBar(saved, n)
     if type(saved) ~= "table" then return nil end
     local profiles = rawget(saved, "profiles")
     local account = type(profiles) == "table" and profiles.account
     local bars = type(account) == "table" and account.bars
-    local bar = type(bars) == "table" and bars[1]
+    local bar = type(bars) == "table" and bars[n or 1]
     return type(bar) == "table" and bar or nil
+end
+
+-- Posição padrão das barras 2 e 3: logo abaixo da barra 1, para não ficarem uma em cima da outra.
+function Profiles.DefaultY(n) return DEFAULTS.y - 40 * ((n or 1) - 1) end
+
+-- Barras 2 e 3: a mesma validação da barra 1 (SanitizeDB e Order.Sanitize), só com os campos de barra.
+-- Começam escondidas; o jogador liga no menu (Barra 2 / Barra 3 → Mostrar) ou com /farol barra 2 mostrar.
+function Profiles.SanitizeBar(saved, n)
+    local raw = Profiles.SavedBar(saved, n) or {}
+    local clean = SanitizeDB(raw)
+    local bar = {}
+    for _, key in ipairs(Profiles.BAR_KEYS) do bar[key] = clean[key] end
+    bar.order = ns.Order.Sanitize(raw.order)
+    if type(raw.shown) ~= "boolean" then bar.shown = false end
+    if type(raw.y) ~= "number" or bar.y ~= raw.y then bar.y = Profiles.DefaultY(n) end
+    return bar
 end
 
 -- Visão "solta" (como na 2.x) dos dados salvos, para a validação de sempre: campos da barra vêm do perfil.
@@ -740,31 +778,39 @@ Profiles.PROXY = {
     __index = function(t, key)
         if Profiles.BAR_KEY[key] then
             local profiles = rawget(t, "profiles")
-            return profiles.account.bars[rawget(t, "activeBar") or 1][key]
+            return profiles.account.bars[Profiles.cur or 1][key]
         end
     end,
     __newindex = function(t, key, value)
         if Profiles.BAR_KEY[key] then
             local profiles = rawget(t, "profiles")
-            profiles.account.bars[rawget(t, "activeBar") or 1][key] = value
+            profiles.account.bars[Profiles.cur or 1][key] = value
         else
             rawset(t, key, value)
         end
     end,
 }
 
--- Move os campos de barra (já validados) para profiles.account.bars[1] e liga o metatable.
-function Profiles.Build(clean)
+-- Move os campos de barra (já validados) para profiles.account.bars[1], junta as barras 2 e 3 (já validadas)
+-- e liga o metatable. db.items, db.scale... = a barra atual (Profiles.cur: a escolhida no menu ou a que está
+-- sendo desenhada).
+function Profiles.Build(clean, extra)
     local bar = {}
     for _, key in ipairs(Profiles.BAR_KEYS) do
         bar[key] = rawget(clean, key)
         rawset(clean, key, nil)
     end
-    rawset(clean, "profiles", { account = { bars = { bar } } })
+    local bars = { bar }
+    for n = 2, Profiles.MAX_BARS do bars[n] = extra and extra[n] or Profiles.SanitizeBar(nil, n) end
+    rawset(clean, "profiles", { account = { bars = bars } })
     rawset(clean, "activeBar", 1)
     rawset(clean, "dataVersion", Profiles.DATA_VERSION)
+    Profiles.cur = 1
     return setmetatable(clean, Profiles.PROXY)
 end
+
+-- Dados (validados) da barra N, sem passar pelo metatable.
+function Profiles.Data(n) return rawget(db, "profiles").account.bars[n] end
 
 -- Executa uma leitura de dados isolada: qualquer erro/bloqueio vira nil.
 local function Safe(fn, ...)
@@ -1993,7 +2039,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply" }
+               "news_tooltip", "news_supply", "news_bars" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2189,59 +2235,121 @@ local ITEM_TEXT = {
 local backdropTemplate = BackdropTemplateMixin and "BackdropTemplate" or nil
 ns.backdropTemplate = backdropTemplate
 
-local frame = CreateFrame("Frame", "FarolFrame", UIParent, backdropTemplate)
-frame:SetSize(330, 26)
-frame:SetFrameStrata("MEDIUM")
-frame:SetClampedToScreen(true)
-frame:SetMovable(true)
-frame:EnableMouse(true)
-frame:RegisterForDrag("LeftButton")
+-- Barra "atual": as funções da barra (desenhar, posicionar, alça, tooltip) usam estas variáveis e os campos db.*
+-- da barra atual. Fora de um desenho, a atual é a escolhida no menu; Profiles.With(n, ...) troca por um momento.
+-- A barra 1 (FarolFrame) sempre existe e recebe os eventos; as barras 2 e 3 só são criadas quando usadas.
+local frame, text, measure, cells, grip
+local isSizing = false   -- o jogador está arrastando a alça de largura
+local layoutRows = 1     -- quantas linhas a barra tem agora
+Profiles.bars, Profiles.cur = {}, 1
 
-if frame.SetBackdrop then
-    frame:SetBackdrop({
-        bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        tile = true, tileSize = 16, edgeSize = 12,
-        insets = { left = 3, right = 3, top = 3, bottom = 3 },
-    })
-    frame:SetBackdropColor(0, 0, 0, 0.7)
-    frame:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+function Profiles.Use(n)
+    local old = Profiles.bars[Profiles.cur]
+    if old then old.isSizing, old.layoutRows = isSizing, layoutRows end
+    local bar = Profiles.bars[n]
+    Profiles.cur = n
+    frame, text, measure, cells, grip = bar.frame, bar.text, bar.measure, bar.cells, bar.grip
+    isSizing, layoutRows = bar.isSizing, bar.layoutRows
 end
 
--- Cada informação é uma "célula" (um texto próprio), posicionada numa grade de colunas
--- alinhadas à esquerda. O número de colunas depende da largura que o jogador escolher.
-local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall") -- 1ª célula
-text:SetJustifyH("LEFT")
-text.farolCell = 1
--- Texto invisível usado só para medir a largura de cada informação e a altura de uma linha.
-local measure = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-measure:Hide()
--- Fonte original da barra: só o tamanho muda (a fonte e o contorno continuam os do jogo).
-local FONT_PATH, _, FONT_FLAGS = text:GetFont()
-text:SetText("...")
+-- Executa fn com a barra N como atual e volta para a anterior (mesmo se fn der erro).
+function Profiles.With(n, fn, ...)
+    local prev = Profiles.cur
+    if prev == n then return fn(...) end
+    if not Profiles.bars[n] then return end
+    Profiles.Use(n)
+    local ok, err = pcall(fn, ...)
+    Profiles.Use(prev)
+    if not ok then error(err, 0) end
+end
+
+-- Executa fn para cada barra que existe.
+function Profiles.Each(fn)
+    for n = 1, Profiles.MAX_BARS do
+        if Profiles.bars[n] then Profiles.With(n, fn) end
+    end
+end
 
 -- Área invisível de mouse sobre o item: tooltip só deste item. Arrastar e clicar continuam indo para a barra.
-local function AttachHover(cell)
-    local hover = CreateFrame("Frame", nil, frame)
+local function AttachHover(cell, owner, n)
+    local hover = CreateFrame("Frame", nil, owner)
     hover:EnableMouse(true)
     if hover.RegisterForDrag then hover:RegisterForDrag("LeftButton") end
     local function forward(script)
         return function(_, ...)
-            local handler = frame:GetScript(script)
-            if handler then handler(frame, ...) end
+            local handler = owner:GetScript(script)
+            if handler then handler(owner, ...) end
         end
     end
     hover:SetScript("OnDragStart", forward("OnDragStart"))
     hover:SetScript("OnDragStop", forward("OnDragStop"))
     hover:SetScript("OnMouseUp", forward("OnMouseUp"))
-    hover:SetScript("OnEnter", function() if ns.ShowTooltip then ns.ShowTooltip(frame, cell.farolKey) end end)
+    hover:SetScript("OnEnter", function()
+        if ns.ShowTooltip then Profiles.With(n, ns.ShowTooltip, owner, cell.farolKey) end
+    end)
     hover:SetScript("OnLeave", function() GameTooltip:Hide() end)
     hover:Hide()
     cell.hover = hover
 end
 
-local cells = { text }
-AttachHover(text)
+-- Cria o quadro da barra N (sem os scripts: Profiles.Wire, mais abaixo).
+function Profiles.NewBar(n)
+    local f = CreateFrame("Frame", n == 1 and "FarolFrame" or ("FarolBar" .. n), UIParent, backdropTemplate)
+    f:SetSize(330, 26)
+    f:SetFrameStrata("MEDIUM")
+    f:SetClampedToScreen(true)
+    f:SetMovable(true)
+    f:EnableMouse(true)
+    f:RegisterForDrag("LeftButton")
+    if f.SetBackdrop then
+        f:SetBackdrop({
+            bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tile = true, tileSize = 16, edgeSize = 12,
+            insets = { left = 3, right = 3, top = 3, bottom = 3 },
+        })
+        f:SetBackdropColor(0, 0, 0, 0.7)
+        f:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+    end
+    if n > 1 then f:Hide() end -- aparece só depois de configurada (ApplyVisibility)
+
+    -- Cada informação é uma "célula" (um texto próprio), posicionada numa grade de colunas
+    -- alinhadas à esquerda. O número de colunas depende da largura que o jogador escolher.
+    local first = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall") -- 1ª célula
+    first:SetJustifyH("LEFT")
+    first.farolCell = 1
+    -- Texto invisível usado só para medir a largura de cada informação e a altura de uma linha.
+    local m = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    m:Hide()
+    AttachHover(first, f, n)
+
+    -- Alça no canto inferior direito: arrastar muda a LARGURA; a altura se ajusta sozinha.
+    -- Fica escondida com a barra travada, para não mudar o formato sem querer.
+    f:SetResizable(true)
+    if f.SetResizeBounds then
+        f:SetResizeBounds(60, 20, 4000, 2000)
+    else
+        if f.SetMinResize then f:SetMinResize(60, 20) end
+        if f.SetMaxResize then f:SetMaxResize(4000, 2000) end
+    end
+    local g = CreateFrame("Button", n == 1 and "FarolBarResize" or ("FarolBarResize" .. n), f)
+    g:SetSize(12, 12)
+    g:SetPoint("BOTTOMRIGHT", -1, 1)
+    g:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    g:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    g:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+
+    Profiles.bars[n] = { frame = f, text = first, measure = m, cells = { first }, grip = g,
+                         isSizing = false, layoutRows = 1 }
+    return Profiles.bars[n]
+end
+
+Profiles.NewBar(1)
+Profiles.Use(1)
+-- Fonte original da barra: só o tamanho muda (a fonte e o contorno continuam os do jogo).
+local FONT_PATH, _, FONT_FLAGS = text:GetFont()
+text:SetText("...")
+
 local function Cell(index)
     local cell = cells[index]
     if not cell then
@@ -2249,13 +2357,13 @@ local function Cell(index)
         cell:SetJustifyH("LEFT")
         cell.farolCell = index
         if FONT_PATH and db then cell:SetFont(FONT_PATH, db.fontSize, FONT_FLAGS) end
-        AttachHover(cell)
+        AttachHover(cell, frame, Profiles.cur)
         cells[index] = cell
     end
     return cell
 end
 
-local PAD_X, PAD_Y, GAP_X = 10, 4, 14 -- margens e espaço entre colunas (pixels)
+Profiles.PAD_X, Profiles.PAD_Y, Profiles.GAP_X = 10, 4, 14 -- margens e espaço entre colunas (pixels)
 
 -- Altura de uma linha: a altura real do texto (medida pelo jogo) ou do ícone, o que for maior.
 local function LineHeight()
@@ -2276,17 +2384,6 @@ local function ApplyPosition()
     frame:ClearAllPoints()
     frame:SetPoint(db.point, UIParent, db.relPoint, db.x, db.y)
 end
-
-frame:SetScript("OnDragStart", function(self)
-    if db and not db.locked and not InCombatLockdown() then
-        self:StartMoving()
-    end
-end)
-
-frame:SetScript("OnDragStop", function(self)
-    self:StopMovingOrSizing()
-    if db then SavePosition() end
-end)
 
 -- Ícone de cada item (texturas do próprio jogo). Recorte 5..59 remove a borda do ícone.
 local ITEM_ICONS = {
@@ -2313,10 +2410,8 @@ local function IconTag(key)
     return "|TInterface\\Icons\\" .. icon .. ":" .. size .. ":" .. size .. ":0:0:64:64:5:59:5:59|t "
 end
 
-local isSizing = false   -- o jogador está arrastando a alça de largura
-local layoutRows = 1     -- quantas linhas a barra tem agora
-
-local function UpdateText()
+-- Desenha a barra atual.
+function Profiles.Layout()
     local parts, keys = {}, {}
     for _, key in ipairs(db.order or ITEM_ORDER) do -- ordem escolhida pelo jogador
         if db.items[key] then
@@ -2357,7 +2452,7 @@ local function UpdateText()
             local col = (i - 1) % c + 1
             w[col] = math.max(w[col] or 0, widths[i])
         end
-        local sum = PAD_X * 2 + GAP_X * (c - 1)
+        local sum = Profiles.PAD_X * 2 + Profiles.GAP_X * (c - 1)
         for col = 1, c do sum = sum + w[col] end
         if not available or sum <= available or c == 1 then
             cols, colWidths, total = c, w, sum
@@ -2367,36 +2462,37 @@ local function UpdateText()
 
     -- Posiciona cada célula na grade, alinhada à esquerda.
     local lineHeight = LineHeight()
-    local colX, x = {}, PAD_X
+    local colX, x = {}, Profiles.PAD_X
     for col = 1, cols do
         colX[col] = x
-        x = x + colWidths[col] + GAP_X
+        x = x + colWidths[col] + Profiles.GAP_X
     end
     for i = 1, n do
         local cell = Cell(i)
         local row, col = math.floor((i - 1) / cols), (i - 1) % cols + 1
         cell:ClearAllPoints()
-        cell:SetPoint("TOPLEFT", frame, "TOPLEFT", colX[col], -PAD_Y - row * lineHeight - 2)
+        cell:SetPoint("TOPLEFT", frame, "TOPLEFT", colX[col], -Profiles.PAD_Y - row * lineHeight - 2)
         cell:SetText(parts[i])
         cell:Show()
         cell.farolKey = keys[i]
         cell.hover:ClearAllPoints()
-        cell.hover:SetPoint("TOPLEFT", cell, "TOPLEFT", -GAP_X / 2, 2)
-        cell.hover:SetSize(widths[i] + GAP_X, lineHeight)
+        cell.hover:SetPoint("TOPLEFT", cell, "TOPLEFT", -Profiles.GAP_X / 2, 2)
+        cell.hover:SetSize(widths[i] + Profiles.GAP_X, lineHeight)
         if keys[i] then cell.hover:Show() else cell.hover:Hide() end
     end
     for i = n + 1, #cells do cells[i]:Hide(); cells[i].hover:Hide() end
 
     layoutRows = math.ceil(n / cols)
     if not isSizing then frame:SetWidth(math.max(60, total)) end -- a barra encolhe até o conteúdo
-    frame:SetHeight(math.max(26, PAD_Y * 2 + layoutRows * lineHeight))
-    if ns.LayoutQuickButtons then ns.LayoutQuickButtons() end
+    frame:SetHeight(math.max(26, Profiles.PAD_Y * 2 + layoutRows * lineHeight))
+    if Profiles.cur == 1 and ns.LayoutQuickButtons then ns.LayoutQuickButtons() end -- botões ficam na barra 1
 end
 
--- Escala, fundo e borda.
-local function ApplyAppearance()
-    if ns.Warnings and ns.Warnings.UpdateButton then ns.Warnings.UpdateButton() end
-    if ns.Loot and ns.Loot.UpdateButton then ns.Loot.UpdateButton() end
+-- Redesenha todas as barras.
+local function UpdateText() Profiles.Each(Profiles.Layout) end
+
+-- Escala, fundo e borda da barra atual.
+function Profiles.Appearance()
     frame:SetScale(db.scale)
     if FONT_PATH then
         for _, cell in ipairs(cells) do cell:SetFont(FONT_PATH, db.fontSize, FONT_FLAGS) end
@@ -2406,7 +2502,13 @@ local function ApplyAppearance()
         frame:SetBackdropColor(0, 0, 0, db.bgAlpha)
         frame:SetBackdropBorderColor(0.4, 0.4, 0.4, db.border and 1 or 0)
     end
-    UpdateText()
+    Profiles.Layout()
+end
+
+local function ApplyAppearance()
+    if ns.Warnings and ns.Warnings.UpdateButton then ns.Warnings.UpdateButton() end
+    if ns.Loot and ns.Loot.UpdateButton then ns.Loot.UpdateButton() end
+    Profiles.Each(Profiles.Appearance)
 end
 
 ---------------------------------------------------------------------------
@@ -2694,7 +2796,7 @@ end
 
 local function ShowTooltip(_, key)
     if not db then return end
-    tipKey = key
+    tipKey, Profiles.tipBar = key, Profiles.cur
     GameTooltip:SetOwner(frame, "ANCHOR_BOTTOM")
     GameTooltip:ClearLines()
     local full = db.tooltipFull or ShiftDown() or key == nil
@@ -2703,71 +2805,55 @@ local function ShowTooltip(_, key)
 end
 ns.ShowTooltip = ShowTooltip
 
-frame:SetScript("OnEnter", function() ShowTooltip(frame, nil) end)
-frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
-
 local function TooltipIsOurs()
-    return GameTooltip ~= nil and GameTooltip:IsShown() and GameTooltip.IsOwned ~= nil and GameTooltip:IsOwned(frame)
+    local bar = Profiles.bars[Profiles.tipBar or 1]
+    return bar ~= nil and GameTooltip ~= nil and GameTooltip:IsShown() and GameTooltip.IsOwned ~= nil
+        and GameTooltip:IsOwned(bar.frame)
 end
 
-local elapsedSinceUpdate = 0
-frame:SetScript("OnUpdate", function(self, elapsed)
-    elapsedSinceUpdate = elapsedSinceUpdate + elapsed
-    if elapsedSinceUpdate >= UPDATE_INTERVAL then
-        elapsedSinceUpdate = 0
+-- A atualização periódica roda uma vez só, pela primeira barra visível (barra escondida não recebe OnUpdate).
+function Profiles.Leader()
+    for n = 1, Profiles.MAX_BARS do
+        local bar = Profiles.bars[n]
+        if bar and bar.frame:IsShown() then return n end
+    end
+end
+
+-- Algum item visível em alguma barra visível? (pedidos ao servidor só se alguém vai mostrar o resultado)
+function Profiles.AnyItem(key)
+    for n = 1, Profiles.MAX_BARS do
+        local bar = Profiles.bars[n]
+        if bar and bar.frame:IsShown() and Profiles.Data(n).items[key] then return true end
+    end
+    return false
+end
+
+Profiles.elapsed = 0
+function Profiles.Tick(n, elapsed)
+    if not db or Profiles.Leader() ~= n then return end
+    Profiles.elapsed = Profiles.elapsed + elapsed
+    if Profiles.elapsed >= UPDATE_INTERVAL then
+        Profiles.elapsed = 0
         pcall(SampleXP) -- mede o XP antes de redesenhar, para a taxa não ficar atrasada
         pcall(SampleRep)
-        if db.items.prof then pcall(SampleProfs) end
+        if Profiles.AnyItem("prof") then pcall(SampleProfs) end
         pcall(RecordCharacter) -- ouro e nível deste personagem (para o total da conta)
         UpdateText()
-        if db.items.guild then RequestGuildRoster() end
-        if TooltipIsOurs() then ShowTooltip(self, tipKey) end -- mantém o tooltip atualizado (mesmo item)
+        if Profiles.AnyItem("guild") then RequestGuildRoster() end
+        if TooltipIsOurs() then Profiles.With(Profiles.tipBar, ShowTooltip, nil, tipKey) end -- mesmo item
     end
-end)
+end
 
 ns.ApplyAppearance = function() ApplyAppearance() end
 
--- Alça no canto inferior direito: arrastar muda a LARGURA; a altura se ajusta sozinha.
--- Fica escondida com a barra travada, para não mudar o formato sem querer.
-frame:SetResizable(true)
-if frame.SetResizeBounds then
-    frame:SetResizeBounds(60, 20, 4000, 2000)
-else
-    if frame.SetMinResize then frame:SetMinResize(60, 20) end
-    if frame.SetMaxResize then frame:SetMaxResize(4000, 2000) end
-end
-local grip = CreateFrame("Button", "FarolBarResize", frame)
-grip:SetSize(12, 12)
-grip:SetPoint("BOTTOMRIGHT", -1, 1)
-grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
-grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
-grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
-grip:SetScript("OnMouseDown", function()
-    if db and not db.locked then
-        isSizing = true
-        frame:StartSizing("RIGHT")
-    end
-end)
-grip:SetScript("OnMouseUp", function()
-    if not isSizing then return end
-    frame:StopMovingOrSizing()
-    isSizing = false
-    db.barWidth = math.max(2, math.floor(frame:GetWidth() + 0.5))
-    SavePosition()
-    UpdateText()
-    if ns.Appearance then ns.Appearance.Refresh() end
-end)
-frame:SetScript("OnSizeChanged", function()
-    if isSizing then UpdateText() end -- reorganiza ao vivo enquanto arrasta
-end)
-
-local function UpdateGrip()
+function Profiles.Grip()
     if db.locked then grip:Hide() else grip:Show() end
 end
+local function UpdateGrip() Profiles.Each(Profiles.Grip) end
 ns.UpdateGrip = UpdateGrip
 
 -- Atalhos de formato (usados pela janela Aparência e pelos comandos).
-function ns.SetBarWidth(width)
+function ns.SetBarWidth(width) -- barra escolhida no menu
     db.barWidth = width
     UpdateText()
 end
@@ -2776,7 +2862,8 @@ ns.UpdateText = function() UpdateText() end
 -- Botões rápidos ao lado da barra (histórico de avisos, saques...), na ordem em que foram criados.
 -- Os visíveis ficam encostados um no outro; se um some, o próximo encosta no anterior.
 ns.quickButtons = {}
-function ns.LayoutQuickButtons()
+function ns.LayoutQuickButtons() Profiles.With(1, Profiles.QuickButtons) end -- sempre ao lado da barra 1
+function Profiles.QuickButtons()
     local anchor = frame
     for _, button in ipairs(ns.quickButtons) do
         if button:IsShown() then
@@ -2791,7 +2878,7 @@ function ns.LayoutQuickButtons()
         end
     end
 end
-ns.frame = frame
+ns.frame = Profiles.bars[1].frame
 
 -- Combate e instância: a barra some temporariamente se o jogador escolheu isso.
 local inCombat = false
@@ -2802,12 +2889,13 @@ local function InHiddenInstance()
     return inside and kind ~= "none" and true or false
 end
 
-local function ApplyVisibility()
+function Profiles.Visibility()
     local visible = db.shown
         and not (db.hideCombat and inCombat)
         and not InHiddenInstance()
     if visible then frame:Show() else frame:Hide() end
 end
+local function ApplyVisibility() Profiles.Each(Profiles.Visibility) end
 
 ---------------------------------------------------------------------------
 -- Ações (usadas pelos comandos e pelo menu de opções)
@@ -2845,7 +2933,7 @@ local function SetGoldTotal(value)
 end
 
 local function ResetPosition()
-    db.point, db.relPoint, db.x, db.y = DEFAULTS.point, DEFAULTS.relPoint, DEFAULTS.x, DEFAULTS.y
+    db.point, db.relPoint, db.x, db.y = DEFAULTS.point, DEFAULTS.relPoint, DEFAULTS.x, Profiles.DefaultY(Profiles.cur)
     ApplyPosition()
 end
 
@@ -2916,6 +3004,17 @@ local function BuildControls(parent, top)
     set.hint = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     set.hint:SetPoint("TOPLEFT", 16, y)
     y = y - 22
+
+    -- Qual barra as opções abaixo (itens, mostrar, travar, aparência, ordem) vão mudar.
+    set.barLabel = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    set.barLabel:SetPoint("TOPLEFT", 16, y - 4)
+    set.bars = {}
+    for n = 1, Profiles.MAX_BARS do
+        local button = CreateButton(parent, 84, function() Profiles.Select(n) end)
+        button:SetPoint("TOPLEFT", 72 + (n - 1) * 88, y)
+        set.bars[n] = button
+    end
+    y = y - 30
 
     set.itemsHeader = CreateHeader(parent, y)
     y = y - 20
@@ -3010,6 +3109,11 @@ RefreshOptions = function()
     for _, set in ipairs(controlSets) do
         local on, total = ItemCounts()
         set.hint:SetText(string.format(T("opt_hint_count"), on, total))
+        set.barLabel:SetText(T("opt_bar"))
+        for n, button in ipairs(set.bars) do
+            button:SetText(string.format(T("bar_n"), n) .. (Profiles.Data(n).shown and "" or " " .. T("bar_off_short")))
+            if n == rawget(db, "activeBar") then button:LockHighlight() else button:UnlockHighlight() end
+        end
         set.itemsHeader:SetText(T("opt_items"))
         set.generalHeader:SetText(T("opt_general"))
         set.langHeader:SetText(T("opt_lang"))
@@ -3113,10 +3217,125 @@ end
 
 ns.ApplyVisibility = function() ApplyVisibility() end
 
--- Clique direito no painel abre o menu.
-frame:SetScript("OnMouseUp", function(_, button)
-    if button == "RightButton" and db then ToggleOptions() end
-end)
+-- Scripts da barra N: tudo roda com a barra N como atual.
+function Profiles.Wire(n)
+    local bar = Profiles.bars[n]
+    local f, g = bar.frame, bar.grip
+    f:SetScript("OnDragStart", function(self)
+        Profiles.With(n, function()
+            if db and not db.locked and not InCombatLockdown() then self:StartMoving() end
+        end)
+    end)
+    f:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        Profiles.With(n, function() if db then SavePosition() end end)
+    end)
+    f:SetScript("OnEnter", function() Profiles.With(n, ShowTooltip, f, nil) end)
+    f:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    f:SetScript("OnUpdate", function(_, elapsed) Profiles.Tick(n, elapsed) end)
+    g:SetScript("OnMouseDown", function()
+        Profiles.With(n, function()
+            if db and not db.locked then
+                isSizing = true
+                frame:StartSizing("RIGHT")
+            end
+        end)
+    end)
+    g:SetScript("OnMouseUp", function()
+        Profiles.With(n, function()
+            if not isSizing then return end
+            frame:StopMovingOrSizing()
+            isSizing = false
+            db.barWidth = math.max(2, math.floor(frame:GetWidth() + 0.5))
+            SavePosition()
+            Profiles.Layout()
+        end)
+        if ns.Appearance then ns.Appearance.Refresh() end
+    end)
+    f:SetScript("OnSizeChanged", function()
+        Profiles.With(n, function() if isSizing then Profiles.Layout() end end) -- reorganiza ao vivo
+    end)
+    -- Clique direito abre o menu já com esta barra escolhida.
+    f:SetScript("OnMouseUp", function(_, button)
+        if button ~= "RightButton" or not db then return end
+        if rawget(db, "activeBar") ~= n then
+            Profiles.Select(n)
+            optionsWindow = optionsWindow or CreateOptionsWindow()
+            optionsWindow:Show()
+        else
+            ToggleOptions()
+        end
+    end)
+end
+Profiles.Wire(1)
+
+-- Cria a barra N (2 ou 3) na primeira vez que for usada.
+function Profiles.Ensure(n)
+    if Profiles.bars[n] then return end
+    Profiles.NewBar(n)
+    Profiles.Wire(n)
+    Profiles.With(n, function()
+        ApplyPosition()
+        Profiles.Grip()
+        Profiles.Appearance()
+        Profiles.Visibility()
+    end)
+end
+
+-- Escolhe a barra que o menu, a Aparência e a Ordem mudam.
+function Profiles.Select(n)
+    n = tonumber(n)
+    if not db or not n or n ~= math.floor(n) or n < 1 or n > Profiles.MAX_BARS then return false end
+    Profiles.Ensure(n)
+    rawset(db, "activeBar", n)
+    Profiles.Use(n)
+    RefreshOptions()
+    if ns.Appearance then ns.Appearance.Refresh() end
+    if ns.Order then ns.Order.Refresh() end
+    return true
+end
+
+-- " — Barra N" nos títulos das janelas, só para quem usa mais de uma barra.
+function ns.BarSuffix()
+    if not db then return "" end
+    local n = rawget(db, "activeBar") or 1
+    local many = n > 1
+    for k = 2, Profiles.MAX_BARS do
+        if Profiles.Data(k).shown then many = true end
+    end
+    return many and (" — " .. string.format(T("bar_n"), n)) or ""
+end
+
+-- /farol barra [N] [mostrar|esconder]
+Profiles.SHOW = { mostrar = true, show = true, on = true, ligar = true }
+Profiles.HIDE = { esconder = true, ocultar = true, hide = true, off = true, desligar = true }
+function Profiles.Command(rest)
+    local num, word = string.match(rest or "", "^%s*(%d*)%s*(%a*)%s*$")
+    if not num then Print(T("bar_usage")) return end
+    word = string.lower(word or "")
+    if num == "" then
+        Print(T("bars_title"))
+        for n = 1, Profiles.MAX_BARS do
+            Print("  " .. string.format(T("bar_n"), n) .. ": " .. (Profiles.Data(n).shown and T("bar_on") or T("bar_off"))
+                .. (n == rawget(db, "activeBar") and (" — " .. T("bar_editing")) or ""))
+        end
+        Print(T("bar_usage"))
+        return
+    end
+    -- Tudo validado antes de mudar qualquer coisa.
+    if (word ~= "" and not Profiles.SHOW[word] and not Profiles.HIDE[word])
+        or string.len(num) > 2 or not Profiles.Select(num) then
+        Print(T("bar_usage"))
+        return
+    end
+    if Profiles.SHOW[word] then
+        SetShown(true)
+    elseif Profiles.HIDE[word] then
+        SetShown(false)
+    end
+    Print(string.format(T("bar_selected"), rawget(db, "activeBar"),
+        Profiles.Data(rawget(db, "activeBar")).shown and T("bar_on") or T("bar_off")))
+end
 
 ---------------------------------------------------------------------------
 -- Eventos
@@ -3153,7 +3372,9 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         db.warnings = ns.Warnings.Sanitize(type(saved) == "table" and saved.warnings or nil)
         db.order = ns.Order.Sanitize(type(saved) == "table" and saved.order or nil)
         db.chars = SanitizeChars(type(saved) == "table" and saved.chars or nil)
-        db = Profiles.Build(db) -- formato 3.x: campos da barra em profiles.account.bars[1]
+        local extra = {} -- barras 2 e 3, validadas do mesmo jeito
+        for n = 2, Profiles.MAX_BARS do extra[n] = Profiles.SanitizeBar(FarolDB, n) end
+        db = Profiles.Build(db, extra) -- formato 3.x: campos de cada barra em profiles.account.bars[N]
         FarolDB = db
         local savedChar = FarolCharDB
         FarolCharDB = ns.Loot.SanitizeHistory(savedChar) -- histórico de saques deste personagem
@@ -3169,7 +3390,10 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
             end
         end
         FarolCharDB.supplySeen = seen
-        ApplyPosition()
+        for n = 2, Profiles.MAX_BARS do
+            if Profiles.Data(n).shown then Profiles.Ensure(n) end
+        end
+        Profiles.Each(ApplyPosition)
         UpdateGrip()
         ApplyAppearance()
         ApplyVisibility()
@@ -3222,7 +3446,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -3282,6 +3506,8 @@ SlashCmdList["FAROL"] = function(msg)
         end
     elseif cmd == "alarme" or cmd == "alarmes" or cmd == "alarm" or cmd == "alarms" then
         ns.Alarm.HandleCommand(rest)
+    elseif cmd == "barra" or cmd == "barras" or cmd == "bar" or cmd == "bars" then
+        Profiles.Command(rest)
     elseif cmd == "ordem" or cmd == "order" then
         ns.Order.HandleCommand(rest)
     elseif cmd == "aparencia" or cmd == "appearance" or cmd == "look" then

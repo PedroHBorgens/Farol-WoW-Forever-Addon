@@ -178,7 +178,7 @@ end
 RefreshWindow = function()
     if not window or not window:IsShown() then return end
     local db = DB()
-    window.title:SetText(T("order_title"))
+    window.title:SetText(T("order_title") .. (ns.BarSuffix and ns.BarSuffix() or ""))
     window.hint:SetText(T("order_hint"))
     window.reset:SetText(T("order_reset"))
     for i, row in ipairs(window.rows) do

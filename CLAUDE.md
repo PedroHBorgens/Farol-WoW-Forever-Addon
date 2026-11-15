@@ -70,7 +70,7 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Li
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
                     Appearance, Order
-  Core.lua          barra (grade de células), 22 itens, tooltip, menu de opções, comandos /farol, dados salvos
+  Core.lua          barras (até 3, grade de células), 22 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água), "Silenciar / Lembrar em N min"
@@ -102,7 +102,16 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   **nunca percorra o `db` com `pairs`/`next`** (não vê os campos da barra) e use `rawget` só de propósito. Ao carregar,
   `Profiles.Flatten` monta a visão "solta" (2.x e 3.x iguais), passa pela validação de sempre e `Profiles.Build`
   remonta o formato novo; perfis desconhecidos e chaves estranhas são descartados. Campo novo de barra: entra em
-  `BAR_KEYS`. O Core está perto do limite de 200 variáveis locais do Lua: agrupe funções novas numa tabela.
+  `BAR_KEYS`. O Core está perto do limite de 200 variáveis locais do Lua: agrupe funções novas numa tabela
+  (`Profiles.*`), nunca em `local` novos no topo do arquivo.
+- **Várias barras (3.1):** até `Profiles.MAX_BARS` (3). Barra 1 = `FarolFrame` (sempre existe, recebe os eventos, tem
+  os botões rápidos); barras 2/3 = `FarolBar2`/`FarolBar3`, criadas só quando usadas (`Profiles.Ensure`). As funções
+  da barra (`Profiles.Layout`, `Appearance`, `Visibility`, `Grip`, `SavePosition`...) trabalham na **barra atual**
+  (`frame`, `cells`, `grip`... + `db.*`). `Profiles.With(n, fn)` troca a atual por um momento e volta (mesmo com erro);
+  `Profiles.Each(fn)` roda em todas; `UpdateText`/`ApplyAppearance`/`ApplyVisibility` já fazem isso. Todo script de
+  quadro de barra passa por `Profiles.With(n, ...)` (`Profiles.Wire`). Fora disso, a atual é a escolhida no menu
+  (`activeBar`, volta para 1 ao carregar). A atualização periódica roda só pela primeira barra visível
+  (`Profiles.Leader`); pedidos ao servidor só se uma barra visível mostra o item (`Profiles.AnyItem`).
 - **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`, `chars` = ouro
   e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks? }`
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle
@@ -127,6 +136,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 lua5.1 tests/run.lua        # ~150 testes; deve terminar com "0 failed"
 ```
 
+- Barras 2/3 nos testes: `H.env.FarolBar2._fontStrings` (`H:cells()`/`H:bar()` leem só a barra 1); `tests/test_bars.lua`.
 - `tests/wow_mock.lua`: simulador da API (modos `forever`, `wotlk` e `secret`). `H:login()`, `H:slash()`,
   `H:update(seg)`, `H:event()`, `H:bar()` (texto da barra), `H:cells()`, `H:click()`.
 - Cuidados com o simulador: campos inexistentes devolvem `nil`; métodos desconhecidos (MaiúsculaInicial) viram

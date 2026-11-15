@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua" }
 
 local function noop() end
 

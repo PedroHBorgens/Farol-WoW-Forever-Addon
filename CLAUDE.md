@@ -69,8 +69,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order
-  Core.lua          barras (até 3, grade de células), 22 itens, tooltip, menu de opções, comandos /farol, dados salvos
+                    Appearance, Order, Tasks
+  Core.lua          barras (até 3, grade de células), 23 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água), "Silenciar / Lembrar em N min"
@@ -78,6 +78,7 @@ Farol/
   Appearance.lua    escala, fundo, tamanhos de texto/ícone, formato (uma linha / uma coluna), esconder em combate,
                     mostrar/esconder os botões rápidos 📝 👜
   Order.lua         ordem dos itens na barra
+  Tasks.lua         lista de tarefas diárias/semanais (janela, item "tasks" da barra, tooltip, /farol tarefa)
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
   Media/Farol.tga   ícone original (64×64)
 tests/              suíte de testes em Lua 5.1 com simulador da API do WoW
@@ -122,8 +123,9 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks? }`
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle
   e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores) e
-  `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `lastSession` = resumo da última sessão,
-  só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
+  `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `tasks` = lista de tarefas
+  `{ n = nome limpo (≤ 40 letras), w = semanal?, d = time() da marca }` (máx. 10; feita = `d` depois do último reset do
+  tipo, calculado com `ns.GetResetTimes`), `lastSession` = resumo da última sessão, só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
   `ADDON_LOADED` chamando o `Sanitize` de cada módulo; chaves desconhecidas são descartadas.
 - **Tooltip:** dividido em seções (`TIP.perf`, `TIP.gold`, `TIP.reset`…). Cada célula tem uma área invisível de
   mouse (`AttachHover`) que mostra só as seções do item (`TIP_SECTIONS`) e repassa arrastar/clique para a barra.
@@ -198,6 +200,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Alarmes | 04 · Janela de saques: 05 · Avisos / histórico: 06 |
 | Aparência (escala, fundo, formato, botões rápidos) | 07 (e 02 se mudar o formato da barra) |
 | Resumo da sessão (textos no chat) | 09 |
+| Tarefas (janela, item, aviso) | 10 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

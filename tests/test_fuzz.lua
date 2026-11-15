@@ -8,7 +8,7 @@ local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", 
                 "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "municao", "reagentes", "400", "5000", "15", "240", "2",
                 "graus", "som", "status", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
-                "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "Garrosh", "on", "off", "07:30", "25:99", "-1", "99999" }
+                "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "Garrosh", "tarefa", "task", "feita", "apagar", "semanal", "diaria", "on", "off", "07:30", "25:99", "-1", "99999" }
 local BAD = { "x", 1e309, -1e309, 0 / 0, true, false, {}, { 1, 2 }, -5, 3.7, "" }
 
 local seed = 1
@@ -58,7 +58,7 @@ return {
                 db.warnings = {}
                 for _, key in ipairs({ "durab", "durabPct", "bags", "bagSlots", "sound", "talents", "ranks", "prof", "restFull", "remindMin",
                                        "ammo", "ammoYellow", "ammoRed", "reag", "reagYellow", "reagRed",
-                                       "pause", "pauseMin", "pauseAnywhere", "water", "waterMin", "waterAnywhere" }) do
+                                       "pause", "pauseMin", "pauseAnywhere", "water", "waterMin", "waterAnywhere", "tasks" }) do
                     db.warnings[key] = pick(BAD)
                 end
             end
@@ -78,6 +78,7 @@ return {
             end
             local char = {
                 profile = pick({ "char", "account", 5, true, "evil" }),
+                tasks = random(3) == 1 and pick(BAD) or { { n = pick(BAD), w = pick(BAD), d = pick(BAD) }, pick(BAD), { n = "Ok", d = pick(BAD) } },
                 items = { { link = "|cff1eff00|Hitem:1|h[Ok]|h|r", count = pick(BAD), q = pick(BAD), t = pick(BAD) } },
                 warnHistory = { { t = pick(BAD), text = "Aviso " .. i }, pick(BAD) },
                 lastSession = random(4) == 1 and pick(BAD) or {

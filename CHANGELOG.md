@@ -2,6 +2,15 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.3.0 — Daily and weekly tasks
+- New **Tasks** window (`/farol task`, or **Tasks...** in the menu): up to 10 tasks per character, each **daily** or
+  **weekly**. Tick what you have done; daily tasks reset at the daily reset and weekly ones at the weekly reset.
+- New bar item **Tasks** (off by default): `Tasks 3/5`, yellow while something is left, green when all are done;
+  the tooltip lists each task.
+- Optional warning (off by default): 1 hour before the daily reset, if a daily task is left.
+- You tick the tasks yourself — Farol does not check quests or anything in the game. Task names are cleaned and
+  everything is validated on load.
+
 ## 3.2.0 — Per-character profiles
 - New **Profile: [Account ▾]** in the menu: every character uses the account profile by default; choose
   **This character only** to give the current character its own 3 bars (starts as a copy of the account profile).

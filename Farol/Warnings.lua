@@ -39,6 +39,7 @@ local DEFAULTS = {
     remindMin = 30,                                          -- tempo padrão do "Lembrar em"
     pause = false, pauseMin = 120, pauseAnywhere = false,    -- lembrete de pausa (desligado por padrão)
     water = false, waterMin = 45, waterAnywhere = false,     -- lembrete de beber água (desligado por padrão)
+    tasks = false,                                           -- tarefas diárias pendentes 1 h antes do reset
 }
 local MAX_ACTION_SLOT = 180 -- barras de ação (clientes modernos têm até 180 espaços)
 local RANK_SCAN_INTERVAL = 5 -- segundos entre varreduras quando algo mudou
@@ -112,6 +113,9 @@ local STRINGS = {
         warn_opt_remind = "\"Lembrar em\" vem com:",
         warn_name_pause = "pausa",
         warn_name_water = "beber água",
+        warn_name_tasks = "tarefas diárias pendentes",
+        warn_tasks    = "faltam %d tarefas diárias e o reset diário é em %s.",
+        warn_task_one = "falta 1 tarefa diária e o reset diário é em %s.",
         warn_set_break  = "lembrete de %s: a cada %d min.",
         warn_set_anywhere = "lembrete de %s: aparece também em lutas, raides e masmorras.",
         warn_set_wait   = "lembrete de %s: espera a luta acabar e você sair da masmorra/raide.",
@@ -205,6 +209,9 @@ local STRINGS = {
         warn_opt_remind = "\"Remind in\" starts at:",
         warn_name_pause = "break",
         warn_name_water = "drink water",
+        warn_name_tasks = "daily tasks left",
+        warn_tasks    = "%d daily tasks left and the daily reset is in %s.",
+        warn_task_one = "1 daily task left and the daily reset is in %s.",
         warn_set_break  = "%s reminder: every %d min.",
         warn_set_anywhere = "%s reminder: also shown during fights, raids and dungeons.",
         warn_set_wait   = "%s reminder: waits until the fight ends and you leave the dungeon/raid.",
@@ -262,7 +269,7 @@ function Warnings.Sanitize(saved)
     local clean = {}
     if type(saved) ~= "table" then saved = {} end
     for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "restFull", "ammo", "reag", "pause", "pauseAnywhere",
-                           "water", "waterAnywhere" }) do
+                           "water", "waterAnywhere", "tasks" }) do
         if type(saved[key]) == "boolean" then clean[key] = saved[key] else clean[key] = DEFAULTS[key] end
     end
     clean.durabPct = InRange(saved.durabPct, DURAB_MIN, DURAB_MAX) or DEFAULTS.durabPct
@@ -300,6 +307,7 @@ local state = {
     supply = { warned = {} },                           -- munição/reagentes já avisados (por grupo)
     pause = { nextAt = nil, silenced = false },         -- lembretes por tempo: próxima vez (GetTime)
     water = { nextAt = nil, silenced = false },
+    tasks = { cycle = nil },                            -- reset diário já avisado (tarefas pendentes)
 }
 
 local function PlayWarningSound()
@@ -998,6 +1006,27 @@ local function CheckRestFull(now)
     Announce(string.format(T("warn_restFull"), table.concat(names, ", ")), "restFull")
 end
 
+-- Tarefas diárias que faltam, 1 h antes do reset diário: uma vez por reset (e de novo no "Lembrar em").
+local TASKS_BEFORE = 3600
+local function CheckTasks(now)
+    if not Settings().tasks or not ns.Tasks then return end
+    local entry = state.tasks
+    local left, resetIn = ns.Tasks.PendingDaily()
+    if not left or left == 0 or not resetIn or resetIn > TASKS_BEFORE then return end
+    local cycle = math.floor((time() + resetIn) / 600) -- este reset (arredondado em 10 min)
+    local text = left == 1 and string.format(T("warn_task_one"), ns.FormatDuration(resetIn))
+        or string.format(T("warn_tasks"), left, ns.FormatDuration(resetIn))
+    if entry.cycle ~= cycle then
+        entry.cycle, entry.remindAt = cycle, nil
+        Announce(text, "tasks")
+    elseif ReminderDue(entry, now) then
+        entry.remindAt = nil
+        Announce(text, "tasks")
+    end
+end
+
+function Warnings.TasksChanged() state.tasks.cycle, state.tasks.remindAt = nil, nil end
+
 ---------------------------------------------------------------------------
 -- Lembretes de pausa e de beber água (por tempo)
 ---------------------------------------------------------------------------
@@ -1063,6 +1092,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         pcall(CheckProfessions, now)
         pcall(CheckRestFull, now)
         pcall(CheckSupplies, now)
+        pcall(CheckTasks, now)
     end
 end)
 
@@ -1446,6 +1476,7 @@ local KEYS = {
     reagentes = "reag", reagente = "reag", reagents = "reag", reagent = "reag",
     pausa = "pause", pause = "pause", ["break"] = "pause", descanso = "pause",
     agua = "water", water = "water", hidratacao = "water", hydrate = "water",
+    tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks",
 }
 local FIGHTS = { lutas = true, luta = true, fights = true, fight = true, combate = true, combat = true }
 

@@ -19,7 +19,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 > `Interface/AddOns/WoWForeverInfo` folder before installing `Farol`. Your old settings are not carried
 > over (just re-tick your items in the menu), and the chat command is now `/farol`.
 
-1. Install it from **CurseForge** (search for *Farol*), or download this repository (**Code → Download ZIP**).
+1. Install it from **[CurseForge](https://www.curseforge.com/wow/addons/farol)**, or download this repository (**Code → Download ZIP**).
 2. Copy the `Farol` folder into `World of Warcraft/_forever_/Interface/AddOns/`
    (the result must be `_forever_/Interface/AddOns/Farol/Core.lua`).
    Other clients use their own folder, e.g. `_retail_` or `_classic_era_`.

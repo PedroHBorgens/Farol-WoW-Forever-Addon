@@ -4,7 +4,7 @@ Guia técnico para quem trabalha no código (pessoas ou assistentes de IA). Para
 [README](README.md) / [README.pt-BR](README.pt-BR.md). Mudanças por versão: [CHANGELOG](CHANGELOG.md).
 
 **Farol** é um addon gratuito, de código aberto e **não oficial** para **WoW Forever**: barra de informações
-personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge. Licença MIT.
+personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <https://www.curseforge.com/wow/addons/farol>. Licença MIT.
 
 ## Regras do projeto (não negociáveis)
 

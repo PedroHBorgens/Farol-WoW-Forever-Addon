@@ -69,11 +69,11 @@ return {
         local H = Mock.new():login()
         local _, window = menuChecks(H)
         local hints = {}
-        for _, fs in ipairs(window._fontStrings or {}) do hints[#hints + 1] = H:text(fs) end
+        hints[#hints + 1] = H:text(H.env.FarolOptions.controls.hint) -- texto da aba Barra
         T.has(table.concat(hints, " | "), "Itens na barra: 6 de 23 ligados — marque os que quiser")
         H:slash("show lixo")
         hints = {}
-        for _, fs in ipairs(window._fontStrings or {}) do hints[#hints + 1] = H:text(fs) end
+        hints[#hints + 1] = H:text(H.env.FarolOptions.controls.hint) -- texto da aba Barra
         T.has(table.concat(hints, " | "), "Itens na barra: 7 de 23 ligados", "updates when an item is turned on")
         local junk
         for _, check in ipairs(H:framesOf("CheckButton")) do

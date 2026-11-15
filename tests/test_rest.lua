@@ -68,7 +68,7 @@ return {
         W:slash("aviso descanso on"); T.eq(W.env.FarolDB.warnings.pause, true)
         T.eq(W.env.FarolDB.warnings.restFull, false)
         W:slash("aviso")
-        T.eq(W:text(W.env.FarolWarnRestFull.label), "Avisar ao entrar se outro personagem estiver com o descanso cheio")
+        T.eq(W:text(W.env.FarolWarnRestFull.label), "Outro personagem com descanso cheio")
     end },
 
     { "no warning when nobody is full", function(T, Mock)

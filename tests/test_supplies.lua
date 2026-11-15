@@ -78,7 +78,7 @@ return {
         H:slash("aviso municao 6000 10"); T.has(H:lastMsg(), "de 0 a 5000")
         H:slash("aviso reagentes 0 3"); T.eq(H.env.FarolDB.warnings.reagYellow, 0, "0 = no yellow")
         H:slash("aviso")
-        T.eq(H:text(H.env.FarolWarnAmmo.label), "Avisar quando a munição acabar")
+        T.eq(H:text(H.env.FarolWarnAmmo.label), "Munição acabando")
         T.eq(H:text(H.env.FarolWarnAmmoYellow), "250"); T.eq(H:text(H.env.FarolWarnAmmoRed), "100")
         local yellow, red = H.env.FarolWarnAmmoYellow, H.env.FarolWarnAmmoRed
         yellow._text, red._text = "500", "50"

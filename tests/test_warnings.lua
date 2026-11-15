@@ -78,12 +78,14 @@ return {
         H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
         local button
         for _, frame in ipairs(H:framesOf("Button")) do
-            if frame._text == "Avisos..." then button = frame end
+            if frame._text == "Avisos" then button = frame end
         end
-        T.ok(button, "Warnings... button in the options menu")
+        T.ok(button, "Warnings tab in the options menu")
         H:click(button)
-        local window = H.env.FarolWarnings
-        T.ok(window:IsShown(), "window open")
+        local window = H.env.FarolOptions
+        T.ok(window:IsShown(), "menu open")
+        T.ok(window.controls.pages.warnings:IsShown(), "warnings tab shown")
+        T.ok(not window.controls.pages.bar:IsShown(), "bar tab hidden")
         T.eq(H.env.FarolWarnDurabPct._text, "20")
         H.env.FarolWarnDurabPct._text = "25"
         H.env.FarolWarnDurabPct._scripts.OnEnterPressed(H.env.FarolWarnDurabPct)

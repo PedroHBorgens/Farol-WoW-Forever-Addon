@@ -2,6 +2,16 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.4.0 — Tabbed menu
+- The options menu now has four tabs: **Bar** (bar 1/2/3, profile, show/lock, the items in six groups, Appearance
+  and Order of this bar), **Warnings** (all warnings in sections: gear and bags, character, breaks, how to warn),
+  **Tools** (Alarms, Tasks, Loot, History, Summary now — one button each, with what it does) and **General** (what
+  applies to all characters: language, server time, session summary, gold of all characters, full tooltip, quick
+  buttons, and Restore).
+- The separate Warnings window became the Warnings tab; `/farol warn` opens the menu on it. Shorter labels.
+- New checkbox for the daily-tasks warning. The same tabs appear in Esc → Options → AddOns → Farol.
+- All commands are unchanged.
+
 ## 3.3.0 — Daily and weekly tasks
 - New **Tasks** window (`/farol task`, or **Tasks...** in the menu): up to 10 tasks per character, each **daily** or
   **weekly**. Tick what you have done; daily tasks reset at the daily reset and weekly ones at the weekly reset.

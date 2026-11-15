@@ -57,13 +57,13 @@ local STRINGS = {
         warn_durab      = "Durabilidade baixa: %d%% — hora de reparar!",
         warn_bags       = "Bolsas quase cheias: %d espaço(s) livre(s).",
         warn_bags_full  = "Bolsas cheias!",
-        warn_opt_durab  = "Avisar quando a durabilidade ficar abaixo de",
-        warn_opt_bags   = "Avisar quando sobrarem até",
+        warn_opt_durab  = "Durabilidade abaixo de",
+        warn_opt_bags   = "Bolsas com até",
         warn_unit_pct   = "%",
-        warn_unit_slots = "espaços nas bolsas",
-        warn_opt_sound  = "Tocar som nos avisos",
-        warn_opt_talents = "Avisar sobre pontos de talento não gastos",
-        warn_opt_ranks  = "Avisar sobre magias de grau antigo na barra de ações",
+        warn_unit_slots = "espaços livres",
+        warn_opt_sound  = "Tocar som",
+        warn_opt_talents = "Pontos de talento não gastos",
+        warn_opt_ranks  = "Magias de grau antigo nas barras",
         warn_talents    = "Você tem %d ponto(s) de talento para gastar.",
         warn_ranks      = "Magia de grau antigo na barra: %s.",
         warn_rank_item  = "%s (Grau %d) — você já tem o Grau %d",
@@ -93,27 +93,32 @@ local STRINGS = {
         warn_supply     = "%s acabando — reabasteça antes de sair da cidade.",
         supply_status   = "munição/reagentes: %s.",
         supply_status_none = "munição/reagentes: nada para a sua classe (ou ainda não encontrado nas bolsas).",
-        warn_opt_ammo   = "Avisar quando a munição acabar",
-        warn_opt_reag   = "Avisar quando os reagentes acabarem",
-        warn_yellow     = "amarelo abaixo de",
-        warn_red        = "vermelho abaixo de",
+        warn_opt_ammo   = "Munição acabando",
+        warn_opt_reag   = "Reagentes acabando",
+        warn_yellow     = "amarelo:",
+        warn_red        = "vermelho:",
         warn_name_ammo  = "munição",
         warn_name_reag  = "reagentes",
         warn_set_supply = "%s: amarelo abaixo de %d, vermelho abaixo de %d.",
         warn_bad_supply = "valores inválidos: use amarelo e vermelho de 0 a %d, com o vermelho menor que o amarelo.",
-        warn_opt_restFull = "Avisar ao entrar se outro personagem estiver com o descanso cheio",
+        warn_opt_restFull = "Outro personagem com descanso cheio",
         warn_name_restFull = "descanso cheio",
-        warn_opt_prof   = "Avisar quando uma profissão chegar ao máximo do treinamento",
+        warn_opt_prof   = "Profissão no limite do treinamento",
         warn_name_prof  = "profissões",
         warn_water      = "Hora de beber água!",
-        warn_opt_pause  = "Lembrete de pausa a cada",
-        warn_opt_water  = "Lembrete de beber água a cada",
+        warn_opt_pause  = "Pausa a cada",
+        warn_opt_water  = "Água a cada",
         warn_unit_min   = "min",
-        warn_opt_anywhere = "Também em lutas, raides e masmorras",
+        warn_opt_anywhere = "Também em lutas e masmorras",
         warn_opt_remind = "\"Lembrar em\" vem com:",
         warn_name_pause = "pausa",
         warn_name_water = "beber água",
         warn_name_tasks = "tarefas diárias pendentes",
+        warn_opt_tasks = "Tarefas diárias pendentes (1 h antes)",
+        warn_sec_gear  = "Equipamento e bolsas",
+        warn_sec_char  = "Personagem",
+        warn_sec_breaks = "Pausas",
+        warn_sec_how   = "Como avisar",
         warn_tasks    = "faltam %d tarefas diárias e o reset diário é em %s.",
         warn_task_one = "falta 1 tarefa diária e o reset diário é em %s.",
         warn_set_break  = "lembrete de %s: a cada %d min.",
@@ -146,20 +151,20 @@ local STRINGS = {
         warn_bad_bags   = "valor inválido: use de 0 a 10 espaços.",
         warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || durab/bolsas/talentos/graus/profissoes/descansado/municao/reagentes/pausa/agua/som on||off || municao A V || reagentes A V || pausa/agua lutas on||off || lembrar N || status || silenciar",
         opt_warnings    = "Avisos...",
-        help_warn       = "  /farol aviso         - abrir a janela de avisos (durabilidade, bolsas, talentos, graus, profissões, pausa, água)",
+        help_warn       = "  /farol aviso         - abrir o menu na aba Avisos (durabilidade, bolsas, talentos, profissões, pausa, água...)",
     },
     en = {
         warn_title      = "Warnings",
         warn_durab      = "Low durability: %d%% — time to repair!",
         warn_bags       = "Bags almost full: %d free slot(s).",
         warn_bags_full  = "Bags full!",
-        warn_opt_durab  = "Warn when durability drops below",
-        warn_opt_bags   = "Warn when only",
+        warn_opt_durab  = "Durability below",
+        warn_opt_bags   = "Bags with only",
         warn_unit_pct   = "%",
-        warn_unit_slots = "bag slots or fewer are free",
-        warn_opt_sound  = "Play a sound with warnings",
-        warn_opt_talents = "Warn about unspent talent points",
-        warn_opt_ranks  = "Warn about lower-rank spells on the action bars",
+        warn_unit_slots = "free slots",
+        warn_opt_sound  = "Play a sound",
+        warn_opt_talents = "Unspent talent points",
+        warn_opt_ranks  = "Lower-rank spells on your bars",
         warn_talents    = "You have %d unspent talent point(s).",
         warn_ranks      = "Lower-rank spell on your bars: %s.",
         warn_rank_item  = "%s (Rank %d) — you already know Rank %d",
@@ -189,27 +194,32 @@ local STRINGS = {
         warn_supply     = "%s running low — restock before leaving town.",
         supply_status   = "ammo/reagents: %s.",
         supply_status_none = "ammo/reagents: nothing for your class (or not found in your bags yet).",
-        warn_opt_ammo   = "Warn when ammo runs low",
-        warn_opt_reag   = "Warn when reagents run low",
-        warn_yellow     = "yellow below",
-        warn_red        = "red below",
+        warn_opt_ammo   = "Ammo running low",
+        warn_opt_reag   = "Reagents running low",
+        warn_yellow     = "yellow:",
+        warn_red        = "red:",
         warn_name_ammo  = "ammo",
         warn_name_reag  = "reagents",
         warn_set_supply = "%s: yellow below %d, red below %d.",
         warn_bad_supply = "invalid values: use yellow and red from 0 to %d, with red lower than yellow.",
-        warn_opt_restFull = "Warn at login if another character has full rested XP",
+        warn_opt_restFull = "Another character fully rested",
         warn_name_restFull = "full rested XP",
-        warn_opt_prof   = "Warn when a profession reaches its training limit",
+        warn_opt_prof   = "Profession at its training limit",
         warn_name_prof  = "professions",
         warn_water      = "Time to drink some water!",
-        warn_opt_pause  = "Break reminder every",
-        warn_opt_water  = "Drink water reminder every",
+        warn_opt_pause  = "Break every",
+        warn_opt_water  = "Drink water every",
         warn_unit_min   = "min",
-        warn_opt_anywhere = "Also during fights, raids and dungeons",
+        warn_opt_anywhere = "Also in fights and dungeons",
         warn_opt_remind = "\"Remind in\" starts at:",
         warn_name_pause = "break",
         warn_name_water = "drink water",
         warn_name_tasks = "daily tasks left",
+        warn_opt_tasks = "Daily tasks left (1 h before)",
+        warn_sec_gear  = "Gear and bags",
+        warn_sec_char  = "Character",
+        warn_sec_breaks = "Breaks",
+        warn_sec_how   = "How to warn",
         warn_tasks    = "%d daily tasks left and the daily reset is in %s.",
         warn_task_one = "1 daily task left and the daily reset is in %s.",
         warn_set_break  = "%s reminder: every %d min.",
@@ -242,7 +252,7 @@ local STRINGS = {
         warn_bad_bags   = "invalid value: use 0 to 10 slots.",
         warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || durab/bags/talents/ranks/professions/rested/ammo/reagents/break/water/sound on||off || ammo Y R || reagents Y R || break/water fights on||off || remind N || status || silence",
         opt_warnings    = "Warnings...",
-        help_warn       = "  /farol warn          - open the warnings window (durability, bags, talents, ranks, professions, break, water)",
+        help_warn       = "  /farol warn          - open the menu on the Warnings tab (durability, bags, talents, professions, break, water...)",
     },
 }
 for lang, entries in pairs(STRINGS) do
@@ -1185,10 +1195,8 @@ local function SetBagSlots(value)
 end
 
 ---------------------------------------------------------------------------
--- Janela de avisos
+-- Controles dos avisos (aba "Avisos" do menu)
 ---------------------------------------------------------------------------
-
-local window
 
 local function NumberBox(frame, name, anchor, onSave, digits)
     local box = CreateFrame("EditBox", name, frame, "InputBoxTemplate")
@@ -1205,34 +1213,16 @@ local function NumberBox(frame, name, anchor, onSave, digits)
     return box
 end
 
-local function CreateWindow()
-    local frame = CreateFrame("Frame", "FarolWarnings", UIParent, ns.backdropTemplate)
-    frame:SetSize(500, 582)
-    frame:SetPoint("CENTER", 0, 60)
-    frame:SetFrameStrata("DIALOG")
-    frame:SetClampedToScreen(true)
-    frame:SetMovable(true)
-    frame:EnableMouse(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart", frame.StartMoving)
-    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-    if frame.SetBackdrop then
-        frame:SetBackdrop({
-            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-            tile = true, tileSize = 32, edgeSize = 32,
-            insets = { left = 11, right = 12, top = 12, bottom = 11 },
-        })
-    end
-    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.title:SetPoint("TOP", 0, -18)
-    local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", -6, -6)
+-- Controles dos avisos, em seções (aba "Avisos" do menu e do painel de configurações do jogo).
+-- prefix = começo dos nomes ("FarolWarn" no menu do Farol). Posições relativas ao canto do "parent".
+local sets = {}
 
-    local function Check(name, y, key, onClick, x)
-        local check = CreateFrame("CheckButton", name, frame, "UICheckButtonTemplate")
+function Warnings.BuildControls(parent, prefix)
+    local set = {}
+    local function Check(name, x, y, key, onClick)
+        local check = CreateFrame("CheckButton", prefix .. name, parent, "UICheckButtonTemplate")
         check:SetSize(24, 24)
-        check:SetPoint("TOPLEFT", x or 20, y)
+        check:SetPoint("TOPLEFT", x, y)
         check.label = check:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         check.label:SetPoint("LEFT", check, "RIGHT", 4, 0)
         check:SetScript("OnClick", function(self)
@@ -1241,133 +1231,144 @@ local function CreateWindow()
         end)
         return check
     end
+    local function Header(x, y)
+        local header = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        header:SetPoint("TOPLEFT", x, y)
+        return header
+    end
+    local function Unit(anchor)
+        local unit = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        unit:SetPoint("LEFT", anchor, "RIGHT", 6, 0)
+        return unit
+    end
 
-    frame.durab = Check("FarolWarnDurab", -50, "durab")
-    frame.durabBox = NumberBox(frame, "FarolWarnDurabPct", frame.durab.label, SetDurabPct)
-    frame.durabUnit = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    frame.durabUnit:SetPoint("LEFT", frame.durabBox, "RIGHT", 6, 0)
-
-    frame.bags = Check("FarolWarnBags", -80, "bags")
-    frame.bagsBox = NumberBox(frame, "FarolWarnBagSlots", frame.bags.label, SetBagSlots)
-    frame.bagsUnit = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    frame.bagsUnit:SetPoint("LEFT", frame.bagsBox, "RIGHT", 6, 0)
-
-    frame.talents = Check("FarolWarnTalents", -110, "talents")
-    frame.ranks = Check("FarolWarnRanks", -140, "ranks")
-    frame.prof = Check("FarolWarnProf", -170, "prof")
-    frame.restFull = Check("FarolWarnRestFull", -200, "restFull")
-
+    -- Coluna 1: equipamento e bolsas; personagem.
+    local x, y = 16, 0
+    set.gearHeader = Header(x, y)
+    set.durab = Check("Durab", x, y - 18, "durab")
+    set.durabBox = NumberBox(parent, prefix .. "DurabPct", set.durab.label, SetDurabPct)
+    set.durabUnit = Unit(set.durabBox)
+    set.bags = Check("Bags", x, y - 43, "bags")
+    set.bagsBox = NumberBox(parent, prefix .. "BagSlots", set.bags.label, SetBagSlots)
+    set.bagsUnit = Unit(set.bagsBox)
     -- Munição e reagentes: liga/desliga e, na linha de baixo, os limites amarelo e vermelho.
-    local y = -230
+    y = y - 68
     for _, kind in ipairs({ "ammo", "reag" }) do
         local cap = kind == "ammo" and "Ammo" or "Reag"
-        frame[kind] = Check("FarolWarn" .. cap, y, kind)
-        local yl = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        yl:SetPoint("TOPLEFT", 48, y - 30)
-        frame[kind .. "YellowLabel"] = yl
+        set[kind] = Check(cap, x, y, kind)
+        local yl = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        yl:SetPoint("TOPLEFT", x + 30, y - 28)
+        set[kind .. "YellowLabel"] = yl
         local function save() -- lê as duas caixas e grava juntas
-            return SetSupplyLimits(kind, frame[kind .. "YellowBox"]:GetText(), frame[kind .. "RedBox"]:GetText())
+            return SetSupplyLimits(kind, set[kind .. "YellowBox"]:GetText(), set[kind .. "RedBox"]:GetText())
         end
-        frame[kind .. "YellowBox"] = NumberBox(frame, "FarolWarn" .. cap .. "Yellow", yl, save, 4)
-        local rl = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        rl:SetPoint("LEFT", frame[kind .. "YellowBox"], "RIGHT", 14, 0)
-        frame[kind .. "RedLabel"] = rl
-        frame[kind .. "RedBox"] = NumberBox(frame, "FarolWarn" .. cap .. "Red", rl, save, 4)
-        y = y - 56
+        set[kind .. "YellowBox"] = NumberBox(parent, prefix .. cap .. "Yellow", yl, save, 4)
+        local rl = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        rl:SetPoint("LEFT", set[kind .. "YellowBox"], "RIGHT", 14, 0)
+        set[kind .. "RedLabel"] = rl
+        set[kind .. "RedBox"] = NumberBox(parent, prefix .. cap .. "Red", rl, save, 4)
+        y = y - 50
     end
+    y = y - 6
+    set.charHeader = Header(x, y)
+    set.talents = Check("Talents", x, y - 18, "talents")
+    set.ranks = Check("Ranks", x, y - 43, "ranks")
+    set.prof = Check("Prof", x, y - 68, "prof")
+    set.restFull = Check("RestFull", x, y - 93, "restFull")
+    set.tasks = Check("Tasks", x, y - 118, "tasks")
+    local bottom = y - 146
+
+    -- Coluna 2: pausas; como avisar.
+    x, y = 330, 0
+    set.breaksHeader = Header(x, y)
+    y = y - 18
     for _, key in ipairs(BREAK_KEYS) do
         local cap = key == "pause" and "Pause" or "Water"
-        local check = Check("FarolWarn" .. cap, y, key)
-        frame[key] = check
-        frame[key .. "Box"] = NumberBox(frame, "FarolWarn" .. cap .. "Min", check.label,
+        local check = Check(cap, x, y, key)
+        set[key] = check
+        set[key .. "Box"] = NumberBox(parent, prefix .. cap .. "Min", check.label,
             function(text) return SetBreakMinutes(key, text) end, 3)
-        frame[key .. "Unit"] = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        frame[key .. "Unit"]:SetPoint("LEFT", frame[key .. "Box"], "RIGHT", 6, 0)
-        frame[key .. "Anywhere"] = Check("FarolWarn" .. cap .. "Anywhere", y - 24, nil,
-            function(value) SetAnywhere(key, value) end, 44)
-        y = y - 56
+        set[key .. "Unit"] = Unit(set[key .. "Box"])
+        set[key .. "Anywhere"] = Check(cap .. "Anywhere", x + 22, y - 24, nil,
+            function(value) SetAnywhere(key, value) end)
+        y = y - 54
     end
-
-    frame.sound = Check("FarolWarnSound", y, "sound")
-    y = y - 32
-    frame.remindLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    frame.remindLabel:SetPoint("TOPLEFT", 24, y - 4)
-    frame.remindDefault = ns.CreateDropdown(frame, "FarolWarnRemindDefault", 80, MinuteItems(
+    y = y - 4
+    set.howHeader = Header(x, y)
+    set.sound = Check("Sound", x, y - 18, "sound")
+    y = y - 50
+    set.remindLabel = parent:CreateFontString(prefix .. "RemindLabel", "OVERLAY", "GameFontHighlight")
+    set.remindLabel:SetPoint("TOPLEFT", x + 4, y - 4)
+    set.remindDefault = ns.CreateDropdown(parent, prefix .. "RemindDefault", 80, MinuteItems(
         function() return Settings().remindMin end,
         function(minutes) SetRemindDefault(minutes) end))
-    frame.remindDefault:SetPoint("LEFT", frame.remindLabel, "RIGHT", 10, 0)
-
-    frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    frame.hint:SetPoint("TOPLEFT", 22, y - 34)
-    frame.hint:SetWidth(426)
-    frame.hint:SetJustifyH("LEFT")
-
-    frame.test = CreateFrame("Button", "FarolWarnTest", frame, "UIPanelButtonTemplate")
-    frame.test:SetSize(130, 22)
-    frame.test:SetPoint("BOTTOMRIGHT", -24, 18)
-    frame.history = CreateFrame("Button", "FarolWarnOpenHistory", frame, "UIPanelButtonTemplate")
-    frame.history:SetSize(130, 22)
-    frame.history:SetPoint("RIGHT", frame.test, "LEFT", -8, 0)
-    frame.history:SetScript("OnClick", function() Warnings.ToggleHistory() end)
-    frame.test:SetScript("OnClick", function()
+    set.remindDefault:SetPoint("LEFT", set.remindLabel, "RIGHT", 10, 0)
+    y = y - 32
+    set.test = CreateFrame("Button", prefix .. "Test", parent, "UIPanelButtonTemplate")
+    set.test:SetSize(130, 22)
+    set.test:SetPoint("TOPLEFT", x, y)
+    set.test:SetScript("OnClick", function()
         Announce(string.format(T("warn_durab"), Settings().durabPct - 1), "test")
     end)
+    set.history = CreateFrame("Button", prefix .. "OpenHistory", parent, "UIPanelButtonTemplate")
+    set.history:SetSize(130, 22)
+    set.history:SetPoint("LEFT", set.test, "RIGHT", 8, 0)
+    set.history:SetScript("OnClick", function() Warnings.ToggleHistory() end)
+    set.hint = parent:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    set.hint:SetPoint("TOPLEFT", x, y - 30)
+    set.hint:SetWidth(290)
+    set.hint:SetJustifyH("LEFT")
 
-    frame:SetScript("OnShow", function() RefreshWindow() end)
-    tinsert(UISpecialFrames, "FarolWarnings") -- ESC fecha
-    ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
-    frame:Hide()
-    return frame
+    sets[#sets + 1] = set
+    return set, math.min(bottom, y - 70)
+end
+
+local function RefreshSet(set)
+    local settings = Settings()
+    set.gearHeader:SetText(T("warn_sec_gear"))
+    set.charHeader:SetText(T("warn_sec_char"))
+    set.breaksHeader:SetText(T("warn_sec_breaks"))
+    set.howHeader:SetText(T("warn_sec_how"))
+    for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "sound" }) do
+        set[key].label:SetText(T("warn_opt_" .. key))
+        set[key]:SetChecked(settings[key])
+    end
+    set.durabUnit:SetText(T("warn_unit_pct"))
+    set.bagsUnit:SetText(T("warn_unit_slots"))
+    for _, kind in ipairs({ "ammo", "reag" }) do
+        set[kind].label:SetText(T("warn_opt_" .. kind))
+        set[kind]:SetChecked(settings[kind])
+        set[kind .. "YellowLabel"]:SetText(T("warn_yellow"))
+        set[kind .. "RedLabel"]:SetText(T("warn_red"))
+        if not set[kind .. "YellowBox"]:HasFocus() then set[kind .. "YellowBox"]:SetText(tostring(settings[kind .. "Yellow"])) end
+        if not set[kind .. "RedBox"]:HasFocus() then set[kind .. "RedBox"]:SetText(tostring(settings[kind .. "Red"])) end
+    end
+    for _, key in ipairs(BREAK_KEYS) do
+        set[key].label:SetText(T("warn_opt_" .. key))
+        set[key]:SetChecked(settings[key])
+        set[key .. "Unit"]:SetText(T("warn_unit_min"))
+        set[key .. "Anywhere"].label:SetText(T("warn_opt_anywhere"))
+        set[key .. "Anywhere"]:SetChecked(settings[key .. "Anywhere"])
+        if not set[key .. "Box"]:HasFocus() then set[key .. "Box"]:SetText(tostring(settings[key .. "Min"])) end
+    end
+    set.remindLabel:SetText(T("warn_opt_remind"))
+    set.remindDefault:SetText(string.format(T("warn_minutes"), settings.remindMin))
+    set.hint:SetText(T("warn_hint") .. " " .. T("warn_hint_break"))
+    set.test:SetText(T("warn_opt_test"))
+    set.history:SetText(T("opt_history"))
+    if not set.durabBox:HasFocus() then set.durabBox:SetText(tostring(settings.durabPct)) end
+    if not set.bagsBox:HasFocus() then set.bagsBox:SetText(tostring(settings.bagSlots)) end
 end
 
 RefreshWindow = function()
-    if not window or not window:IsShown() then return end
-    local settings = Settings()
-    window.title:SetText(T("warn_title"))
-    window.durab.label:SetText(T("warn_opt_durab"))
-    window.durab:SetChecked(settings.durab)
-    window.durabUnit:SetText(T("warn_unit_pct"))
-    window.bags.label:SetText(T("warn_opt_bags"))
-    window.bags:SetChecked(settings.bags)
-    window.bagsUnit:SetText(T("warn_unit_slots"))
-    window.talents.label:SetText(T("warn_opt_talents"))
-    window.talents:SetChecked(settings.talents)
-    window.ranks.label:SetText(T("warn_opt_ranks"))
-    window.ranks:SetChecked(settings.ranks)
-    window.prof.label:SetText(T("warn_opt_prof"))
-    window.prof:SetChecked(settings.prof)
-    window.restFull.label:SetText(T("warn_opt_restFull"))
-    window.restFull:SetChecked(settings.restFull)
-    for _, kind in ipairs({ "ammo", "reag" }) do
-        window[kind].label:SetText(T("warn_opt_" .. kind))
-        window[kind]:SetChecked(settings[kind])
-        window[kind .. "YellowLabel"]:SetText(T("warn_yellow"))
-        window[kind .. "RedLabel"]:SetText(T("warn_red"))
-        if not window[kind .. "YellowBox"]:HasFocus() then window[kind .. "YellowBox"]:SetText(tostring(settings[kind .. "Yellow"])) end
-        if not window[kind .. "RedBox"]:HasFocus() then window[kind .. "RedBox"]:SetText(tostring(settings[kind .. "Red"])) end
-    end
-    window.sound.label:SetText(T("warn_opt_sound"))
-    window.sound:SetChecked(settings.sound)
-    for _, key in ipairs(BREAK_KEYS) do
-        window[key].label:SetText(T("warn_opt_" .. key))
-        window[key]:SetChecked(settings[key])
-        window[key .. "Unit"]:SetText(T("warn_unit_min"))
-        window[key .. "Anywhere"].label:SetText(T("warn_opt_anywhere"))
-        window[key .. "Anywhere"]:SetChecked(settings[key .. "Anywhere"])
-        if not window[key .. "Box"]:HasFocus() then window[key .. "Box"]:SetText(tostring(settings[key .. "Min"])) end
-    end
-    window.remindLabel:SetText(T("warn_opt_remind"))
-    window.remindDefault:SetText(string.format(T("warn_minutes"), settings.remindMin))
-    window.hint:SetText(T("warn_hint") .. " " .. T("warn_hint_break"))
-    window.test:SetText(T("warn_opt_test"))
-    window.history:SetText(T("opt_history"))
-    if not window.durabBox:HasFocus() then window.durabBox:SetText(tostring(settings.durabPct)) end
-    if not window.bagsBox:HasFocus() then window.bagsBox:SetText(tostring(settings.bagSlots)) end
+    if not ns.GetDB() or not Settings() then return end
+    for _, set in ipairs(sets) do RefreshSet(set) end
 end
+Warnings.RefreshControls = function() RefreshWindow() end
 
+-- /farol aviso: abre o menu do Farol na aba "Avisos" (ou fecha, se já estiver nela).
 function Warnings.ToggleWindow()
-    window = window or CreateWindow()
-    if window:IsShown() then window:Hide() else window:Show() end
+    if ns.OpenOptions then ns.OpenOptions("warnings") end
 end
 
 local function CreateHistoryWindow()

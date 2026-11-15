@@ -100,7 +100,7 @@ return {
         H:slash("aviso profissoes off"); T.eq(H.env.FarolDB.warnings.prof, false)
         H.profs[2][2] = 150; H:update(1); T.eq(H.warnSounds, 2, "off: no warning")
         H:slash("aviso")
-        T.eq(H:text(H.env.FarolWarnProf.label), "Avisar quando uma profissão chegar ao máximo do treinamento")
+        T.eq(H:text(H.env.FarolWarnProf.label), "Profissão no limite do treinamento")
         H:check(H.env.FarolWarnProf, true); H:update(1)
         T.eq(H.warnSounds, 3, "turned on again: warns about the profession at the limit")
     end },

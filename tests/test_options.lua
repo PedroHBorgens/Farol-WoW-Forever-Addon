@@ -1,7 +1,7 @@
 -- Menu de opções: abrir/fechar, caixinhas sincronizadas, idioma, horário do servidor.
 -- Options menu: open/close, synced checkboxes, language, server time.
 
-local ITEM_COUNT, GENERAL_COUNT = 23, 5 -- 23 itens + mostrar/travar/horário do servidor/resumo/ouro total
+local ITEM_COUNT, GENERAL_COUNT = 23, 22 -- 23 itens + mostrar/travar (Barra) + 6 da aba Geral + 14 da aba Avisos
 
 local function openMenu(H)
     H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
@@ -40,7 +40,7 @@ return {
         T.eq(H:text(window[16].label), "Reputação")
         T.eq(H:text(window[17].label), "Profissões")
         T.eq(H:text(window[20].label), "Tarefas (diárias/semanais)")
-        T.eq(H:text(window[24].label), "Mostrar painel")
+        T.eq(H:text(window[24].label), "Mostrar esta barra")
         T.eq(H:text(window[26].label), "Horário do servidor")
         T.eq(H:text(panel[25].label), "Travar posição")
     end },

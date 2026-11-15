@@ -290,8 +290,25 @@ local STRINGS = {
         tt_slot      = "Espaço %d",
         help_menu    = "  /farol menu          - abrir o menu de opções (ou clique direito no painel)",
         opt_items    = "Itens da barra",
+        tab_bar      = "Barra",
+        tab_warnings = "Avisos",
+        tab_tools    = "Ferramentas",
+        tab_general  = "Geral",
+        grp_perf     = "Desempenho",
+        grp_place    = "Lugar",
+        grp_gear     = "Equipamento e bolsas",
+        grp_gold     = "Ouro",
+        grp_progress = "Progresso",
+        grp_time     = "Tempo e social",
+        opt_all_chars = "Para todos os personagens",
+        opt_restore  = "Restaurar",
+        tool_alarms  = "Alarmes...",       tool_alarms_desc = "até 10 alarmes, hora local ou do servidor",
+        tool_tasks   = "Tarefas...",       tool_tasks_desc = "diárias e semanais, zeram sozinhas no reset",
+        tool_loot    = "Saques...",        tool_loot_desc = "últimos itens, com horário e filtro de qualidade",
+        tool_history = "Histórico...",     tool_history_desc = "os 10 últimos avisos",
+        tool_summary = "Resumo agora",     tool_summary_desc = "ouro, XP, reputação e saques desta sessão (no chat)",
         opt_general  = "Geral",
-        opt_shown    = "Mostrar painel",
+        opt_shown    = "Mostrar esta barra",
         opt_locked   = "Travar posição",
         opt_lang     = "Idioma",
         opt_reset    = "Resetar posição",
@@ -319,6 +336,7 @@ local STRINGS = {
         news_supply  = "munição e reagentes, com limites que você escolhe",
         news_bars    = "até 3 barras: no menu (clique direito) escolha Barra 2 ou 3 e marque \"Mostrar\"",
         news_profiles = "perfil só deste personagem e \"Copiar de...\" (menu ou /farol perfil)",
+        news_menu    = "menu em abas: Barra, Avisos, Ferramentas e Geral (clique direito na barra)",
         opt_profile  = "Perfil:",
         opt_copy     = "Copiar de...",
         pfl_account  = "Conta",
@@ -571,8 +589,25 @@ local STRINGS = {
         tt_slot      = "Slot %d",
         help_menu    = "  /farol menu          - open the options menu (or right-click the panel)",
         opt_items    = "Bar items",
+        tab_bar      = "Bar",
+        tab_warnings = "Warnings",
+        tab_tools    = "Tools",
+        tab_general  = "General",
+        grp_perf     = "Performance",
+        grp_place    = "Location",
+        grp_gear     = "Gear and bags",
+        grp_gold     = "Gold",
+        grp_progress = "Progress",
+        grp_time     = "Time and social",
+        opt_all_chars = "For all characters",
+        opt_restore  = "Restore",
+        tool_alarms  = "Alarms...",        tool_alarms_desc = "up to 10 alarms, local or server time",
+        tool_tasks   = "Tasks...",         tool_tasks_desc = "daily and weekly, reset on their own",
+        tool_loot    = "Loot...",          tool_loot_desc = "recent items, with time and quality filter",
+        tool_history = "History...",       tool_history_desc = "the last 10 warnings",
+        tool_summary = "Summary now",      tool_summary_desc = "gold, XP, reputation and loot of this session (in chat)",
         opt_general  = "General",
-        opt_shown    = "Show panel",
+        opt_shown    = "Show this bar",
         opt_locked   = "Lock position",
         opt_lang     = "Language",
         opt_reset    = "Reset position",
@@ -600,6 +635,7 @@ local STRINGS = {
         news_supply  = "ammo and reagents, with limits you choose",
         news_bars    = "up to 3 bars: in the menu (right-click) pick Bar 2 or 3 and tick \"Show\"",
         news_profiles = "a profile just for this character and \"Copy from...\" (menu or /farol profile)",
+        news_menu    = "tabbed menu: Bar, Warnings, Tools and General (right-click the bar)",
         opt_profile  = "Profile:",
         opt_copy     = "Copy from...",
         pfl_account  = "Account",
@@ -2193,7 +2229,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -3156,38 +3192,71 @@ local function CreateButton(parent, width, onClick)
     return button
 end
 
+-- Menu em abas: Barra (o que é desta barra), Avisos, Ferramentas (as janelas) e Geral (o que vale para todos).
+-- Os itens aparecem em grupos; a ordem dos grupos é a mesma de ITEM_ORDER (um teste confere).
+Profiles.TABS = { "bar", "warnings", "tools", "general" }
+Profiles.GROUPS = {
+    { "grp_perf", { "fps", "ms", "mem" } },
+    { "grp_place", { "coords", "zone", "speed" } },
+    { "grp_gear", { "durab", "bags", "junk", "ammo" } },
+    { "grp_gold", { "gold", "session", "goldh" } },
+    { "grp_progress", { "xp", "xph", "rep", "prof" } },
+    { "grp_time", { "clock", "reset", "tasks", "playtime", "friends", "guild" } },
+}
+ns.ITEM_GROUPS = Profiles.GROUPS
+Profiles.MENU_W, Profiles.PAGE_H = 660, 420
+
+-- Opções de aparência que valem para todos (ficam na aba Geral; também na janela Aparência).
+function Profiles.SetGlobalToggle(key, value)
+    db[key] = value
+    ApplyAppearance()
+    if ns.Appearance then ns.Appearance.Refresh() end
+    RefreshOptions()
+end
+
+function Profiles.SelectTab(set, tab)
+    set.tab = tab
+    for _, key in ipairs(Profiles.TABS) do
+        if key == tab then set.pages[key]:Show(); set.tabs[key]:LockHighlight()
+        else set.pages[key]:Hide(); set.tabs[key]:UnlockHighlight() end
+    end
+    if tab == "warnings" and ns.Warnings and ns.Warnings.RefreshControls then ns.Warnings.RefreshControls() end
+end
+
 -- Cria todos os controles dentro de "parent", começando na altura "top".
 local function BuildControls(parent, top)
-    local set = { items = {}, langs = {} }
-    local y = top
+    local set = { items = {}, langs = {}, groups = {}, tabs = {}, pages = {}, tools = {} }
+    local index = #controlSets + 1
+    for i, key in ipairs(Profiles.TABS) do
+        local button = CreateButton(parent, 120, function() Profiles.SelectTab(set, key) end)
+        button:SetPoint("TOPLEFT", 16 + (i - 1) * 124, top)
+        set.tabs[key] = button
+        local page = CreateFrame("Frame", nil, parent)
+        page:SetPoint("TOPLEFT", 0, top - 34)
+        page:SetSize(Profiles.MENU_W, Profiles.PAGE_H)
+        set.pages[key] = page
+    end
 
-    set.hint = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    set.hint:SetPoint("TOPLEFT", 16, y)
-    y = y - 22
-
-    -- Qual barra as opções abaixo (itens, mostrar, travar, aparência, ordem) vão mudar.
-    set.barLabel = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    set.barLabel:SetPoint("TOPLEFT", 16, y - 4)
+    -- Aba "Barra": qual barra, perfil, mostrar/travar, itens em grupos, Aparência e Ordem desta barra.
+    local page = set.pages.bar
+    set.barLabel = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    set.barLabel:SetPoint("TOPLEFT", 16, -4)
     set.bars = {}
     for n = 1, Profiles.MAX_BARS do
-        local button = CreateButton(parent, 84, function() Profiles.Select(n) end)
-        button:SetPoint("TOPLEFT", 72 + (n - 1) * 88, y)
+        local button = CreateButton(page, 88, function() Profiles.Select(n) end)
+        button:SetPoint("TOPLEFT", 72 + (n - 1) * 92, 0)
         set.bars[n] = button
     end
-    y = y - 30
-
-    -- Perfil: o da conta (todos os personagens) ou só deste personagem; e "Copiar de..." outro perfil.
-    set.profileLabel = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    set.profileLabel:SetPoint("TOPLEFT", 16, y - 4)
-    local index = #controlSets + 1
-    set.profile = ns.CreateDropdown(parent, "FarolProfile" .. index, 170, function()
+    set.profileLabel = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    set.profileLabel:SetPoint("TOPLEFT", 16, -34)
+    set.profile = ns.CreateDropdown(page, "FarolProfile" .. index, 170, function()
         return {
             { text = T("pfl_account_all"), checked = Profiles.mode ~= "char", onClick = function() Profiles.SetMode("account") end },
             { text = T("pfl_char_only"), checked = Profiles.mode == "char", onClick = function() Profiles.SetMode("char") end },
         }
     end)
-    set.profile:SetPoint("TOPLEFT", 72, y)
-    set.copy = ns.CreateDropdown(parent, "FarolProfileCopy" .. index, 120, function()
+    set.profile:SetPoint("TOPLEFT", 72, -30)
+    set.copy = ns.CreateDropdown(page, "FarolProfileCopy" .. index, 130, function()
         local items = {}
         for _, source in ipairs(Profiles.Sources()) do
             items[#items + 1] = { text = Profiles.SourceLabel(source), onClick = function() Profiles.CopyFrom(source) end }
@@ -3195,77 +3264,66 @@ local function BuildControls(parent, top)
         if #items == 0 then items[1] = { text = T("pfl_none"), r = .6, g = .6, b = .6, onClick = function() end } end
         return items
     end)
-    set.copy:SetPoint("TOPLEFT", 248, y)
-    y = y - 30
-
-    set.itemsHeader = CreateHeader(parent, y)
-    y = y - 20
-    -- Duas colunas para caber todos os itens.
-    local perColumn = math.ceil(#ITEM_ORDER / 2)
-    for index, key in ipairs(ITEM_ORDER) do
-        local column = (index > perColumn) and 1 or 0
-        local row = (index - 1) % perColumn
-        set.items[key] = CreateCheck(parent, 20 + column * 165, y - row * 26,
-            function(value) SetItemVisible(key, value) end)
-        -- Passar o mouse: o que este item mostra.
-        set.items[key]:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:AddLine(T("name_" .. key))
-            GameTooltip:AddLine(T("desc_" .. key), 1, 1, 1, true)
-            GameTooltip:Show()
-        end)
-        set.items[key]:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    set.copy:SetPoint("TOPLEFT", 250, -30)
+    set.hint = page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    set.hint:SetPoint("TOPLEFT", 16, -92)
+    for g, group in ipairs(Profiles.GROUPS) do
+        local col, row = (g - 1) % 3, math.floor((g - 1) / 3)
+        local x, y = 16 + col * 210, -110 - row * 124
+        local header = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        header:SetPoint("TOPLEFT", x, y)
+        set.groups[g] = header
+        for i, key in ipairs(group[2]) do
+            local check = CreateCheck(page, x, y - 16 - (i - 1) * 22, function(value) SetItemVisible(key, value) end)
+            check.label:SetFontObject("GameFontHighlightSmall")
+            -- Passar o mouse: o que este item mostra.
+            check:SetScript("OnEnter", function(self)
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                GameTooltip:AddLine(T("name_" .. key))
+                GameTooltip:AddLine(T("desc_" .. key), 1, 1, 1, true)
+                GameTooltip:Show()
+            end)
+            check:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            set.items[key] = check
+        end
     end
-    y = y - perColumn * 26
+    set.shown = CreateCheck(page, 16, -62, SetShown)
+    set.locked = CreateCheck(page, 226, -62, SetLocked)
+    set.appearance = CreateButton(page, 200, function() ns.Appearance.ToggleWindow() end)
+    set.appearance:SetPoint("TOPLEFT", 16, -394)
+    set.order = CreateButton(page, 200, function() ns.Order.ToggleWindow() end)
+    set.order:SetPoint("TOPLEFT", 226, -394)
 
-    y = y - 10
-    set.generalHeader = CreateHeader(parent, y)
-    y = y - 20
-    set.shown = CreateCheck(parent, 20, y, SetShown)
-    set.locked = CreateCheck(parent, 185, y, SetLocked)
-    y = y - 26
-    set.serverTime = CreateCheck(parent, 20, y, SetServerTime)
-    set.summary = CreateCheck(parent, 185, y, SetSummary)
-    y = y - 26
-    set.goldTotal = CreateCheck(parent, 20, y, SetGoldTotal)
-    y = y - 36
-
-    set.langHeader = CreateHeader(parent, y)
-    y = y - 22
+    -- Aba "Geral": o que vale para todos os personagens.
+    page = set.pages.general
+    set.langHeader = CreateHeader(page, 0)
     local x = 20
     for _, entry in ipairs({ { "auto", "Auto" }, { "pt", "Português" }, { "en", "English" } }) do
         local lang, label = entry[1], entry[2]
-        local button = CreateButton(parent, 84, function() SetLang(lang) end)
-        button:SetPoint("TOPLEFT", x, y)
+        local button = CreateButton(page, 100, function() SetLang(lang) end)
+        button:SetPoint("TOPLEFT", x, -20)
         button:SetText(label)
         set.langs[lang] = button
-        x = x + 88
+        x = x + 106
     end
-    y = y - 36
-
-    set.reset = CreateButton(parent, 150, function() ResetPosition() end)
-    set.reset:SetPoint("TOPLEFT", 20, y)
-    set.alarms = CreateButton(parent, 150, function() ns.Alarm.ToggleWindow() end)
-    set.alarms:SetPoint("TOPLEFT", 176, y)
-    y = y - 26
-    set.loot = CreateButton(parent, 150, function() ns.Loot.ToggleWindow() end)
-    set.loot:SetPoint("TOPLEFT", 20, y)
-    set.sessionReset = CreateButton(parent, 150, function()
+    set.allHeader = CreateHeader(page, -58)
+    set.serverTime = CreateCheck(page, 20, -78, SetServerTime)
+    set.summary = CreateCheck(page, 20, -104, SetSummary)
+    set.goldTotal = CreateCheck(page, 20, -130, SetGoldTotal)
+    set.tooltipFull = CreateCheck(page, 20, -156, function(value) Profiles.SetGlobalToggle("tooltipFull", value) end)
+    set.warnButton = CreateCheck(page, 20, -182, function(value) Profiles.SetGlobalToggle("warnButton", value) end)
+    set.lootButton = CreateCheck(page, 20, -208, function(value) Profiles.SetGlobalToggle("lootButton", value) end)
+    set.restoreHeader = CreateHeader(page, -246)
+    set.reset = CreateButton(page, 170, function() ResetPosition() end)
+    set.reset:SetPoint("TOPLEFT", 20, -266)
+    set.sessionReset = CreateButton(page, 170, function()
         ResetSession()
         UpdateText()
         Print(T("session_reset"))
     end)
-    set.sessionReset:SetPoint("TOPLEFT", 176, y)
-    y = y - 26
-    set.warnings = CreateButton(parent, 150, function() ns.Warnings.ToggleWindow() end)
-    set.warnings:SetPoint("TOPLEFT", 20, y)
-    set.appearance = CreateButton(parent, 150, function() ns.Appearance.ToggleWindow() end)
-    set.appearance:SetPoint("TOPLEFT", 176, y)
-    y = y - 26
-    set.order = CreateButton(parent, 150, function() ns.Order.ToggleWindow() end)
-    set.order:SetPoint("TOPLEFT", 20, y)
+    set.sessionReset:SetPoint("TOPLEFT", 196, -266)
     -- "Esquecer personagens": pede um segundo clique (em até 5 s) para confirmar.
-    set.forget = CreateButton(parent, 150, nil)
+    set.forget = CreateButton(page, 190, nil)
     set.forget:SetScript("OnClick", function(self)
         local now = GetTime()
         if self.confirmAt and now - self.confirmAt <= 5 then
@@ -3279,19 +3337,44 @@ local function BuildControls(parent, top)
         end
         RefreshOptions()
     end)
-    set.forget:SetPoint("TOPLEFT", 176, y)
-    y = y - 26
-    set.tasks = CreateButton(parent, 150, function() ns.Tasks.ToggleWindow() end)
-    set.tasks:SetPoint("TOPLEFT", 20, y)
-    y = y - 30
+    set.forget:SetPoint("TOPLEFT", 372, -266)
 
+    -- Aba "Avisos": os controles do módulo de avisos (os do menu do Farol têm os nomes "FarolWarn...").
+    if ns.Warnings and ns.Warnings.BuildControls then
+        set.warnings = ns.Warnings.BuildControls(set.pages.warnings, index == 1 and "FarolPanelWarn" or "FarolWarn")
+    end
+
+    -- Aba "Ferramentas": um botão para cada janela, com o que ela faz.
+    page = set.pages.tools
+    local tools = {
+        { "alarms", function() ns.Alarm.ToggleWindow() end },
+        { "tasks", function() ns.Tasks.ToggleWindow() end },
+        { "loot", function() ns.Loot.ToggleWindow() end },
+        { "history", function() ns.Warnings.ToggleHistory() end },
+        { "summary", function()
+            pcall(SampleXP); pcall(SampleRep)
+            local ok, s = pcall(BuildSummary)
+            if ok then PrintSummary(s, false) end
+        end },
+    }
+    for i, entry in ipairs(tools) do
+        local button = CreateButton(page, 170, entry[2])
+        button:SetPoint("TOPLEFT", 16, -(i - 1) * 36)
+        button.desc = page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        button.desc:SetPoint("LEFT", button, "RIGHT", 14, 0)
+        button.key = entry[1]
+        set.tools[i] = button
+    end
+
+    Profiles.SelectTab(set, "bar")
     controlSets[#controlSets + 1] = set
-    return set, y
+    return set, top - 34 - Profiles.PAGE_H
 end
 
 RefreshOptions = function()
     if not db then return end
     for _, set in ipairs(controlSets) do
+        for _, key in ipairs(Profiles.TABS) do set.tabs[key]:SetText(T("tab_" .. key)) end
         local on, total = ItemCounts()
         set.hint:SetText(string.format(T("opt_hint_count"), on, total))
         set.barLabel:SetText(T("opt_bar"))
@@ -3302,9 +3385,10 @@ RefreshOptions = function()
             button:SetText(string.format(T("bar_n"), n) .. (Profiles.Data(n).shown and "" or " " .. T("bar_off_short")))
             if n == rawget(db, "activeBar") then button:LockHighlight() else button:UnlockHighlight() end
         end
-        set.itemsHeader:SetText(T("opt_items"))
-        set.generalHeader:SetText(T("opt_general"))
+        for g, header in ipairs(set.groups) do header:SetText(T(Profiles.GROUPS[g][1])) end
         set.langHeader:SetText(T("opt_lang"))
+        set.allHeader:SetText(T("opt_all_chars"))
+        set.restoreHeader:SetText(T("opt_restore"))
         for key, check in pairs(set.items) do
             check.label:SetText(T("name_" .. key))
             check:SetChecked(db.items[key])
@@ -3319,20 +3403,27 @@ RefreshOptions = function()
         set.summary:SetChecked(db.summary)
         set.goldTotal.label:SetText(T("opt_goldtotal"))
         set.goldTotal:SetChecked(db.goldTotal)
+        set.tooltipFull.label:SetText(T("app_tooltipfull"))
+        set.tooltipFull:SetChecked(db.tooltipFull)
+        set.warnButton.label:SetText(T("app_warnbutton"))
+        set.warnButton:SetChecked(db.warnButton)
+        set.lootButton.label:SetText(T("app_lootbutton"))
+        set.lootButton:SetChecked(db.lootButton)
         set.forget.confirmAt = nil
         set.forget:SetText(T("opt_forget"))
         for lang, button in pairs(set.langs) do
             if lang == db.lang then button:LockHighlight() else button:UnlockHighlight() end
         end
         set.reset:SetText(T("opt_reset"))
-        set.alarms:SetText(T("opt_alarms"))
-        set.loot:SetText(T("opt_loot"))
         set.sessionReset:SetText(T("opt_session_reset"))
-        set.warnings:SetText(T("opt_warnings"))
         set.appearance:SetText(T("opt_appearance"))
         set.order:SetText(T("opt_order"))
-        set.tasks:SetText(T("opt_tasks"))
+        for _, button in ipairs(set.tools) do
+            button:SetText(T("tool_" .. button.key))
+            button.desc:SetText(T("tool_" .. button.key .. "_desc"))
+        end
     end
+    if ns.Warnings and ns.Warnings.RefreshControls then ns.Warnings.RefreshControls() end
 end
 
 -- Janela própria, criada só na primeira vez que for aberta.
@@ -3365,8 +3456,9 @@ local function CreateOptionsWindow()
     local close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -6, -6)
 
-    local _, bottom = BuildControls(window, -46)
-    window:SetSize(350, -bottom + 12)
+    local set, bottom = BuildControls(window, -46)
+    window.controls = set
+    window:SetSize(Profiles.MENU_W, -bottom + 12)
 
     window:SetScript("OnShow", RefreshOptions)
     tinsert(UISpecialFrames, "FarolOptions") -- ESC fecha a janela
@@ -3382,6 +3474,19 @@ local function ToggleOptions()
     else
         optionsWindow:Show()
     end
+end
+
+ns.RefreshOptions = function() RefreshOptions() end -- outras janelas mudam opções que também estão no menu
+
+-- Abre o menu numa aba ("bar", "warnings", "tools", "general"); se já estiver aberto nela, fecha.
+function ns.OpenOptions(tab)
+    if not db then return end
+    optionsWindow = optionsWindow or CreateOptionsWindow()
+    local set = optionsWindow.controls
+    if optionsWindow:IsShown() and set.tab == tab then optionsWindow:Hide() return end
+    Profiles.SelectTab(set, tab)
+    optionsWindow:Show()
+    if optionsWindow.Raise then optionsWindow:Raise() end
 end
 
 -- Também aparece em Esc > Opções > AddOns (clientes modernos) ou Interface > AddOns (antigos).
@@ -3447,12 +3552,16 @@ function Profiles.Wire(n)
     -- Clique direito abre o menu já com esta barra escolhida.
     f:SetScript("OnMouseUp", function(_, button)
         if button ~= "RightButton" or not db then return end
-        if rawget(db, "activeBar") ~= n then
-            Profiles.Select(n)
-            optionsWindow = optionsWindow or CreateOptionsWindow()
-            optionsWindow:Show()
+        local other = rawget(db, "activeBar") ~= n
+        if other then Profiles.Select(n) end
+        -- Aberto na aba "Barra" desta barra: fecha. Senão: abre (ou troca) para a aba "Barra", com esta barra escolhida.
+        if not other and optionsWindow and optionsWindow:IsShown() and optionsWindow.controls.tab == "bar" then
+            optionsWindow:Hide()
         else
-            ToggleOptions()
+            optionsWindow = optionsWindow or CreateOptionsWindow()
+            Profiles.SelectTab(optionsWindow.controls, "bar")
+            optionsWindow:Show()
+            if optionsWindow.Raise then optionsWindow:Raise() end
         end
     end)
 end

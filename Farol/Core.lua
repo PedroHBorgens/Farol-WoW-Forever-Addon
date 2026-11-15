@@ -20,7 +20,7 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk", "ammo",
-    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "clock", "reset", "playtime", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "clock", "reset", "tasks", "playtime", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
@@ -28,7 +28,7 @@ local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
     goldh = false, xph = false, rep = false, prof = false, junk = false, ammo = false,
-    clock = false, reset = false, playtime = false, friends = false, guild = false,
+    clock = false, reset = false, tasks = false, playtime = false, friends = false, guild = false,
 }
 
 -- Nomes aceitos nos comandos /farol show|hide (português e inglês).
@@ -52,6 +52,7 @@ local ITEM_ALIASES = {
     xp = "xp", experiencia = "xp", experience = "xp",
     hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
     reset = "reset", resets = "reset", reinicio = "reset",
+    tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks", todo = "tasks",
     tempo = "playtime", playtime = "playtime", played = "playtime",
     amigos = "friends", friends = "friends",
     guilda = "guild", guild = "guild",
@@ -2192,7 +2193,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2363,6 +2364,10 @@ local ITEM_TEXT = {
         if daily then parts[#parts + 1] = T("label_reset_daily") .. " " .. FormatCountdown(daily) end
         if weekly then parts[#parts + 1] = T("label_reset_weekly") .. " " .. FormatCountdown(weekly) end
         return table.concat(parts, " · ")
+    end,
+    tasks = function() -- lista de tarefas (Tasks.lua)
+        if not ns.Tasks then return nil end
+        return ns.Tasks.BarText()
     end,
     playtime = function()
         local seconds = GetSessionSeconds()
@@ -2547,7 +2552,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
@@ -2886,6 +2891,8 @@ TIP.reset = function()
     More(#locks)
 end
 
+TIP.tasks = function() if ns.Tasks then ns.Tasks.Tooltip() end end
+
 TIP.playtime = function()
     local seconds = Safe(GetSessionSeconds)
     AddPair(T("tt_playtime"), seconds and FormatDuration(seconds) or "--")
@@ -2905,15 +2912,15 @@ local TIP_SECTIONS = {
     durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
     xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" },
-    clock = { "clock" }, reset = { "reset" }, playtime = { "playtime" },
+    clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, playtime = { "playtime" },
     friends = { "social" }, guild = { "social" },
 }
 ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
 local TIP_ORDER = { "perf", "place", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
-                    "rep", "junk", "supply", "prof", "reset", "playtime", "social" }
-local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset" }
+                    "rep", "junk", "supply", "prof", "reset", "tasks", "playtime", "social" }
+local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -3273,6 +3280,9 @@ local function BuildControls(parent, top)
         RefreshOptions()
     end)
     set.forget:SetPoint("TOPLEFT", 176, y)
+    y = y - 26
+    set.tasks = CreateButton(parent, 150, function() ns.Tasks.ToggleWindow() end)
+    set.tasks:SetPoint("TOPLEFT", 20, y)
     y = y - 30
 
     controlSets[#controlSets + 1] = set
@@ -3321,6 +3331,7 @@ RefreshOptions = function()
         set.warnings:SetText(T("opt_warnings"))
         set.appearance:SetText(T("opt_appearance"))
         set.order:SetText(T("opt_order"))
+        set.tasks:SetText(T("opt_tasks"))
     end
 end
 
@@ -3644,6 +3655,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
             end
         end
         FarolCharDB.supplySeen = seen
+        FarolCharDB.tasks = ns.Tasks.Sanitize(type(savedChar) == "table" and savedChar.tasks or nil) -- lista de tarefas
         -- Perfil deste personagem: o da conta (padrão) ou o próprio.
         FarolCharDB.profile = type(savedChar) == "table" and savedChar.profile == "char" and "char" or "account"
         Profiles.mode = FarolCharDB.profile
@@ -3706,7 +3718,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -3768,6 +3780,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Alarm.HandleCommand(rest)
     elseif cmd == "barra" or cmd == "barras" or cmd == "bar" or cmd == "bars" then
         Profiles.BarCommand(rest)
+    elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then
+        ns.Tasks.HandleCommand(rest)
     elseif cmd == "perfil" or cmd == "perfis" or cmd == "profile" or cmd == "profiles" then
         Profiles.Command(rest)
     elseif cmd == "ordem" or cmd == "order" then

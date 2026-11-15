@@ -4,7 +4,7 @@
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · horário · resets diário/semanal · tempo de sessão · amigos · guilda** — você escolhe o que aparece (22 itens).
+XP/hora · reputação · profissões · horário · resets diário/semanal · tarefas · tempo de sessão · amigos · guilda** — você escolhe o que aparece (23 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -47,6 +47,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
+| `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
 | `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
 | `/farol barra 2 mostrar` | Liga a barra 2 (ou 3) e escolhe ela para o menu, a Aparência e a Ordem (`/farol barra` lista as barras) |
 | `/farol alarme`     | Abre a janela de alarmes |
@@ -227,6 +228,17 @@ Os **10 últimos avisos** (com data e hora) ficam guardados por personagem. Para
 - um **atalho de teclado** à sua escolha: Esc → Opções → Teclas de atalho → AddOns → Farol (usa o `Bindings.xml`
   oficial do jogo; só abre a janela);
 - `/farol historico`, ou **Histórico...** na janela de Avisos.
+
+## Tarefas diárias e semanais
+
+Sua lista de coisas para fazer, por personagem (até 10): abra com `/farol tarefa` ou **Tarefas...** no menu, escreva a
+tarefa, escolha **Diária** ou **Semanal** e clique em **Adicionar**. Marque o que já fez. **As diárias voltam a "falta"
+no reset diário, e as semanais no reset semanal** — sozinhas. O item **Tarefas** da barra (desligado por padrão) mostra
+quantas já fez (`Tarefas 3/5`, amarelo enquanto falta alguma, verde quando todas foram feitas); passe o mouse para ver
+a lista. Aviso opcional (desligado): **1 hora antes do reset diário, se faltar alguma diária**.
+
+O Farol não confere nada no jogo — quem marca as tarefas é você. Comandos: `/farol tarefa add [diaria|semanal] Nome`,
+`/farol tarefa feita N`, `/farol tarefa apagar N`, `/farol tarefa lista`, `/farol tarefa aviso on|off`.
 
 ## Resumo da sessão
 

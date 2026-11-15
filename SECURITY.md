@@ -24,9 +24,9 @@ e o branch `main` recebem correções.
 - **Sends nothing**: no chat or add-on messages, no network access (add-ons cannot reach the internet). / **Não envia
   nada**: nenhuma mensagem de chat ou de addon.
 - Friends and guild items read **counts only**, never names. / Amigos e guilda: só **quantidades**, nunca nomes.
-- Saved data (`FarolDB`, `FarolCharDB`) holds only settings, alarms, your own loot links, warning texts, the last
+- Saved data (`FarolDB`, `FarolCharDB`) holds only settings, alarms, your own task list, your own loot links, warning texts, the last
   session summary (numbers) and the gold/level/rested XP/saved instances of **your own** characters, and is **validated on load**. It never
-  leaves your computer. / Os dados salvos guardam só configurações, alarmes, seus links de saque, textos de avisos,
+  leaves your computer. / Os dados salvos guardam só configurações, alarmes, sua lista de tarefas, seus links de saque, textos de avisos,
   o resumo da última sessão (números) e o ouro/nível/descanso/instâncias salvas dos **seus próprios** personagens, e são **validados ao
   carregar**. Nunca saem do seu computador.
 - The add-on never sells, moves, destroys or equips items. / O addon nunca vende, move, destrói ou equipa itens.

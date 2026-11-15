@@ -4,7 +4,7 @@
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
 **FPS · latency · memory · coordinates · zone · speed · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · clock · daily/weekly resets · session time · friends · guild** — you pick what shows (22 items).
+reputation · professions · clock · daily/weekly resets · tasks · session time · friends · guild** — you pick what shows (23 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -47,6 +47,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
 | `/farol order`      | Choose the order of the items on the bar |
+| `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
 | `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
 | `/farol bar 2 show` | Turn on bar 2 (or 3) and pick it for the menu, Appearance and Order (`/farol bar` lists the bars) |
 | `/farol alarm`      | Open the alarms window |
@@ -224,6 +225,17 @@ The **last 10 warnings** (with date and time) are kept per character. Open them 
 - a **key binding** of your choice: Esc → Options → Keybindings → AddOns → Farol (uses the game's official
   `Bindings.xml`; it only opens the window);
 - `/farol history`, or **History...** in the Warnings window.
+
+## Daily and weekly tasks
+
+Your own checklist of things to do, per character (up to 10): open it with `/farol task` or **Tasks...** in the
+menu, type a task, choose **Daily** or **Weekly** and click **Add**. Tick what you have done. **Daily tasks go back to
+"to do" at the daily reset, weekly tasks at the weekly reset** — on their own. The bar item **Tasks** (off by default)
+shows how many are done (`Tasks 3/5`, yellow while something is left, green when all are done); hover it for the list.
+Optional warning (off by default): **1 hour before the daily reset, if a daily task is left**.
+
+Farol does not check anything in the game — you tick the tasks yourself. Commands: `/farol task add [daily|weekly] Name`,
+`/farol task done N`, `/farol task remove N`, `/farol task list`, `/farol task warn on|off`.
 
 ## Session summary
 

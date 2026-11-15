@@ -1,0 +1,31 @@
+Meet Farol: a free info bar for WoW Forever. Let's take a quick tour.
+
+Farol puts everything you need in one small bar: frame rate, latency, zone, durability, gold, gold per hour, and XP per hour.
+
+Hover any item to see its own short tooltip. Hold Shift, and you get everything at once.
+
+Right-click the bar to open the menu. Tick the items you want, and they show up instantly.
+
+Open the Order window to move items up or down, and arrange the bar your way.
+
+Track your progress: XP per hour and time to the next level, reputation per hour, and your professions, with a reminder when you reach the training limit.
+
+See the daily and weekly reset countdowns, your saved instances, and the gold and rested XP of all your characters.
+
+New in version three: up to three bars. Pick Bar 2 in the menu, tick Show panel, and choose its items. Each bar has its own position, look, and order.
+
+In the Appearance window, change the scale, the background, and the text and icon size, or switch to a single column. You can even hide a bar in combat.
+
+With profiles, every character can share the same bars, or have bars of its own. Copy from another character in one click, and undo it if you change your mind.
+
+Set clock alarms, using local or server time, with a snooze button.
+
+Get warnings for low durability, full bags, unspent talent points, and low ammo or reagents, plus optional reminders to take a break and drink some water.
+
+The loot window keeps your recent drops, with the time you got them and a quality filter.
+
+And every time you log in, you get a short summary of your last session: gold, experience, reputation, and loot.
+
+Farol only reads and shows. There's no automation, and it never sends anything. It's free, open source, and available in English and Portuguese.
+
+Get Farol on CurseForge. Thanks for watching!

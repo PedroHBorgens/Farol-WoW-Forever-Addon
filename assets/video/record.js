@@ -12,7 +12,7 @@ const path = require('path');
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: scale });
   const errors = [];
   page.on('pageerror', e => errors.push(String(e)));
-  await page.goto('file://' + path.join(__dirname, 'video.html'));
+  await page.goto('file://' + path.join(__dirname, process.env.PAGE || 'video.html')); // PAGE=youtube.html para o vídeo longo
   await page.evaluate(() => document.fonts.ready);
   if (mode === 'preview') {
     for (const t of process.argv.slice(3)) {

@@ -29,3 +29,19 @@ node assets/video/record.js video               # writes assets/video/farol-prom
 When a window changes in the add-on, update the matching scene here (and the CurseForge image), then regenerate.
 Ao mudar uma janela do addon, atualize a cena correspondente aqui (e a imagem do CurseForge) e gere de novo.
 The `.html`, `.mp4` and preview files are not versioned / não são versionados.
+
+## YouTube video (~3 min, narrated) / Vídeo do YouTube (~3 min, narrado)
+
+16 scenes, one narration paragraph each (`youtube_script.txt`, generated from `SCENES` in `youtube.py`).
+The narration audio (English, ElevenLabs) is not versioned; `youtube_timing.json` keeps where each paragraph is in it
+(checked sentence by sentence) and how long each scene lasts.
+
+```
+python3 assets/video/youtube_audio.py prepare narration.mp3 <end1,...,end15>   # only for a new narration
+python3 assets/video/youtube.py                                                # writes youtube.html
+PAGE=youtube.html node assets/video/record.js video youtube-silent.mp4
+python3 assets/video/youtube_audio.py mix narration.mp3 youtube-silent.mp4 farol-youtube.mp4
+```
+
+16 cenas, um parágrafo de narração cada. O áudio não é versionado; `youtube_timing.json` guarda onde está cada
+parágrafo e a duração de cada cena.

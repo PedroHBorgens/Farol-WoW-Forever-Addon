@@ -11,7 +11,7 @@ local function allowed(name)
     return false
 end
 
-local FILES = { "Core", "Alarm", "Loot", "Warnings", "Appearance", "Order" }
+local FILES = { "Core", "Alarm", "Loot", "Warnings", "Appearance", "Order", "Tasks", "Goals", "Runs", "MinimapButton" }
 
 return {
     { "using every feature creates no global outside the Farol names", function(T, Mock)
@@ -27,7 +27,8 @@ return {
                                "perfil", "perfil personagem", "perfil copiar conta", "perfil desfazer", "perfil conta",
                                "show tarefas", "tarefa", "tarefa add A", "tarefa add semanal B", "tarefa feita 1", "tarefa lista", "tarefa aviso on", "tarefa apagar 2",
                                "show metas", "meta", "meta ouro 200", "meta nivel 40", "meta aviso on", "meta limpar ouro",
-                               "show masmorra", "masmorra", "masmorra resumo off", "masmorra limpar" }) do
+                               "show masmorra", "masmorra", "masmorra resumo off", "masmorra limpar",
+                               "minimapa off", "minimapa on", "minimapa travar" }) do
             H:slash(cmd)
         end
         H:event("CHAT_MSG_LOOT", "Você recebe saque: |cff1eff00|Hitem:1|h[X]|h|r.")

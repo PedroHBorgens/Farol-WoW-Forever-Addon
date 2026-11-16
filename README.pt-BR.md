@@ -48,6 +48,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
 | `/farol meta`       | Metas de ouro e de nível com estimativa de tempo (`/farol meta ouro 500`, `/farol meta nivel 40`) |
+| `/farol minimapa`   | Mostra/esconde ou trava o botão do minimapa (`on`, `off`, `travar`, `destravar`) |
 | `/farol masmorra`   | Suas 10 últimas masmorras e raides: tempo, XP, ouro, saques, mortes |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
 | `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
@@ -71,6 +72,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 
 Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um destes jeitos:
 
+- **Clique no botão do Farol no minimapa** (ou na lista de addons do jogo ao lado do minimapa, nos clientes modernos)
 - **Clique direito** no painel
 - Digite `/farol menu`
 - **Esc → Opções → AddOns → Farol**
@@ -84,8 +86,13 @@ O menu tem **quatro abas**:
   testar, histórico). `/farol aviso` abre o menu nesta aba.
 - **Ferramentas** — um botão para cada janela, com o que ela faz: Alarmes, Tarefas, Saques, Histórico e **Resumo agora**.
 - **Geral** — o que vale para todos os seus personagens: idioma (Auto / Português / English), hora do servidor, resumo
-  da sessão ao entrar, ouro de todos os personagens, tooltip completo, os botões rápidos ao lado da barra 1; e
-  **Restaurar**: posição da barra, zerar sessão, esquecer personagens.
+  da sessão ao entrar, ouro de todos os personagens, tooltip completo, os botões rápidos ao lado da barra 1, o **botão
+  do minimapa** (mostrar / travar); e **Restaurar**: posição da barra, zerar sessão, esquecer personagens.
+
+**Botão no minimapa:** clique = menu, **clique direito = esconde/mostra todas as barras de uma vez** (só nesta sessão —
+bom para prints; `/farol` também traz de volta), Shift + clique = aba Avisos. Arraste em volta do minimapa (se não
+estiver travado). `/farol minimapa on|off|travar|destravar`. É um botão do próprio Farol — não precisa de outro addon
+nem de biblioteca.
 
 Aperte **Esc** para fechar. Se esconder a barra, use `/farol menu` para trazê-la de volta.
 

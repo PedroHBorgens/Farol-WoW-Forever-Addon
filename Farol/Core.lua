@@ -2235,7 +2235,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -3102,12 +3102,20 @@ local function InHiddenInstance()
 end
 
 function Profiles.Visibility()
-    local visible = db.shown
+    local visible = db.shown and not Profiles.allHidden -- "esconder todas" (botão do minimapa, só nesta sessão)
         and not (db.hideCombat and inCombat)
         and not InHiddenInstance()
     if visible then frame:Show() else frame:Hide() end
 end
 local function ApplyVisibility() Profiles.Each(Profiles.Visibility) end
+
+-- Esconder/mostrar todas as barras de uma vez (botão do minimapa). Só nesta sessão: não é salvo.
+ns.AllBarsHidden = function() return Profiles.allHidden == true end
+ns.SetAllBarsHidden = function(value)
+    Profiles.allHidden = value and true or nil
+    ApplyVisibility()
+    return Profiles.allHidden == true
+end
 
 ---------------------------------------------------------------------------
 -- Ações (usadas pelos comandos e pelo menu de opções)
@@ -3329,15 +3337,17 @@ local function BuildControls(parent, top)
     set.tooltipFull = CreateCheck(page, 20, -156, function(value) Profiles.SetGlobalToggle("tooltipFull", value) end)
     set.warnButton = CreateCheck(page, 20, -182, function(value) Profiles.SetGlobalToggle("warnButton", value) end)
     set.lootButton = CreateCheck(page, 20, -208, function(value) Profiles.SetGlobalToggle("lootButton", value) end)
-    set.restoreHeader = CreateHeader(page, -246)
+    set.minimap = CreateCheck(page, 20, -234, function(value) ns.MinimapButton.SetShown(value) end)
+    set.minimapLock = CreateCheck(page, 20, -260, function(value) ns.MinimapButton.SetLocked(value) end)
+    set.restoreHeader = CreateHeader(page, -298)
     set.reset = CreateButton(page, 170, function() ResetPosition() end)
-    set.reset:SetPoint("TOPLEFT", 20, -266)
+    set.reset:SetPoint("TOPLEFT", 20, -318)
     set.sessionReset = CreateButton(page, 170, function()
         ResetSession()
         UpdateText()
         Print(T("session_reset"))
     end)
-    set.sessionReset:SetPoint("TOPLEFT", 196, -266)
+    set.sessionReset:SetPoint("TOPLEFT", 196, -318)
     -- "Esquecer personagens": pede um segundo clique (em até 5 s) para confirmar.
     set.forget = CreateButton(page, 190, nil)
     set.forget:SetScript("OnClick", function(self)
@@ -3353,7 +3363,7 @@ local function BuildControls(parent, top)
         end
         RefreshOptions()
     end)
-    set.forget:SetPoint("TOPLEFT", 372, -266)
+    set.forget:SetPoint("TOPLEFT", 372, -318)
 
     -- Aba "Avisos": os controles do módulo de avisos (os do menu do Farol têm os nomes "FarolWarn...").
     if ns.Warnings and ns.Warnings.BuildControls then
@@ -3427,6 +3437,10 @@ RefreshOptions = function()
         set.warnButton:SetChecked(db.warnButton)
         set.lootButton.label:SetText(T("app_lootbutton"))
         set.lootButton:SetChecked(db.lootButton)
+        set.minimap.label:SetText(T("opt_minimap"))
+        set.minimap:SetChecked(db.minimap and db.minimap.show or false)
+        set.minimapLock.label:SetText(T("opt_minimap_lock"))
+        set.minimapLock:SetChecked(db.minimap and db.minimap.locked or false)
         set.forget.confirmAt = nil
         set.forget:SetText(T("opt_forget"))
         for lang, button in pairs(set.langs) do
@@ -3765,6 +3779,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         db.chars = SanitizeChars(type(saved) == "table" and saved.chars or nil)
         local extra = {} -- barras 2 e 3, validadas do mesmo jeito
         for n = 2, Profiles.MAX_BARS do extra[n] = Profiles.SanitizeBar(FarolDB, n) end
+        db.minimap = ns.MinimapButton.Sanitize(type(saved) == "table" and saved.minimap or nil) -- botão do minimapa
         db = Profiles.Build(db, extra) -- formato 3.x: campos de cada barra em profiles.account.bars[N]
         rawget(db, "profiles").chars = Profiles.SanitizeChars(FarolDB) -- perfis por personagem (3.2)
         FarolDB = db
@@ -3797,6 +3812,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         ApplyAppearance()
         ApplyVisibility()
         pcall(RegisterSettingsPanel) -- se a API de configurações mudar, o addon continua funcionando
+        pcall(ns.MinimapButton.Apply) -- botão no minimapa (se o jogo tiver minimapa)
         self:UnregisterEvent("ADDON_LOADED")
         return
     end
@@ -3847,7 +3863,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_runs",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_runs", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -3881,7 +3897,10 @@ SlashCmdList["FAROL"] = function(msg)
     local rest = string.match(msg or "", "^%s*%a*%s*(.-)%s*$") or "" -- usado pelos alarmes (aceita 07:30 e nomes)
     cmd, arg = string.lower(cmd or ""), string.lower(arg or "")
 
-    if cmd == "" then
+    if cmd == "" and Profiles.allHidden then -- "esconder todas" ligado: /farol traz as barras de volta
+        ns.SetAllBarsHidden(false)
+        Print(T("shown"))
+    elseif cmd == "" then
         SetShown(not db.shown)
         Print(db.shown and T("shown") or T("hidden"))
     elseif cmd == "menu" or cmd == "config" or cmd == "opcoes" or cmd == "options" then
@@ -3911,6 +3930,8 @@ SlashCmdList["FAROL"] = function(msg)
         Profiles.BarCommand(rest)
     elseif cmd == "masmorra" or cmd == "masmorras" or cmd == "dungeon" or cmd == "dungeons" or cmd == "run" or cmd == "runs" then
         ns.Runs.HandleCommand(rest)
+    elseif cmd == "minimapa" or cmd == "minimap" or cmd == "mapa" then
+        ns.MinimapButton.HandleCommand(rest)
     elseif cmd == "meta" or cmd == "metas" or cmd == "goal" or cmd == "goals" then
         ns.Goals.HandleCommand(rest)
     elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then

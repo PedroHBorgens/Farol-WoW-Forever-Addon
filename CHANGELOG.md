@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.7.0 — Minimap button
+- New **Farol button on the minimap**: click opens the menu, right-click hides/shows every bar at once (this session
+  only; `/farol` also brings them back), Shift-click opens the Warnings tab. Drag it around the minimap.
+- Modern clients also list Farol in the game's **addon list** next to the minimap (same clicks).
+- **General** tab: "Show the minimap button" (on by default) and "Lock the minimap button position";
+  `/farol minimap on|off|lock|unlock`.
+- Farol's own button: no other addon or library; nothing is sent. The position is validated on load.
+
 ## 3.6.0 — Dungeon and raid runs
 - Entering a dungeon or raid starts a **run**: time, XP, gold, loot (rares/epics) and deaths of your character.
 - New bar item **Dungeon / raid** (off by default): shown only while inside (`Ember Depths 18m · +4.2k XP · +12g`);

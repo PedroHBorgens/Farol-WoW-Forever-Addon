@@ -48,6 +48,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
 | `/farol order`      | Choose the order of the items on the bar |
 | `/farol goal`       | Gold and level goals with a time estimate (`/farol goal gold 500`, `/farol goal level 40`) |
+| `/farol minimap`    | Show/hide or lock the minimap button (`on`, `off`, `lock`, `unlock`) |
 | `/farol dungeon`    | Your last 10 dungeons and raids: time, XP, gold, loot, deaths (`/farol run`) |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
 | `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
@@ -71,6 +72,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 
 Tick or untick each item — no commands needed. Open it in any of these ways:
 
+- **Click the Farol button on the minimap** (or in the game's addon list next to the minimap, on modern clients)
 - **Right-click** the panel
 - Type `/farol menu`
 - **Esc → Options → AddOns → Farol**
@@ -84,8 +86,12 @@ The menu has **four tabs**:
   test, history). `/farol warn` opens the menu on this tab.
 - **Tools** — one button per window, with what it does: Alarms, Tasks, Loot, History and **Summary now**.
 - **General** — what applies to all your characters: language (Auto / Português / English), server time, session
-  summary at login, gold of all characters, full tooltip, the quick buttons next to bar 1; and **Restore**: bar
-  position, reset session, forget characters.
+  summary at login, gold of all characters, full tooltip, the quick buttons next to bar 1, the **minimap button**
+  (show / lock); and **Restore**: bar position, reset session, forget characters.
+
+**Minimap button:** click = menu, **right-click = hide/show every bar at once** (this session only — handy for
+screenshots; `/farol` also brings them back), Shift-click = Warnings tab. Drag it around the minimap (unless locked).
+`/farol minimap on|off|lock|unlock`. It is Farol's own button — no other addon or library is needed.
 
 Press **Esc** to close it. If you hide the bar, use `/farol menu` to bring it back.
 

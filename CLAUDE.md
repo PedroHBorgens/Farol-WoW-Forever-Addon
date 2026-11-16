@@ -69,7 +69,7 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Goals, Runs
+                    Appearance, Order, Tasks, Goals, Runs, MinimapButton
   Core.lua          barras (até 3, grade de células), 25 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
@@ -81,6 +81,7 @@ Farol/
   Tasks.lua         lista de tarefas diárias/semanais (janela, item "tasks" da barra, tooltip, /farol tarefa)
   Goals.lua         metas de ouro e de nível (janela, item "goals" da barra, tooltip, estimativa pelo ritmo, /farol meta)
   Runs.lua          registro de masmorras/raides (corrida atual no item "run", resumo ao sair, 10 últimas, /farol masmorra)
+  MinimapButton.lua botão próprio no minimapa (sem bibliotecas) + entrada AddonCompartment do .toc (/farol minimapa)
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
   Media/Farol.tga   ícone original (64×64)
 tests/              suíte de testes em Lua 5.1 com simulador da API do WoW
@@ -98,7 +99,8 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   "Ontem" / "08/11"; longo = "domingo, 08/11/2026 às 21:12"; inválido = "--").
 - Cada módulo adiciona seus textos em `ns.STRINGS.pt` / `ns.STRINGS.en` e usa `T("chave")`.
 - **Globais:** só nomes começando com `Farol` (janelas/botões), `FarolDB`, `FarolCharDB`, `SLASH_FAROL1`,
-  `Farol_ToggleWarnHistory`, `BINDING_*`. Nada de globais genéricos.
+  `Farol_ToggleWarnHistory`, `Farol_OnAddonCompartmentClick/Enter/Leave` (citadas no `.toc`), `BINDING_*`. Nada de
+  globais genéricos. O `test_globals` lê **todos** os `.lua` (lista `FILES`): arquivo novo entra nela.
 - **Perfis (3.x):** no disco, os campos de cada barra (`ns.BAR_KEYS`: posição, aparência, `items`, `order`…) ficam
   em `FarolDB.profiles.account.bars[N]`; `activeBar` e `dataVersion = 3` ao lado. No código, `db.items`, `db.scale`
   etc. continuam valendo: um metatable (`Profiles.PROXY` no Core) leva essas chaves para a barra ativa. Por isso
@@ -121,6 +123,9 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   `Profiles.Activate()` escolhe (o nome do personagem pode só chegar no `PLAYER_ENTERING_WORLD`, que reaplica).
   Toda cópia passa por `Profiles.CleanBar`/`CopyBars` (validação + tabelas novas, nunca compartilhadas). "Copiar de..."
   guarda `Profiles.backup` (só na sessão) para `/farol perfil desfazer`. Esquecer um personagem apaga o perfil dele.
+- **Botão do minimapa (3.7):** `FarolDB.minimap = { show, locked, angle 0–360 }` (validado). Clique direito chama
+  `ns.SetAllBarsHidden` ("esconder todas", só na sessão: `Profiles.allHidden`, respeitado por `Profiles.Visibility`;
+  `/farol` sozinho desfaz). Sem `Minimap` (outra interface) o botão simplesmente não é criado.
 - **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`, `chars` = ouro
   e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks? }`
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle

@@ -86,10 +86,10 @@ return {
         for _, button in ipairs(set.tools) do texts[#texts + 1] = H:text(button) .. " = " .. H:text(button.desc) end
         local all = table.concat(texts, " | ")
         T.has(all, "Alarmes... = até 10 alarmes"); T.has(all, "Tarefas... = diárias e semanais"); T.has(all, "Histórico... = os 10 últimos avisos")
-        for _, entry in ipairs({ { 1, "FarolAlarms" }, { 2, "FarolTasks" }, { 3, "FarolGoals" }, { 4, "FarolLoot" }, { 5, "FarolWarnHistory" } }) do
+        for _, entry in ipairs({ { 1, "FarolAlarms" }, { 2, "FarolTasks" }, { 3, "FarolGoals" }, { 4, "FarolRuns" }, { 5, "FarolLoot" }, { 6, "FarolWarnHistory" } }) do
             H:click(set.tools[entry[1]]); T.ok(H.env[entry[2]]:IsShown(), entry[2])
         end
-        H:click(set.tools[6]); T.has(H.strip(table.concat(H.msgs, "\n")), "resumo da sessão")
+        H:click(set.tools[7]); T.has(H.strip(table.concat(H.msgs, "\n")), "resumo da sessão")
     end },
 
     { "General tab: options for every character, synced with the Appearance window", function(T, Mock)
@@ -110,6 +110,6 @@ return {
         T.eq(H:text(set.tabs.tools), "Tools"); T.eq(H:text(set.groups[3]), "Gear and bags")
         T.eq(H:text(set.shown.label), "Show this bar")
         T.eq(H:text(set.warnings.breaksHeader), "Breaks"); T.eq(H:text(H.env.FarolWarnDurab.label), "Durability below")
-        T.eq(H:text(set.tools[6]), "Summary now")
+        T.eq(H:text(set.tools[7]), "Summary now")
     end },
 }

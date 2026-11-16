@@ -1,7 +1,7 @@
 -- Menu de opções: abrir/fechar, caixinhas sincronizadas, idioma, horário do servidor.
 -- Options menu: open/close, synced checkboxes, language, server time.
 
-local ITEM_COUNT, GENERAL_COUNT = 24, 23 -- 24 itens + mostrar/travar (Barra) + 6 da aba Geral + 15 da aba Avisos
+local ITEM_COUNT, GENERAL_COUNT = 25, 23 -- 25 itens + mostrar/travar (Barra) + 6 da aba Geral + 15 da aba Avisos
 
 local function openMenu(H)
     H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
@@ -41,9 +41,10 @@ return {
         T.eq(H:text(window[17].label), "Profissões")
         T.eq(H:text(window[18].label), "Metas (ouro/nível)")
         T.eq(H:text(window[21].label), "Tarefas (diárias/semanais)")
-        T.eq(H:text(window[25].label), "Mostrar esta barra")
-        T.eq(H:text(window[27].label), "Horário do servidor")
-        T.eq(H:text(panel[26].label), "Travar posição")
+        T.eq(H:text(window[23].label), "Masmorra / raide (corrida atual)")
+        T.eq(H:text(window[26].label), "Mostrar esta barra")
+        T.eq(H:text(window[28].label), "Horário do servidor")
+        T.eq(H:text(panel[27].label), "Travar posição")
     end },
 
     { "ticking a box updates the bar, the saved settings and the other menu", function(T, Mock)
@@ -60,10 +61,10 @@ return {
     { "show panel, lock and server time options", function(T, Mock)
         local H = Mock.new():login()
         local _, window = openMenu(H)
-        H:check(window[26], true); T.eq(H.env.FarolDB.locked, true)
-        H:check(window[25], false)
+        H:check(window[27], true); T.eq(H.env.FarolDB.locked, true)
+        H:check(window[26], false)
         T.eq(H.env.FarolDB.shown, false); T.ok(not H.env.FarolFrame:IsShown(), "panel hidden")
-        H:check(window[27], true); T.eq(H.env.FarolDB.serverTime, true)
+        H:check(window[28], true); T.eq(H.env.FarolDB.serverTime, true)
         H:slash(""); T.ok(H.env.FarolFrame:IsShown(), "/farol shows it again")
         H:slash("show hora"); H:update(1)
         T.has(H:bar(), "21:05", "clock uses server time")

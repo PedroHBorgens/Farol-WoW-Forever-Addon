@@ -4,7 +4,7 @@
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · metas de ouro/nível · horário · resets diário/semanal · tarefas · tempo de sessão · amigos · guilda** — você escolhe o que aparece (24 itens).
+XP/hora · reputação · profissões · metas de ouro/nível · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (25 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -48,6 +48,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
 | `/farol meta`       | Metas de ouro e de nível com estimativa de tempo (`/farol meta ouro 500`, `/farol meta nivel 40`) |
+| `/farol masmorra`   | Suas 10 últimas masmorras e raides: tempo, XP, ouro, saques, mortes |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
 | `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
 | `/farol barra 2 mostrar` | Liga a barra 2 (ou 3) e escolhe ela para o menu, a Aparência e a Ordem (`/farol barra` lista as barras) |
@@ -250,6 +251,20 @@ hora, XP por hora): `Meta 500g 44% ~27m · Nv 40 36% ~6h 10m` (amarelo enquanto 
 mostra quanto você tem, a estimativa ("por volta das 22:41") e o ritmo. A estimativa de nível supõe que cada nível que
 falta custa o XP do nível atual — use como referência. Aviso opcional (desligado): **"Meta alcançada: 500g!"**, uma vez
 por meta. As metas são de cada personagem. `/farol meta limpar [ouro|nivel]` apaga.
+
+## Masmorras e raides
+
+Ao entrar numa **masmorra ou raide**, o Farol começa uma "corrida" sozinho: tempo dentro, **XP**, **ouro** (o saldo,
+então consertos entram na conta), **saques** (com raros e épicos) e **mortes** — só os seus números. O item **Masmorra /
+raide** da barra (desligado por padrão) mostra isso enquanto você está dentro (`Ember Depths 18m · +4.2k XP · +12g`);
+passe o mouse para ver detalhes e a última vez que esteve ali. Ao sair, um **resumo no seu chat** (pode desligar):
+"saiu de Ember Depths (masmorra): 32m · XP +6.8k · Ouro +18g 40s · Saques 14 (2 raros, 1 épico) · Mortes 1". A janela
+**Masmorras e raides** (`/farol masmorra`, ou **Masmorras...** na aba Ferramentas) mostra as **10 últimas corridas** do
+personagem.
+
+Um `/reload` lá dentro continua a corrida; se você ficar mais de 15 minutos fora do jogo, ela termina no último momento
+visto. Visitas de menos de 1 minuto não ficam salvas. `/farol masmorra resumo on|off`, `/farol masmorra limpar`.
+(`/farol instancias` continua listando suas instâncias salvas.)
 
 ## Tarefas diárias e semanais
 

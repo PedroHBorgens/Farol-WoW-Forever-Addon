@@ -78,6 +78,7 @@ local SUITES = {
     "test_tasks",
     "test_menu",
     "test_goals",
+    "test_runs",
     "test_globals",
 }
 

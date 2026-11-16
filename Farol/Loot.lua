@@ -267,7 +267,9 @@ Loot.UpdateButton = UpdateButton
 
 local function Record(link, count)
     if not ValidLink(link) then return end
-    history[#history + 1] = { link = link, count = count, q = QualityOf(link), t = time() }
+    local quality = QualityOf(link)
+    history[#history + 1] = { link = link, count = count, q = quality, t = time() }
+    if ns.Runs and ns.Runs.OnLoot then pcall(ns.Runs.OnLoot, quality) end -- conta para a masmorra atual
     while #history > HISTORY_MAX do table.remove(history, 1) end
     if FarolCharDB then FarolCharDB.items = history end
     if RefreshWindow then RefreshWindow() end

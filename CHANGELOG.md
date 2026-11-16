@@ -2,6 +2,15 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.6.0 — Dungeon and raid runs
+- Entering a dungeon or raid starts a **run**: time, XP, gold, loot (rares/epics) and deaths of your character.
+- New bar item **Dungeon / raid** (off by default): shown only while inside (`Ember Depths 18m · +4.2k XP · +12g`);
+  the tooltip has the details and your last time there.
+- When you leave: a short summary in your chat (can be turned off).
+- New window **Dungeons and raids** (`/farol dungeon`, or **Dungeons...** in the Tools tab): the last 10 runs.
+- A `/reload` inside keeps the run; more than 15 minutes away ends it at the last moment seen; visits under one minute
+  are not saved. Reads only your own data; no new server request, nothing sent. Saved runs are validated on load.
+
 ## 3.5.0 — Gold and level goals
 - New **Goals** (`/farol goal`, or **Goals...** in the Tools tab): a gold goal and/or a level goal per character.
 - New bar item **Goals** (off by default): `Goal 500g 44% ~27m · Lv 40 36% ~6h 10m` — how much you have and an

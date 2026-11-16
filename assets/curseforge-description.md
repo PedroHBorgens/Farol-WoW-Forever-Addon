@@ -20,6 +20,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags �
 - **Up to 3 bars**, each with its own items, position, appearance and order (menu → Bar 2 / Bar 3 → Show).
 - **Profiles:** the same bars on every character, or **this character only** — and **Copy from...** another character.
 - **Daily & weekly tasks:** your own checklist (`/farol task`) that resets on its own at the daily/weekly reset.
+- **Minimap button:** click for the menu, right-click to hide/show every bar at once (no other addon needed).
 - **Hover** an item for its own short tooltip (gold, durability, resets…); hold **Shift** to see everything: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
 
 ### Appearance
@@ -75,6 +76,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidad
 - **Até 3 barras**, cada uma com itens, posição, aparência e ordem próprios (menu → Barra 2 / Barra 3 → Mostrar).
 - **Perfis:** as mesmas barras em todos os personagens, ou **só deste personagem** — e **Copiar de...** outro personagem.
 - **Tarefas diárias e semanais:** sua lista (`/farol tarefa`) que zera sozinha no reset diário/semanal.
+- **Botão no minimapa:** clique para o menu, clique direito para esconder/mostrar todas as barras (não precisa de outro addon).
 - **Passe o mouse** num item para ver um tooltip curto só dele (ouro, durabilidade, resets…); segure **Shift** para ver tudo: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.
 
 ### Aparência

@@ -20,7 +20,7 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk", "ammo",
-    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "clock", "reset", "tasks", "playtime", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "clock", "reset", "tasks", "playtime", "run", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
@@ -28,7 +28,7 @@ local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
     goldh = false, xph = false, rep = false, prof = false, goals = false, junk = false, ammo = false,
-    clock = false, reset = false, tasks = false, playtime = false, friends = false, guild = false,
+    clock = false, reset = false, tasks = false, playtime = false, run = false, friends = false, guild = false,
 }
 
 -- Nomes aceitos nos comandos /farol show|hide (português e inglês).
@@ -54,6 +54,7 @@ local ITEM_ALIASES = {
     reset = "reset", resets = "reset", reinicio = "reset",
     tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks", todo = "tasks",
     metas = "goals", meta = "goals", goals = "goals", goal = "goals", objetivo = "goals",
+    masmorra = "run", masmorras = "run", dungeon = "run", dungeons = "run", run = "run", corrida = "run",
     tempo = "playtime", playtime = "playtime", played = "playtime",
     amigos = "friends", friends = "friends",
     guilda = "guild", guild = "guild",
@@ -71,6 +72,7 @@ local DEFAULTS = {
     summary = true,     -- mostrar o resumo da última sessão ao entrar no jogo
     goldTotal = false,  -- item Ouro mostra também o total de todos os seus personagens do reino
     tooltipFull = false, -- false = cada item mostra só o seu tooltip (Shift mostra tudo); true = sempre completo
+    runSummary = true,  -- resumo no chat ao sair de uma masmorra ou raide (Runs.lua)
     newsSeen = 0,       -- quantas novidades (NEWS) o jogador já viu; boas-vindas/novidades aparecem uma vez
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
     -- Aparência
@@ -2047,6 +2049,7 @@ local function GetGoldRate()
     return delta / seconds * 3600
 end
 ns.GetGoldRate = GetGoldRate -- usados pelas metas (Goals.lua)
+ns.GetSessionXP = function() return session.xpGained end -- XP somado na sessão (Runs.lua conta a diferença)
 ns.GetXPRate = GetXPRate
 
 -- Reputação por hora na facção acompanhada (nil antes de 1 minuto ou sem ganho).
@@ -2232,7 +2235,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2403,6 +2406,10 @@ local ITEM_TEXT = {
         if daily then parts[#parts + 1] = T("label_reset_daily") .. " " .. FormatCountdown(daily) end
         if weekly then parts[#parts + 1] = T("label_reset_weekly") .. " " .. FormatCountdown(weekly) end
         return table.concat(parts, " · ")
+    end,
+    run = function() -- corrida atual numa masmorra/raide (Runs.lua); fora delas, some
+        if not ns.Runs then return nil end
+        return ns.Runs.BarText()
     end,
     goals = function() -- metas de ouro e de nível (Goals.lua)
         if not ns.Goals then return nil end
@@ -2595,7 +2602,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  run = "INV_Misc_Key_03",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
@@ -2936,6 +2943,7 @@ end
 
 TIP.tasks = function() if ns.Tasks then ns.Tasks.Tooltip() end end
 TIP.goals = function() if ns.Goals then ns.Goals.Tooltip() end end
+TIP.run = function() if ns.Runs then ns.Runs.Tooltip() end end
 
 TIP.playtime = function()
     local seconds = Safe(GetSessionSeconds)
@@ -2956,15 +2964,15 @@ local TIP_SECTIONS = {
     durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
     xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" },
-    clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, playtime = { "playtime" },
+    clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, playtime = { "playtime" }, run = { "run" },
     friends = { "social" }, guild = { "social" },
 }
 ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
 local TIP_ORDER = { "perf", "place", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
-                    "rep", "junk", "supply", "prof", "goals", "reset", "tasks", "playtime", "social" }
-local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals" }
+                    "rep", "junk", "supply", "prof", "goals", "reset", "tasks", "playtime", "run", "social" }
+local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", run = "run" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -3209,10 +3217,10 @@ Profiles.GROUPS = {
     { "grp_gear", { "durab", "bags", "junk", "ammo" } },
     { "grp_gold", { "gold", "session", "goldh" } },
     { "grp_progress", { "xp", "xph", "rep", "prof", "goals" } },
-    { "grp_time", { "clock", "reset", "tasks", "playtime", "friends", "guild" } },
+    { "grp_time", { "clock", "reset", "tasks", "playtime", "run", "friends", "guild" } },
 }
 ns.ITEM_GROUPS = Profiles.GROUPS
-Profiles.MENU_W, Profiles.PAGE_H = 660, 420
+Profiles.MENU_W, Profiles.PAGE_H = 660, 444
 
 -- Opções de aparência que valem para todos (ficam na aba Geral; também na janela Aparência).
 function Profiles.SetGlobalToggle(key, value)
@@ -3298,9 +3306,9 @@ local function BuildControls(parent, top)
     set.shown = CreateCheck(page, 16, -62, SetShown)
     set.locked = CreateCheck(page, 226, -62, SetLocked)
     set.appearance = CreateButton(page, 200, function() ns.Appearance.ToggleWindow() end)
-    set.appearance:SetPoint("TOPLEFT", 16, -394)
+    set.appearance:SetPoint("TOPLEFT", 16, -416)
     set.order = CreateButton(page, 200, function() ns.Order.ToggleWindow() end)
-    set.order:SetPoint("TOPLEFT", 226, -394)
+    set.order:SetPoint("TOPLEFT", 226, -416)
 
     -- Aba "Geral": o que vale para todos os personagens.
     page = set.pages.general
@@ -3358,6 +3366,7 @@ local function BuildControls(parent, top)
         { "alarms", function() ns.Alarm.ToggleWindow() end },
         { "tasks", function() ns.Tasks.ToggleWindow() end },
         { "goals", function() ns.Goals.ToggleWindow() end },
+        { "runs", function() ns.Runs.ToggleWindow() end },
         { "loot", function() ns.Loot.ToggleWindow() end },
         { "history", function() ns.Warnings.ToggleHistory() end },
         { "summary", function()
@@ -3773,6 +3782,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
             end
         end
         FarolCharDB.supplySeen = seen
+        FarolCharDB.runs = ns.Runs.Sanitize(type(savedChar) == "table" and savedChar.runs or nil) -- masmorras
         FarolCharDB.goals = ns.Goals.Sanitize(type(savedChar) == "table" and savedChar.goals or nil) -- metas
         FarolCharDB.tasks = ns.Tasks.Sanitize(type(savedChar) == "table" and savedChar.tasks or nil) -- lista de tarefas
         -- Perfil deste personagem: o da conta (padrão) ou o próprio.
@@ -3837,7 +3847,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_runs",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -3899,6 +3909,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Alarm.HandleCommand(rest)
     elseif cmd == "barra" or cmd == "barras" or cmd == "bar" or cmd == "bars" then
         Profiles.BarCommand(rest)
+    elseif cmd == "masmorra" or cmd == "masmorras" or cmd == "dungeon" or cmd == "dungeons" or cmd == "run" or cmd == "runs" then
+        ns.Runs.HandleCommand(rest)
     elseif cmd == "meta" or cmd == "metas" or cmd == "goal" or cmd == "goals" then
         ns.Goals.HandleCommand(rest)
     elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then

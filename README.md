@@ -4,7 +4,7 @@
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
 **FPS · latency · memory · coordinates · zone · speed · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · gold/level goals · clock · daily/weekly resets · tasks · session time · friends · guild** — you pick what shows (24 items).
+reputation · professions · gold/level goals · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (25 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -48,6 +48,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
 | `/farol order`      | Choose the order of the items on the bar |
 | `/farol goal`       | Gold and level goals with a time estimate (`/farol goal gold 500`, `/farol goal level 40`) |
+| `/farol dungeon`    | Your last 10 dungeons and raids: time, XP, gold, loot, deaths (`/farol run`) |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
 | `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
 | `/farol bar 2 show` | Turn on bar 2 (or 3) and pick it for the menu, Appearance and Order (`/farol bar` lists the bars) |
@@ -247,6 +248,19 @@ of each goal you have and an **estimate** of the time left from this session's p
 the estimate ("around 22:41") and the pace. The level estimate assumes each remaining level costs as much XP as the
 current one, so treat it as a rough guide. Optional warning (off by default): **"Goal reached: 500g!"**, once per goal.
 Goals are per character. `/farol goal clear [gold|level]` removes them.
+
+## Dungeon and raid runs
+
+When you enter a **dungeon or raid**, Farol starts a "run" on its own: time inside, **XP**, **gold** (net, so repairs
+count), **loot** (with rares and epics) and **deaths** — your own numbers only. The bar item **Dungeon / raid**
+(off by default) shows it while you are inside (`Ember Depths 18m · +4.2k XP · +12g`); hover it for details and your
+last time there. When you leave, a short **summary in your chat** (can be turned off): "left Ember Depths (dungeon):
+32m · XP +6.8k · Gold +18g 40s · Loot 14 (2 rares, 1 epic) · Deaths 1". The window **Dungeons and raids**
+(`/farol dungeon`, or **Dungeons...** in the Tools tab) lists the **last 10 runs** of the character.
+
+A `/reload` inside keeps the run; if you are away from the game for more than 15 minutes, it ends at the last moment
+seen. Visits under one minute are not saved. `/farol dungeon summary on|off`, `/farol dungeon clear`. (`/farol lockouts`
+still lists your saved instances.)
 
 ## Daily and weekly tasks
 

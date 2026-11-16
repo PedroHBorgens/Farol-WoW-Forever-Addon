@@ -8,7 +8,7 @@ local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", 
                 "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "municao", "reagentes", "400", "5000", "15", "240", "2",
                 "graus", "som", "status", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
-                "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "Garrosh", "tarefa", "task", "feita", "apagar", "semanal", "diaria", "meta", "goal", "nivel", "limpar", "40", "1000000", "on", "off", "07:30", "25:99", "-1", "99999" }
+                "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "Garrosh", "tarefa", "task", "feita", "apagar", "semanal", "diaria", "meta", "goal", "nivel", "limpar", "40", "1000000", "masmorra", "dungeon", "resumo", "on", "off", "07:30", "25:99", "-1", "99999" }
 local BAD = { "x", 1e309, -1e309, 0 / 0, true, false, {}, { 1, 2 }, -5, 3.7, "" }
 
 local seed = 1
@@ -78,6 +78,9 @@ return {
             end
             local char = {
                 profile = pick({ "char", "account", 5, true, "evil" }),
+                runs = random(3) == 1 and pick(BAD) or { list = { { n = pick(BAD), k = pick({ "party", "raid", pick(BAD) }), t = pick(BAD), s = pick(BAD),
+                    x = pick(BAD), g = pick(BAD), l = pick(BAD), r = pick(BAD), e = pick(BAD), d = pick(BAD) }, pick(BAD) },
+                    cur = random(2) == 1 and pick(BAD) or { n = "Ok", k = "party", t = pick(BAD), u = pick(BAD), x = pick(BAD) } },
                 goals = random(3) == 1 and pick(BAD) or { gold = pick(BAD), level = pick(BAD), ls = pick(BAD), gw = pick(BAD), lw = pick(BAD) },
                 tasks = random(3) == 1 and pick(BAD) or { { n = pick(BAD), w = pick(BAD), d = pick(BAD) }, pick(BAD), { n = "Ok", d = pick(BAD) } },
                 items = { { link = "|cff1eff00|Hitem:1|h[Ok]|h|r", count = pick(BAD), q = pick(BAD), t = pick(BAD) } },

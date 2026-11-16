@@ -69,8 +69,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Goals
-  Core.lua          barras (até 3, grade de células), 24 itens, tooltip, menu de opções, comandos /farol, dados salvos
+                    Appearance, Order, Tasks, Goals, Runs
+  Core.lua          barras (até 3, grade de células), 25 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água, tarefas),
@@ -80,6 +80,7 @@ Farol/
   Order.lua         ordem dos itens na barra
   Tasks.lua         lista de tarefas diárias/semanais (janela, item "tasks" da barra, tooltip, /farol tarefa)
   Goals.lua         metas de ouro e de nível (janela, item "goals" da barra, tooltip, estimativa pelo ritmo, /farol meta)
+  Runs.lua          registro de masmorras/raides (corrida atual no item "run", resumo ao sair, 10 últimas, /farol masmorra)
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
   Media/Farol.tga   ícone original (64×64)
 tests/              suíte de testes em Lua 5.1 com simulador da API do WoW
@@ -92,7 +93,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - Arquivos compartilham a tabela `ns` (`local _, ns = ...`). O Core exporta `ns.T` (tradução), `ns.Print`,
   `ns.GetDB`, `ns.IsSecret`, `ns.frame`, `ns.UpdateText`, `ns.ApplyAppearance`, `ns.ApplyVisibility`,
   `ns.MakeToplevel`, `ns.LayoutQuickButtons`, `ns.SetBarWidth`, `ns.ITEM_ORDER`, `ns.ITEM_ICONS`,
-  `ns.GetWatchedFaction`, `ns.GetJunk`, `ns.GetGoldRate`, `ns.GetXPRate`, `ns.ReadProfessions`, `ns.GetResetTimes`, `ns.GetServerClock` (hora do servidor validada: relógio, alarmes e
+  `ns.GetWatchedFaction`, `ns.GetJunk`, `ns.GetGoldRate`, `ns.GetXPRate`, `ns.GetSessionXP`, `ns.ReadProfessions`, `ns.GetResetTimes`, `ns.GetServerClock` (hora do servidor validada: relógio, alarmes e
   resets usam só ela, nunca `GetGameTime` direto) e `ns.FormatWhen(t, longo)` (datas de histórico: "Hoje 21:42" /
   "Ontem" / "08/11"; longo = "domingo, 08/11/2026 às 21:12"; inválido = "--").
 - Cada módulo adiciona seus textos em `ns.STRINGS.pt` / `ns.STRINGS.en` e usa `T("chave")`.
@@ -124,7 +125,10 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks? }`
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle
   e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores) e
-  `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `goals` = metas `{ gold = cobre alvo
+  `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `runs` = `{ list (máx. 10), cur }` corridas
+  em masmorras/raides `{ n, k = "party"/"raid", t, s ≥ 60, x, g, l, r, e, d, u (só cur) }` — o `/reload` continua a
+  corrida, mais de 15 min fora fecha no último momento visto; saques contados via `Runs.OnLoot` chamado pelo
+  `Record` do Loot; XP pela diferença de `ns.GetSessionXP`, `goals` = metas `{ gold = cobre alvo
   (≤ 1 milhão de ouro), level = nível alvo, ls = nível ao criar, gw/lw = "alcançada" já avisada }`, `tasks` = lista de tarefas
   `{ n = nome limpo (≤ 40 letras), w = semanal?, d = time() da marca }` (máx. 10; feita = `d` depois do último reset do
   tipo, calculado com `ns.GetResetTimes`), `lastSession` = resumo da última sessão, só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
@@ -211,6 +215,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Resumo da sessão (textos no chat) | 09 |
 | Tarefas (janela, item, aviso) | 10 |
 | Metas (item e tooltip de progresso) | 08 (e 02/03 pela contagem de itens) |
+| Masmorras e raides (item, resumo, janela) | 11 (e 02/03 pela contagem de itens) |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

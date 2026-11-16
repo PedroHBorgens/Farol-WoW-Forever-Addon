@@ -77,6 +77,7 @@ local SUITES = {
     "test_charprofiles",
     "test_tasks",
     "test_menu",
+    "test_goals",
     "test_globals",
 }
 

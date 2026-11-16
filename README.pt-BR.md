@@ -4,7 +4,7 @@
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · horário · resets diário/semanal · tarefas · tempo de sessão · amigos · guilda** — você escolhe o que aparece (23 itens).
+XP/hora · reputação · profissões · metas de ouro/nível · horário · resets diário/semanal · tarefas · tempo de sessão · amigos · guilda** — você escolhe o que aparece (24 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -47,6 +47,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol historico`  | Últimos 10 avisos (também pelo botão ao lado da barra ou por atalho de teclado) |
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
+| `/farol meta`       | Metas de ouro e de nível com estimativa de tempo (`/farol meta ouro 500`, `/farol meta nivel 40`) |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
 | `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
 | `/farol barra 2 mostrar` | Liga a barra 2 (ou 3) e escolhe ela para o menu, a Aparência e a Ordem (`/farol barra` lista as barras) |
@@ -239,6 +240,16 @@ Os **10 últimos avisos** (com data e hora) ficam guardados por personagem. Para
 - um **atalho de teclado** à sua escolha: Esc → Opções → Teclas de atalho → AddOns → Farol (usa o `Bindings.xml`
   oficial do jogo; só abre a janela);
 - `/farol historico`, ou **Histórico...** na janela de Avisos.
+
+## Metas de ouro e de nível
+
+Escolha uma meta — **ouro** (por exemplo 500 de ouro) e/ou um **nível** (por exemplo 40) — com `/farol meta`, **Metas...**
+na aba Ferramentas do menu, ou `/farol meta ouro 500` / `/farol meta nivel 40`. O item **Metas** da barra (desligado por
+padrão) mostra quanto de cada meta você já tem e uma **estimativa** do tempo que falta pelo ritmo da sessão (ouro por
+hora, XP por hora): `Meta 500g 44% ~27m · Nv 40 36% ~6h 10m` (amarelo enquanto falta, verde "alcançada"). O tooltip
+mostra quanto você tem, a estimativa ("por volta das 22:41") e o ritmo. A estimativa de nível supõe que cada nível que
+falta custa o XP do nível atual — use como referência. Aviso opcional (desligado): **"Meta alcançada: 500g!"**, uma vez
+por meta. As metas são de cada personagem. `/farol meta limpar [ouro|nivel]` apaga.
 
 ## Tarefas diárias e semanais
 

@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.5.0 — Gold and level goals
+- New **Goals** (`/farol goal`, or **Goals...** in the Tools tab): a gold goal and/or a level goal per character.
+- New bar item **Goals** (off by default): `Goal 500g 44% ~27m · Lv 40 36% ~6h 10m` — how much you have and an
+  estimate of the time left from this session's gold per hour and XP per hour; green "reached" when done. The
+  tooltip shows the estimate ("around 22:41") and the pace.
+- Optional warning (off by default, Warnings tab): "Goal reached: 500g!", once per goal.
+- Reads only your own gold, level and XP; no new server request, nothing sent. Goals are validated on load.
+
 ## 3.4.0 — Tabbed menu
 - The options menu now has four tabs: **Bar** (bar 1/2/3, profile, show/lock, the items in six groups, Appearance
   and Order of this bar), **Warnings** (all warnings in sections: gear and bags, character, breaks, how to warn),

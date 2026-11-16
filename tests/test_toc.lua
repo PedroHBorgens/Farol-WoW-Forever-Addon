@@ -68,7 +68,7 @@ return {
             -- profissões: nunca abandonar, treinar ou fabricar
             "AbandonSkill", "BuyTrainerService", "DoTradeSkill", "CastTradeSkill", "ExpandSkillHeader",
         }
-        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua" }) do
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua" }) do
             local code = read("Farol/" .. file)
             code = string.gsub(code, "%-%-%[%[.-%]%]", "") -- comentários de bloco
             code = string.gsub(code, "%-%-[^\n]*", "")     -- comentários de linha
@@ -80,7 +80,7 @@ return {
 
     { "command alias tables have no duplicate names (a repeated name silently overrides the first)", function(T)
         local tables = { { "Core.lua", "local ITEM_ALIASES = {" }, { "Warnings.lua", "local KEYS = {" },
-                         { "Appearance.lua", "local WORDS = {" }, { "Tasks.lua", "local WORDS = {" } }
+                         { "Appearance.lua", "local WORDS = {" }, { "Tasks.lua", "local WORDS = {" }, { "Goals.lua", "local WORDS = {" } }
         for _, entry in ipairs(tables) do
             local code = read("Farol/" .. entry[1])
             local start = string.find(code, entry[2], 1, true)

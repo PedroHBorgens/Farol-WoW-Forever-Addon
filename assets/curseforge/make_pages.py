@@ -101,15 +101,15 @@ tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
 page("farol-02-bar-items-layout-tooltip", f"""
 <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
-     "23 items, each with its own short tooltip (Shift: all)", "23 informações, cada uma com o seu tooltip curto (Shift: tudo)")
+     "24 items, each with its own short tooltip (Shift: all)", "24 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Friends online","Guild online"]
-on = {0,1,3,4,6,7,8,9,10,12,14,15,16,18}
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Friends online","Guild online"]
+on = {0,1,3,4,6,7,8,9,10,12,14,15,16,17,19}
 half = 12
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
 GROUPS = [("Performance", [0, 1, 2]), ("Location", [3, 4, 5]), ("Gear and bags", [6, 7, 8, 9]), ("Gold", [10, 11, 12]),
-          ("Progress", [13, 14, 15, 16]), ("Time and social", [17, 18, 19, 20, 21, 22])]
+          ("Progress", [13, 14, 15, 16, 17]), ("Time and social", [18, 19, 20, 21, 22, 23])]
 grp = lambda title, idx: (f'<div class="grp"><div class="gh">{title}</div>'
                           + "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in idx) + '</div>')
 tabs = lambda active: '<div class="tabs">' + "".join(f'<span class="tab{" on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
@@ -118,7 +118,7 @@ menu = f"""<div class="win menu3" style="width:640px;padding-top:12px;padding-bo
 <div class="line"><span class="k">Bar:</span><span class="btn hl" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span></div>
 <div class="line"><span class="k">Profile:</span><span class="btn" style="padding:2px 10px">Account ▾</span><span class="btn" style="padding:2px 10px">Copy from... ▾</span></div>
 <div class="line"><span class="ck" style="margin:0"><span class="box">✓</span>Show this bar</span><span class="ck" style="margin:0 0 0 24px"><span class="box"></span>Lock position</span></div>
-<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 14 of 23 on — tick the ones you want (hover to see what each one shows).</div>
+<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 15 of 24 on — tick the ones you want (hover to see what each one shows).</div>
 <div class="cols">{"".join(grp(t, i) for t, i in GROUPS)}</div>
 <div class="line" style="margin-top:10px"><span class="btn">Appearance...</span><span class="btn hl">Order...</span></div></div>"""
 TAB_CSS = """
@@ -208,7 +208,8 @@ big = hbar(BAR_ITEMS[:4], "font-size:19px;background:#0004;border-color:#0000")
 page("farol-07-appearance-settings", f'{app}<div style="display:flex;flex-direction:column;gap:30px;align-items:flex-start"><div class="dim">Small · compact</div>{small}<div class="dim">Large · transparent</div>{big}</div>',
      "Make it yours: shape, size, background, hide in combat", "Do seu jeito: formato livre, tamanho do texto e ícones, fundo, esconder em combate")
 # 8. Progress: XP, reputation, resets
-pbar = hbar([("📖",'XP 46% <span class="blue">+12%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,("⛏️", 'Mining <span class="r">150/150</span>'),RESET_ITEM], "font-size:14px")
+pbar = hbar([("📖",'XP 46% <span class="blue">+12%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,("⛏️", 'Mining <span class="r">150/150</span>'),
+             ("🎯",'Goal 500g <span class="y">44%</span> ~27m · Lv 40 <span class="y">36%</span> ~6h 10m')], "font-size:13px")
 ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol</div>
 <div class="row"><span class="k">Experience</span><span>11,040 / 24,000 (46%)</span></div>
 <div class="row"><span class="k">XP per hour</span><span>18.4k</span></div>
@@ -224,6 +225,10 @@ ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-we
 <div style="color:#ff6666;font-size:13px">&nbsp;&nbsp;&nbsp;at the training limit — find a trainer</div>
 <div class="row"><span class="k">Cooking</span><span>60/75</span></div>
 <div style="height:6px"></div>
+<div class="k">Goals</div>
+<div class="row"><span>&nbsp; Gold 500g</span><span>223g of 500g (44%)</span></div>
+<div class="row dim"><span>&nbsp;&nbsp;&nbsp; estimate: ~27m (around 22:41) · pace 600g per hour</span><span></span></div>
+<div style="height:6px"></div>
 <div class="k">Rested XP of your characters (estimate)</div>
 <div class="row"><span>&nbsp; Jaina (34)</span><span>150% <span class="g">full</span> <span class="dim">inn/city</span></span></div>
 <div class="row"><span>&nbsp; Arthas (22)</span><span>84% full in ~2d 1h <span class="dim">inn/city</span></span></div>
@@ -233,7 +238,7 @@ ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-we
 <div class="k">Saved instances</div>
 <div class="row"><span>&nbsp; Molten Core</span><span>7/10 bosses &nbsp;reset in 2d 4h</span></div></div>"""
 page("farol-08-progress-xp-reputation-professions", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:center;transform:scale(.86);margin-top:40px">{pbar}{ptip}</div>',
-     "Progress: XP, reputation, professions, rested XP", "Seu progresso: XP, reputação, profissões, descanso e resets")
+     "Progress: XP, reputation, professions, goals", "Seu progresso: XP, reputação, profissões, metas e resets")
 # 9. Session summary (chat only)
 def chatline(text): return f'<div><span style="color:#33ccff">Farol:</span> {text}</div>'
 G = lambda g, sv: f'<span class="g">+</span><span class="gold">{g}g</span> <span class="silver">{sv}s</span>'

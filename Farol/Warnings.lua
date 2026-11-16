@@ -40,6 +40,7 @@ local DEFAULTS = {
     pause = false, pauseMin = 120, pauseAnywhere = false,    -- lembrete de pausa (desligado por padrão)
     water = false, waterMin = 45, waterAnywhere = false,     -- lembrete de beber água (desligado por padrão)
     tasks = false,                                           -- tarefas diárias pendentes 1 h antes do reset
+    goals = false,                                           -- meta de ouro/nível alcançada
 }
 local MAX_ACTION_SLOT = 180 -- barras de ação (clientes modernos têm até 180 espaços)
 local RANK_SCAN_INTERVAL = 5 -- segundos entre varreduras quando algo mudou
@@ -115,6 +116,9 @@ local STRINGS = {
         warn_name_water = "beber água",
         warn_name_tasks = "tarefas diárias pendentes",
         warn_opt_tasks = "Tarefas diárias pendentes (1 h antes)",
+        warn_opt_goals = "Meta de ouro ou de nível alcançada",
+        warn_name_goals = "meta alcançada",
+        warn_goals     = "meta alcançada: %s!",
         warn_sec_gear  = "Equipamento e bolsas",
         warn_sec_char  = "Personagem",
         warn_sec_breaks = "Pausas",
@@ -216,6 +220,9 @@ local STRINGS = {
         warn_name_water = "drink water",
         warn_name_tasks = "daily tasks left",
         warn_opt_tasks = "Daily tasks left (1 h before)",
+        warn_opt_goals = "Gold or level goal reached",
+        warn_name_goals = "goal reached",
+        warn_goals     = "goal reached: %s!",
         warn_sec_gear  = "Gear and bags",
         warn_sec_char  = "Character",
         warn_sec_breaks = "Breaks",
@@ -279,7 +286,7 @@ function Warnings.Sanitize(saved)
     local clean = {}
     if type(saved) ~= "table" then saved = {} end
     for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "restFull", "ammo", "reag", "pause", "pauseAnywhere",
-                           "water", "waterAnywhere", "tasks" }) do
+                           "water", "waterAnywhere", "tasks", "goals" }) do
         if type(saved[key]) == "boolean" then clean[key] = saved[key] else clean[key] = DEFAULTS[key] end
     end
     clean.durabPct = InRange(saved.durabPct, DURAB_MIN, DURAB_MAX) or DEFAULTS.durabPct
@@ -318,6 +325,7 @@ local state = {
     pause = { nextAt = nil, silenced = false },         -- lembretes por tempo: próxima vez (GetTime)
     water = { nextAt = nil, silenced = false },
     tasks = { cycle = nil },                            -- reset diário já avisado (tarefas pendentes)
+    goals = {},                                         -- metas: o "já avisada" fica salvo (FarolCharDB.goals)
 }
 
 local function PlayWarningSound()
@@ -1035,6 +1043,13 @@ local function CheckTasks(now)
     end
 end
 
+-- Meta de ouro ou de nível alcançada: uma vez por meta (fica marcado em FarolCharDB.goals).
+local function CheckGoals()
+    if not Settings().goals or not ns.Goals then return end
+    local list = ns.Goals.NewlyReached()
+    if #list > 0 then Announce(string.format(T("warn_goals"), table.concat(list, ", ")), "goals") end
+end
+
 function Warnings.TasksChanged() state.tasks.cycle, state.tasks.remindAt = nil, nil end
 
 ---------------------------------------------------------------------------
@@ -1103,6 +1118,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         pcall(CheckRestFull, now)
         pcall(CheckSupplies, now)
         pcall(CheckTasks, now)
+        pcall(CheckGoals)
     end
 end)
 
@@ -1276,7 +1292,8 @@ function Warnings.BuildControls(parent, prefix)
     set.prof = Check("Prof", x, y - 68, "prof")
     set.restFull = Check("RestFull", x, y - 93, "restFull")
     set.tasks = Check("Tasks", x, y - 118, "tasks")
-    local bottom = y - 146
+    set.goals = Check("Goals", x, y - 143, "goals")
+    local bottom = y - 171
 
     -- Coluna 2: pausas; como avisar.
     x, y = 330, 0
@@ -1329,7 +1346,7 @@ local function RefreshSet(set)
     set.charHeader:SetText(T("warn_sec_char"))
     set.breaksHeader:SetText(T("warn_sec_breaks"))
     set.howHeader:SetText(T("warn_sec_how"))
-    for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "sound" }) do
+    for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "goals", "sound" }) do
         set[key].label:SetText(T("warn_opt_" .. key))
         set[key]:SetChecked(settings[key])
     end
@@ -1478,6 +1495,7 @@ local KEYS = {
     pausa = "pause", pause = "pause", ["break"] = "pause", descanso = "pause",
     agua = "water", water = "water", hidratacao = "water", hydrate = "water",
     tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks",
+    metas = "goals", meta = "goals", goals = "goals", goal = "goals",
 }
 local FIGHTS = { lutas = true, luta = true, fights = true, fight = true, combate = true, combat = true }
 

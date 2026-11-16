@@ -20,14 +20,14 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk", "ammo",
-    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "clock", "reset", "tasks", "playtime", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "clock", "reset", "tasks", "playtime", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
 local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
-    goldh = false, xph = false, rep = false, prof = false, junk = false, ammo = false,
+    goldh = false, xph = false, rep = false, prof = false, goals = false, junk = false, ammo = false,
     clock = false, reset = false, tasks = false, playtime = false, friends = false, guild = false,
 }
 
@@ -53,6 +53,7 @@ local ITEM_ALIASES = {
     hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
     reset = "reset", resets = "reset", reinicio = "reset",
     tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks", todo = "tasks",
+    metas = "goals", meta = "goals", goals = "goals", goal = "goals", objetivo = "goals",
     tempo = "playtime", playtime = "playtime", played = "playtime",
     amigos = "friends", friends = "friends",
     guilda = "guild", guild = "guild",
@@ -2045,6 +2046,8 @@ local function GetGoldRate()
     if not seconds or not delta or seconds < RATE_MIN_SECONDS then return nil end
     return delta / seconds * 3600
 end
+ns.GetGoldRate = GetGoldRate -- usados pelas metas (Goals.lua)
+ns.GetXPRate = GetXPRate
 
 -- Reputação por hora na facção acompanhada (nil antes de 1 minuto ou sem ganho).
 local function GetRepRate()
@@ -2229,7 +2232,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2400,6 +2403,10 @@ local ITEM_TEXT = {
         if daily then parts[#parts + 1] = T("label_reset_daily") .. " " .. FormatCountdown(daily) end
         if weekly then parts[#parts + 1] = T("label_reset_weekly") .. " " .. FormatCountdown(weekly) end
         return table.concat(parts, " · ")
+    end,
+    goals = function() -- metas de ouro e de nível (Goals.lua)
+        if not ns.Goals then return nil end
+        return ns.Goals.BarText()
     end,
     tasks = function() -- lista de tarefas (Tasks.lua)
         if not ns.Tasks then return nil end
@@ -2588,7 +2595,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
@@ -2928,6 +2935,7 @@ TIP.reset = function()
 end
 
 TIP.tasks = function() if ns.Tasks then ns.Tasks.Tooltip() end end
+TIP.goals = function() if ns.Goals then ns.Goals.Tooltip() end end
 
 TIP.playtime = function()
     local seconds = Safe(GetSessionSeconds)
@@ -2947,7 +2955,7 @@ local TIP_SECTIONS = {
     coords = { "place" }, zone = { "place" }, speed = { "place" },
     durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
-    xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" },
+    xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" },
     clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, playtime = { "playtime" },
     friends = { "social" }, guild = { "social" },
 }
@@ -2955,8 +2963,8 @@ ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
 local TIP_ORDER = { "perf", "place", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
-                    "rep", "junk", "supply", "prof", "reset", "tasks", "playtime", "social" }
-local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks" }
+                    "rep", "junk", "supply", "prof", "goals", "reset", "tasks", "playtime", "social" }
+local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -3200,7 +3208,7 @@ Profiles.GROUPS = {
     { "grp_place", { "coords", "zone", "speed" } },
     { "grp_gear", { "durab", "bags", "junk", "ammo" } },
     { "grp_gold", { "gold", "session", "goldh" } },
-    { "grp_progress", { "xp", "xph", "rep", "prof" } },
+    { "grp_progress", { "xp", "xph", "rep", "prof", "goals" } },
     { "grp_time", { "clock", "reset", "tasks", "playtime", "friends", "guild" } },
 }
 ns.ITEM_GROUPS = Profiles.GROUPS
@@ -3349,6 +3357,7 @@ local function BuildControls(parent, top)
     local tools = {
         { "alarms", function() ns.Alarm.ToggleWindow() end },
         { "tasks", function() ns.Tasks.ToggleWindow() end },
+        { "goals", function() ns.Goals.ToggleWindow() end },
         { "loot", function() ns.Loot.ToggleWindow() end },
         { "history", function() ns.Warnings.ToggleHistory() end },
         { "summary", function()
@@ -3764,6 +3773,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
             end
         end
         FarolCharDB.supplySeen = seen
+        FarolCharDB.goals = ns.Goals.Sanitize(type(savedChar) == "table" and savedChar.goals or nil) -- metas
         FarolCharDB.tasks = ns.Tasks.Sanitize(type(savedChar) == "table" and savedChar.tasks or nil) -- lista de tarefas
         -- Perfil deste personagem: o da conta (padrão) ou o próprio.
         FarolCharDB.profile = type(savedChar) == "table" and savedChar.profile == "char" and "char" or "account"
@@ -3827,7 +3837,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -3889,6 +3899,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Alarm.HandleCommand(rest)
     elseif cmd == "barra" or cmd == "barras" or cmd == "bar" or cmd == "bars" then
         Profiles.BarCommand(rest)
+    elseif cmd == "meta" or cmd == "metas" or cmd == "goal" or cmd == "goals" then
+        ns.Goals.HandleCommand(rest)
     elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then
         ns.Tasks.HandleCommand(rest)
     elseif cmd == "perfil" or cmd == "perfis" or cmd == "profile" or cmd == "profiles" then

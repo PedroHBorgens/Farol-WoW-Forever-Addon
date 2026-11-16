@@ -4,7 +4,7 @@
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
 **FPS · latency · memory · coordinates · zone · speed · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · clock · daily/weekly resets · tasks · session time · friends · guild** — you pick what shows (23 items).
+reputation · professions · gold/level goals · clock · daily/weekly resets · tasks · session time · friends · guild** — you pick what shows (24 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -47,6 +47,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol history`    | Last 10 warnings (also the note button next to the bar, or a key binding) |
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
 | `/farol order`      | Choose the order of the items on the bar |
+| `/farol goal`       | Gold and level goals with a time estimate (`/farol goal gold 500`, `/farol goal level 40`) |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
 | `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
 | `/farol bar 2 show` | Turn on bar 2 (or 3) and pick it for the menu, Appearance and Order (`/farol bar` lists the bars) |
@@ -236,6 +237,16 @@ The **last 10 warnings** (with date and time) are kept per character. Open them 
 - a **key binding** of your choice: Esc → Options → Keybindings → AddOns → Farol (uses the game's official
   `Bindings.xml`; it only opens the window);
 - `/farol history`, or **History...** in the Warnings tab.
+
+## Gold and level goals
+
+Pick a goal — **gold** (e.g. 500 gold) and/or a **level** (e.g. 40) — with `/farol goal`, **Goals...** in the Tools tab
+of the menu, or `/farol goal gold 500` / `/farol goal level 40`. The bar item **Goals** (off by default) shows how much
+of each goal you have and an **estimate** of the time left from this session's pace (gold per hour, XP per hour):
+`Goal 500g 44% ~27m · Lv 40 36% ~6h 10m` (yellow while in progress, green "reached"). The tooltip shows what you have,
+the estimate ("around 22:41") and the pace. The level estimate assumes each remaining level costs as much XP as the
+current one, so treat it as a rough guide. Optional warning (off by default): **"Goal reached: 500g!"**, once per goal.
+Goals are per character. `/farol goal clear [gold|level]` removes them.
 
 ## Daily and weekly tasks
 

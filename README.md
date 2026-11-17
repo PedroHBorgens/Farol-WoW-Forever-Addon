@@ -4,7 +4,7 @@
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
 **FPS · latency · memory · coordinates · zone · speed · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · gold/level goals · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (25 items).
+reputation · professions · gold/level goals · farm goals (items) · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (26 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -48,6 +48,7 @@ Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
 | `/farol order`      | Choose the order of the items on the bar |
 | `/farol goal`       | Gold and level goals with a time estimate (`/farol goal gold 500`, `/farol goal level 40`) |
+| `/farol goal item`  | Farm goals: `/farol goal item [link] 40` (shift-click the item) or by name; `remove`, `clear` |
 | `/farol minimap`    | Show/hide or lock the minimap button (`on`, `off`, `lock`, `unlock`) |
 | `/farol dungeon`    | Your last 10 dungeons and raids: time, XP, gold, loot, deaths (`/farol run`) |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
@@ -254,6 +255,19 @@ of each goal you have and an **estimate** of the time left from this session's p
 the estimate ("around 22:41") and the pace. The level estimate assumes each remaining level costs as much XP as the
 current one, so treat it as a rough guide. Optional warning (off by default): **"Goal reached: 500g!"**, once per goal.
 Goals are per character. `/farol goal clear [gold|level]` removes them.
+
+### Farm goals (items)
+
+For gathering profession, quest or reputation materials: `/farol goal item [link] 40` (type the command and
+**shift-click** the item to insert its link) or by name, `/farol goal item Silk Cloth 40` (the item must be in your bags
+or in the loot history). You can also click **+ Goal** on a row of the loot window 👜 (a goal of 20, which you can change
+later). The bar item **Farm** (off by default) shows the item and its progress (`Silk Cloth 27/40`: red at first,
+yellow, green when done) or, with several goals, how many are done (`Farm 2/5`). The tooltip lists each item with how
+many you got this session, the pace per hour and an estimate ("+18 this session (~24/h) · ~32m left"). The count
+includes the bank when the game reports it. The **Goals...** window lists the items so you can change the amount or
+remove them (X). Up to 10 items per character; the "goal reached" warning covers them too, once per item.
+`/farol goal item remove <name or number>`, `/farol goal item clear`. Farol only **counts** items: it never moves, sells,
+uses or loots anything, and nothing is sent.
 
 ## Dungeon and raid runs
 

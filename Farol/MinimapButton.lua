@@ -156,7 +156,9 @@ local function CursorAngle()
     local okM, mx, my = pcall(Minimap.GetCenter, Minimap)
     local okS, scale = pcall(Minimap.GetEffectiveScale, Minimap)
     if not (okC and okM and okS) then return nil end
-    for _, v in ipairs({ cx, cy, mx, my, scale }) do
+    local values = { cx, cy, mx, my, scale }
+    for i = 1, 5 do -- índice fixo: ipairs pararia no primeiro nil e deixaria passar um valor ausente
+        local v = values[i]
         if type(v) ~= "number" or v ~= v or v == math.huge or v == -math.huge then return nil end
     end
     if scale <= 0 then return nil end

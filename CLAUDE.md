@@ -63,14 +63,20 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 - No chat do WoW, `|` inicia códigos (`|c` cor, `|H` link, `|T` textura). **Barra literal = `||`.** Um teste confere
   todos os textos.
 - `GetChecked()` devolve `1/nil` em clientes antigos: sempre converter com `and true or false`.
+- **Nunca valide vários retornos com `ipairs({ a, b, c })`**: o `ipairs` para no primeiro `nil` e deixa passar um valor
+  ausente (já causou erro no arrasto do botão do minimapa). Use índice fixo (`for i = 1, n`) ou trate `nil` antes.
+- Metas de farm: contagem com `C_Item.GetItemCount(id, true)`/`GetItemCount(id, true)` (o `true` inclui o banco quando
+  o cliente informa). Do link (Shift + clique) só se lê o número e o nome do item; nada é guardado do link. Busca pelo
+  nome: `GetItemInfo(nome)`, depois bolsas, depois o histórico de saques. A contagem do início da sessão fica só na
+  memória (recomeça se a quantidade cair, ex.: vendeu/usou).
 
 ## Estrutura
 
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Goals, Runs, MinimapButton
-  Core.lua          barras (até 3, grade de células), 25 itens, tooltip, menu de opções, comandos /farol, dados salvos
+                    Appearance, Order, Tasks, Goals, Farm, Runs, MinimapButton
+  Core.lua          barras (até 3, grade de células), 26 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água, tarefas),
@@ -80,6 +86,8 @@ Farol/
   Order.lua         ordem dos itens na barra
   Tasks.lua         lista de tarefas diárias/semanais (janela, item "tasks" da barra, tooltip, /farol tarefa)
   Goals.lua         metas de ouro e de nível (janela, item "goals" da barra, tooltip, estimativa pelo ritmo, /farol meta)
+  Farm.lua          metas de farm/itens (item "farm", tooltip com ritmo, linhas na janela de Metas, "+ Meta" nos saques,
+                    /farol meta item, /farol farm)
   Runs.lua          registro de masmorras/raides (corrida atual no item "run", resumo ao sair, 10 últimas, /farol masmorra)
   MinimapButton.lua botão próprio no minimapa (sem bibliotecas) + entrada AddonCompartment do .toc (/farol minimapa)
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
@@ -94,7 +102,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - Arquivos compartilham a tabela `ns` (`local _, ns = ...`). O Core exporta `ns.T` (tradução), `ns.Print`,
   `ns.GetDB`, `ns.IsSecret`, `ns.frame`, `ns.UpdateText`, `ns.ApplyAppearance`, `ns.ApplyVisibility`,
   `ns.MakeToplevel`, `ns.LayoutQuickButtons`, `ns.SetBarWidth`, `ns.ITEM_ORDER`, `ns.ITEM_ICONS`,
-  `ns.GetWatchedFaction`, `ns.GetJunk`, `ns.GetGoldRate`, `ns.GetXPRate`, `ns.GetSessionXP`, `ns.ReadProfessions`, `ns.GetResetTimes`, `ns.GetServerClock` (hora do servidor validada: relógio, alarmes e
+  `ns.GetWatchedFaction`, `ns.GetJunk`, `ns.ReadBagSlot`/`ns.LastBag` (leitura de bolsas, usada pelo Farm), `ns.GetGoldRate`, `ns.GetXPRate`, `ns.GetSessionXP`, `ns.ReadProfessions`, `ns.GetResetTimes`, `ns.GetServerClock` (hora do servidor validada: relógio, alarmes e
   resets usam só ela, nunca `GetGameTime` direto) e `ns.FormatWhen(t, longo)` (datas de histórico: "Hoje 21:42" /
   "Ontem" / "08/11"; longo = "domingo, 08/11/2026 às 21:12"; inválido = "--").
 - Cada módulo adiciona seus textos em `ns.STRINGS.pt` / `ns.STRINGS.en` e usa `T("chave")`.
@@ -136,7 +144,8 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   `Record` do Loot; XP pela diferença de `ns.GetSessionXP`, `goals` = metas `{ gold = cobre alvo
   (≤ 1 milhão de ouro), level = nível alvo, ls = nível ao criar, gw/lw = "alcançada" já avisada }`, `tasks` = lista de tarefas
   `{ n = nome limpo (≤ 40 letras), w = semanal?, d = time() da marca }` (máx. 10; feita = `d` depois do último reset do
-  tipo, calculado com `ns.GetResetTimes`), `lastSession` = resumo da última sessão, só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
+  tipo, calculado com `ns.GetResetTimes`), `farm` = metas de itens `{ id, n = nome limpo (≤ 40 letras), c = alvo
+  1–100000, w = "alcançada" já avisada }` (máx. 10, sem id repetido), `lastSession` = resumo da última sessão, só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
   `ADDON_LOADED` chamando o `Sanitize` de cada módulo; chaves desconhecidas são descartadas.
 - **Tooltip:** dividido em seções (`TIP.perf`, `TIP.gold`, `TIP.reset`…). Cada célula tem uma área invisível de
   mouse (`AttachHover`) que mostra só as seções do item (`TIP_SECTIONS`) e repassa arrastar/clique para a barra.
@@ -219,7 +228,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Aparência (escala, fundo, formato, botões rápidos) | 07 (e 02 se mudar o formato da barra) |
 | Resumo da sessão (textos no chat) | 09 |
 | Tarefas (janela, item, aviso) | 10 |
-| Metas (item e tooltip de progresso) | 08 (e 02/03 pela contagem de itens) |
+| Metas e metas de farm (item e tooltip de progresso) | 08 (e 02/03 pela contagem de itens) |
 | Masmorras e raides (item, resumo, janela) | 11 (e 02/03 pela contagem de itens) |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram

@@ -4,7 +4,7 @@
 ## Notes-ptBR: Barra de informações personalizável: FPS, latência, coordenadas, zona, durabilidade, bolsas, ouro, XP, horário e mais para WoW Forever. Gratuito, código aberto, não afiliado à Blizzard.
 ## Author: PedroHBorgens
 ## IconTexture: Interface\AddOns\Farol\Media\Farol
-## Version: 3.8.0
+## Version: 3.9.0
 ## AddonCompartmentFunc: Farol_OnAddonCompartmentClick
 ## AddonCompartmentFuncOnEnter: Farol_OnAddonCompartmentEnter
 ## AddonCompartmentFuncOnLeave: Farol_OnAddonCompartmentLeave
@@ -20,5 +20,6 @@ Order.lua
 Tasks.lua
 Goals.lua
 Farm.lua
+Quests.lua
 Runs.lua
 MinimapButton.lua

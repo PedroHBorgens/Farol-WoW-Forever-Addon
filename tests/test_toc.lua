@@ -67,8 +67,12 @@ return {
             "PickupMerchantItem", "EquipItemByName", "UseItemByName", "AutoEquipCursorItem",
             -- profissões: nunca abandonar, treinar ou fabricar
             "AbandonSkill", "BuyTrainerService", "DoTradeSkill", "CastTradeSkill", "ExpandSkillHeader",
+            -- missões: nunca aceitar, entregar, abandonar, compartilhar, acompanhar ou abrir categorias do diário
+            "AcceptQuest", "CompleteQuest", "GetQuestReward", "AbandonQuest", "SetAbandonQuest", "QuestLogPushQuest",
+            "AddQuestWatch", "RemoveQuestWatch", "ExpandQuestHeader", "CollapseQuestHeader", "SelectQuestLogEntry",
+            "C_QuestLog.AbandonQuest", "C_QuestLog.SetAbandonQuest", "C_QuestLog.AddQuestWatch",
         }
-        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Runs.lua", "MinimapButton.lua" }) do
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Runs.lua", "MinimapButton.lua" }) do
             local code = read("Farol/" .. file)
             code = string.gsub(code, "%-%-%[%[.-%]%]", "") -- comentários de bloco
             code = string.gsub(code, "%-%-[^\n]*", "")     -- comentários de linha
@@ -91,6 +95,28 @@ return {
             for name in string.gmatch(body, "[%[\"]*([%w_]+)[\"%]]*%s*=%s*\"") do
                 T.ok(not seen[name], entry[1] .. ": alias '" .. name .. "' appears twice")
                 seen[name] = true
+            end
+        end
+    end },
+
+    { "no Blizzard names (characters, places, items) in what players see: add-on, docs, images and videos", function(T)
+        -- Regra 7: nada da Blizzard como se fosse do addon. As ilustrações usam nomes genéricos.
+        local NAMES = { "Thunderfury", "Molten Core", "Orgrimmar", "Stormwind", "Ironforge", "Undercity", "Darnassus",
+                        "Thunder Bluff", "Jaina", "Arthas", "Thrall", "Sylvanas", "Ragnaros", "Onyxia", "Naxxramas",
+                        "Deadmines", "Blackrock", "Zul'Gurub", "Peacebloom", "Elwynn", "Durotar", "Westfall" }
+        local files = { "README.md", "README.pt-BR.md", "assets/curseforge-description.md", "assets/curseforge/make_pages.py",
+                        "assets/video/make_video.py", "assets/video/timeline.js", "assets/video/youtube.py",
+                        "assets/video/youtube.js", "assets/video/youtube_script.txt" }
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua",
+                                "Goals.lua", "Farm.lua", "Quests.lua", "Runs.lua", "MinimapButton.lua" }) do
+            files[#files + 1] = "Farol/" .. file
+        end
+        for _, path in ipairs(files) do
+            local content = read(path)
+            T.ok(content, "missing file: " .. path)
+            local lower = string.lower(content or "")
+            for _, name in ipairs(NAMES) do
+                T.ok(not string.find(lower, string.lower(name), 1, true), path .. " uses a Blizzard name: " .. name)
             end
         end
     end },

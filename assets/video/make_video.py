@@ -82,7 +82,7 @@ def wrow(text):
 warn = f"""<div class="win" id="warn" style="width:700px"><div class="t">Warnings (3)</div>
 {wrow("Low durability: 18% — time to repair!")}{wrow("You've been playing for 2h 00m — time for a break?")}{wrow("Time to drink some water!")}</div>"""
 loot_items = [("q4", "🛡️", "[Helm of the Lighthouse]", "", "21:42"), ("q3", "💍", "[Band of the Tides]", "", "21:38"),
-              ("q2", "🌿", "[Peacebloom]", "x6", "21:20"), ("q1", "🧵", "[Linen Cloth]", "x12", "21:05")]
+              ("q2", "🌿", "[Meadow Bloom]", "x6", "21:20"), ("q1", "🧵", "[Linen Cloth]", "x12", "21:05")]
 lrows = "".join(f'<div class="row" style="padding:3px 0;font-size:15px"><span>{ic(e)} <span class="{q}">{n}</span> <span class="dim">{c}</span></span>'
                 f'<span class="dim">Today {t}</span></div>' for q, e, n, c, t in loot_items)
 loot = f"""<div class="win" id="loot" style="width:430px"><div class="x">×</div><div class="t">Recent loot</div>{lrows}</div>"""

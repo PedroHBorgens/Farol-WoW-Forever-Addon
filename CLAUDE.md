@@ -69,14 +69,20 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   o cliente informa). Do link (Shift + clique) só se lê o número e o nome do item; nada é guardado do link. Busca pelo
   nome: `GetItemInfo(nome)`, depois bolsas, depois o histórico de saques. A contagem do início da sessão fica só na
   memória (recomeça se a quantidade cair, ex.: vendeu/usou).
+- Diário de missões: modernos `C_QuestLog` (`GetNumQuestLogEntries`, `GetInfo`, `IsComplete`, `IsFailed`,
+  `GetQuestObjectives`, `GetMaxNumQuestsCanAccept`); antigos `GetQuestLogTitle` — a ordem muda: quando o 4º valor é
+  número (grupo sugerido do 3.3.5a), categoria/fechada/completa andam uma posição; completa = 1 (pronta) ou -1 (falhou).
+  Limite: `GetMaxNumQuestsCanAccept` → `MAX_QUESTLOGQUESTS` → 20. Nunca abrir categorias fechadas (só avisar no tooltip).
+- **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
+  lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 
 ## Estrutura
 
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Goals, Farm, Runs, MinimapButton
-  Core.lua          barras (até 3, grade de células), 26 itens, tooltip, menu de opções, comandos /farol, dados salvos
+                    Appearance, Order, Tasks, Goals, Farm, Quests, Runs, MinimapButton
+  Core.lua          barras (até 3, grade de células), 27 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água, tarefas),
@@ -88,6 +94,7 @@ Farol/
   Goals.lua         metas de ouro e de nível (janela, item "goals" da barra, tooltip, estimativa pelo ritmo, /farol meta)
   Farm.lua          metas de farm/itens (item "farm", tooltip com ritmo, linhas na janela de Metas, "+ Meta" nos saques,
                     /farol meta item, /farol farm)
+  Quests.lua        diário de missões (item "quests", tooltip; avisos questFull/questReady ficam em Warnings.lua)
   Runs.lua          registro de masmorras/raides (corrida atual no item "run", resumo ao sair, 10 últimas, /farol masmorra)
   MinimapButton.lua botão próprio no minimapa (sem bibliotecas) + entrada AddonCompartment do .toc (/farol minimapa)
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
@@ -228,7 +235,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Aparência (escala, fundo, formato, botões rápidos) | 07 (e 02 se mudar o formato da barra) |
 | Resumo da sessão (textos no chat) | 09 |
 | Tarefas (janela, item, aviso) | 10 |
-| Metas e metas de farm (item e tooltip de progresso) | 08 (e 02/03 pela contagem de itens) |
+| Metas, metas de farm e diário de missões (item e tooltip de progresso) | 08 (e 02/03 pela contagem de itens) |
 | Masmorras e raides (item, resumo, janela) | 11 (e 02/03 pela contagem de itens) |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram

@@ -4,7 +4,7 @@
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (26 itens).
+XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · diário de missões · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (27 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -273,6 +273,17 @@ estimativa ("+18 nesta sessão (~24/h) · faltam ~32m"). A contagem inclui o ban
 alcançada vale também para eles, uma vez por item. `/farol meta item remover <nome ou número>`, `/farol meta item limpar`.
 O Farol só **conta** os itens: nunca move, vende, usa ou saqueia nada, e nada é enviado.
 
+## Diário de missões
+
+O item **Missões** da barra (desligado por padrão) mostra quantas missões há no diário e quantas cabem, e quantas já
+estão **prontas para entregar**: `Missões 17/20 · 3 prontas` (verde com folga, amarelo a partir de 3 do limite, vermelho
+cheio). O tooltip lista primeiro as **prontas para entregar** e depois as **em andamento**, com o objetivo que falta
+(`3/8`), o nível colorido pela dificuldade (como no jogo) e quantas estão bem acima do seu nível (no máximo 5 por lista,
+"… e mais N"). Dois avisos opcionais (desligados) na aba **Avisos**: **diário quase cheio** a partir de N missões
+(`/farol aviso missoes 19`, `/farol aviso missoes on`) e **missões prontas** ao entrar numa cidade ou estalagem
+(`/farol aviso prontas on`; no máximo a cada 5 minutos). O Farol só **lê** o diário: nunca aceita, entrega, abandona ou
+compartilha missões, e não abre categorias fechadas do diário. `/farol aviso status` mostra o que foi lido.
+
 ## Masmorras e raides
 
 Ao entrar numa **masmorra ou raide**, o Farol começa uma "corrida" sozinho: tempo dentro, **XP**, **ouro** (o saldo,
@@ -305,7 +316,7 @@ O Farol não confere nada no jogo — quem marca as tarefas é você. Comandos: 
 ```
 Farol: resumo da sessão (2h 14m):
 Farol:   Ouro: +38g 12s (+17g 6s/h) · XP: +84.2k (1 nível, 37.6k/h)
-Farol:   Reputação: +1.3k Orgrimmar (Honrado → Reverenciado)
+Farol:   Reputação: +1.3k Harbor Guild (Honrado → Reverenciado)
 Farol:   Saques: 46 (3 raros, 1 épico) · Avisos: 2
 ```
 
@@ -387,10 +398,10 @@ personagens que você apagou. Tudo fica só no seu computador.
 
 **Descanso dos seus personagens:** ao sair, o Farol também guarda o seu XP descansado e se você estava numa estalagem
 ou cidade. O tooltip do ouro mostra então uma **estimativa** para os outros personagens — por exemplo
-`Jaina (34) 150% cheio` ou `Arthas (22) 5% cheio em ~9d 16h` — pelas regras do estilo clássico: em estalagem/cidade,
+`Mira (34) 150% cheio` ou `Tomas (22) 5% cheio em ~9d 16h` — pelas regras do estilo clássico: em estalagem/cidade,
 5% de um nível a cada 8 horas; fora, um quarto disso; até 150%. O valor real substitui a estimativa quando você entra
 com o personagem. Aviso opcional (desligado por padrão) na janela de Avisos ou com `/farol aviso descansado on`:
-"Descanso cheio (150%): Jaina (34)…", uma vez por sessão.
+"Descanso cheio (150%): Mira (34)…", uma vez por sessão.
 
 **Lixo nas bolsas:** soma o preço de venda dos itens cinzentos (Inferior), por exemplo `Lixo 3g 26s (3)`; o
 tooltip mostra os que valem mais. **O Farol nunca vende nada** (isso seria automação): quem vende é você, no

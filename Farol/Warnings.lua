@@ -41,7 +41,10 @@ local DEFAULTS = {
     water = false, waterMin = 45, waterAnywhere = false,     -- lembrete de beber água (desligado por padrão)
     tasks = false,                                           -- tarefas diárias pendentes 1 h antes do reset
     goals = false,                                           -- meta de ouro/nível alcançada
+    questFull = false, questMin = 19,                        -- diário de missões quase cheio (a partir de N)
+    questReady = false,                                      -- missões prontas ao entrar numa cidade/estalagem
 }
+local QUEST_MIN, QUEST_MAX = 1, 100
 local MAX_ACTION_SLOT = 180 -- barras de ação (clientes modernos têm até 180 espaços)
 local RANK_SCAN_INTERVAL = 5 -- segundos entre varreduras quando algo mudou
 
@@ -117,6 +120,17 @@ local STRINGS = {
         warn_name_tasks = "tarefas diárias pendentes",
         warn_opt_tasks = "Tarefas diárias pendentes (1 h antes)",
         warn_opt_goals = "Meta alcançada (ouro, nível ou farm)",
+        warn_opt_questFull = "Diário de missões a partir de",
+        warn_unit_quests = "missões",
+        warn_name_questFull = "diário de missões quase cheio",
+        warn_questFull = "Diário de missões quase cheio: %d/%d.",
+        warn_questFull_full = "Diário de missões cheio: %d/%d!",
+        warn_opt_questReady = "Missões prontas (ao entrar numa cidade ou estalagem)",
+        warn_name_questReady = "missões prontas para entregar",
+        warn_questReady = "Você tem %d missões prontas para entregar.",
+        warn_questReady_one = "Você tem 1 missão pronta para entregar.",
+        warn_set_questMin = "aviso do diário de missões: a partir de %d missões.",
+        warn_bad_questMin = "valor inválido: use de 1 a 100 missões.",
         warn_name_goals = "meta alcançada",
         warn_goals     = "meta alcançada: %s!",
         warn_sec_gear  = "Equipamento e bolsas",
@@ -153,7 +167,7 @@ local STRINGS = {
         warn_name_sound = "som",
         warn_bad_durab  = "valor inválido: use de 5 a 50 (%).",
         warn_bad_bags   = "valor inválido: use de 0 a 10 espaços.",
-        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || durab/bolsas/talentos/graus/profissoes/descansado/municao/reagentes/pausa/agua/som on||off || municao A V || reagentes A V || pausa/agua lutas on||off || lembrar N || status || silenciar",
+        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || missoes N || durab/bolsas/talentos/graus/profissoes/descansado/municao/reagentes/pausa/agua/missoes/prontas/som on||off || municao A V || reagentes A V || pausa/agua lutas on||off || lembrar N || status || silenciar",
         opt_warnings    = "Avisos...",
         help_warn       = "  /farol aviso         - abrir o menu na aba Avisos (durabilidade, bolsas, talentos, profissões, pausa, água...)",
     },
@@ -221,6 +235,17 @@ local STRINGS = {
         warn_name_tasks = "daily tasks left",
         warn_opt_tasks = "Daily tasks left (1 h before)",
         warn_opt_goals = "Goal reached (gold, level or farm)",
+        warn_opt_questFull = "Quest log with at least",
+        warn_unit_quests = "quests",
+        warn_name_questFull = "quest log almost full",
+        warn_questFull = "Quest log almost full: %d/%d.",
+        warn_questFull_full = "Quest log full: %d/%d!",
+        warn_opt_questReady = "Quests ready (when entering a city or inn)",
+        warn_name_questReady = "quests ready to turn in",
+        warn_questReady = "You have %d quests ready to turn in.",
+        warn_questReady_one = "You have 1 quest ready to turn in.",
+        warn_set_questMin = "quest log warning: at %d quests or more.",
+        warn_bad_questMin = "invalid value: use 1 to 100 quests.",
         warn_name_goals = "goal reached",
         warn_goals     = "goal reached: %s!",
         warn_sec_gear  = "Gear and bags",
@@ -257,7 +282,7 @@ local STRINGS = {
         warn_name_sound = "sound",
         warn_bad_durab  = "invalid value: use 5 to 50 (%).",
         warn_bad_bags   = "invalid value: use 0 to 10 slots.",
-        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || durab/bags/talents/ranks/professions/rested/ammo/reagents/break/water/sound on||off || ammo Y R || reagents Y R || break/water fights on||off || remind N || status || silence",
+        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || quests N || durab/bags/talents/ranks/professions/rested/ammo/reagents/break/water/quests/ready/sound on||off || ammo Y R || reagents Y R || break/water fights on||off || remind N || status || silence",
         opt_warnings    = "Warnings...",
         help_warn       = "  /farol warn          - open the menu on the Warnings tab (durability, bags, talents, professions, break, water...)",
     },
@@ -286,13 +311,14 @@ function Warnings.Sanitize(saved)
     local clean = {}
     if type(saved) ~= "table" then saved = {} end
     for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "restFull", "ammo", "reag", "pause", "pauseAnywhere",
-                           "water", "waterAnywhere", "tasks", "goals" }) do
+                           "water", "waterAnywhere", "tasks", "goals", "questFull", "questReady" }) do
         if type(saved[key]) == "boolean" then clean[key] = saved[key] else clean[key] = DEFAULTS[key] end
     end
     clean.durabPct = InRange(saved.durabPct, DURAB_MIN, DURAB_MAX) or DEFAULTS.durabPct
     clean.bagSlots = InRange(saved.bagSlots, BAGS_MIN, BAGS_MAX) or DEFAULTS.bagSlots
     clean.pauseMin = InRange(saved.pauseMin, BREAK_MIN, BREAK_MAX) or DEFAULTS.pauseMin
     clean.waterMin = InRange(saved.waterMin, BREAK_MIN, BREAK_MAX) or DEFAULTS.waterMin
+    clean.questMin = InRange(saved.questMin, QUEST_MIN, QUEST_MAX) or DEFAULTS.questMin
     -- Limites de munição (0 a 5000) e reagentes (0 a 200): vermelho menor que amarelo (0 no amarelo = sem amarelo).
     for _, pair in ipairs({ { "ammo", 5000 }, { "reag", 200 } }) do
         local y = InRange(saved[pair[1] .. "Yellow"], 0, pair[2])
@@ -326,6 +352,8 @@ local state = {
     water = { nextAt = nil, silenced = false },
     tasks = { cycle = nil },                            -- reset diário já avisado (tarefas pendentes)
     goals = {},                                         -- metas: o "já avisada" fica salvo (FarolCharDB.goals)
+    questFull = { armed = true, lastAt = nil, full = false }, -- diário quase cheio (como as bolsas)
+    questReady = { wasResting = nil, lastAt = nil },    -- prontas: ao passar a descansar (cidade/estalagem)
 }
 
 local function PlayWarningSound()
@@ -1053,6 +1081,54 @@ end
 function Warnings.TasksChanged() state.tasks.cycle, state.tasks.remindAt = nil, nil end
 
 ---------------------------------------------------------------------------
+-- Diário de missões (Quests.lua): quase cheio (a partir de N) e prontas ao entrar numa cidade ou estalagem
+---------------------------------------------------------------------------
+
+local function CheckQuestFull(now)
+    local settings = Settings()
+    local entry = state.questFull
+    if not settings.questFull or not ns.Quests then return end
+    local data = ns.Quests.Read()
+    if not data then return end
+    if data.count < settings.questMin then -- liberou espaço: pode avisar de novo
+        entry.armed, entry.full, entry.remindAt = true, false, nil
+        return
+    end
+    local full = data.count >= data.max
+    if not full then entry.full = false end
+    local text = string.format(full and T("warn_questFull_full") or T("warn_questFull"), data.count, data.max)
+    if full and not entry.full then
+        entry.full = true -- encheu de vez: avisa mesmo que tenha avisado "quase cheio" há pouco
+        Fire(entry, now, text, "questFull")
+    elseif CanFire(entry, now) then
+        Fire(entry, now, text, "questFull")
+    elseif ReminderDue(entry, now) then
+        entry.remindAt = nil
+        Announce(text, "questFull")
+    end
+end
+
+-- Ao passar a descansar (entrou numa cidade ou estalagem, ou entrou no jogo numa delas): avisa se há missões
+-- prontas. No máximo uma vez a cada 5 min; o "Lembrar em" avisa de novo se ainda houver.
+local function CheckQuestReady(now)
+    local entry = state.questReady
+    if not Settings().questReady or not ns.Quests or not IsResting then entry.wasResting = nil return end
+    local ok, value = pcall(IsResting)
+    if not ok or ns.IsSecret(value) then return end
+    local resting = value and true or false
+    local arrived = resting and not entry.wasResting
+    entry.wasResting = resting
+    local reminding = ReminderDue(entry, now)
+    if not reminding and not (arrived and (entry.lastAt == nil or now - entry.lastAt >= COOLDOWN)) then return end
+    local data = ns.Quests.Read()
+    local ready = data and #data.ready or 0
+    if reminding then entry.remindAt = nil end
+    if ready == 0 then return end
+    entry.lastAt = now
+    Announce(ready == 1 and T("warn_questReady_one") or string.format(T("warn_questReady"), ready), "questReady")
+end
+
+---------------------------------------------------------------------------
 -- Lembretes de pausa e de beber água (por tempo)
 ---------------------------------------------------------------------------
 
@@ -1119,6 +1195,8 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         pcall(CheckSupplies, now)
         pcall(CheckTasks, now)
         pcall(CheckGoals)
+        pcall(CheckQuestFull, now)
+        pcall(CheckQuestReady, now)
     end
 end)
 
@@ -1144,6 +1222,8 @@ local function SetEnabled(key, value)
             end
             ShowNext()
         end
+    elseif key == "questReady" then state.questReady.wasResting, state.questReady.lastAt = nil, nil
+    elseif key == "questFull" then state.questFull.armed, state.questFull.full = true, false
     elseif state[key] then state[key].armed = true end
     Print(string.format(value and T("warn_on") or T("warn_off"), T("warn_name_" .. key)))
     if RefreshWindow then RefreshWindow() end
@@ -1196,6 +1276,16 @@ local function SetRemindDefault(value)
     if not minutes then Print(T("warn_bad_remind")) return false end
     Settings().remindMin = minutes
     Print(string.format(T("warn_set_remind"), minutes))
+    if RefreshWindow then RefreshWindow() end
+    return true
+end
+
+local function SetQuestMin(value)
+    local count = InRange(value, QUEST_MIN, QUEST_MAX)
+    if not count then Print(T("warn_bad_questMin")) return false end
+    Settings().questMin = count
+    state.questFull.armed, state.questFull.full = true, false
+    Print(string.format(T("warn_set_questMin"), count))
     if RefreshWindow then RefreshWindow() end
     return true
 end
@@ -1293,7 +1383,11 @@ function Warnings.BuildControls(parent, prefix)
     set.restFull = Check("RestFull", x, y - 93, "restFull")
     set.tasks = Check("Tasks", x, y - 118, "tasks")
     set.goals = Check("Goals", x, y - 143, "goals")
-    local bottom = y - 171
+    set.questFull = Check("QuestFull", x, y - 168, "questFull")
+    set.questBox = NumberBox(parent, prefix .. "QuestMin", set.questFull.label, SetQuestMin, 3)
+    set.questUnit = Unit(set.questBox)
+    set.questReady = Check("QuestReady", x, y - 193, "questReady")
+    local bottom = y - 221
 
     -- Coluna 2: pausas; como avisar.
     x, y = 330, 0
@@ -1346,7 +1440,7 @@ local function RefreshSet(set)
     set.charHeader:SetText(T("warn_sec_char"))
     set.breaksHeader:SetText(T("warn_sec_breaks"))
     set.howHeader:SetText(T("warn_sec_how"))
-    for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "goals", "sound" }) do
+    for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "goals", "questFull", "questReady", "sound" }) do
         set[key].label:SetText(T("warn_opt_" .. key))
         set[key]:SetChecked(settings[key])
     end
@@ -1375,6 +1469,8 @@ local function RefreshSet(set)
     set.history:SetText(T("opt_history"))
     if not set.durabBox:HasFocus() then set.durabBox:SetText(tostring(settings.durabPct)) end
     if not set.bagsBox:HasFocus() then set.bagsBox:SetText(tostring(settings.bagSlots)) end
+    set.questUnit:SetText(T("warn_unit_quests"))
+    if not set.questBox:HasFocus() then set.questBox:SetText(tostring(settings.questMin)) end
 end
 
 RefreshWindow = function()
@@ -1496,6 +1592,8 @@ local KEYS = {
     agua = "water", water = "water", hidratacao = "water", hydrate = "water",
     tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks",
     metas = "goals", meta = "goals", goals = "goals", goal = "goals",
+    missoes = "questFull", diario = "questFull", quests = "questFull", questlog = "questFull",
+    prontas = "questReady", entregar = "questReady", ready = "questReady", turnin = "questReady",
 }
 local FIGHTS = { lutas = true, luta = true, fights = true, fight = true, combate = true, combat = true }
 
@@ -1521,7 +1619,8 @@ local function PrintStatus()
         end
         Print(string.format("    GetTalentTabInfo: %s", table.concat(spent, " / ")))
     end
-    Print(string.format("    UnitLevel: %s", tostring(UnitLevel and UnitLevel("player"))))
+    local okLevel, level = pcall(UnitLevel, "player") -- leitura protegida (diagnóstico)
+    Print(string.format("    UnitLevel: %s", okLevel and tostring(level) or "--"))
     local okRep, faction, repSource = pcall(ns.GetWatchedFaction)
     if okRep and faction then
         Print(string.format(T("rep_status"), (string.gsub(tostring(faction.name), "|", "||")), tostring(repSource)))
@@ -1561,6 +1660,11 @@ local function PrintStatus()
         Print(string.format(T("reset_status"), show(daily), tostring(dailySource or "--"),
             show(weekly), tostring(weeklySource or "--")))
     end
+    if ns.Quests then
+        local okQ, data = pcall(ns.Quests.Read)
+        Print(string.format(T("quests_status"), (okQ and data) and (data.count .. "/" .. data.max) or "--",
+            (okQ and data) and #data.ready or 0, ns.Quests.Source()))
+    end
     local ok, outdated = pcall(FindOutdatedSpells)
     outdated = ok and outdated or {}
     Print(string.format(T("warn_status_ranks"), #outdated))
@@ -1598,6 +1702,8 @@ function Warnings.HandleCommand(rest)
         SetDurabPct(value)
     elseif key == "bags" and value ~= "" then
         SetBagSlots(value)
+    elseif key == "questFull" and value ~= "" then
+        SetQuestMin(value)                             -- /farol aviso missoes 18
     elseif (key == "ammo" or key == "reag") and value ~= "" then
         SetSupplyLimits(key, value, extra)              -- /farol aviso municao 400 200
     elseif IsBreak(key) and FIGHTS[value] and (ON[extra] or OFF[extra]) then

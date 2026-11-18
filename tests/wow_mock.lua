@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Runs.lua", "MinimapButton.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Runs.lua", "MinimapButton.lua" }
 
 local function noop() end
 
@@ -182,6 +182,55 @@ function Mock.new(opts)
     env.UnitName = function(unit) if unit == "player" then return H.playerName end return nil end
     env.GetRealmName = function() return H.realm end
     env.IsResting = function() return H.resting or false end -- estalagem/cidade
+    -- Diário de missões: H.quests = { { title, level, header?, done?, failed?, have?, need?, collapsed? } }
+    -- (moderno: C_QuestLog; 3.3.5a: GetQuestLogTitle com o "grupo sugerido" no 4º valor). H.questMax = limite.
+    H.quests, H.questMax = {}, 20
+    local function questCount()
+        local n = 0
+        for _, q in ipairs(H.quests) do if not q.header then n = n + 1 end end
+        return n
+    end
+    if mode == "wotlk" then
+        env.MAX_QUESTLOGQUESTS = 25
+        env.GetNumQuestLogEntries = function() return #H.quests, questCount() end
+        env.GetQuestLogTitle = function(i)
+            local q = H.quests[i]
+            if not q then return nil end
+            local complete = q.done and 1 or (q.failed and -1 or nil)
+            return q.title, q.level, nil, 0, q.header and 1 or nil, q.collapsed and 1 or nil, complete, nil, i
+        end
+        env.GetNumQuestLeaderBoards = function(i) return (H.quests[i] and H.quests[i].need) and 1 or 0 end
+        env.GetQuestLogLeaderBoard = function(_, i)
+            local q = H.quests[i]
+            return "Objetivo: " .. q.have .. "/" .. q.need, "monster", q.have >= q.need and 1 or nil
+        end
+    else
+        env.C_QuestLog = {
+            GetNumQuestLogEntries = function() return #H.quests, questCount() end,
+            GetInfo = function(i)
+                local q = H.quests[i]
+                if not q then return nil end
+                return { title = q.title, level = q.level, isHeader = q.header or false, isCollapsed = q.collapsed or false,
+                         isHidden = q.hidden or false, questID = 1000 + i }
+            end,
+            IsComplete = function(id) local q = H.quests[id - 1000]; return q and q.done or false end,
+            IsFailed = function(id) local q = H.quests[id - 1000]; return q and q.failed or false end,
+            GetQuestObjectives = function(id)
+                local q = H.quests[id - 1000]
+                if not q or not q.need then return {} end
+                return { { text = "Objetivo", finished = q.have >= q.need, numFulfilled = q.have, numRequired = q.need } }
+            end,
+            GetMaxNumQuestsCanAccept = function() return H.questMax end,
+        }
+        env.GetQuestDifficultyColor = function(level)
+            local d = level - (H.xp.level or 1)
+            if d >= 5 then return { r = 1, g = 0.1, b = 0.1 } end
+            if d >= 3 then return { r = 1, g = 0.5, b = 0.25 } end
+            if d >= -2 then return { r = 1, g = 1, b = 0 } end
+            if d >= -8 then return { r = 0.25, g = 0.75, b = 0.25 } end
+            return { r = 0.5, g = 0.5, b = 0.5 }
+        end
+    end
     -- Classe e contagens: H.class ("WARRIOR" não usa reagentes), H.itemCounts[id], H.ammo (espaço da munição).
     H.class, H.itemCounts, H.ammo = "WARRIOR", {}, 0
     env.UnitClass = function() return "Classe", H.class, 1 end

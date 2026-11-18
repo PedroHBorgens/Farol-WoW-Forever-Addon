@@ -101,15 +101,15 @@ tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
 page("farol-02-bar-items-layout-tooltip", f"""
 <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
-     "25 items, each with its own short tooltip (Shift: all)", "25 informações, cada uma com o seu tooltip curto (Shift: tudo)")
+     "26 items, each with its own short tooltip (Shift: all)", "26 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid (current run)","Friends online","Guild online"]
-on = {0,1,3,4,6,7,8,9,10,12,14,15,16,17,19}
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid (current run)","Friends online","Guild online"]
+on = {0,1,3,4,6,7,8,9,10,12,14,15,16,17,18,20}
 half = 12
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
 GROUPS = [("Performance", [0, 1, 2]), ("Location", [3, 4, 5]), ("Gear and bags", [6, 7, 8, 9]), ("Gold", [10, 11, 12]),
-          ("Progress", [13, 14, 15, 16, 17]), ("Time and social", [18, 19, 20, 21, 22, 23, 24])]
+          ("Progress", [13, 14, 15, 16, 17, 18]), ("Time and social", [19, 20, 21, 22, 23, 24, 25])]
 grp = lambda title, idx: (f'<div class="grp"><div class="gh">{title}</div>'
                           + "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in idx) + '</div>')
 tabs = lambda active: '<div class="tabs">' + "".join(f'<span class="tab{" on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
@@ -118,7 +118,7 @@ menu = f"""<div class="win menu3" style="width:640px;padding-top:12px;padding-bo
 <div class="line"><span class="k">Bar:</span><span class="btn hl" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span></div>
 <div class="line"><span class="k">Profile:</span><span class="btn" style="padding:2px 10px">Account ▾</span><span class="btn" style="padding:2px 10px">Copy from... ▾</span></div>
 <div class="line"><span class="ck" style="margin:0"><span class="box">✓</span>Show this bar</span><span class="ck" style="margin:0 0 0 24px"><span class="box"></span>Lock position</span></div>
-<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 15 of 25 on — tick the ones you want (hover to see what each one shows).</div>
+<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 16 of 26 on — tick the ones you want (hover to see what each one shows).</div>
 <div class="cols">{"".join(grp(t, i) for t, i in GROUPS)}</div>
 <div class="line" style="margin-top:10px"><span class="btn">Appearance...</span><span class="btn hl">Order...</span></div></div>"""
 TAB_CSS = """
@@ -156,16 +156,16 @@ page("farol-04-clock-alarms-snooze", alarms + popup, "Clock alarms with snooze �
 # 5. Loot
 loot_items = [("q5","⚔️","[Thunderfury, Blessed Blade]","","Today","21:42"),("q4","🛡️","[Helm of Valor]","","Today","21:38"),("q3","💍","[Band of the Ancients]","","Today","09:30"),
               ("q2","🌿","[Peacebloom]","x6","Yesterday","22:27"),("q1","🧵","[Linen Cloth]","x12","Yesterday","21:20"),("q2","🗡️","[Bloodlust Dagger]","","Nov 7","21:12")]
-rows = "".join(f'<div class="row" style="padding:3px 0;font-size:15px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{ic(e)} <span class="{q}">{n}</span></span><span style="white-space:nowrap"><span class="dim">{c}</span>&nbsp;&nbsp;<span style="color:#8c8c8c">{d}</span> <span style="color:#c8c8c8">{t}</span></span></div>' for q,e,n,c,d,t in loot_items)
+rows = "".join(f'<div class="row" style="padding:3px 0;font-size:15px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{ic(e)} <span class="{q}">{n}</span></span><span style="white-space:nowrap"><span class="dim">{c}</span>&nbsp;&nbsp;<span style="color:#8c8c8c">{d}</span> <span style="color:#c8c8c8">{t}</span>&nbsp;&nbsp;<span class="btn" style="padding:0 7px;font-size:11px">+ Goal</span></span></div>' for q,e,n,c,d,t in loot_items)
 dd = """<div class="tip" style="position:absolute;left:236px;top:92px;width:200px;font-size:14px;line-height:1.7;z-index:2;background:#0a0d1a">
 <div><span class="k">✓</span> <span class="q0">Poor</span></div><div>&nbsp;&nbsp;&nbsp;<span class="q1">Common</span></div><div><span class="k">✓</span> <span class="q2">Uncommon</span></div>
 <div><span class="k">✓</span> <span class="q3">Rare</span></div><div><span class="k">✓</span> <span class="q4">Epic</span></div><div><span class="k">✓</span> <span class="q5">Legendary+</span></div>
 <div class="dim">Check all</div><div class="dim">Uncheck all</div></div>"""
 loot = f"""<div class="win" style="width:720px;padding-bottom:26px"><div class="x">×</div><div class="t">Recent loot</div>
 <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px"><span class="k">Show:</span><span class="btn">10 ▾</span><span class="k" style="margin-left:14px">Quality:</span><span class="btn">5 selected ▾</span></div>
-{dd}{rows}<div class="dim" style="font-size:12px;margin-top:10px">Hover: details · Shift-click: link · Wheel: scroll</div>
+{dd}{rows}<div class="dim" style="font-size:12px;margin-top:10px">Hover: details · Shift-click: link · Wheel: scroll · + Goal: track the item (farm goal)</div>
 <div style="position:absolute;right:8px;bottom:6px;color:#aaa">◢</div></div>"""
-page("farol-05-recent-loot-window", loot, "Recent loot: when you got it, with quality filter", "Últimos saques: quando você pegou, com filtro de qualidade — redimensionável")
+page("farol-05-recent-loot-window", loot, "Recent loot: when you got it, quality filter, + Goal to track", "Últimos saques: quando você pegou, filtro de qualidade e + Meta para acompanhar")
 
 # 6. Warnings: grouped window with remind-time dropdowns + history
 def wrow(text):
@@ -228,6 +228,10 @@ ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-we
 <div class="k">Goals</div>
 <div class="row"><span>&nbsp; Gold 500g</span><span>223g of 500g (44%)</span></div>
 <div class="row dim"><span>&nbsp;&nbsp;&nbsp; estimate: ~27m (around 22:41) · pace 600g per hour</span><span></span></div>
+<div class="k">Farm (item goals)</div>
+<div class="row"><span>&nbsp; Silk Cloth</span><span class="y">27/40</span></div>
+<div class="row dim"><span>&nbsp;&nbsp;&nbsp; +18 this session (~24/h) · ~32m left</span><span></span></div>
+<div class="row"><span>&nbsp; Iron Ore</span><span class="g">20/20</span></div>
 <div style="height:6px"></div>
 <div class="k">Rested XP of your characters (estimate)</div>
 <div class="row"><span>&nbsp; Jaina (34)</span><span>150% <span class="g">full</span> <span class="dim">inn/city</span></span></div>
@@ -238,7 +242,7 @@ ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-we
 <div class="k">Saved instances</div>
 <div class="row"><span>&nbsp; Molten Core</span><span>7/10 bosses &nbsp;reset in 2d 4h</span></div></div>"""
 page("farol-08-progress-xp-reputation-professions", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:center;transform:scale(.86);margin-top:40px">{pbar}{ptip}</div>',
-     "Progress: XP, reputation, professions, goals", "Seu progresso: XP, reputação, profissões, metas e resets")
+     "Progress: XP, reputation, professions, goals, farm", "Seu progresso: XP, reputação, profissões, metas, farm e resets")
 # 9. Session summary (chat only)
 def chatline(text): return f'<div><span style="color:#33ccff">Farol:</span> {text}</div>'
 G = lambda g, sv: f'<span class="g">+</span><span class="gold">{g}g</span> <span class="silver">{sv}s</span>'

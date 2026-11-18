@@ -99,4 +99,19 @@ return {
         local H = setup(Mock, nil, { minimap = { angle = 45.5, show = false, locked = true } })
         T.eq(H.env.FarolDB.minimap.angle, 45.5); T.ok(not H.env.FarolMinimapButton, "hidden: not even created")
     end },
+
+    { "dragging survives a missing cursor or minimap value (no error every frame)", function(T, Mock)
+        local H = setup(Mock)
+        local B, E = H.env.FarolMinimapButton, H.env
+        E.Minimap.GetCenter = function() return 500, 500 end
+        E.Minimap.GetEffectiveScale = function() return 1 end
+        local angle = E.FarolDB.minimap.angle
+        for _, cursor in ipairs({ function() return 600 end, function() return nil, 600 end, function() return "x", 1 end }) do
+            E.GetCursorPosition = cursor
+            B._scripts.OnDragStart(B)
+            local ok, err = pcall(B._scripts.OnUpdate, B, 0.1)
+            T.ok(ok, tostring(err)); B._scripts.OnDragStop(B)
+        end
+        T.eq(E.FarolDB.minimap.angle, angle, "angle unchanged")
+    end },
 }

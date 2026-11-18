@@ -28,7 +28,7 @@ return {
     { "/farol version shows the WoW Forever Interface number", function(T, Mock)
         local H = Mock.new():login()
         H:slash("version")
-        T.has(H.strip(H.msgs[#H.msgs - 1]), "cliente 1.60.1 (build 70862, Nov 6 2026) — Interface: 16001")
+        T.has(H.strip(H.msgs[#H.msgs - 1]), "cliente 1.60.1 (build 70959, Nov 13 2026) — Interface: 16001")
     end },
 
     { "language: auto follows the client, pt/en switch, invalid rejected", function(T, Mock)

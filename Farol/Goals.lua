@@ -38,18 +38,18 @@ local STRINGS = {
         tt_goal_rate_gold = "ritmo: %s por hora",
         tt_goal_rate_xp = "ritmo: %s XP por hora",
         goal_title    = "Metas",
-        goal_hint     = "Escolha uma meta; a barra mostra quanto falta e uma estimativa pelo ritmo da sessão.",
+        goal_hint     = "Escolha uma meta; a barra mostra quanto falta e uma estimativa pelo ritmo da sessão. Itens: /farol meta item [link] 40.",
         goal_gold     = "Ouro:",
         goal_level    = "Nível:",
         goal_set      = "Definir",
         goal_clear    = "Limpar",
-        goal_warn     = "Avisar quando alcançar uma meta",
+        goal_warn     = "Avisar quando alcançar uma meta (ouro, nível ou farm)",
         goal_set_gold = "meta de ouro: %s.",
         goal_set_level = "meta de nível: %d.",
         goal_cleared  = "meta apagada: %s.",
         goal_bad_gold = "meta de ouro inválida: use de 1 a 1000000 (ouro).",
         goal_bad_level = "meta de nível inválida: use um nível maior que o atual, até %d.",
-        goal_usage    = "uso: /farol meta || /farol meta ouro N || /farol meta nivel N || /farol meta limpar [ouro||nivel] || /farol meta aviso on||off",
+        goal_usage    = "uso: /farol meta || /farol meta ouro N || /farol meta nivel N || /farol meta item [link] N || /farol meta limpar [ouro||nivel] || /farol meta aviso on||off",
         help_goals    = "  /farol meta          - metas de ouro e de nível (quanto falta e estimativa de tempo)",
         tool_goals    = "Metas...",       tool_goals_desc = "ouro e nível: quanto falta e quanto tempo deve levar",
         news_goals    = "metas de ouro e de nível, com estimativa de tempo (/farol meta)",
@@ -70,18 +70,18 @@ local STRINGS = {
         tt_goal_rate_gold = "pace: %s per hour",
         tt_goal_rate_xp = "pace: %s XP per hour",
         goal_title    = "Goals",
-        goal_hint     = "Pick a goal; the bar shows how much is left and an estimate from this session's pace.",
+        goal_hint     = "Pick a goal; the bar shows how much is left and an estimate from this session's pace. Items: /farol goal item [link] 40.",
         goal_gold     = "Gold:",
         goal_level    = "Level:",
         goal_set      = "Set",
         goal_clear    = "Clear",
-        goal_warn     = "Warn when a goal is reached",
+        goal_warn     = "Warn when a goal is reached (gold, level or farm)",
         goal_set_gold = "gold goal: %s.",
         goal_set_level = "level goal: %d.",
         goal_cleared  = "goal cleared: %s.",
         goal_bad_gold = "invalid gold goal: use 1 to 1000000 (gold).",
         goal_bad_level = "invalid level goal: use a level above your current one, up to %d.",
-        goal_usage    = "usage: /farol goal || /farol goal gold N || /farol goal level N || /farol goal clear [gold||level] || /farol goal warn on||off",
+        goal_usage    = "usage: /farol goal || /farol goal gold N || /farol goal level N || /farol goal item [link] N || /farol goal clear [gold||level] || /farol goal warn on||off",
         help_goals    = "  /farol goal          - gold and level goals (how much is left and a time estimate)",
         tool_goals    = "Goals...",       tool_goals_desc = "gold and level: how much is left and how long it may take",
         news_goals    = "gold and level goals, with a time estimate (/farol goal)",
@@ -262,6 +262,9 @@ function Goals.NewlyReached()
     if level and level.done and not data.lw then
         data.lw = true; list[#list + 1] = T("tt_goal_level") .. " " .. level.target
     end
+    if ns.Farm then
+        for _, text in ipairs(ns.Farm.NewlyReached()) do list[#list + 1] = text end
+    end
     return list
 end
 
@@ -324,7 +327,7 @@ local window
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolGoals", UIParent, ns.backdropTemplate)
-    frame:SetSize(440, 250)
+    frame:SetSize(440, 280)
     frame:SetPoint("CENTER", 30, 20)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -380,11 +383,12 @@ local function CreateWindow()
 
     frame.warn = CreateFrame("CheckButton", "FarolGoalWarn", frame, "UICheckButtonTemplate")
     frame.warn:SetSize(24, 24)
-    frame.warn:SetPoint("TOPLEFT", 20, -196)
+    frame.warn:SetPoint("BOTTOMLEFT", 20, 18)
     frame.warn.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.warn.label:SetPoint("LEFT", frame.warn, "RIGHT", 4, 0)
     frame.warn:SetScript("OnClick", function(self) SetWarning(self:GetChecked() and true or false) end)
 
+    if ns.Farm then ns.Farm.Attach(frame, -192) end -- metas de farm (Farm.lua)
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolGoals") -- ESC fecha
     ns.MakeToplevel(frame)
@@ -419,6 +423,8 @@ RefreshWindow = function()
     local settings = ns.GetDB() and ns.GetDB().warnings
     window.warn:SetChecked(settings and settings.goals or false)
     window.warn.label:SetText(T("goal_warn"))
+    local rows = ns.Farm and ns.Farm.RefreshRows(window) or 0
+    window:SetHeight(280 + rows * (ns.Farm and ns.Farm.ROW_H or 0))
 end
 
 function Goals.ToggleWindow()
@@ -436,12 +442,14 @@ local WORDS = {
     nivel = "level", level = "level", lvl = "level", nv = "level",
     limpar = "clear", clear = "clear", apagar = "clear", remove = "clear",
     aviso = "warn", avisar = "warn", warn = "warn",
+    item = "item", itens = "item", items = "item", farm = "item",
 }
 local SWITCH = { on = true, ligar = true, off = false, desligar = false }
 
 function Goals.HandleCommand(rest)
     local word, tail = string.match(rest or "", "^%s*(%a*)%s*(.-)%s*$")
     local action = WORDS[string.lower(word or "")]
+    if action == "item" and ns.Farm then return ns.Farm.HandleCommand(tail) end -- nomes e links mantêm maiúsculas
     tail = string.lower(tail or "")
     if word == "" then
         Goals.ToggleWindow()

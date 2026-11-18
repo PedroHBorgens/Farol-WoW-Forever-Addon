@@ -138,4 +138,16 @@ return {
         H.env.GetProfessions = nil
         H:update(1); tip(H)
     end },
+
+    { "a missing skill level or limit is skipped, never compared (modern API)", function(T, Mock)
+        local H = setup(Mock)
+        H:slash("mostrar prof")
+        H.env.GetProfessions = function() return 1, 2 end
+        H.env.GetProfessionInfo = function(i)
+            if i == 1 then return "Alquimia", 1, nil, 300 end
+            return "Mineração", 1, 50, nil
+        end
+        H:update(1)
+        T.eq(H.ns.ReadProfessions and #(H.ns.ReadProfessions() or {}) or 0, 0, "both skipped")
+    end },
 }

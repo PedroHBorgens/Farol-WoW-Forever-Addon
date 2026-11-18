@@ -4,7 +4,7 @@
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · metas de ouro/nível · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (25 itens).
+XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (26 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -48,6 +48,7 @@ saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de gra
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
 | `/farol meta`       | Metas de ouro e de nível com estimativa de tempo (`/farol meta ouro 500`, `/farol meta nivel 40`) |
+| `/farol meta item`  | Metas de farm: `/farol meta item [link] 40` (Shift + clique no item) ou pelo nome; `remover`, `limpar` |
 | `/farol minimapa`   | Mostra/esconde ou trava o botão do minimapa (`on`, `off`, `travar`, `destravar`) |
 | `/farol masmorra`   | Suas 10 últimas masmorras e raides: tempo, XP, ouro, saques, mortes |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
@@ -258,6 +259,19 @@ hora, XP por hora): `Meta 500g 44% ~27m · Nv 40 36% ~6h 10m` (amarelo enquanto 
 mostra quanto você tem, a estimativa ("por volta das 22:41") e o ritmo. A estimativa de nível supõe que cada nível que
 falta custa o XP do nível atual — use como referência. Aviso opcional (desligado): **"Meta alcançada: 500g!"**, uma vez
 por meta. As metas são de cada personagem. `/farol meta limpar [ouro|nivel]` apaga.
+
+### Metas de farm (itens)
+
+Para juntar material de profissão, de missão ou de reputação: `/farol meta item [link] 40` (digite o comando e dê
+**Shift + clique** no item para colocar o link) ou pelo nome, `/farol meta item Tecido de Seda 40` (o item precisa estar
+nas bolsas ou no histórico de saques). Também dá para clicar em **+ Meta** numa linha da janela de saques 👜 (meta de 20,
+que você muda depois). O item **Farm** da barra (desligado por padrão) mostra o item e o progresso
+(`Tecido de Seda 27/40`: vermelho no começo, amarelo, verde ao completar) ou, com várias metas, quantas já foram
+concluídas (`Farm 2/5`). O tooltip lista cada item com quantos você pegou nesta sessão, o ritmo por hora e a
+estimativa ("+18 nesta sessão (~24/h) · faltam ~32m"). A contagem inclui o banco quando o jogo informa. A janela
+**Metas...** lista os itens para mudar a quantidade ou apagar (X). Até 10 itens por personagem; o aviso de meta
+alcançada vale também para eles, uma vez por item. `/farol meta item remover <nome ou número>`, `/farol meta item limpar`.
+O Farol só **conta** os itens: nunca move, vende, usa ou saqueia nada, e nada é enviado.
 
 ## Masmorras e raides
 

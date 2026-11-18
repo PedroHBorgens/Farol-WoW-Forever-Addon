@@ -2,6 +2,18 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.8.0 — Farm goals (items)
+- New **farm goals**: pick items to gather (`/farol goal item [link] 40`, shift-click the item, or by name), up to 10
+  per character.
+- New bar item **Farm** (off by default): `Silk Cloth 27/40`, or `Farm 2/5` (goals done) with several items.
+- Tooltip: progress, how many this session, pace per hour and a time estimate; counts the bank when the game reports it.
+- **+ Goal** button on each row of the loot window (goal of 20); the **Goals...** window lists the items to change the
+  amount or remove them.
+- The optional "goal reached" warning also covers farm goals, once per item.
+- Only counts items (never moves, sells, uses or loots); nothing is sent. Saved goals are validated on load.
+- Fixes: dragging the minimap button no longer errors if the game returns a missing cursor value; a missing
+  profession level is skipped safely.
+
 ## 3.7.0 — Minimap button
 - New **Farol button on the minimap**: click opens the menu, right-click hides/shows every bar at once (this session
   only; `/farol` also brings them back), Shift-click opens the Warnings tab. Drag it around the minimap.

@@ -20,14 +20,14 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk", "ammo",
-    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "clock", "reset", "tasks", "playtime", "run", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "farm", "clock", "reset", "tasks", "playtime", "run", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
 local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
-    goldh = false, xph = false, rep = false, prof = false, goals = false, junk = false, ammo = false,
+    goldh = false, xph = false, rep = false, prof = false, goals = false, farm = false, junk = false, ammo = false,
     clock = false, reset = false, tasks = false, playtime = false, run = false, friends = false, guild = false,
 }
 
@@ -54,6 +54,7 @@ local ITEM_ALIASES = {
     reset = "reset", resets = "reset", reinicio = "reset",
     tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks", todo = "tasks",
     metas = "goals", meta = "goals", goals = "goals", goal = "goals", objetivo = "goals",
+    farm = "farm", farmar = "farm", coleta = "farm",
     masmorra = "run", masmorras = "run", dungeon = "run", dungeons = "run", run = "run", corrida = "run",
     tempo = "playtime", playtime = "playtime", played = "playtime",
     amigos = "friends", friends = "friends",
@@ -1099,7 +1100,7 @@ local PROF_FINAL = 300 -- último limite do estilo clássico: aqui não há mais
 
 local function ValidProf(name, level, max)
     if type(name) ~= "string" or name == "" or IsSecret(name) then return false end
-    for _, v in ipairs({ level, max }) do
+    for _, v in pairs({ level = level or false, max = max or false }) do -- nil vira false: ipairs pararia no nil
         if type(v) ~= "number" or IsSecret(v) or v ~= v or v < 0 or v > 100000 then return false end
     end
     return max > 0
@@ -1811,6 +1812,7 @@ local function GetJunk()
     return { total = total, slots = slots, pending = pending, items = items }, source
 end
 ns.GetJunk = GetJunk -- usado pelo aviso de bolsas
+ns.ReadBagSlot, ns.LastBag = ReadSlot, LastBag -- busca de item pelo nome nas metas de farm (Farm.lua; só lê)
 
 local function GetSessionMoney()
     if not session.startMoney then return nil end
@@ -2235,7 +2237,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2410,6 +2412,10 @@ local ITEM_TEXT = {
     run = function() -- corrida atual numa masmorra/raide (Runs.lua); fora delas, some
         if not ns.Runs then return nil end
         return ns.Runs.BarText()
+    end,
+    farm = function() -- metas de farm/itens (Farm.lua)
+        if not ns.Farm then return nil end
+        return ns.Farm.BarText()
     end,
     goals = function() -- metas de ouro e de nível (Goals.lua)
         if not ns.Goals then return nil end
@@ -2602,7 +2608,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  run = "INV_Misc_Key_03",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  run = "INV_Misc_Key_03",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
@@ -2944,6 +2950,7 @@ end
 TIP.tasks = function() if ns.Tasks then ns.Tasks.Tooltip() end end
 TIP.goals = function() if ns.Goals then ns.Goals.Tooltip() end end
 TIP.run = function() if ns.Runs then ns.Runs.Tooltip() end end
+TIP.farm = function() if ns.Farm then ns.Farm.Tooltip() end end
 
 TIP.playtime = function()
     local seconds = Safe(GetSessionSeconds)
@@ -2963,7 +2970,7 @@ local TIP_SECTIONS = {
     coords = { "place" }, zone = { "place" }, speed = { "place" },
     durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
-    xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" },
+    xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" }, farm = { "farm" },
     clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, playtime = { "playtime" }, run = { "run" },
     friends = { "social" }, guild = { "social" },
 }
@@ -2971,8 +2978,8 @@ ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
 local TIP_ORDER = { "perf", "place", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
-                    "rep", "junk", "supply", "prof", "goals", "reset", "tasks", "playtime", "run", "social" }
-local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", run = "run" }
+                    "rep", "junk", "supply", "prof", "goals", "farm", "reset", "tasks", "playtime", "run", "social" }
+local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", farm = "farm", run = "run" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -3224,7 +3231,7 @@ Profiles.GROUPS = {
     { "grp_place", { "coords", "zone", "speed" } },
     { "grp_gear", { "durab", "bags", "junk", "ammo" } },
     { "grp_gold", { "gold", "session", "goldh" } },
-    { "grp_progress", { "xp", "xph", "rep", "prof", "goals" } },
+    { "grp_progress", { "xp", "xph", "rep", "prof", "goals", "farm" } },
     { "grp_time", { "clock", "reset", "tasks", "playtime", "run", "friends", "guild" } },
 }
 ns.ITEM_GROUPS = Profiles.GROUPS
@@ -3799,6 +3806,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         FarolCharDB.supplySeen = seen
         FarolCharDB.runs = ns.Runs.Sanitize(type(savedChar) == "table" and savedChar.runs or nil) -- masmorras
         FarolCharDB.goals = ns.Goals.Sanitize(type(savedChar) == "table" and savedChar.goals or nil) -- metas
+        FarolCharDB.farm = ns.Farm.Sanitize(type(savedChar) == "table" and savedChar.farm or nil) -- metas de farm
         FarolCharDB.tasks = ns.Tasks.Sanitize(type(savedChar) == "table" and savedChar.tasks or nil) -- lista de tarefas
         -- Perfil deste personagem: o da conta (padrão) ou o próprio.
         FarolCharDB.profile = type(savedChar) == "table" and savedChar.profile == "char" and "char" or "account"
@@ -3863,7 +3871,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_runs", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_runs", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -3934,6 +3942,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.MinimapButton.HandleCommand(rest)
     elseif cmd == "meta" or cmd == "metas" or cmd == "goal" or cmd == "goals" then
         ns.Goals.HandleCommand(rest)
+    elseif cmd == "farm" or cmd == "farmar" then
+        ns.Farm.HandleCommand(rest)
     elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then
         ns.Tasks.HandleCommand(rest)
     elseif cmd == "perfil" or cmd == "perfis" or cmd == "profile" or cmd == "profiles" then

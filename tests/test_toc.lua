@@ -68,7 +68,7 @@ return {
             -- profissões: nunca abandonar, treinar ou fabricar
             "AbandonSkill", "BuyTrainerService", "DoTradeSkill", "CastTradeSkill", "ExpandSkillHeader",
         }
-        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Runs.lua", "MinimapButton.lua" }) do
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Runs.lua", "MinimapButton.lua" }) do
             local code = read("Farol/" .. file)
             code = string.gsub(code, "%-%-%[%[.-%]%]", "") -- comentários de bloco
             code = string.gsub(code, "%-%-[^\n]*", "")     -- comentários de linha

@@ -2,6 +2,13 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.9.1 — You decide: almost everything starts off
+- New project rule: **every new feature starts off**; updating never turns anything on. An automated test keeps the
+  exact list of what is on by default (nothing changed in this version).
+- After an update, each news line says when the feature is off and where to turn it on
+  (e.g. "quest log on the bar — off (turn it on in Menu > Bar)").
+- The menu says everything is optional (Bar and Warnings tabs); READMEs and the CurseForge page list what starts on.
+
 ## 3.9.0 — Quest log
 - New bar item **Quests** (off by default): `Quests 17/20 · 3 ready`, green / yellow / red as the log fills up.
 - Tooltip: quests ready to turn in first, then the ones in progress with the objective left and the level colored by

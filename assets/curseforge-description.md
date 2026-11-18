@@ -11,7 +11,7 @@
 
 **Farol** (Portuguese for *lighthouse*) shows the information you care about in one small, movable bar.
 
-> **Most features start turned off** — right-click the bar (or `/farol menu`) to choose what you want. Hover each item to see what it shows. After an update, Farol lists what is new in your chat, once.
+> **You decide: almost everything starts off.** Only the basics are on the first time (6 of 27 bar items: FPS, latency, coordinates, zone, durability, gold; the durability, bags, talents, spell rank and profession warnings; the session summary in your own chat; the minimap button). **Every new feature arrives turned off** — updating never turns anything on by itself. Right-click the bar (or `/farol menu`) to choose; after an update, Farol lists what is new once and says where to turn it on.
 
 ### Info bar — pick what you see
 FPS · Latency · Memory · Coordinates · Zone · Speed · Durability · Bags · **Junk value (gray items)** · **Ammo & reagents (your limits)** · Gold (**+ total and rested XP of all your characters**) · Session gold · **Gold per hour** · XP & rested · **XP per hour & time to level** · **Reputation (standing, progress, rep/hour)** · **Professions (level / training limit)** · **Gold & level goals with a time estimate** · **Farm goals: items to gather, pace per hour & estimate** · **Quest log: how many fit, ready to turn in, warning before it fills up** · **Dungeon & raid run log (time, XP, gold, loot, deaths)** · Clock (local or server) · **Daily & weekly reset countdown + saved instances (raid lockouts)** · **Daily & weekly tasks** · Session time · Friends online · Guild online
@@ -67,7 +67,7 @@ English and Brazilian Portuguese (follows your client, or `/farol lang en|pt`).
 
 **Farol** mostra as informações que importam numa barra pequena e móvel.
 
-> **A maioria das funções começa desligada** — clique com o botão direito na barra (ou `/farol menu`) para escolher o que quiser. Passe o mouse em cada item para ver o que ele mostra. Depois de uma atualização, o Farol lista as novidades no seu chat, uma vez.
+> **Você decide: quase tudo vem desligado.** Na primeira vez só o básico vem ligado (6 de 27 itens da barra: FPS, latência, coordenadas, zona, durabilidade, ouro; os avisos de durabilidade, bolsas, talentos, graus de magia e profissões; o resumo da sessão no seu próprio chat; o botão do minimapa). **Toda função nova chega desligada** — atualizar nunca liga nada sozinho. Clique com o botão direito na barra (ou `/farol menu`) para escolher; depois de uma atualização, o Farol lista as novidades uma vez e diz onde ligar.
 
 ### Barra de informações — você escolhe o que aparece
 FPS · Latência · Memória · Coordenadas · Zona · Velocidade · Durabilidade · Bolsas · **Valor do lixo (itens cinzentos)** · **Munição e reagentes (seus limites)** · Ouro (**+ total e descanso de todos os seus personagens**) · Ouro da sessão · **Ouro por hora** · XP e descansado · **XP por hora e tempo até o próximo nível** · **Reputação (nível, progresso, rep/hora)** · **Profissões (nível / limite do treinamento)** · **Metas de ouro e de nível com estimativa de tempo** · **Metas de farm: itens para juntar, ritmo por hora e estimativa** · **Diário de missões: quantas cabem, prontas para entregar e aviso antes de encher** · **Registro de masmorras e raides (tempo, XP, ouro, saques, mortes)** · Horário (local ou do servidor) · **Contagem até o reset diário e semanal + instâncias salvas (bloqueios de raide)** · **Tarefas diárias e semanais** · Tempo de sessão · Amigos online · Guilda online

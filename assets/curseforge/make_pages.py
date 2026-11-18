@@ -118,7 +118,7 @@ menu = f"""<div class="win menu3" style="width:640px;padding-top:12px;padding-bo
 <div class="line"><span class="k">Bar:</span><span class="btn hl" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span></div>
 <div class="line"><span class="k">Profile:</span><span class="btn" style="padding:2px 10px">Account ▾</span><span class="btn" style="padding:2px 10px">Copy from... ▾</span></div>
 <div class="line"><span class="ck" style="margin:0"><span class="box">✓</span>Show this bar</span><span class="ck" style="margin:0 0 0 24px"><span class="box"></span>Lock position</span></div>
-<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 17 of 27 on — tick the ones you want (hover to see what each one shows).</div>
+<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 17 of 27 on — everything is optional, tick only what you want (hover for details).</div>
 <div class="cols">{"".join(grp(t, i) for t, i in GROUPS)}</div>
 <div class="line" style="margin-top:10px"><span class="btn">Appearance...</span><span class="btn hl">Order...</span></div></div>"""
 TAB_CSS = """

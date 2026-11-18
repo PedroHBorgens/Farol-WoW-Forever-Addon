@@ -8,10 +8,22 @@ reputation · professions · gold/level goals · farm goals (items) · quest log
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
-> **Most features start turned off.** The bar begins with the basics (FPS, latency, coordinates, zone, durability,
-> gold). **Right-click the bar** (or `/farol menu`) to turn on the others — hover each item to see what it shows.
-> The first time, Farol says this in your chat; after an update it lists what is new, once (`/farol news` shows it
-> again).
+## You decide: almost everything starts off
+
+Farol respects your choice: **only what you turn on runs**, and **every new feature arrives turned off** — updating the
+add-on never turns anything on by itself (an automated test checks this).
+
+| On the first time | Everything else starts off |
+|---|---|
+| The bar with the basics: FPS, latency, coordinates, zone, durability and gold (6 of 27 items) | The other 21 bar items and bars 2 and 3 |
+| Warnings for durability, bags, unspent talents, lower-rank spells and professions (with sound) | Ammo, reagents, break, water, tasks, goals, quests, rested XP of your characters |
+| Session summary at login and when leaving a dungeon — only in **your** chat | Full tooltip, server time, gold of all characters, hide in combat |
+| Minimap button | Per-character profiles, alarms, tasks, goals |
+
+- **To turn things on or off:** right-click the bar (or `/farol menu`) — hover each item to see what it shows.
+  Everything that starts on can be turned off too.
+- **After an update**, Farol lists what is new once in your chat and says which ones are off and where to turn them on
+  (`/farol news` shows it again). If you already use the add-on, it keeps exactly what you chose.
 
 ## Installation
 

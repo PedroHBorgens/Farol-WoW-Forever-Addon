@@ -19,6 +19,10 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 5. **Todo dado salvo é validado ao carregar** (tipo, faixa, NaN/infinito); valores ruins voltam ao padrão.
 6. **Toda mudança vem com teste.** Nada entra no `main` sem os testes passando.
 7. **Nome e aparência não oficiais:** nunca usar marcas/arte da Blizzard como se fossem do addon.
+8. **Função nova vem desligada.** O jogador decide o que liga; atualizar o addon nunca liga nada sozinho. Só vem
+   ligado por padrão o que está nas listas aprovadas pelo dono em `tests/test_defaults.lua` (itens da barra, avisos,
+   opções gerais e padrões `x ~= false`); o teste falha se aparecer outro. Novidade ligada a item/aviso entra em
+   `Profiles.NEWS_ITEM`/`NEWS_WARN` (Core) para a mensagem de novidades dizer "desligado (ligue em Menu > ...)".
 
 ## WoW Forever: fatos técnicos que custaram descobrir
 
@@ -200,7 +204,7 @@ lua5.1 tests/run.lua        # ~150 testes; deve terminar com "0 failed"
 2. Mudança + testes + README.md **e** README.pt-BR.md + `assets/curseforge-description.md` se for algo visível.
 3. Subir a versão em **todos os 4 `.toc`** (`## Version:`) e registrar no `CHANGELOG.md`. Função nova e visível:
    acrescentar uma chave **no fim** de `NEWS` (Core.lua) com o texto `news_*` em PT/EN — quem atualizar vê só o que
-   ainda não viu. Item novo na barra: também `desc_<item>` em PT/EN (explicação ao passar o mouse; um teste confere) e uma
+   ainda não viu — e, se for item ou aviso, em `Profiles.NEWS_ITEM`/`NEWS_WARN` (regra 8: vem desligado). Item novo na barra: também `desc_<item>` em PT/EN (explicação ao passar o mouse; um teste confere) e uma
    entrada em `TIP_SECTIONS` (quais seções `TIP.*` o tooltip daquele item mostra; um teste confere).
 4. Pull request. O `main` é protegido: o merge exige **`test`** aprovado. Esperar também o
    **`github-advanced-security`** (AI Scan / "Code scanning AI findings": análise de segurança por IA do GitHub,

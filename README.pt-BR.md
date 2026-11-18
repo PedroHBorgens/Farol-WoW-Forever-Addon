@@ -8,10 +8,22 @@ XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
-> **A maioria das funções começa desligada.** A barra começa com o básico (FPS, latência, coordenadas, zona,
-> durabilidade, ouro). **Clique com o botão direito na barra** (ou `/farol menu`) para ligar as outras — passe o mouse
-> em cada item para ver o que ele mostra. Na primeira vez, o Farol avisa isso no seu chat; depois de uma atualização,
-> lista as novidades uma vez (`/farol novidades` mostra de novo).
+## Você decide: quase tudo vem desligado
+
+O Farol respeita a sua escolha: **só funciona o que você ligar**, e **toda função nova chega desligada** — atualizar
+o addon nunca liga nada sozinho (um teste automático garante isso).
+
+| Vem ligado na primeira vez | Todo o resto vem desligado |
+|---|---|
+| Barra com o básico: FPS, latência, coordenadas, zona, durabilidade e ouro (6 de 27 itens) | Os outros 21 itens da barra e a 2ª e 3ª barras |
+| Avisos de durabilidade, bolsas, talentos não gastos, magias de grau antigo e profissões (com som) | Munição, reagentes, pausa, água, tarefas, metas, missões, descanso dos personagens |
+| Resumo da sessão ao entrar e ao sair de masmorra — só no **seu** chat | Tooltip completo, horário do servidor, ouro de todos os personagens, esconder em combate |
+| Botão no minimapa | Perfis por personagem, alarmes, tarefas, metas |
+
+- **Para ligar ou desligar:** clique com o botão direito na barra (ou `/farol menu`) — passe o mouse em cada item para
+  ver o que ele mostra. Tudo o que vem ligado também pode ser desligado.
+- **Depois de uma atualização**, o Farol lista as novidades uma vez no seu chat e diz quais estão desligadas e onde
+  ligar (`/farol novidades` mostra de novo). Quem já usa o addon mantém exatamente o que escolheu.
 
 ## Instalação
 

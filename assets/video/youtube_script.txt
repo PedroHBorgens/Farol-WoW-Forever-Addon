@@ -4,19 +4,29 @@ Farol puts everything you need in one small bar: frame rate, latency, zone, dura
 
 Hover any item to see its own short tooltip. Hold Shift, and you get everything at once.
 
-Right-click the bar to open the menu. Tick the items you want, and they show up instantly.
+Right-click the bar to open the menu. It has four tabs: Bar, Warnings, Tools, and General. Tick the items you want, and they show up instantly.
 
 Open the Order window to move items up or down, and arrange the bar your way.
 
 Track your progress: XP per hour and time to the next level, reputation per hour, and your professions, with a reminder when you reach the training limit.
 
+Set a gold goal or a level goal. Farol shows how much is left, and estimates how long it will take at your current pace.
+
+New in version three point eight: farm goals. Click plus Goal in the loot window, or shift-click any item, and watch your count, your pace per hour, and the time left.
+
 See the daily and weekly reset countdowns, your saved instances, and the gold and rested XP of all your characters.
 
-New in version three: up to three bars. Pick Bar 2 in the menu, tick Show panel, and choose its items. Each bar has its own position, look, and order.
+Keep a list of daily and weekly tasks. Tick them off as you go, and they clear on their own at the reset.
+
+Inside a dungeon or raid, Farol logs your run: time, experience, gold, loot, and deaths. You get a short summary when you leave, and your last ten runs in one window.
+
+Use up to three bars. Pick Bar 2 in the menu, tick Show this bar, and choose its items. Each bar has its own position, look, and order.
 
 In the Appearance window, change the scale, the background, and the text and icon size, or switch to a single column. You can even hide a bar in combat.
 
 With profiles, every character can share the same bars, or have bars of its own. Copy from another character in one click, and undo it if you change your mind.
+
+The minimap button opens the menu with one click. Right-click it to hide or show every bar at once, and drag it anywhere around the minimap.
 
 Set clock alarms, using local or server time, with a snooze button.
 

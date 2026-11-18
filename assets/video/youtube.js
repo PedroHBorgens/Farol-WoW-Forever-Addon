@@ -75,7 +75,6 @@ SC.bars = { anim(lt) {
   const b2 = seg(lt, 4.6, 5.2), b3 = seg(lt, 8.6, 9.2);
   op($('bwrap2'), b2); $('barB2').style.transform = `translateY(${(1 - ease(b2)) * -24}px)`;
   op($('bwrap3'), b3); $('bwrap3').style.transform = `translateX(${(1 - ease(b3)) * -40}px)`;
-  op($('newbadge'), seg(lt, .3, .8) * (0.75 + 0.25 * Math.sin(lt * 6)));
 }, cursor: { on: [0, 99], path: [[0, [1000, 500]], [3.0, 'Bb2'], [4.2, 'Bshow'], [7.0, 'Bb3'], [8.2, 'Bshow'], [10.5, [1050, 520]]], clicks: [3.2, 4.4, 7.2, 8.4] } };
 SC.appearance = { anim(lt) {
   const scale = lt < 2.0 ? 1 : lt < 2.6 ? 1.1 : lt < 3.2 ? 1.2 : 1.3;
@@ -101,6 +100,55 @@ SC.profiles = { anim(lt) {
   const on = copied ? [2, 3, 7, 8, 10, 12, 13] : ON1;
   for (let i = 0; i < 16; i++) check('Pm' + i, on.includes(i));
 }, cursor: { on: [0, 99], path: [[0, [1000, 520]], [1.8, 'Pprof'], [3.0, 'ddprof1'], [6.4, 'Pcopy'], [7.8, 'ddcopy1'], [10, [1060, 470]]], clicks: [2.0, 3.4, 6.6, 8.2] } };
+SC.goals = { anim(lt) {
+  op($('gv').closest('.win').parentNode, seg(lt, .3, .7));
+  $('gv').textContent = '500'.slice(0, Math.floor(seg(lt, 1.4, 2.0) * 3 + 1e-6));
+  $('lv').textContent = '40'.slice(0, Math.floor(seg(lt, 3.6, 4.0) * 2 + 1e-6));
+  op($('gsst'), seg(lt, 2.6, 2.9)); op($('lsst'), seg(lt, 4.6, 4.9));
+  const gi = items('barGo')[4];
+  op(gi, seg(lt, 2.6, 2.9)); op($('gol'), seg(lt, 4.6, 4.9)); $('gol').style.display = lt >= 4.6 ? 'inline' : 'none';
+  glow(gi, lt > 2.6 && lt < 99);
+  op($('tipGo'), seg(lt, 6.0, 6.4));
+}, cursor: { on: [0, 6], path: [[0, [700, 520]], [1.2, 'gv'], [2.4, 'gs'], [3.4, 'lv'], [4.4, 'ls'], [5.6, [700, 560]]], clicks: [1.3, 2.6, 3.5, 4.6] } };
+SC.farm = { anim(lt) {
+  op($('fb0').closest('.win').parentNode, seg(lt, .3, .7));
+  const added = lt >= 2.6;
+  $('fitem').style.display = added ? 'inline-flex' : 'none'; op($('fitem'), seg(lt, 2.6, 3.0));
+  glow(items('barF')[4], added);
+  op($('fchat'), seg(lt, 2.7, 3.0));
+  hl($('fb0'), lt > 2.0 && lt < 3.0);
+  const n = 27 + Math.min(6, Math.max(0, Math.floor((lt - 4.5) / 1.1)));
+  const txt = n + '/40';
+  $('fcnt').textContent = txt; $('ftcnt').textContent = txt;
+  op($('tipF2'), seg(lt, 5.2, 5.6));
+  $('fpace').innerHTML = n > 27 ? `&nbsp;&nbsp;&nbsp;+${n - 27 + 18} this session (~24/h) · ~${Math.round((40 - n) / 24 * 60)}m left` : '&nbsp;&nbsp;&nbsp;no pace yet this session';
+  op($('newbadge2'), seg(lt, .3, .8) * (0.75 + 0.25 * Math.sin(lt * 6)));
+}, cursor: { on: [0, 4.5], path: [[0, [700, 560]], [2.4, 'fb0'], [4.2, [700, 600]]], clicks: [2.6] } };
+SC.tasks = { anim(lt) {
+  op($('tb0').closest('.win').parentNode, seg(lt, .3, .7));
+  const done = [true, lt >= 2.6, false, lt >= 4.4];
+  done.forEach((d, i) => { check('tb' + i, d); $('tn' + i).className = d ? 'g' : ''; });
+  const n = done.filter(Boolean).length;
+  $('tkcnt').textContent = n + '/4';
+  glow(items('barTk')[3], lt > 2.6 && lt < 99);
+}, cursor: { on: [0, 6.5], path: [[0, [1000, 560]], [2.4, 'tb1'], [4.2, 'tb3'], [6, [1000, 600]]], clicks: [2.6, 4.4] } };
+SC.runs = { anim(lt) {
+  const ri = items('barRn')[4]; op(ri, Math.min(seg(lt, .6, 1.0), 1 - seg(lt, 3.8, 4.2))); glow(ri, lt > .6 && lt < 4);
+  op($('rsum'), seg(lt, 4.0, 4.4));
+  op($('rwin'), seg(lt, 7.0, 7.4));
+  for (let i = 0; i < 4; i++) op($('rr' + i), seg(lt, 7.4 + i * .3, 7.7 + i * .3));
+} };
+function mmPos(angle) { const a = angle * Math.PI / 180, r = 110 + 14; return [930 + 110 + Math.cos(a) * r - 20, 250 + 110 - Math.sin(a) * r - 20]; }
+SC.minimap = { anim(lt) {
+  const angle = 215 + 70 * ease(seg(lt, 8.4, 10.2));
+  const [x, y] = mmPos(angle); $('mmbtn').style.left = x + 'px'; $('mmbtn').style.top = y + 'px';
+  glow($('mmbtn'), lt > 1 && lt < 3.4); $('mmbtn').style.borderRadius = '50%';
+  op($('mmtip'), vis(lt, 1.2, 3.6, .25, .25));
+  const hidden = lt >= 4.4 && lt < 6.6;
+  const bo = hidden ? 1 - seg(lt, 4.4, 4.8) : (lt >= 6.6 ? seg(lt, 6.6, 7.0) : 1);
+  op($('mmb1'), bo); op($('mmb2'), bo);
+  op($('mmchat'), seg(lt, 4.5, 4.8)); op($('mmc1'), seg(lt, 4.5, 4.8)); op($('mmc2'), seg(lt, 6.7, 7.0));
+}, cursor: { on: [0, 11], path: [[0, [700, 560]], [1.0, 'mmbtn'], [8.3, 'mmbtn'], [10.2, () => 'mmbtn'], [11, [800, 600]]], clicks: [4.4, 6.6] } };
 SC.alarms = { anim(lt) {
   const p = $('alarmpop'); op(p, vis(lt, 1.6, 5.6, .3, .4));
   p.style.transform = `rotate(${lt > 1.6 && lt < 4 ? Math.sin(lt * 40) * 1.2 * (1 - seg(lt, 3, 4)) : 0}deg)`;

@@ -352,7 +352,7 @@ function Mock.new(opts)
         end
     else
         -- Cliente moderno (WoW Forever / Midnight).
-        env.GetBuildInfo = function() return "1.60.1", "70862", "Nov 6 2026", 16001 end
+        env.GetBuildInfo = function() return "1.60.1", "70959", "Nov 13 2026", 16001 end
         env.GetNetStats = function() return 1, 2, 40, 60 end
         env.BackdropTemplateMixin = {}
         env.SOUNDKIT = { RAID_WARNING = 8959, READY_CHECK = 8960 }

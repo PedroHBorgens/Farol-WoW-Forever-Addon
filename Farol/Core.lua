@@ -20,14 +20,14 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk", "ammo",
-    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "farm", "clock", "reset", "tasks", "playtime", "run", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "farm", "quests", "clock", "reset", "tasks", "playtime", "run", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
 local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     mem = false, speed = false, bags = false, session = false, xp = false,
-    goldh = false, xph = false, rep = false, prof = false, goals = false, farm = false, junk = false, ammo = false,
+    goldh = false, xph = false, rep = false, prof = false, goals = false, farm = false, quests = false, junk = false, ammo = false,
     clock = false, reset = false, tasks = false, playtime = false, run = false, friends = false, guild = false,
 }
 
@@ -55,6 +55,7 @@ local ITEM_ALIASES = {
     tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks", todo = "tasks",
     metas = "goals", meta = "goals", goals = "goals", goal = "goals", objetivo = "goals",
     farm = "farm", farmar = "farm", coleta = "farm",
+    missoes = "quests", missao = "quests", quests = "quests", quest = "quests", diario = "quests",
     masmorra = "run", masmorras = "run", dungeon = "run", dungeons = "run", run = "run", corrida = "run",
     tempo = "playtime", playtime = "playtime", played = "playtime",
     amigos = "friends", friends = "friends",
@@ -2237,7 +2238,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2412,6 +2413,10 @@ local ITEM_TEXT = {
     run = function() -- corrida atual numa masmorra/raide (Runs.lua); fora delas, some
         if not ns.Runs then return nil end
         return ns.Runs.BarText()
+    end,
+    quests = function() -- diário de missões (Quests.lua)
+        if not ns.Quests then return nil end
+        return ns.Quests.BarText()
     end,
     farm = function() -- metas de farm/itens (Farm.lua)
         if not ns.Farm then return nil end
@@ -2608,7 +2613,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  run = "INV_Misc_Key_03",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  quests = "INV_Misc_Book_09",  run = "INV_Misc_Key_03",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
@@ -2951,6 +2956,7 @@ TIP.tasks = function() if ns.Tasks then ns.Tasks.Tooltip() end end
 TIP.goals = function() if ns.Goals then ns.Goals.Tooltip() end end
 TIP.run = function() if ns.Runs then ns.Runs.Tooltip() end end
 TIP.farm = function() if ns.Farm then ns.Farm.Tooltip() end end
+TIP.quests = function() if ns.Quests then ns.Quests.Tooltip() end end
 
 TIP.playtime = function()
     local seconds = Safe(GetSessionSeconds)
@@ -2970,7 +2976,7 @@ local TIP_SECTIONS = {
     coords = { "place" }, zone = { "place" }, speed = { "place" },
     durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
-    xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" }, farm = { "farm" },
+    xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" }, farm = { "farm" }, quests = { "quests" },
     clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, playtime = { "playtime" }, run = { "run" },
     friends = { "social" }, guild = { "social" },
 }
@@ -2978,8 +2984,8 @@ ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
 local TIP_ORDER = { "perf", "place", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
-                    "rep", "junk", "supply", "prof", "goals", "farm", "reset", "tasks", "playtime", "run", "social" }
-local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", farm = "farm", run = "run" }
+                    "rep", "junk", "supply", "prof", "goals", "farm", "quests", "reset", "tasks", "playtime", "run", "social" }
+local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", farm = "farm", quests = "quests", run = "run" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -3231,7 +3237,7 @@ Profiles.GROUPS = {
     { "grp_place", { "coords", "zone", "speed" } },
     { "grp_gear", { "durab", "bags", "junk", "ammo" } },
     { "grp_gold", { "gold", "session", "goldh" } },
-    { "grp_progress", { "xp", "xph", "rep", "prof", "goals", "farm" } },
+    { "grp_progress", { "xp", "xph", "rep", "prof", "goals", "farm", "quests" } },
     { "grp_time", { "clock", "reset", "tasks", "playtime", "run", "friends", "guild" } },
 }
 ns.ITEM_GROUPS = Profiles.GROUPS

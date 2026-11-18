@@ -4,7 +4,7 @@
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
 **FPS · latency · memory · coordinates · zone · speed · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · gold/level goals · farm goals (items) · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (26 items).
+reputation · professions · gold/level goals · farm goals (items) · quest log · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (27 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -269,6 +269,17 @@ remove them (X). Up to 10 items per character; the "goal reached" warning covers
 `/farol goal item remove <name or number>`, `/farol goal item clear`. Farol only **counts** items: it never moves, sells,
 uses or loots anything, and nothing is sent.
 
+## Quest log
+
+The bar item **Quests** (off by default) shows how many quests are in your log and how many fit, and how many are
+**ready to turn in**: `Quests 17/20 · 3 ready` (green with room, yellow from 3 below the limit, red when full). The
+tooltip lists the **ready to turn in** quests first, then the ones **in progress**, with the objective left (`3/8`), the
+level colored by difficulty (as in the game) and how many are well above your level (at most 5 per list, "… and N
+more"). Two optional warnings (off) in the **Warnings** tab: **quest log almost full** from N quests
+(`/farol warn quests 19`, `/farol warn quests on`) and **quests ready** when you enter a city or inn
+(`/farol warn ready on`; at most every 5 minutes). Farol only **reads** the quest log: it never accepts, turns in,
+abandons or shares quests, and never opens collapsed categories. `/farol warn status` shows what it read.
+
 ## Dungeon and raid runs
 
 When you enter a **dungeon or raid**, Farol starts a "run" on its own: time inside, **XP**, **gold** (net, so repairs
@@ -300,7 +311,7 @@ Farol does not check anything in the game — you tick the tasks yourself. Comma
 ```
 Farol: session summary (2h 14m):
 Farol:   Gold: +38g 12s (+17g 6s/h) · XP: +84.2k (1 level, 37.6k/h)
-Farol:   Reputation: +1.3k Orgrimmar (Honored → Revered)
+Farol:   Reputation: +1.3k Harbor Guild (Honored → Revered)
 Farol:   Loot: 46 (3 rares, 1 epic) · Warnings: 2
 ```
 
@@ -380,10 +391,10 @@ It only knows a character after you log in with it once with Farol on. Use **For
 (click twice to confirm) or `/farol gold forget Name` for characters you deleted. This stays on your computer only.
 
 **Rested XP of your characters:** when you log out, Farol also saves your rested XP and whether you were in an inn or
-city. The gold tooltip then shows an **estimate** for your other characters — e.g. `Jaina (34) 150% full` or
-`Arthas (22) 5% full in ~9d 16h` — using the classic rules: in an inn/city, 5% of a level every 8 hours; outside, a
+city. The gold tooltip then shows an **estimate** for your other characters — e.g. `Mira (34) 150% full` or
+`Tomas (22) 5% full in ~9d 16h` — using the classic rules: in an inn/city, 5% of a level every 8 hours; outside, a
 quarter of that; up to 150%. The real value replaces the estimate when you log in with that character. Optional
-warning (off by default) in the Warnings tab or `/farol warn rested on`: "Rested XP full (150%): Jaina (34)…",
+warning (off by default) in the Warnings tab or `/farol warn rested on`: "Rested XP full (150%): Mira (34)…",
 once per session.
 
 **Junk in bags:** adds up the vendor price of your gray (Poor) items, e.g. `Junk 3g 26s (3)`; the tooltip shows
@@ -395,7 +406,7 @@ tooltip lists all of them, including cooking, fishing and first aid, with the po
 
 **Resets:** counts down to the **daily** and **weekly** reset, using the time the game itself reports. The tooltip
 shows when each one happens in local and server time. Older clients only report the daily reset.
-The tooltip also lists your **saved instances** (raid/dungeon lockouts) — e.g. `Molten Core 7/10 bosses, reset in
+The tooltip also lists your **saved instances** (raid/dungeon lockouts) — e.g. `Cinder Caverns 7/10 bosses, reset in
 2d 4h` — and the gold tooltip shows where your **other characters** are saved (saved when you log out; expired
 lockouts disappear by themselves). `/farol lockouts` lists everything in your chat. To get the list, Farol asks the
 server once at login and at most once a minute after that (the same request as the game's own Raid window).

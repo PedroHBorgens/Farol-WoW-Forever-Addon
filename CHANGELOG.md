@@ -2,6 +2,16 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.9.0 — Quest log
+- New bar item **Quests** (off by default): `Quests 17/20 · 3 ready`, green / yellow / red as the log fills up.
+- Tooltip: quests ready to turn in first, then the ones in progress with the objective left and the level colored by
+  difficulty; how many are well above your level.
+- Two optional warnings (Warnings tab): quest log almost full from N quests (`/farol warn quests 19`) and quests ready
+  when you enter a city or inn (`/farol warn ready on`).
+- Only reads the quest log (never accepts, turns in, abandons or shares; never opens collapsed categories); nothing sent.
+- Images and docs use generic names only (no Blizzard characters, places or items); a test checks it.
+- Fix: `/farol warn status` no longer errors if the game blocks the level reading.
+
 ## 3.8.0 — Farm goals (items)
 - New **farm goals**: pick items to gather (`/farol goal item [link] 40`, shift-click the item, or by name), up to 10
   per character.

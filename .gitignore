@@ -15,4 +15,5 @@ assets/curseforge/*.html
 # Vídeo de divulgação: a página e o vídeo são gerados (assets/video/README.md)
 assets/video/*.html
 assets/video/*.mp4
+assets/video/*.srt
 assets/video/preview_*.png

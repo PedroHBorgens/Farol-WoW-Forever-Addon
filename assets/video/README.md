@@ -30,18 +30,28 @@ When a window changes in the add-on, update the matching scene here (and the Cur
 Ao mudar uma janela do addon, atualize a cena correspondente aqui (e a imagem do CurseForge) e gere de novo.
 The `.html`, `.mp4` and preview files are not versioned / não são versionados.
 
-## YouTube video (~3 min, narrated) / Vídeo do YouTube (~3 min, narrado)
+## YouTube video (~4 min, narrated) / Vídeo do YouTube (~4 min, narrado)
 
-16 scenes, one narration paragraph each (`youtube_script.txt`, generated from `SCENES` in `youtube.py`).
-The narration audio (English, ElevenLabs) is not versioned; `youtube_timing.json` keeps where each paragraph is in it
-(checked sentence by sentence) and how long each scene lasts.
+21 scenes, one narration paragraph each (`youtube_script.txt`, generated from `SCENES` in `youtube.py`), with
+YouTube subtitles in English and Portuguese (`NARRATION_PT`: one Portuguese sentence for each English one).
+The narration audio is not versioned; `youtube_timing.json` keeps where each paragraph is in it and how long each
+scene lasts.
+
+Free, local narration with [Piper](https://github.com/rhasspy/piper) (`pip install piper-tts`; voice
+`voice-en-us-ryan-high.tar.gz` from the Piper GitHub releases):
 
 ```
-python3 assets/video/youtube_audio.py prepare narration.mp3 <end1,...,end15>   # only for a new narration
-python3 assets/video/youtube.py                                                # writes youtube.html
+python3 assets/video/youtube_audio.py piper en-us-ryan-high.onnx narration.mp3   # audio + youtube_timing.json
+python3 assets/video/youtube.py                                                 # writes youtube.html
 PAGE=youtube.html node assets/video/record.js video youtube-silent.mp4
 python3 assets/video/youtube_audio.py mix narration.mp3 youtube-silent.mp4 farol-youtube.mp4
+python3 assets/video/youtube_audio.py subs narration.mp3                         # farol-youtube.en.srt / .pt-BR.srt
 ```
 
-16 cenas, um parágrafo de narração cada. O áudio não é versionado; `youtube_timing.json` guarda onde está cada
-parágrafo e a duração de cada cena.
+With an audio from another source (e.g. ElevenLabs, one take for the whole script), use
+`youtube_audio.py prepare narration.mp3 <end1,...,end20>` (where each paragraph ends) instead of `piper`.
+Upload the two `.srt` files on YouTube (Subtitles → Add language → Upload file, "With timing").
+
+21 cenas, um parágrafo de narração cada, com legendas do YouTube em inglês e português. O áudio não é versionado;
+`youtube_timing.json` guarda onde está cada parágrafo e a duração de cada cena. Narração gratuita e local com o Piper
+(comandos acima); as legendas `.srt` sobem no YouTube em Legendas → Adicionar idioma → Enviar arquivo ("Com tempo").

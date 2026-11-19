@@ -319,7 +319,9 @@ local STRINGS = {
         opt_reset    = "Resetar posição",
         opt_alarms   = "Alarmes...",
         opt_hint     = "Marque o que deseja ver na barra.",
-        opt_hint_count = "Itens na barra: %d de %d ligados — marque os que quiser (passe o mouse para ver o que cada um mostra).",
+        opt_hint_count = "Itens na barra: %d de %d ligados — tudo é opcional, marque só o que quiser (passe o mouse para ver detalhes).",
+        news_off_bar = " — desligado (ligue em Menu > Barra)",
+        news_off_warn = " — desligado (ligue em Menu > Avisos)",
         tt_rightclick_more = "Clique direito: opções (mais %d informações para ligar).",
         tt_shift_full = "Segure Shift para ver todas as informações.",
         tt_more      = "e mais %d",
@@ -618,7 +620,9 @@ local STRINGS = {
         opt_reset    = "Reset position",
         opt_alarms   = "Alarms...",
         opt_hint     = "Tick what you want to see on the bar.",
-        opt_hint_count = "Bar items: %d of %d on — tick the ones you want (hover to see what each one shows).",
+        opt_hint_count = "Bar items: %d of %d on — everything is optional, tick only what you want (hover for details).",
+        news_off_bar = " — off (turn it on in Menu > Bar)",
+        news_off_warn = " — off (turn it on in Menu > Warnings)",
         tt_rightclick_more = "Right-click: options (%d more items you can turn on).",
         tt_shift_full = "Hold Shift to see all information.",
         tt_more      = "and %d more",
@@ -2249,9 +2253,21 @@ local function ItemCounts()
     return on, #ITEM_ORDER
 end
 
+-- Novidade ligada a um item da barra ou a um aviso: se estiver desligada, a linha diz onde ligar (regra 8: o que é
+-- novo vem desligado; o jogador decide).
+Profiles.NEWS_ITEM = { news_rep = "rep", news_reset = "reset", news_prof = "prof", news_junk = "junk", news_supply = "ammo",
+                       news_tasks = "tasks", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests" }
+Profiles.NEWS_WARN = { news_breaks = "pause" }
+function Profiles.NewsLine(key)
+    local item, warn = Profiles.NEWS_ITEM[key], Profiles.NEWS_WARN[key]
+    if item and not db.items[item] then return T(key) .. T("news_off_bar") end
+    if warn and db.warnings and not db.warnings[warn] then return T(key) .. T("news_off_warn") end
+    return T(key)
+end
+
 local function ShowNews(from)
     local names = {}
-    for i = (from or 0) + 1, #NEWS do names[#names + 1] = T(NEWS[i]) end
+    for i = (from or 0) + 1, #NEWS do names[#names + 1] = Profiles.NewsLine(NEWS[i]) end
     if #names == 0 then return end
     Print(T("news_title"))
     for _, name in ipairs(names) do Print("  • " .. name) end -- uma novidade por linha, mais fácil de ler

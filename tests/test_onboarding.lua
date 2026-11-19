@@ -43,7 +43,9 @@ return {
         local H = Mock.new():login({ items = { fps = true } }) -- já usava o addon (sem "newsSeen")
         local text = chat(H)
         T.has(text, "novidades desde a sua última versão (a maioria vem desligada")
-        T.has(text, "  • reputação na barra\nFarol:   • contagem até os resets")
+        T.has(text, "  • reputação na barra — desligado (ligue em Menu > Barra)\nFarol:   • contagem até os resets — desligado")
+        T.has(text, "  • lembretes de pausa e de água — desligado (ligue em Menu > Avisos)")
+        T.has(text, "  • datas na janela de saques\n", "news without an option stay as they are")
         T.has(text, "  • descanso dos seus personagens")
         local lines = 0
         for _ in string.gmatch(text, "•") do lines = lines + 1 end
@@ -70,7 +72,7 @@ return {
         local _, window = menuChecks(H)
         local hints = {}
         hints[#hints + 1] = H:text(H.env.FarolOptions.controls.hint) -- texto da aba Barra
-        T.has(table.concat(hints, " | "), "Itens na barra: 6 de 27 ligados — marque os que quiser")
+        T.has(table.concat(hints, " | "), "Itens na barra: 6 de 27 ligados — tudo é opcional, marque só o que quiser")
         H:slash("show lixo")
         hints = {}
         hints[#hints + 1] = H:text(H.env.FarolOptions.controls.hint) -- texto da aba Barra

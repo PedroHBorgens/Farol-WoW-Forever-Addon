@@ -78,6 +78,7 @@ return {
         local _, set = open(H)
         T.eq(set.profile:GetParent(), set.pages.general); T.eq(set.copy:GetParent(), set.pages.general)
         T.eq(H:text(set.profileHeader), "Perfis (avançado)")
+        T.eq(set.locked._anchor, set.shown.label, "Lock sits after the end of the Show label, never on top of it")
         H:slash("perfil personagem"); T.eq(H.env.FarolCharDB.profile, "char")
     end },
 

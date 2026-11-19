@@ -119,7 +119,7 @@ Aperte **Esc** para fechar. Se esconder a barra, use `/farol menu` para trazê-l
 ### Até 3 barras
 
 No alto do menu, **Barra: [Barra 1] [Barra 2] [Barra 3]** escolhe qual barra o menu, a **Aparência...** e a
-**Ordem...** mudam. Escolha **Barra 2**, marque **Mostrar esta barra** e os itens que quiser: cada barra tem **itens,
+**Ordem...** mudam. Escolha **Barra 2**, marque **Mostrar** e os itens que quiser: cada barra tem **itens,
 posição, aparência (escala, fundo, texto, formato, esconder em combate) e ordem próprios**. O clique direito numa barra
 abre o menu já com ela escolhida. As barras 2 e 3 começam desligadas (e abaixo da barra 1); também dá para usar
 `/farol barra 2 mostrar` / `/farol barra 2 esconder`. Alarmes, saques, avisos, idioma e os botões rápidos (📝 👜, ao lado

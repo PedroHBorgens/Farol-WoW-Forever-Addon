@@ -43,10 +43,10 @@ return {
         T.eq(H:text(window[20].label), "Farm (metas de itens)")
         T.eq(H:text(window[21].label), "Missões (diário)")
         T.eq(H:text(window[24].label), "Tarefas (diárias/semanais)")
-        T.eq(H:text(window[26].label), "Masmorra / raide (corrida atual)")
-        T.eq(H:text(window[29].label), "Mostrar esta barra")
+        T.eq(H:text(window[26].label), "Masmorra / raide atual")
+        T.eq(H:text(window[29].label), "Mostrar")
         T.eq(H:text(window[31].label), "Horário do servidor")
-        T.eq(H:text(panel[30].label), "Travar posição")
+        T.eq(H:text(panel[30].label), "Travar")
     end },
 
     { "ticking a box updates the bar, the saved settings and the other menu", function(T, Mock)

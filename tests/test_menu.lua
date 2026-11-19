@@ -109,7 +109,7 @@ return {
         local H = Mock.new({ locale = "enUS" }):login()
         local _, set = open(H)
         T.eq(H:text(set.tabs.tools), "Tools"); T.eq(H:text(set.groups[3]), "Gear and bags")
-        T.eq(H:text(set.shown.label), "Show this bar")
+        T.eq(H:text(set.shown.label), "Show")
         T.eq(H:text(set.warnings.breaksHeader), "Breaks"); T.eq(H:text(set.warnings.questHeader), "Quests and travel"); T.eq(H:text(H.env.FarolWarnDurab.label), "Durability below")
         T.eq(H:text(set.tools[7]), "Summary now")
     end },

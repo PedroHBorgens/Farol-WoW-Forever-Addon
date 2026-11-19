@@ -242,7 +242,7 @@ end
 
 local function CreatePopup()
     local frame = CreateFrame("Frame", "FarolAlarmPopup", UIParent, ns.backdropTemplate)
-    frame:SetSize(320, 96)
+    frame:SetSize(380, 96)
     frame:SetPoint("TOP", 0, -140)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -264,6 +264,8 @@ local function CreatePopup()
     frame.title:SetPoint("TOP", 0, -16)
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.text:SetPoint("TOP", frame.title, "BOTTOM", 0, -6)
+    frame.text:SetWidth(340) -- nome comprido (até 30 letras) cabe; se não couber, corta com "..."
+    if frame.text.SetWordWrap then frame.text:SetWordWrap(false) end
 
     frame.snooze = CreateFrame("Button", "FarolAlarmSnooze", frame, "UIPanelButtonTemplate")
     frame.snooze:SetSize(130, 22)
@@ -450,7 +452,7 @@ local window
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolAlarms", UIParent, ns.backdropTemplate)
-    frame:SetSize(380, 470)
+    frame:SetSize(440, 470)
     frame:SetPoint("CENTER", 40, 0)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -491,6 +493,9 @@ local function CreateWindow()
         end)
         row.text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         row.text:SetPoint("LEFT", row.check, "RIGHT", 4, 0)
+        row.text:SetWidth(330) -- nome comprido: corta com "..." antes do botão X
+        row.text:SetJustifyH("LEFT")
+        if row.text.SetWordWrap then row.text:SetWordWrap(false) end
         row.delete = CreateFrame("Button", "FarolAlarmDelete" .. i, frame, "UIPanelButtonTemplate")
         row.delete:SetSize(26, 22)
         row.delete:SetPoint("TOPRIGHT", -24, y - 1)

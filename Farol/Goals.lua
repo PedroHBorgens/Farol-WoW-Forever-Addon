@@ -51,7 +51,7 @@ local STRINGS = {
         goal_bad_level = "meta de nível inválida: use um nível maior que o atual, até %d.",
         goal_usage    = "uso: /farol meta || /farol meta ouro N || /farol meta nivel N || /farol meta item [link] N || /farol meta limpar [ouro||nivel] || /farol meta aviso on||off",
         help_goals    = "  /farol meta          - metas de ouro e de nível (quanto falta e estimativa de tempo)",
-        tool_goals    = "Metas...",       tool_goals_desc = "ouro e nível: quanto falta e quanto tempo deve levar",
+        tool_goals    = "Metas...",       tool_goals_desc = "ouro, nível e farm: quanto falta e quanto tempo deve levar",
         news_goals    = "metas de ouro e de nível, com estimativa de tempo (/farol meta)",
     },
     en = {
@@ -83,7 +83,7 @@ local STRINGS = {
         goal_bad_level = "invalid level goal: use a level above your current one, up to %d.",
         goal_usage    = "usage: /farol goal || /farol goal gold N || /farol goal level N || /farol goal item [link] N || /farol goal clear [gold||level] || /farol goal warn on||off",
         help_goals    = "  /farol goal          - gold and level goals (how much is left and a time estimate)",
-        tool_goals    = "Goals...",       tool_goals_desc = "gold and level: how much is left and how long it may take",
+        tool_goals    = "Goals...",       tool_goals_desc = "gold, level and farm: how much is left and how long it may take",
         news_goals    = "gold and level goals, with a time estimate (/farol goal)",
     },
 }

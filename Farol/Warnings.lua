@@ -195,7 +195,7 @@ local STRINGS = {
         warn_name_sound = "som",
         warn_bad_durab  = "valor inválido: use de 5 a 50 (%).",
         warn_bad_bags   = "valor inválido: use de 0 a 10 espaços.",
-        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || missoes N || durab/bolsas/talentos/graus/profissoes/descansado/municao/reagentes/pausa/agua/missoes/prontas/regresso/som on||off || municao A V || reagentes A V || pausa/agua lutas on||off || lembrar N || status || silenciar",
+        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || missoes N || durab/bolsas/talentos/graus/profissoes/descansado/municao/reagentes/pausa/agua/missoes/prontas/regresso/som on||off || municao A V || reagentes A V || pausa/agua lutas on||off || recomendados || nenhum || lembrar N || status || silenciar",
         opt_warnings    = "Avisos...",
         help_warn       = "  /farol aviso         - abrir o menu na aba Avisos (durabilidade, bolsas, talentos, profissões, pausa, água...)",
     },
@@ -324,7 +324,7 @@ local STRINGS = {
         hist_button_new = "%d new — click to view",
         hist_button_none = "Click to view",
         opt_history     = "History...",
-        help_history    = "  /farol history      - view the last 10 warnings (also via the button next to the bar or a key binding)",
+        help_history    = "  /farol history       - view the last 10 warnings (also via the button next to the bar or a key binding)",
         warn_opt_test   = "Test warning",
         warn_hint       = "Everything is optional: only what you leave ticked warns. Warns once; warns again after it improves (min. 5 min).",
         warn_hint_break = "Break and water start off; without the option above they wait for fights and dungeons to end.",
@@ -337,7 +337,7 @@ local STRINGS = {
         warn_name_sound = "sound",
         warn_bad_durab  = "invalid value: use 5 to 50 (%).",
         warn_bad_bags   = "invalid value: use 0 to 10 slots.",
-        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || quests N || durab/bags/talents/ranks/professions/rested/ammo/reagents/break/water/quests/ready/hearth/sound on||off || ammo Y R || reagents Y R || break/water fights on||off || remind N || status || silence",
+        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || quests N || durab/bags/talents/ranks/professions/rested/ammo/reagents/break/water/quests/ready/hearth/sound on||off || ammo Y R || reagents Y R || break/water fights on||off || recommended || none || remind N || status || silence",
         opt_warnings    = "Warnings...",
         help_warn       = "  /farol warn          - open the menu on the Warnings tab (durability, bags, talents, professions, break, water...)",
     },
@@ -477,7 +477,7 @@ local function CreateRow(frame, index)
         function() return row.entry and row.entry.minutes end,
         function(minutes) if row.entry then row.entry.minutes = minutes end end))
     row.time:SetPoint("RIGHT", 0, 0)
-    row.remind = NewButton(row, prefix .. "Remind", 130, function()
+    row.remind = NewButton(row, prefix .. "Remind", 144, function()
         if row.entry then Warnings.Respond(true, row.entry.key, row.entry.minutes) end
     end)
     row.remind:SetPoint("RIGHT", row.time, "LEFT", -2, 0)
@@ -514,7 +514,7 @@ local function CreatePopup()
     frame.text:SetPoint("TOP", frame.title, "BOTTOM", 0, -6)
     frame.text:SetWidth(SINGLE_WIDTH - 40)
     -- Botões de baixo: um aviso = Silenciar / Lembrar; vários = Silenciar todos / Lembrar todos.
-    frame.silence = NewButton(frame, "FarolWarnSilence", 140, function()
+    frame.silence = NewButton(frame, "FarolWarnSilence", 124, function()
         if #queue == 1 then Warnings.Respond(false, queue[1].key) else Warnings.Respond(false) end
     end)
     frame.silence:SetPoint("BOTTOMLEFT", 22, 16)
@@ -527,7 +527,7 @@ local function CreatePopup()
             if #queue == 1 then queue[1].minutes = minutes else groupMinutes = minutes end
         end))
     frame.time:SetPoint("BOTTOMRIGHT", -22, 16)
-    frame.remind = NewButton(frame, "FarolWarnRemind", 170, function()
+    frame.remind = NewButton(frame, "FarolWarnRemind", 190, function() -- cabe "Lembrar todos em 30 min"
         if #queue == 1 then
             Warnings.Respond(true, queue[1].key, queue[1].minutes)
         else

@@ -28,7 +28,7 @@ ns.Runs = Runs
 
 local STRINGS = {
     pt = {
-        name_run      = "Masmorra / raide (corrida atual)", cmd_run = "masmorra",
+        name_run      = "Masmorra / raide atual", cmd_run = "masmorra",
         desc_run      = "Dentro de uma masmorra ou raide: tempo, XP e ouro desta corrida. Fora delas, some da barra.",
         run_party     = "masmorra",
         run_raid      = "raide",
@@ -65,8 +65,8 @@ local STRINGS = {
         news_runs     = "registro de masmorras e raides, com resumo ao sair (/farol masmorra)",
     },
     en = {
-        name_run      = "Dungeon / raid (current run)", cmd_run = "dungeon",
-        desc_run      = "Inside a dungeon or raid: time, XP and gold of this run. Outside, it leaves the bar.",
+        name_run      = "Dungeon / raid run", cmd_run = "dungeon",
+        desc_run      = "Inside a dungeon or raid: time, XP and gold of this run. Outside, it hides itself.",
         run_party     = "dungeon",
         run_raid      = "raid",
         run_unknown   = "Instance",

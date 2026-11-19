@@ -118,7 +118,7 @@ Press **Esc** to close it. If you hide the bar, use `/farol menu` to bring it ba
 ### Up to 3 bars
 
 At the top of the menu, **Bar: [Bar 1] [Bar 2] [Bar 3]** chooses which bar the menu, **Appearance...** and
-**Order...** change. Pick **Bar 2**, tick **Show this bar** and the items you want: each bar has its **own items,
+**Order...** change. Pick **Bar 2**, tick **Show** and the items you want: each bar has its **own items,
 position, appearance (scale, background, text, layout, hide in combat) and order**. Right-clicking a bar opens the
 menu with that bar already chosen. Bars 2 and 3 start off (and below bar 1); `/farol bar 2 show` / `/farol bar 2 hide`
 also work. Alarms, loot, warnings, language and the quick buttons (📝 👜, next to bar 1) are shared.

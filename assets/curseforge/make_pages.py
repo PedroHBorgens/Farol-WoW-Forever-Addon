@@ -104,7 +104,7 @@ page("farol-02-bar-items-layout-tooltip", f"""
      "28 items, each with its own short tooltip (Shift: all)", "28 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid (current run)","Friends online","Guild online"]
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid run","Friends online","Guild online"]
 on = {0,1,3,4,6,7,8,9,10,11,13,15,16,17,18,19,20,22}
 half = 12
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
@@ -116,7 +116,7 @@ grp = lambda title, idx: (f'<div class="grp"><div class="gh">{title}</div>'
 tabs = lambda active: '<div class="tabs">' + "".join(f'<span class="tab{" on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
 menu = f"""<div class="win menu3" style="width:640px;padding-top:12px;padding-bottom:14px;transform:scale(.86);transform-origin:center"><div class="x">×</div><div class="t">Farol</div>
 {tabs("Bar")}
-<div class="line"><span class="k">Bar:</span><span class="btn hl" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span><span class="ck" style="margin:0 0 0 18px"><span class="box">✓</span>Show this bar</span><span class="ck" style="margin:0 0 0 12px"><span class="box"></span>Lock</span></div>
+<div class="line"><span class="k">Bar:</span><span class="btn hl" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span><span class="ck" style="margin:0 0 0 18px"><span class="box">✓</span>Show</span><span class="ck" style="margin:0 0 0 12px"><span class="box"></span>Lock</span></div>
 <div class="line"><span class="k">Presets:</span><span class="btn" style="padding:2px 9px">Basic</span><span class="btn hl" style="padding:2px 9px">Leveling</span><span class="btn" style="padding:2px 9px">Gold &amp; farm</span><span class="btn" style="padding:2px 9px">Dungeons</span><span class="dim" style="margin-left:6px;font-size:12px">Undo</span></div>
 <div class="dim" style="font-size:12px;margin:4px 0">Bar items: 18 of 28 on — everything is optional, tick only what you want (hover for details).</div>
 <div class="cols">{"".join(grp(t, i) for t, i in GROUPS)}</div>

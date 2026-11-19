@@ -2,6 +2,17 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.11.1 — Text review and menu fixes
+- Bar tab: "Lock" no longer overlaps "Show" (it now sits right after the label, whatever the font); the row reads
+  "Bar: [1] [2] [3]  Show  Lock", and the bar buttons are wider so "Bar 2 (off)" fits.
+- The dungeon item is now called "Dungeon / raid run" so its gear fits inside the window.
+- Order window wider (long names + "(hidden)" no longer touch the arrows); Alarms window and alarm popup wider, with
+  long alarm names cut with "..."; warning popup buttons wider so "Remind all in 30 min" fits.
+- Every text reviewed in Portuguese and English: "panel" is now "bar" everywhere; Portuguese help uses the Portuguese
+  commands (/farol mostrar, esconder, travar, idioma, versao); "(off)" is "(desl.)" in Portuguese; outdated texts fixed
+  (Warnings tab instead of window, the "+ Goal" button, profiles in the General tab, Goals window with farm goals,
+  /farol warn recommended / none in the usage line).
+
 ## 3.11.0 — Simpler menu
 - Bar tab: **presets** (Basic, Leveling, Gold & farm, Dungeons) set up the bar in one click, with **Undo**
   (`/farol preset leveling`, `/farol preset undo`); presets only change what you click (nothing turns on by itself).

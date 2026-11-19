@@ -150,7 +150,7 @@ return {
         log(H, 17, 1); H:update(1)
         T.has(H:bar(), "Quests 17/20 · 1 ready"); T.has(tip(H), "Ready to turn in (1)")
         H:slash("menu")
-        T.eq(H:text(H.env.FarolWarnQuestFull.label), "Quest log with at least")
+        T.eq(H:text(H.env.FarolWarnQuestFull.label), "Quest log from")
         T.eq(H.env.FarolWarnQuestMin._text, "19")
         H:check(H.env.FarolWarnQuestReady, true); T.eq(H.env.FarolDB.warnings.questReady, true)
         T.eq(H.env.FarolPanelWarnQuestReady._checked, true, "settings panel synced")

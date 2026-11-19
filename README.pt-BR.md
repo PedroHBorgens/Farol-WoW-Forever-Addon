@@ -60,6 +60,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol aparencia`  | Abre a janela de aparência (escala, fundo, formato, esconder em combate) |
 | `/farol ordem`      | Escolhe a ordem das informações na barra |
 | `/farol meta`       | Metas de ouro e de nível com estimativa de tempo (`/farol meta ouro 500`, `/farol meta nivel 40`) |
+| `/farol pacote`     | Liga um pacote de itens: `basico` (volta ao básico), `upando`, `farm`, `masmorras`; `desfazer` |
 | `/farol meta item`  | Metas de farm: `/farol meta item [link] 40` (Shift + clique no item) ou pelo nome; `remover`, `limpar` |
 | `/farol minimapa`   | Mostra/esconde ou trava o botão do minimapa (`on`, `off`, `travar`, `destravar`) |
 | `/farol masmorra`   | Suas 10 últimas masmorras e raides: tempo, XP, ouro, saques, mortes |
@@ -92,15 +93,21 @@ Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um des
 
 O menu tem **quatro abas**:
 
-- **Barra** — o que é da barra escolhida: **Barra 1 / 2 / 3**, o **perfil**, **Mostrar esta barra**, **Travar
-  posição**, os itens em grupos (Desempenho, Lugar, Equipamento e bolsas, Ouro, Progresso, Tempo e social — passe o
-  mouse em cada um para ver o que mostra) e os botões **Aparência...** e **Ordem...** desta barra.
-- **Avisos** — todos os avisos, em seções: Equipamento e bolsas, Personagem, Pausas, Como avisar (som, "Lembrar em",
-  testar, histórico). `/farol aviso` abre o menu nesta aba.
+- **Barra** — o que é da barra escolhida: **Barra 1 / 2 / 3**, **Mostrar** e **Travar**; os **pacotes prontos**
+  (**Básico** volta ao básico; **Upando**, **Ouro e farm** e **Masmorras** ligam um conjunto de itens que combinam;
+  **Desfazer** volta como estava — também `/farol pacote upando` / `/farol pacote desfazer`); os itens em grupos
+  (Desempenho, Lugar, Equipamento e bolsas, Ouro, Progresso, Tempo e social), com uma **engrenagem** ao lado dos que
+  têm configuração (ela abre a janela ou o aviso daquele item); uma **faixa embaixo explica o item sob o mouse**; e os
+  botões **Aparência...** e **Ordem...** desta barra.
+- **Avisos** — todos os avisos em grupos: Equipamento e bolsas, Personagem, Missões e viagem, Pausas, Como avisar
+  (som, "Lembrar em", testar, histórico). No topo, **Só os recomendados** e **Desligar todos**
+  (`/farol aviso recomendados` / `/farol aviso nenhum`); embaixo, a explicação do aviso sob o mouse. `/farol aviso`
+  abre o menu nesta aba.
 - **Ferramentas** — um botão para cada janela, com o que ela faz: Alarmes, Tarefas, Saques, Histórico e **Resumo agora**.
 - **Geral** — o que vale para todos os seus personagens: idioma (Auto / Português / English), hora do servidor, resumo
   da sessão ao entrar, ouro de todos os personagens, tooltip completo, os botões rápidos ao lado da barra 1, o **botão
-  do minimapa** (mostrar / travar); e **Restaurar**: posição da barra, zerar sessão, esquecer personagens.
+  do minimapa** (mostrar / travar); **Restaurar**: posição da barra, zerar sessão, esquecer personagens; e
+  **Perfis (avançado)**: as mesmas barras em todos os personagens ou só neste, e **Copiar de...**.
 
 **Botão no minimapa:** clique = menu, **clique direito = esconde/mostra todas as barras de uma vez** (só nesta sessão —
 bom para prints; `/farol` também traz de volta), Shift + clique = aba Avisos. Arraste em volta do minimapa (se não

@@ -60,6 +60,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol appearance` | Open the appearance window (scale, background, layout, hide in combat) |
 | `/farol order`      | Choose the order of the items on the bar |
 | `/farol goal`       | Gold and level goals with a time estimate (`/farol goal gold 500`, `/farol goal level 40`) |
+| `/farol preset`     | Turns on a preset of items: `basic` (back to the basics), `leveling`, `farm`, `dungeons`; `undo` |
 | `/farol goal item`  | Farm goals: `/farol goal item [link] 40` (shift-click the item) or by name; `remove`, `clear` |
 | `/farol minimap`    | Show/hide or lock the minimap button (`on`, `off`, `lock`, `unlock`) |
 | `/farol dungeon`    | Your last 10 dungeons and raids: time, XP, gold, loot, deaths (`/farol run`) |
@@ -92,15 +93,21 @@ Tick or untick each item — no commands needed. Open it in any of these ways:
 
 The menu has **four tabs**:
 
-- **Bar** — what belongs to the chosen bar: **Bar 1 / 2 / 3**, the **profile**, **Show this bar**, **Lock position**,
-  the items in groups (Performance, Location, Gear and bags, Gold, Progress, Time and social — hover each one to see
-  what it shows), and the **Appearance...** and **Order...** buttons of this bar.
-- **Warnings** — every warning, in sections: Gear and bags, Character, Breaks, How to warn (sound, "Remind in",
-  test, history). `/farol warn` opens the menu on this tab.
+- **Bar** — what belongs to the chosen bar: **Bar 1 / 2 / 3**, **Show** and **Lock**; the **presets** (**Basic**
+  goes back to the basics; **Leveling**, **Gold & farm** and **Dungeons** turn on a set of items that go together;
+  **Undo** goes back — also `/farol preset leveling` / `/farol preset undo`); the items in groups (Performance,
+  Location, Gear and bags, Gold, Progress, Time and social), with a **gear** next to the ones that have settings (it
+  opens that item's window or warning); a **strip at the bottom explains the hovered item**; and the
+  **Appearance...** and **Order...** buttons of this bar.
+- **Warnings** — every warning in groups: Gear and bags, Character, Quests and travel, Breaks, How to warn (sound,
+  "Remind in", test, history). At the top, **Recommended only** and **Turn all off** (`/farol warn recommended` /
+  `/farol warn none`); at the bottom, the explanation of the hovered warning. `/farol warn` opens the menu on this
+  tab.
 - **Tools** — one button per window, with what it does: Alarms, Tasks, Loot, History and **Summary now**.
 - **General** — what applies to all your characters: language (Auto / Português / English), server time, session
   summary at login, gold of all characters, full tooltip, the quick buttons next to bar 1, the **minimap button**
-  (show / lock); and **Restore**: bar position, reset session, forget characters.
+  (show / lock); **Restore**: bar position, reset session, forget characters; and **Profiles (advanced)**: the same
+  bars on every character or just this one, and **Copy from...**.
 
 **Minimap button:** click = menu, **right-click = hide/show every bar at once** (this session only — handy for
 screenshots; `/farol` also brings them back), Shift-click = Warnings tab. Drag it around the minimap (unless locked).

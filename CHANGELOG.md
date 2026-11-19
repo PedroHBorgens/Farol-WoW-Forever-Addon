@@ -2,6 +2,16 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.11.0 — Simpler menu
+- Bar tab: **presets** (Basic, Leveling, Gold & farm, Dungeons) set up the bar in one click, with **Undo**
+  (`/farol preset leveling`, `/farol preset undo`); presets only change what you click (nothing turns on by itself).
+- A **gear** next to items with settings (Hearthstone, ammo, quests, goals, farm, clock, tasks, dungeon) opens that
+  item's window or warning.
+- A strip at the bottom of the Bar and Warnings tabs explains the item or warning under the mouse.
+- Warnings tab in groups (Gear and bags, Character, Quests and travel, Breaks, How to warn), with **Recommended only**
+  and **Turn all off** (`/farol warn recommended`, `/farol warn none`).
+- Profile and "Copy from..." moved to the General tab (Profiles, advanced). No setting changed.
+
 ## 3.10.0 — Hearthstone
 - New bar item **Hearthstone**: where it is bound and the cooldown (`Lighthouse Village · 23m` / `ready` / `no stone`);
   the tooltip shows what time it will be ready.

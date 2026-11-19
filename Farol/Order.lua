@@ -116,7 +116,7 @@ end
 local function CreateWindow()
     local count = #ns.ITEM_ORDER
     local frame = CreateFrame("Frame", "FarolOrder", UIParent, ns.backdropTemplate)
-    frame:SetSize(360, 112 + count * ROW_HEIGHT)
+    frame:SetSize(420, 112 + count * ROW_HEIGHT) -- nomes longos + "(escondido)" antes das setas
     frame:SetPoint("CENTER", 60, 0)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)

@@ -95,7 +95,7 @@ local STRINGS = {
         app_bad_bg    = "invalid background: use 0 to 100 (%).",
         app_usage     = "usage: /farol appearance scale N || bg N || text N || icons N || row || column || width N || border || icons || button || lootbutton || combat || instance || default",
         opt_appearance = "Appearance...",
-        help_appearance = "  /farol appearance   - open the appearance window (scale, background, layout, hide in combat)",
+        help_appearance = "  /farol appearance    - open the appearance window (scale, background, layout, hide in combat)",
     },
 }
 for lang, entries in pairs(STRINGS) do

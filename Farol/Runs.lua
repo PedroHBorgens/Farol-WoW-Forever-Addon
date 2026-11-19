@@ -66,7 +66,7 @@ local STRINGS = {
     },
     en = {
         name_run      = "Dungeon / raid run", cmd_run = "dungeon",
-        desc_run      = "Inside a dungeon or raid: time, XP and gold of this run. Outside, it leaves the bar.",
+        desc_run      = "Inside a dungeon or raid: time, XP and gold of this run. Outside, it hides itself.",
         run_party     = "dungeon",
         run_raid      = "raid",
         run_unknown   = "Instance",

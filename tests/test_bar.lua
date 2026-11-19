@@ -33,12 +33,12 @@ return {
 
     { "language: auto follows the client, pt/en switch, invalid rejected", function(T, Mock)
         local H = Mock.new({ locale = "enUS" }):login()
-        H:slash("lock"); T.has(H:lastMsg(), "panel locked")
-        H:slash("lang pt"); H:slash("lock"); T.has(H:lastMsg(), "painel destravado")
-        H:slash("lang klingon"); T.has(H:lastMsg(), "uso: /farol lang pt | en | auto")
+        H:slash("lock"); T.has(H:lastMsg(), "bar locked")
+        H:slash("lang pt"); H:slash("lock"); T.has(H:lastMsg(), "barra destravada")
+        H:slash("lang klingon"); T.has(H:lastMsg(), "uso: /farol idioma pt | en | auto")
         T.eq(H.env.FarolDB.lang, "pt")
         local H2 = Mock.new({ locale = "ptBR" }):login()
-        H2:slash("lock"); T.has(H2:lastMsg(), "painel travado")
+        H2:slash("lock"); T.has(H2:lastMsg(), "barra travada")
     end },
 
     { "corrupted saved settings fall back to safe defaults", function(T, Mock)
@@ -60,11 +60,11 @@ return {
         local H = Mock.new():login()
         H:slash("esconder ouro"); T.hasnt(H:bar(), "123g")
         H:slash("show gold"); T.has(H:bar(), "123g")
-        H:slash("hide klingon"); T.has(H:lastMsg(), "uso: /farol show|hide fps | ms | mem")
+        H:slash("hide klingon"); T.has(H:lastMsg(), "uso: /farol mostrar|esconder fps | ms | mem")
         H.msgs = {}
         H:slash("itens"); T.has(H.strip(table.concat(H.msgs, "/")), "Ouro (ouro): visível")
         for _, key in ipairs(ALL_ITEMS) do H:slash("hide " .. key) end
-        T.has(H:bar(), "/farol show <item>", "hint when every item is hidden")
+        T.has(H:bar(), "/farol mostrar <item>", "hint when every item is hidden")
     end },
 
     { "all 22 items render with correct values", function(T, Mock)

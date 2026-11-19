@@ -80,7 +80,7 @@ return {
         H:slash("barra 2 mostrar"); H:slash("barra 1")
         H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
         local b2 = buttonWithText(H, "Barra 2")
-        T.ok(b2, "button Barra 2"); T.ok(buttonWithText(H, "Barra 3 (off)"), "bar 3 marked off")
+        T.ok(b2, "button Barra 2"); T.ok(buttonWithText(H, "Barra 3 (desl.)"), "bar 3 marked off")
         T.eq(buttonWithText(H, "Barra 1")._highlight, true)
         H:click(b2)
         T.eq(rawget(H.env.FarolDB, "activeBar"), 2); T.eq(b2._highlight, true)

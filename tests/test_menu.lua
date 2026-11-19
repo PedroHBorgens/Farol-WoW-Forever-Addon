@@ -70,7 +70,7 @@ return {
         H:slash("aviso")
         local w = H.env.FarolOptions.controls.warnings
         T.eq(H:text(w.gearHeader), "Equipamento e bolsas"); T.eq(H:text(w.charHeader), "Personagem")
-        T.eq(H:text(w.breaksHeader), "Pausas"); T.eq(H:text(w.howHeader), "Como avisar")
+        T.eq(H:text(w.breaksHeader), "Pausas e lembretes"); T.eq(H:text(w.howHeader), "Como avisar")
         T.eq(H:text(H.env.FarolWarnTasks.label), "Tarefas diárias pendentes (1 h antes)")
         H:check(H.env.FarolWarnTasks, true); T.eq(H.env.FarolDB.warnings.tasks, true)
         T.eq(H.env.FarolPanelWarnTasks._checked, true, "settings panel synced")
@@ -109,7 +109,7 @@ return {
         local _, set = open(H)
         T.eq(H:text(set.tabs.tools), "Tools"); T.eq(H:text(set.groups[3]), "Gear and bags")
         T.eq(H:text(set.shown.label), "Show this bar")
-        T.eq(H:text(set.warnings.breaksHeader), "Breaks"); T.eq(H:text(H.env.FarolWarnDurab.label), "Durability below")
+        T.eq(H:text(set.warnings.breaksHeader), "Breaks and reminders"); T.eq(H:text(H.env.FarolWarnDurab.label), "Durability below")
         T.eq(H:text(set.tools[7]), "Summary now")
     end },
 }

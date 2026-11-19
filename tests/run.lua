@@ -79,7 +79,7 @@ local SUITES = {
     "test_menu",
     "test_goals",
     "test_runs",
-    "test_minimap", "test_farm", "test_quests", "test_defaults",
+    "test_minimap", "test_farm", "test_quests", "test_defaults", "test_hearth",
     "test_globals",
 }
 

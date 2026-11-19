@@ -77,6 +77,10 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   `GetQuestObjectives`, `GetMaxNumQuestsCanAccept`); antigos `GetQuestLogTitle` — a ordem muda: quando o 4º valor é
   número (grupo sugerido do 3.3.5a), categoria/fechada/completa andam uma posição; completa = 1 (pronta) ou -1 (falhou).
   Limite: `GetMaxNumQuestsCanAccept` → `MAX_QUESTLOGQUESTS` → 20. Nunca abrir categorias fechadas (só avisar no tooltip).
+- Pedra de Regresso: item 6948; lugar com `GetBindLocation`; recarga com `C_Container.GetItemCooldown` (modernos) ou
+  `GetItemCooldown` (antigos) — duração ≤ 1,5 s é a recarga global e não conta. Sem lugar informado, o item some da barra.
+- Item da barra **ausente** nos dados salvos (item novo para quem já usa) vem **desligado**; o padrão de `ITEM_DEFAULTS`
+  só vale em instalação nova (sem lista de itens salva). Valor inválido volta ao padrão.
 - **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
   lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 
@@ -85,8 +89,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Goals, Farm, Quests, Runs, MinimapButton
-  Core.lua          barras (até 3, grade de células), 27 itens, tooltip, menu de opções, comandos /farol, dados salvos
+                    Appearance, Order, Tasks, Goals, Farm, Quests, Hearth, Runs, MinimapButton
+  Core.lua          barras (até 3, grade de células), 28 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água, tarefas),
@@ -99,6 +103,8 @@ Farol/
   Farm.lua          metas de farm/itens (item "farm", tooltip com ritmo, linhas na janela de Metas, "+ Meta" nos saques,
                     /farol meta item, /farol farm)
   Quests.lua        diário de missões (item "quests", tooltip; avisos questFull/questReady ficam em Warnings.lua)
+  Hearth.lua        Pedra de Regresso (item "hearth": lugar + recarga; aviso hearthReady em Warnings.lua; lugar dos
+                    personagens em chars[...].bind, gravado pelo Core)
   Runs.lua          registro de masmorras/raides (corrida atual no item "run", resumo ao sair, 10 últimas, /farol masmorra)
   MinimapButton.lua botão próprio no minimapa (sem bibliotecas) + entrada AddonCompartment do .toc (/farol minimapa)
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
@@ -146,7 +152,8 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   `ns.SetAllBarsHidden` ("esconder todas", só na sessão: `Profiles.allHidden`, respeitado por `Profiles.Visibility`;
   `/farol` sozinho desfaz). Sem `Minimap` (outra interface) o botão simplesmente não é criado.
 - **Dados salvos:** `FarolDB` (conta: configurações, `items`, `order`, `alarms`, `loot`, `warnings`, `chars` = ouro
-  e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks? }`
+  e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks?, bind? }`
+  (bind = onde a Pedra de Regresso estava vinculada, texto limpo até 40 letras)
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle
   e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores) e
   `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `runs` = `{ list (máx. 10), cur }` corridas

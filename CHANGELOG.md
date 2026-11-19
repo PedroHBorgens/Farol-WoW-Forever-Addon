@@ -2,6 +2,16 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.10.0 — Hearthstone
+- New bar item **Hearthstone**: where it is bound and the cooldown (`Lighthouse Village · 23m` / `ready` / `no stone`);
+  the tooltip shows what time it will be ready.
+- On only on a fresh install (approved exception to rule 8); existing players get it off, and the news says where to
+  turn it on. Bar items missing from saved data now always arrive off.
+- Optional warning (Warnings tab, off): "Hearthstone ready", once per cooldown, after combat and dungeons.
+- The gold tooltip shows where each of your characters was bound when they logged out.
+- Only reads (item-using and binding APIs added to the forbidden list); nothing sent. The Order window rows are a bit
+  shorter so the 28 items fit on smaller screens.
+
 ## 3.9.1 — You decide: almost everything starts off
 - New project rule: **every new feature starts off**; updating never turns anything on. An automated test keeps the
   exact list of what is on by default (nothing changed in this version).

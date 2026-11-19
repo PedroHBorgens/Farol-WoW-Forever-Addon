@@ -3,8 +3,8 @@
 [Português](README.pt-BR.md) | **English**
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
-**FPS · latency · memory · coordinates · zone · speed · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · gold/level goals · farm goals (items) · quest log · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (27 items).
+**FPS · latency · memory · coordinates · zone · speed · Hearthstone · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
+reputation · professions · gold/level goals · farm goals (items) · quest log · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (28 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -15,7 +15,7 @@ add-on never turns anything on by itself (an automated test checks this).
 
 | On the first time | Everything else starts off |
 |---|---|
-| The bar with the basics: FPS, latency, coordinates, zone, durability and gold (6 of 27 items) | The other 21 bar items and bars 2 and 3 |
+| The bar with the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (7 of 28 items) | The other 21 bar items and bars 2 and 3 |
 | Warnings for durability, bags, unspent talents, lower-rank spells and professions (with sound) | Ammo, reagents, break, water, tasks, goals, quests, rested XP of your characters |
 | Session summary at login and when leaving a dungeon — only in **your** chat | Full tooltip, server time, gold of all characters, hide in combat |
 | Minimap button | Per-character profiles, alarms, tasks, goals |
@@ -280,6 +280,16 @@ includes the bank when the game reports it. The **Goals...** window lists the it
 remove them (X). Up to 10 items per character; the "goal reached" warning covers them too, once per item.
 `/farol goal item remove <name or number>`, `/farol goal item clear`. Farol only **counts** items: it never moves, sells,
 uses or loots anything, and nothing is sent.
+
+## Hearthstone
+
+The **Hearthstone** item shows where it is bound and how long until it is ready: `Lighthouse Village · 23m` (yellow),
+`Lighthouse Village · ready` (green) or `Lighthouse Village · no stone` (grey, when it is not in your bags — the place
+still shows). The tooltip shows what time it will be ready. It is on **only on a fresh install** (approved as an
+exception to the "new features start off" rule); if you already use Farol, it arrives off — turn it on in Menu > Bar
+(`/farol show hearth`). Optional warning (off) in the **Warnings** tab: **"Hearthstone ready"**, once per cooldown,
+waiting for combat and dungeons to end (`/farol warn hearth on`). The **gold** tooltip also shows where each of your
+characters was bound when they logged out. Farol only **reads**: it never uses the stone or binds it anywhere.
 
 ## Quest log
 

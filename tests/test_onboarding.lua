@@ -28,7 +28,7 @@ return {
     { "first time: a welcome explains that only the basics are on, once", function(T, Mock)
         local H = Mock.new():login()
         local text = chat(H)
-        T.has(text, "bem-vindo! A barra começa só com o básico: FPS, Latência, Coordenadas, Zona, Durabilidade, Ouro.")
+        T.has(text, "bem-vindo! A barra começa só com o básico: FPS, Latência, Coordenadas, Zona, Pedra de Regresso, Durabilidade, Ouro.")
         T.has(text, "há mais 21 informações e vários avisos desligados — clique com o botão direito na barra")
         T.hasnt(text, "novidades", "a new player gets the welcome, not the news")
         local N = relog(H, Mock)
@@ -36,7 +36,7 @@ return {
         T.hasnt(chat(N), "novidades")
         local before = 0
         for _, v in pairs(H.env.FarolDB.items) do if v then before = before + 1 end end
-        T.eq(before, 6, "nothing was turned on by the welcome")
+        T.eq(before, 7, "nothing was turned on by the welcome")
     end },
 
     { "after an update: the news are listed once (only what is new for you)", function(T, Mock)
@@ -72,11 +72,11 @@ return {
         local _, window = menuChecks(H)
         local hints = {}
         hints[#hints + 1] = H:text(H.env.FarolOptions.controls.hint) -- texto da aba Barra
-        T.has(table.concat(hints, " | "), "Itens na barra: 6 de 27 ligados — tudo é opcional, marque só o que quiser")
+        T.has(table.concat(hints, " | "), "Itens na barra: 7 de 28 ligados — tudo é opcional, marque só o que quiser")
         H:slash("show lixo")
         hints = {}
         hints[#hints + 1] = H:text(H.env.FarolOptions.controls.hint) -- texto da aba Barra
-        T.has(table.concat(hints, " | "), "Itens na barra: 7 de 27 ligados", "updates when an item is turned on")
+        T.has(table.concat(hints, " | "), "Itens na barra: 8 de 28 ligados", "updates when an item is turned on")
         local junk
         for _, check in ipairs(H:framesOf("CheckButton")) do
             if check.label and H:text(check.label) == "Lixo nas bolsas" then junk = check end
@@ -100,7 +100,7 @@ return {
         for _, key in ipairs(H.ns.ITEM_ORDER) do H:slash("show " .. key) end
         T.has(tip(H), "Clique direito: opções.", "all on: the plain hint")
         local E = Mock.new({ locale = "enUS" }):login()
-        T.has(chat(E), "welcome! The bar starts with the basics only: FPS, Latency, Coordinates, Zone, Durability, Gold.")
+        T.has(chat(E), "welcome! The bar starts with the basics only: FPS, Latency, Coordinates, Zone, Hearthstone, Durability, Gold.")
         T.has(chat(E), "there are 21 more items and several warnings turned off")
     end },
 }

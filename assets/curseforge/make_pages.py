@@ -101,15 +101,15 @@ tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
 page("farol-02-bar-items-layout-tooltip", f"""
 <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
-     "27 items, each with its own short tooltip (Shift: all)", "27 informações, cada uma com o seu tooltip curto (Shift: tudo)")
+     "28 items, each with its own short tooltip (Shift: all)", "28 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid (current run)","Friends online","Guild online"]
-on = {0,1,3,4,6,7,8,9,10,12,14,15,16,17,18,19,21}
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid (current run)","Friends online","Guild online"]
+on = {0,1,3,4,6,7,8,9,10,11,13,15,16,17,18,19,20,22}
 half = 12
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
-GROUPS = [("Performance", [0, 1, 2]), ("Location", [3, 4, 5]), ("Gear and bags", [6, 7, 8, 9]), ("Gold", [10, 11, 12]),
-          ("Progress", [13, 14, 15, 16, 17, 18, 19]), ("Time and social", [20, 21, 22, 23, 24, 25, 26])]
+GROUPS = [("Performance", [0, 1, 2]), ("Location", [3, 4, 5, 6]), ("Gear and bags", [7, 8, 9, 10]), ("Gold", [11, 12, 13]),
+          ("Progress", [14, 15, 16, 17, 18, 19, 20]), ("Time and social", [21, 22, 23, 24, 25, 26, 27])]
 grp = lambda title, idx: (f'<div class="grp"><div class="gh">{title}</div>'
                           + "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in idx) + '</div>')
 tabs = lambda active: '<div class="tabs">' + "".join(f'<span class="tab{" on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
@@ -118,7 +118,7 @@ menu = f"""<div class="win menu3" style="width:640px;padding-top:12px;padding-bo
 <div class="line"><span class="k">Bar:</span><span class="btn hl" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span></div>
 <div class="line"><span class="k">Profile:</span><span class="btn" style="padding:2px 10px">Account ▾</span><span class="btn" style="padding:2px 10px">Copy from... ▾</span></div>
 <div class="line"><span class="ck" style="margin:0"><span class="box">✓</span>Show this bar</span><span class="ck" style="margin:0 0 0 24px"><span class="box"></span>Lock position</span></div>
-<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 17 of 27 on — everything is optional, tick only what you want (hover for details).</div>
+<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 18 of 28 on — everything is optional, tick only what you want (hover for details).</div>
 <div class="cols">{"".join(grp(t, i) for t, i in GROUPS)}</div>
 <div class="line" style="margin-top:10px"><span class="btn">Appearance...</span><span class="btn hl">Order...</span></div></div>"""
 TAB_CSS = """

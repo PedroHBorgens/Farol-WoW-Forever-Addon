@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Runs.lua", "MinimapButton.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "MinimapButton.lua" }
 
 local function noop() end
 
@@ -185,6 +185,15 @@ function Mock.new(opts)
     -- Diário de missões: H.quests = { { title, level, header?, done?, failed?, have?, need?, collapsed? } }
     -- (moderno: C_QuestLog; 3.3.5a: GetQuestLogTitle com o "grupo sugerido" no 4º valor). H.questMax = limite.
     H.quests, H.questMax = {}, 20
+    -- Pedra de Regresso: H.bind = lugar (nil = o jogo não informa), H.hearthCD = { início, duração } (GetTime),
+    -- quantidade em H.itemCounts[6948].
+    H.bind, H.hearthCD = nil, { 0, 0 }
+    env.GetBindLocation = function() return H.bind end
+    local function hearthCooldown(id)
+        if id ~= 6948 then return 0, 0, 1 end
+        return H.hearthCD[1], H.hearthCD[2], 1
+    end
+    if mode == "wotlk" then env.GetItemCooldown = hearthCooldown else H.containerCooldown = hearthCooldown end
     local function questCount()
         local n = 0
         for _, q in ipairs(H.quests) do if not q.header then n = n + 1 end end
@@ -412,6 +421,7 @@ function Mock.new(opts)
             end,
         }
         env.C_Container = {
+            GetItemCooldown = function(id) return H.containerCooldown(id) end,
             GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end,
             GetContainerNumFreeSlots = function(bag) return H.bagFree[bag] or 0, 0 end,
             GetContainerItemInfo = function(bag, slot) -- cliente moderno: tabela

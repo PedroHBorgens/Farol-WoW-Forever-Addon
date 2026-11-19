@@ -43,6 +43,7 @@ local DEFAULTS = {
     goals = false,                                           -- meta de ouro/nível alcançada
     questFull = false, questMin = 19,                        -- diário de missões quase cheio (a partir de N)
     questReady = false,                                      -- missões prontas ao entrar numa cidade/estalagem
+    hearthReady = false,                                     -- Pedra de Regresso pronta (fim da recarga)
 }
 local QUEST_MIN, QUEST_MAX = 1, 100
 local MAX_ACTION_SLOT = 180 -- barras de ação (clientes modernos têm até 180 espaços)
@@ -126,6 +127,10 @@ local STRINGS = {
         warn_questFull = "Diário de missões quase cheio: %d/%d.",
         warn_questFull_full = "Diário de missões cheio: %d/%d!",
         warn_opt_questReady = "Missões prontas (ao entrar numa cidade ou estalagem)",
+        warn_opt_hearthReady = "Pedra de Regresso pronta (espera o combate e a masmorra)",
+        warn_name_hearthReady = "Pedra de Regresso pronta",
+        warn_hearthReady = "Pedra de Regresso pronta (%s).",
+        warn_hearthReady_noplace = "Pedra de Regresso pronta.",
         warn_name_questReady = "missões prontas para entregar",
         warn_questReady = "Você tem %d missões prontas para entregar.",
         warn_questReady_one = "Você tem 1 missão pronta para entregar.",
@@ -135,7 +140,7 @@ local STRINGS = {
         warn_goals     = "meta alcançada: %s!",
         warn_sec_gear  = "Equipamento e bolsas",
         warn_sec_char  = "Personagem",
-        warn_sec_breaks = "Pausas",
+        warn_sec_breaks = "Pausas e lembretes",
         warn_sec_how   = "Como avisar",
         warn_tasks    = "faltam %d tarefas diárias e o reset diário é em %s.",
         warn_task_one = "falta 1 tarefa diária e o reset diário é em %s.",
@@ -167,7 +172,7 @@ local STRINGS = {
         warn_name_sound = "som",
         warn_bad_durab  = "valor inválido: use de 5 a 50 (%).",
         warn_bad_bags   = "valor inválido: use de 0 a 10 espaços.",
-        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || missoes N || durab/bolsas/talentos/graus/profissoes/descansado/municao/reagentes/pausa/agua/missoes/prontas/som on||off || municao A V || reagentes A V || pausa/agua lutas on||off || lembrar N || status || silenciar",
+        warn_usage      = "uso: /farol aviso durab N || bolsas N || pausa N || agua N || missoes N || durab/bolsas/talentos/graus/profissoes/descansado/municao/reagentes/pausa/agua/missoes/prontas/regresso/som on||off || municao A V || reagentes A V || pausa/agua lutas on||off || lembrar N || status || silenciar",
         opt_warnings    = "Avisos...",
         help_warn       = "  /farol aviso         - abrir o menu na aba Avisos (durabilidade, bolsas, talentos, profissões, pausa, água...)",
     },
@@ -241,6 +246,10 @@ local STRINGS = {
         warn_questFull = "Quest log almost full: %d/%d.",
         warn_questFull_full = "Quest log full: %d/%d!",
         warn_opt_questReady = "Quests ready (when entering a city or inn)",
+        warn_opt_hearthReady = "Hearthstone ready (waits for combat and dungeons to end)",
+        warn_name_hearthReady = "Hearthstone ready",
+        warn_hearthReady = "Hearthstone ready (%s).",
+        warn_hearthReady_noplace = "Hearthstone ready.",
         warn_name_questReady = "quests ready to turn in",
         warn_questReady = "You have %d quests ready to turn in.",
         warn_questReady_one = "You have 1 quest ready to turn in.",
@@ -250,7 +259,7 @@ local STRINGS = {
         warn_goals     = "goal reached: %s!",
         warn_sec_gear  = "Gear and bags",
         warn_sec_char  = "Character",
-        warn_sec_breaks = "Breaks",
+        warn_sec_breaks = "Breaks and reminders",
         warn_sec_how   = "How to warn",
         warn_tasks    = "%d daily tasks left and the daily reset is in %s.",
         warn_task_one = "1 daily task left and the daily reset is in %s.",
@@ -282,7 +291,7 @@ local STRINGS = {
         warn_name_sound = "sound",
         warn_bad_durab  = "invalid value: use 5 to 50 (%).",
         warn_bad_bags   = "invalid value: use 0 to 10 slots.",
-        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || quests N || durab/bags/talents/ranks/professions/rested/ammo/reagents/break/water/quests/ready/sound on||off || ammo Y R || reagents Y R || break/water fights on||off || remind N || status || silence",
+        warn_usage      = "usage: /farol warn durab N || bags N || break N || water N || quests N || durab/bags/talents/ranks/professions/rested/ammo/reagents/break/water/quests/ready/hearth/sound on||off || ammo Y R || reagents Y R || break/water fights on||off || remind N || status || silence",
         opt_warnings    = "Warnings...",
         help_warn       = "  /farol warn          - open the menu on the Warnings tab (durability, bags, talents, professions, break, water...)",
     },
@@ -311,7 +320,7 @@ function Warnings.Sanitize(saved)
     local clean = {}
     if type(saved) ~= "table" then saved = {} end
     for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "restFull", "ammo", "reag", "pause", "pauseAnywhere",
-                           "water", "waterAnywhere", "tasks", "goals", "questFull", "questReady" }) do
+                           "water", "waterAnywhere", "tasks", "goals", "questFull", "questReady", "hearthReady" }) do
         if type(saved[key]) == "boolean" then clean[key] = saved[key] else clean[key] = DEFAULTS[key] end
     end
     clean.durabPct = InRange(saved.durabPct, DURAB_MIN, DURAB_MAX) or DEFAULTS.durabPct
@@ -354,6 +363,7 @@ local state = {
     goals = {},                                         -- metas: o "já avisada" fica salvo (FarolCharDB.goals)
     questFull = { armed = true, lastAt = nil, full = false }, -- diário quase cheio (como as bolsas)
     questReady = { wasResting = nil, lastAt = nil },    -- prontas: ao passar a descansar (cidade/estalagem)
+    hearthReady = { cooling = false },                  -- viu a pedra em recarga: avisa quando ficar pronta
 }
 
 local function PlayWarningSound()
@@ -1128,12 +1138,29 @@ local function CheckQuestReady(now)
     Announce(ready == 1 and T("warn_questReady_one") or string.format(T("warn_questReady"), ready), "questReady")
 end
 
+-- Pedra de Regresso: avisa uma vez quando a recarga termina (só se a viu em recarga nesta sessão; ao entrar com
+-- ela já pronta, não avisa). Espera a luta e a masmorra acabarem, como os lembretes.
+local Busy -- definida abaixo
+local function CheckHearth(now)
+    local entry = state.hearthReady
+    if not Settings().hearthReady or not ns.Hearth then entry.cooling = false return end
+    local ready, status = ns.Hearth.Ready()
+    if ready == nil then return end
+    if not ready then entry.cooling = true return end
+    local reminding = ReminderDue(entry, now)
+    if not entry.cooling and not reminding then return end
+    if Busy() then return end -- espera
+    entry.cooling = false
+    if reminding then entry.remindAt = nil end
+    Announce(status.place and string.format(T("warn_hearthReady"), status.place) or T("warn_hearthReady_noplace"), "hearthReady")
+end
+
 ---------------------------------------------------------------------------
 -- Lembretes de pausa e de beber água (por tempo)
 ---------------------------------------------------------------------------
 
 -- Em luta, ou dentro de masmorra, raide, arena ou campo de batalha?
-local function Busy()
+Busy = function()
     if InCombat() then return true end
     if IsInInstance then
         local ok, inside, kind = pcall(IsInInstance)
@@ -1197,6 +1224,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         pcall(CheckGoals)
         pcall(CheckQuestFull, now)
         pcall(CheckQuestReady, now)
+        pcall(CheckHearth, now)
     end
 end)
 
@@ -1224,6 +1252,7 @@ local function SetEnabled(key, value)
         end
     elseif key == "questReady" then state.questReady.wasResting, state.questReady.lastAt = nil, nil
     elseif key == "questFull" then state.questFull.armed, state.questFull.full = true, false
+    elseif key == "hearthReady" then state.hearthReady.cooling, state.hearthReady.remindAt = false, nil
     elseif state[key] then state[key].armed = true end
     Print(string.format(value and T("warn_on") or T("warn_off"), T("warn_name_" .. key)))
     if RefreshWindow then RefreshWindow() end
@@ -1404,7 +1433,8 @@ function Warnings.BuildControls(parent, prefix)
             function(value) SetAnywhere(key, value) end)
         y = y - 54
     end
-    y = y - 4
+    set.hearthReady = Check("HearthReady", x, y, "hearthReady")
+    y = y - 30
     set.howHeader = Header(x, y)
     set.sound = Check("Sound", x, y - 18, "sound")
     y = y - 50
@@ -1440,7 +1470,7 @@ local function RefreshSet(set)
     set.charHeader:SetText(T("warn_sec_char"))
     set.breaksHeader:SetText(T("warn_sec_breaks"))
     set.howHeader:SetText(T("warn_sec_how"))
-    for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "goals", "questFull", "questReady", "sound" }) do
+    for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "goals", "questFull", "questReady", "hearthReady", "sound" }) do
         set[key].label:SetText(T("warn_opt_" .. key))
         set[key]:SetChecked(settings[key])
     end
@@ -1594,6 +1624,7 @@ local KEYS = {
     metas = "goals", meta = "goals", goals = "goals", goal = "goals",
     missoes = "questFull", diario = "questFull", quests = "questFull", questlog = "questFull",
     prontas = "questReady", entregar = "questReady", ready = "questReady", turnin = "questReady",
+    regresso = "hearthReady", pedra = "hearthReady", hearth = "hearthReady", hearthstone = "hearthReady",
 }
 local FIGHTS = { lutas = true, luta = true, fights = true, fight = true, combate = true, combat = true }
 

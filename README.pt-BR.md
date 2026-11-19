@@ -3,8 +3,8 @@
 **Português** | [English](README.md)
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
-**FPS · latência · memória · coordenadas · zona · velocidade · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · diário de missões · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (27 itens).
+**FPS · latência · memória · coordenadas · zona · velocidade · Pedra de Regresso · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
+XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · diário de missões · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (28 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -15,7 +15,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 
 | Vem ligado na primeira vez | Todo o resto vem desligado |
 |---|---|
-| Barra com o básico: FPS, latência, coordenadas, zona, durabilidade e ouro (6 de 27 itens) | Os outros 21 itens da barra e a 2ª e 3ª barras |
+| Barra com o básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (7 de 28 itens) | Os outros 21 itens da barra e a 2ª e 3ª barras |
 | Avisos de durabilidade, bolsas, talentos não gastos, magias de grau antigo e profissões (com som) | Munição, reagentes, pausa, água, tarefas, metas, missões, descanso dos personagens |
 | Resumo da sessão ao entrar e ao sair de masmorra — só no **seu** chat | Tooltip completo, horário do servidor, ouro de todos os personagens, esconder em combate |
 | Botão no minimapa | Perfis por personagem, alarmes, tarefas, metas |
@@ -284,6 +284,17 @@ estimativa ("+18 nesta sessão (~24/h) · faltam ~32m"). A contagem inclui o ban
 **Metas...** lista os itens para mudar a quantidade ou apagar (X). Até 10 itens por personagem; o aviso de meta
 alcançada vale também para eles, uma vez por item. `/farol meta item remover <nome ou número>`, `/farol meta item limpar`.
 O Farol só **conta** os itens: nunca move, vende, usa ou saqueia nada, e nada é enviado.
+
+## Pedra de Regresso
+
+O item **Pedra de Regresso** mostra onde ela está vinculada e quanto falta da recarga: `Vila do Farol · 23m` (amarelo),
+`Vila do Farol · pronta` (verde) ou `Vila do Farol · sem pedra` (cinza, quando ela não está nas bolsas — o lugar
+continua aparecendo). O tooltip mostra a que horas ela fica pronta. Vem ligado **só em instalação nova** (aprovado
+como exceção à regra "função nova vem desligada"); quem já usa o Farol recebe desligado e liga em Menu > Barra
+(`/farol mostrar regresso`). Aviso opcional (desligado) na aba **Avisos**: **"Pedra de Regresso pronta"**, uma vez por
+recarga, esperando o combate e a masmorra acabarem (`/farol aviso regresso on`). O tooltip do **ouro** também mostra
+onde cada um dos seus personagens estava vinculado ao sair. O Farol só **lê**: nunca usa a pedra nem vincula em outro
+lugar.
 
 ## Diário de missões
 

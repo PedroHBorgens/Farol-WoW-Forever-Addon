@@ -2,14 +2,15 @@
 -- projeto). Ligar outra coisa por padrão exige mudar este teste de propósito.
 -- Rule 8: new features start OFF. Only what is listed below (approved by the project owner) is on by default.
 
-local ON_ITEMS = { fps = true, ms = true, coords = true, zone = true, durab = true, gold = true }
+local ON_ITEMS = { fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
+                   hearth = true } -- Pedra de Regresso: aprovada pelo dono (3.10), só em instalação nova
 local ON_WARNINGS = { durab = true, bags = true, sound = true, talents = true, ranks = true, prof = true }
 local ON_GENERAL = { shown = true, summary = true, runSummary = true, border = true, icons = true,
                      warnButton = true, lootButton = true }
 -- Padrões "ligado se não estiver salvo" (x ~= false) permitidos: arquivo → quantos.
 local DEFAULT_TRUE_PATTERNS = { ["Alarm.lua"] = 1, ["Loot.lua"] = 1, ["MinimapButton.lua"] = 1 }
 local FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua",
-                "Goals.lua", "Farm.lua", "Quests.lua", "Runs.lua", "MinimapButton.lua" }
+                "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "MinimapButton.lua" }
 
 local function read(path)
     local file = io.open(path, "r")
@@ -77,7 +78,7 @@ return {
         local hint = H:text(H.env.FarolOptions.controls.hint)
         T.has(hint, "tudo é opcional")
         -- Quem atualiza vê as novidades com "desligado" e onde ligar.
-        local saved = { newsSeen = #H.ns.NEWS - 2, items = { fps = true } }
+        local saved = { newsSeen = #H.ns.NEWS - 3, items = { fps = true } }
         H = Mock.new():login(saved)
         local text = H.strip(table.concat(H.msgs, "\n"))
         T.has(text, "metas de farm"); T.has(text, "desligado (ligue em Menu > Barra)")

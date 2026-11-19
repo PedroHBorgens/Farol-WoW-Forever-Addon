@@ -8,7 +8,7 @@ local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", 
                 "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "municao", "reagentes", "400", "5000", "15", "240", "2",
                 "graus", "som", "status", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
-                "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "Garrosh", "tarefa", "task", "feita", "apagar", "semanal", "diaria", "meta", "goal", "nivel", "limpar", "item", "farm", "remover", "missoes", "prontas", "aviso", "quests", "19", "|cffffffff|Hitem:4306::|h[Seda]|h|r", "[Seda]", "|Hitem:abc|h", "40", "1000000", "masmorra", "dungeon", "resumo", "minimapa", "minimap", "travar", "on", "off", "07:30", "25:99", "-1", "99999" }
+                "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "Garrosh", "tarefa", "task", "feita", "apagar", "semanal", "diaria", "meta", "goal", "nivel", "limpar", "item", "farm", "remover", "missoes", "prontas", "aviso", "quests", "19", "regresso", "hearth", "pedra", "|cffffffff|Hitem:4306::|h[Seda]|h|r", "[Seda]", "|Hitem:abc|h", "40", "1000000", "masmorra", "dungeon", "resumo", "minimapa", "minimap", "travar", "on", "off", "07:30", "25:99", "-1", "99999" }
 local BAD = { "x", 1e309, -1e309, 0 / 0, true, false, {}, { 1, 2 }, -5, 3.7, "" }
 
 local seed = 1
@@ -58,9 +58,12 @@ return {
                 db.warnings = {}
                 for _, key in ipairs({ "durab", "durabPct", "bags", "bagSlots", "sound", "talents", "ranks", "prof", "restFull", "remindMin",
                                        "ammo", "ammoYellow", "ammoRed", "reag", "reagYellow", "reagRed",
-                                       "pause", "pauseMin", "pauseAnywhere", "water", "waterMin", "waterAnywhere", "tasks", "goals", "questFull", "questMin", "questReady" }) do
+                                       "pause", "pauseMin", "pauseAnywhere", "water", "waterMin", "waterAnywhere", "tasks", "goals", "questFull", "questMin", "questReady", "hearthReady" }) do
                     db.warnings[key] = pick(BAD)
                 end
+            end
+            if random(3) == 1 then -- personagens: lugar da Pedra de Regresso adulterado
+                db.chars = { Azralon = { Mira = { gold = 100, level = 20, t = 1700000000, bind = pick(BAD) }, [pick({ "x", 1 })] = pick(BAD) } }
             end
             if random(2) == 1 then -- perfis da 3.x: estrutura e cada campo da barra adulterados
                 local bar = {}

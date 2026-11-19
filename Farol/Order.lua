@@ -8,7 +8,7 @@
 
 local _, ns = ...
 
-local ROW_HEIGHT = 22
+local ROW_HEIGHT = 20 -- 28 itens: a janela fica com ~670 px de altura
 
 local Order = {}
 ns.Order = Order
@@ -104,7 +104,7 @@ local window
 
 local function ArrowButton(parent, name, up)
     local button = CreateFrame("Button", name, parent)
-    button:SetSize(22, 22)
+    button:SetSize(20, 20)
     local base = up and "Interface\\ChatFrame\\UI-ChatIcon-ScrollUp" or "Interface\\ChatFrame\\UI-ChatIcon-ScrollDown"
     button:SetNormalTexture(base .. "-Up")
     button:SetPushedTexture(base .. "-Down")

@@ -71,8 +71,10 @@ return {
             "AcceptQuest", "CompleteQuest", "GetQuestReward", "AbandonQuest", "SetAbandonQuest", "QuestLogPushQuest",
             "AddQuestWatch", "RemoveQuestWatch", "ExpandQuestHeader", "CollapseQuestHeader", "SelectQuestLogEntry",
             "C_QuestLog.AbandonQuest", "C_QuestLog.SetAbandonQuest", "C_QuestLog.AddQuestWatch",
+            -- Pedra de Regresso: nunca usar itens nem vincular em outro lugar
+            "UseInventoryItem", "ConfirmBinder", "C_PlayerInteractionManager", "UseToy", "C_Container.UseContainerItem",
         }
-        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Runs.lua", "MinimapButton.lua" }) do
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "MinimapButton.lua" }) do
             local code = read("Farol/" .. file)
             code = string.gsub(code, "%-%-%[%[.-%]%]", "") -- comentários de bloco
             code = string.gsub(code, "%-%-[^\n]*", "")     -- comentários de linha
@@ -108,7 +110,7 @@ return {
                         "assets/video/make_video.py", "assets/video/timeline.js", "assets/video/youtube.py",
                         "assets/video/youtube.js", "assets/video/youtube_script.txt" }
         for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua",
-                                "Goals.lua", "Farm.lua", "Quests.lua", "Runs.lua", "MinimapButton.lua" }) do
+                                "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "MinimapButton.lua" }) do
             files[#files + 1] = "Farol/" .. file
         end
         for _, path in ipairs(files) do

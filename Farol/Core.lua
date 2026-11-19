@@ -19,13 +19,14 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
-    "fps", "ms", "mem", "coords", "zone", "speed", "durab", "bags", "junk", "ammo",
+    "fps", "ms", "mem", "coords", "zone", "speed", "hearth", "durab", "bags", "junk", "ammo",
     "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "farm", "quests", "clock", "reset", "tasks", "playtime", "run", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
 local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
+    hearth = true, -- aprovado pelo dono (3.10): só em instalação nova; quem já usa recebe desligado
     mem = false, speed = false, bags = false, session = false, xp = false,
     goldh = false, xph = false, rep = false, prof = false, goals = false, farm = false, quests = false, junk = false, ammo = false,
     clock = false, reset = false, tasks = false, playtime = false, run = false, friends = false, guild = false,
@@ -39,6 +40,7 @@ local ITEM_ALIASES = {
     coords = "coords", coord = "coords", coordenadas = "coords", coordinates = "coords",
     zona = "zone", zone = "zone",
     vel = "speed", velocidade = "speed", speed = "speed",
+    regresso = "hearth", pedra = "hearth", hearth = "hearth", hearthstone = "hearth",
     durab = "durab", dur = "durab", durabilidade = "durab", durability = "durab",
     bolsas = "bags", bags = "bags", bolsa = "bags", bag = "bags",
     ouro = "gold", gold = "gold",
@@ -799,8 +801,10 @@ local function SanitizeDB(saved)
         local value = savedItems[key]
         if type(value) == "boolean" then
             clean.items[key] = value
+        elseif value == nil and next(savedItems) ~= nil then
+            clean.items[key] = false -- regra 8: quem já usa o Farol recebe item novo desligado
         else
-            clean.items[key] = ITEM_DEFAULTS[key] -- padrão do item
+            clean.items[key] = ITEM_DEFAULTS[key] -- padrão do item (instalação nova)
         end
     end
 
@@ -1306,6 +1310,8 @@ local function SanitizeChars(saved)
                             end
                             if #locks > 0 then entry.locks = locks end
                         end
+                        -- Pedra de Regresso (opcional): onde estava vinculada ao sair (texto limpo, até 40 letras).
+                        if ns.Hearth and type(info.bind) == "string" then entry.bind = ns.Hearth.Clean(info.bind) end
                         list[name] = entry
                         count = count + 1
                     end
@@ -1442,12 +1448,13 @@ local function RecordCharacter(force)
     gold, level = math.floor(gold), math.floor(level)
     local rest, max, inn = CurrentRest()
     if not force and entry and entry.gold == gold and entry.level == level and entry.rest == rest
-            and entry.inn == inn and time() - entry.t < 60 then return end
+            and entry.inn == inn and time() - entry.t < 60 then return end -- (o lugar da Pedra entra na próxima gravação)
     -- Instâncias salvas: atualizadas só quando a resposta do servidor já chegou; senão, mantém as anteriores.
     local locks = entry and entry.locks
     if locksLoaded then locks = LocksToSave(ReadLockouts()) end
+    local bind = ns.Hearth and ns.Hearth.BindLocation() or (entry and entry.bind) -- onde a Pedra está vinculada
     chars[name] = { gold = gold, level = level, t = time(), rest = rest, max = max, inn = rest and inn or nil,
-                    locks = locks }
+                    locks = locks, bind = bind }
 end
 
 -- Estimativa do descanso de um personagem deslogado, pelas regras do estilo clássico: em estalagem/cidade ganha
@@ -1511,7 +1518,8 @@ local function RealmCharacters()
     if not name or not db or type(db.chars) ~= "table" then return nil end
     local list, total = {}, 0
     for charName, info in pairs(db.chars[realm] or {}) do
-        list[#list + 1] = { name = charName, gold = info.gold, level = info.level, t = info.t, current = charName == name }
+        list[#list + 1] = { name = charName, gold = info.gold, level = info.level, t = info.t, current = charName == name,
+                            bind = info.bind }
         total = total + info.gold
     end
     table.sort(list, function(a, b)
@@ -2242,7 +2250,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2256,7 +2264,8 @@ end
 -- Novidade ligada a um item da barra ou a um aviso: se estiver desligada, a linha diz onde ligar (regra 8: o que é
 -- novo vem desligado; o jogador decide).
 Profiles.NEWS_ITEM = { news_rep = "rep", news_reset = "reset", news_prof = "prof", news_junk = "junk", news_supply = "ammo",
-                       news_tasks = "tasks", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests" }
+                       news_tasks = "tasks", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests",
+                       news_hearth = "hearth" }
 Profiles.NEWS_WARN = { news_breaks = "pause" }
 function Profiles.NewsLine(key)
     local item, warn = Profiles.NEWS_ITEM[key], Profiles.NEWS_WARN[key]
@@ -2429,6 +2438,10 @@ local ITEM_TEXT = {
     run = function() -- corrida atual numa masmorra/raide (Runs.lua); fora delas, some
         if not ns.Runs then return nil end
         return ns.Runs.BarText()
+    end,
+    hearth = function() -- Pedra de Regresso (Hearth.lua); sem o lugar informado, some da barra
+        if not ns.Hearth then return nil end
+        return ns.Hearth.BarText()
     end,
     quests = function() -- diário de missões (Quests.lua)
         if not ns.Quests then return nil end
@@ -2629,7 +2642,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  quests = "INV_Misc_Book_09",  run = "INV_Misc_Key_03",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  quests = "INV_Misc_Book_09",  hearth = "INV_Misc_Rune_01",  run = "INV_Misc_Key_03",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
@@ -2817,6 +2830,7 @@ TIP.gold = function()
         for i = 1, math.min(LIST_MAX, #chars) do
             local c = chars[i]
             local when = c.current and T("tt_gold_this") or FormatWhen(c.t)
+            if c.bind then when = when .. " · " .. c.bind end -- onde a Pedra de Regresso estava vinculada
             GameTooltip:AddDoubleLine("   " .. FactionName(c.name) .. " (" .. c.level .. ")",
                 FormatMoneyShort(c.gold) .. "  |cff8c8c8c" .. when .. "|r", 0.8, 0.8, 0.8, 1, 1, 1)
         end
@@ -2973,6 +2987,7 @@ TIP.goals = function() if ns.Goals then ns.Goals.Tooltip() end end
 TIP.run = function() if ns.Runs then ns.Runs.Tooltip() end end
 TIP.farm = function() if ns.Farm then ns.Farm.Tooltip() end end
 TIP.quests = function() if ns.Quests then ns.Quests.Tooltip() end end
+TIP.hearth = function() if ns.Hearth then ns.Hearth.Tooltip() end end
 
 TIP.playtime = function()
     local seconds = Safe(GetSessionSeconds)
@@ -2989,7 +3004,7 @@ end
 -- Item da barra -> seções do seu tooltip.
 local TIP_SECTIONS = {
     fps = { "perf" }, ms = { "perf" }, mem = { "perf" },
-    coords = { "place" }, zone = { "place" }, speed = { "place" },
+    coords = { "place" }, zone = { "place" }, speed = { "place" }, hearth = { "hearth" },
     durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
     xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" }, farm = { "farm" }, quests = { "quests" },
@@ -2999,9 +3014,9 @@ local TIP_SECTIONS = {
 ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
-local TIP_ORDER = { "perf", "place", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
+local TIP_ORDER = { "perf", "place", "hearth", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
                     "rep", "junk", "supply", "prof", "goals", "farm", "quests", "reset", "tasks", "playtime", "run", "social" }
-local TIP_NEEDS_ITEM = { rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", farm = "farm", quests = "quests", run = "run" }
+local TIP_NEEDS_ITEM = { hearth = "hearth", rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", farm = "farm", quests = "quests", run = "run" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -3250,7 +3265,7 @@ end
 Profiles.TABS = { "bar", "warnings", "tools", "general" }
 Profiles.GROUPS = {
     { "grp_perf", { "fps", "ms", "mem" } },
-    { "grp_place", { "coords", "zone", "speed" } },
+    { "grp_place", { "coords", "zone", "speed", "hearth" } },
     { "grp_gear", { "durab", "bags", "junk", "ammo" } },
     { "grp_gold", { "gold", "session", "goldh" } },
     { "grp_progress", { "xp", "xph", "rep", "prof", "goals", "farm", "quests" } },

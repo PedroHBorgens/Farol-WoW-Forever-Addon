@@ -2,6 +2,10 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.11.1 — Menu fixes
+- Bar tab: "Lock position" no longer overlaps "Show this bar" (it now sits right after the label, whatever the font).
+- The dungeon item is now called "Dungeon / raid run" so its gear fits inside the window.
+
 ## 3.11.0 — Simpler menu
 - Bar tab: **presets** (Basic, Leveling, Gold & farm, Dungeons) set up the bar in one click, with **Undo**
   (`/farol preset leveling`, `/farol preset undo`); presets only change what you click (nothing turns on by itself).

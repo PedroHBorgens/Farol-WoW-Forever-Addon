@@ -104,7 +104,7 @@ page("farol-02-bar-items-layout-tooltip", f"""
      "28 items, each with its own short tooltip (Shift: all)", "28 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid (current run)","Friends online","Guild online"]
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid run","Friends online","Guild online"]
 on = {0,1,3,4,6,7,8,9,10,11,13,15,16,17,18,19,20,22}
 half = 12
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)

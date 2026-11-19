@@ -3482,8 +3482,11 @@ local function BuildControls(parent, top)
             if Profiles.GEARS[key] then Profiles.AddGear(set, page, check, key) end
         end
     end
-    set.shown = CreateCheck(page, 370, -1, SetShown)
+    set.shown = CreateCheck(page, 350, -1, SetShown) -- logo depois dos botões Barra 1/2/3 (terminam em 344)
     set.locked = CreateCheck(page, 490, -1, SetLocked)
+    -- "Travar" logo depois do fim do texto de "Mostrar esta barra" (a fonte do jogo é mais larga que a estimativa).
+    set.locked:ClearAllPoints()
+    set.locked:SetPoint("LEFT", set.shown.label, "RIGHT", 14, 0)
     set.packLabel = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     set.packLabel:SetPoint("TOPLEFT", 16, -34)
     set.packs = {}

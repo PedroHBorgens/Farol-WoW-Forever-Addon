@@ -323,6 +323,30 @@ local STRINGS = {
         opt_hint     = "Marque o que deseja ver na barra.",
         opt_hint_count = "Itens na barra: %d de %d ligados — tudo é opcional, marque só o que quiser (passe o mouse para ver detalhes).",
         news_off_bar = " — desligado (ligue em Menu > Barra)",
+        news_packs   = "menu mais simples: pacotes prontos (Básico, Upando, Ouro e farm, Masmorras), engrenagem para configurar cada item e avisos em grupos",
+        pk_label     = "Pacotes:",
+        pk_basic     = "Básico",       pk_desc_basic = "volta a barra ao básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (desliga o resto).",
+        pk_leveling  = "Upando",       pk_desc_leveling = "liga XP, XP por hora, diário de missões e Pedra de Regresso.",
+        pk_farm      = "Ouro e farm",  pk_desc_farm = "liga ouro, ouro por hora, bolsas, lixo nas bolsas e metas de farm.",
+        pk_dungeon   = "Masmorras",    pk_desc_dungeon = "liga durabilidade, bolsas, munição e reagentes, masmorra atual e resets.",
+        pk_undo      = "Desfazer",
+        pk_done      = "pacote %s: %d item(ns) ligado(s) (Desfazer no menu ou /farol pacote desfazer).",
+        pk_done_basic = "pacote %s: a barra voltou ao básico, %d item(ns) mudaram (Desfazer no menu ou /farol pacote desfazer).",
+        pk_undone    = "pacote desfeito: a barra voltou a como estava.",
+        pk_nothing   = "nada para desfazer.",
+        pk_usage     = "uso: /farol pacote basico||upando||farm||masmorras||desfazer",
+        help_pack    = "  /farol pacote        - ligar um pacote de itens (basico, upando, farm, masmorras) ou desfazer",
+        opt_gear     = "Configurar",
+        gear_hearth  = "aviso de \"Pedra de Regresso pronta\" (aba Avisos).",
+        gear_ammo    = "limites e aviso de munição e reagentes (aba Avisos).",
+        gear_quests  = "avisos do diário de missões (aba Avisos).",
+        gear_goals   = "abre a janela Metas.",
+        gear_farm    = "abre a janela Metas (metas de farm).",
+        gear_clock   = "abre a janela Alarmes.",
+        gear_tasks   = "abre a janela Tarefas.",
+        gear_run     = "abre a janela Masmorras e raides.",
+        opt_info_default = "Passe o mouse num item para ver o que ele mostra. A engrenagem ao lado de um item abre a configuração dele.",
+        opt_profiles_header = "Perfis (avançado)",
         news_off_warn = " — desligado (ligue em Menu > Avisos)",
         tt_rightclick_more = "Clique direito: opções (mais %d informações para ligar).",
         tt_shift_full = "Segure Shift para ver todas as informações.",
@@ -624,6 +648,30 @@ local STRINGS = {
         opt_hint     = "Tick what you want to see on the bar.",
         opt_hint_count = "Bar items: %d of %d on — everything is optional, tick only what you want (hover for details).",
         news_off_bar = " — off (turn it on in Menu > Bar)",
+        news_packs   = "simpler menu: presets (Basic, Leveling, Gold & farm, Dungeons), a gear to set up each item and grouped warnings",
+        pk_label     = "Presets:",
+        pk_basic     = "Basic",        pk_desc_basic = "back to the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (turns the rest off).",
+        pk_leveling  = "Leveling",     pk_desc_leveling = "turns on XP, XP per hour, quest log and Hearthstone.",
+        pk_farm      = "Gold & farm",  pk_desc_farm = "turns on gold, gold per hour, bags, junk in bags and farm goals.",
+        pk_dungeon   = "Dungeons",     pk_desc_dungeon = "turns on durability, bags, ammo and reagents, current dungeon run and resets.",
+        pk_undo      = "Undo",
+        pk_done      = "preset %s: %d item(s) turned on (Undo in the menu or /farol preset undo).",
+        pk_done_basic = "preset %s: the bar is back to the basics, %d item(s) changed (Undo in the menu or /farol preset undo).",
+        pk_undone    = "preset undone: the bar is back to how it was.",
+        pk_nothing   = "nothing to undo.",
+        pk_usage     = "usage: /farol preset basic||leveling||farm||dungeons||undo",
+        help_pack    = "  /farol preset        - turn on a preset of items (basic, leveling, farm, dungeons) or undo",
+        opt_gear     = "Settings",
+        gear_hearth  = "the \"Hearthstone ready\" warning (Warnings tab).",
+        gear_ammo    = "ammo and reagent limits and warning (Warnings tab).",
+        gear_quests  = "quest log warnings (Warnings tab).",
+        gear_goals   = "opens the Goals window.",
+        gear_farm    = "opens the Goals window (farm goals).",
+        gear_clock   = "opens the Alarms window.",
+        gear_tasks   = "opens the Tasks window.",
+        gear_run     = "opens the Dungeons and raids window.",
+        opt_info_default = "Hover an item to see what it shows. The gear next to an item opens its settings.",
+        opt_profiles_header = "Profiles (advanced)",
         news_off_warn = " — off (turn it on in Menu > Warnings)",
         tt_rightclick_more = "Right-click: options (%d more items you can turn on).",
         tt_shift_full = "Hold Shift to see all information.",
@@ -2250,7 +2298,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -3291,6 +3339,96 @@ function Profiles.SelectTab(set, tab)
     if tab == "warnings" and ns.Warnings and ns.Warnings.RefreshControls then ns.Warnings.RefreshControls() end
 end
 
+-- Pacotes prontos (aba Barra): um clique liga um conjunto de itens que combinam; "Básico" volta ao básico.
+-- Regra 8: nada liga sozinho, só quando o jogador clica. "Desfazer" volta a barra a como estava antes do pacote.
+Profiles.PACKS = {
+    { "basic", replace = true, items = { "fps", "ms", "coords", "zone", "hearth", "durab", "gold" } },
+    { "leveling", items = { "xp", "xph", "quests", "hearth" } },
+    { "farm", items = { "gold", "goldh", "bags", "junk", "farm" } },
+    { "dungeon", items = { "durab", "bags", "ammo", "run", "reset" } },
+}
+Profiles.PACK_WORDS = { basico = "basic", basic = "basic", upando = "leveling", leveling = "leveling", level = "leveling",
+    ouro = "farm", farm = "farm", gold = "farm", masmorras = "dungeon", masmorra = "dungeon", dungeon = "dungeon",
+    dungeons = "dungeon", desfazer = "undo", undo = "undo" }
+
+function Profiles.ApplyPack(name)
+    local pack
+    for _, entry in ipairs(Profiles.PACKS) do if entry[1] == name then pack = entry end end
+    if not pack then return end
+    local before = {}
+    for _, key in ipairs(ITEM_ORDER) do before[key] = db.items[key] and true or false end
+    Profiles.packBackup = { bar = rawget(db, "activeBar") or 1, items = before }
+    local wanted, changed = {}, 0
+    for _, key in ipairs(pack.items) do wanted[key] = true end
+    for _, key in ipairs(ITEM_ORDER) do
+        local value = wanted[key] or (not pack.replace and before[key]) or false
+        if value ~= before[key] then changed = changed + 1 end
+        db.items[key] = value
+    end
+    UpdateText(); RefreshOptions()
+    if ns.Order then ns.Order.Refresh() end
+    Print(string.format(pack.replace and T("pk_done_basic") or T("pk_done"), T("pk_" .. name), changed))
+end
+
+function Profiles.UndoPack()
+    local backup = Profiles.packBackup
+    if not backup then Print(T("pk_nothing")) return end
+    Profiles.packBackup = nil
+    Profiles.With(backup.bar, function()
+        for key, value in pairs(backup.items) do db.items[key] = value end
+    end)
+    UpdateText(); RefreshOptions()
+    if ns.Order then ns.Order.Refresh() end
+    Print(T("pk_undone"))
+end
+
+function Profiles.PackCommand(rest)
+    local word = string.lower(string.match(rest or "", "^%s*(%a*)") or "")
+    local action = Profiles.PACK_WORDS[word]
+    if action == "undo" then Profiles.UndoPack()
+    elseif action then Profiles.ApplyPack(action)
+    else Print(T("pk_usage")) end
+end
+
+-- ⚙ ao lado dos itens que têm configuração: abre a janela ou a aba certa.
+Profiles.GEARS = {
+    hearth = "warnings", ammo = "warnings", quests = "warnings",
+    goals = function() ns.Goals.ToggleWindow() end, farm = function() ns.Goals.ToggleWindow() end,
+    clock = function() ns.Alarm.ToggleWindow() end, tasks = function() ns.Tasks.ToggleWindow() end,
+    run = function() ns.Runs.ToggleWindow() end,
+}
+function Profiles.AddGear(set, page, check, key)
+    local gear = CreateFrame("Button", NextName("Gear"), page)
+    gear:SetSize(14, 14)
+    gear:SetPoint("LEFT", check.label, "RIGHT", 4, 0)
+    gear:SetNormalTexture("Interface\\Icons\\INV_Misc_Gear_01")
+    gear:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
+    gear.key = key
+    gear:SetScript("OnClick", function()
+        local target = Profiles.GEARS[key]
+        if target == "warnings" then Profiles.SelectTab(set, "warnings") else target() end
+    end)
+    gear:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine(T("opt_gear"))
+        GameTooltip:AddLine(T("gear_" .. key), 1, 1, 1, true)
+        GameTooltip:Show()
+        Profiles.ShowInfo(set, nil, T("opt_gear") .. ": " .. T("gear_" .. key))
+    end)
+    gear:SetScript("OnLeave", function() GameTooltip:Hide(); Profiles.ShowInfo(set, nil) end)
+    set.gears = set.gears or {}
+    set.gears[key] = gear
+end
+
+-- Faixa de explicação (aba Barra): o item sob o mouse; sem nada, a dica geral.
+function Profiles.ShowInfo(set, key, text)
+    if not set.info then return end
+    set.infoKey = key
+    if text then set.info:SetText(text)
+    elseif key then set.info:SetText("|cffffd100" .. T("name_" .. key) .. ":|r " .. T("desc_" .. key))
+    else set.info:SetText("|cff9d9d9d" .. T("opt_info_default") .. "|r") end
+end
+
 -- Cria todos os controles dentro de "parent", começando na altura "top".
 local function BuildControls(parent, top)
     local set = { items = {}, langs = {}, groups = {}, tabs = {}, pages = {}, tools = {} }
@@ -3305,7 +3443,8 @@ local function BuildControls(parent, top)
         set.pages[key] = page
     end
 
-    -- Aba "Barra": qual barra, perfil, mostrar/travar, itens em grupos, Aparência e Ordem desta barra.
+    -- Aba "Barra": qual barra + mostrar/travar, pacotes prontos, itens em grupos (⚙ = configurar o item),
+    -- faixa de explicação do item sob o mouse, Aparência e Ordem desta barra.
     local page = set.pages.bar
     set.barLabel = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     set.barLabel:SetPoint("TOPLEFT", 16, -4)
@@ -3315,48 +3454,55 @@ local function BuildControls(parent, top)
         button:SetPoint("TOPLEFT", 72 + (n - 1) * 92, 0)
         set.bars[n] = button
     end
-    set.profileLabel = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    set.profileLabel:SetPoint("TOPLEFT", 16, -34)
-    set.profile = ns.CreateDropdown(page, "FarolProfile" .. index, 170, function()
-        return {
-            { text = T("pfl_account_all"), checked = Profiles.mode ~= "char", onClick = function() Profiles.SetMode("account") end },
-            { text = T("pfl_char_only"), checked = Profiles.mode == "char", onClick = function() Profiles.SetMode("char") end },
-        }
-    end)
-    set.profile:SetPoint("TOPLEFT", 72, -30)
-    set.copy = ns.CreateDropdown(page, "FarolProfileCopy" .. index, 130, function()
-        local items = {}
-        for _, source in ipairs(Profiles.Sources()) do
-            items[#items + 1] = { text = Profiles.SourceLabel(source), onClick = function() Profiles.CopyFrom(source) end }
-        end
-        if #items == 0 then items[1] = { text = T("pfl_none"), r = .6, g = .6, b = .6, onClick = function() end } end
-        return items
-    end)
-    set.copy:SetPoint("TOPLEFT", 250, -30)
     set.hint = page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    set.hint:SetPoint("TOPLEFT", 16, -92)
+    set.hint:SetPoint("TOPLEFT", 16, -60)
+    set.info = page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    set.info:SetPoint("TOPLEFT", 16, -380)
+    set.info:SetWidth(Profiles.MENU_W - 40)
+    set.info:SetJustifyH("LEFT")
     for g, group in ipairs(Profiles.GROUPS) do
         local col, row = (g - 1) % 3, math.floor((g - 1) / 3)
-        local x, y = 16 + col * 210, -110 - row * 124
+        local x, y = 16 + col * 210, -78 - row * 124
         local header = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         header:SetPoint("TOPLEFT", x, y)
         set.groups[g] = header
         for i, key in ipairs(group[2]) do
             local check = CreateCheck(page, x, y - 16 - (i - 1) * 22, function(value) SetItemVisible(key, value) end)
             check.label:SetFontObject("GameFontHighlightSmall")
-            -- Passar o mouse: o que este item mostra.
+            -- Passar o mouse: o que este item mostra (tooltip e faixa de explicação embaixo).
             check:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 GameTooltip:AddLine(T("name_" .. key))
                 GameTooltip:AddLine(T("desc_" .. key), 1, 1, 1, true)
                 GameTooltip:Show()
+                Profiles.ShowInfo(set, key)
             end)
-            check:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            check:SetScript("OnLeave", function() GameTooltip:Hide(); Profiles.ShowInfo(set, nil) end)
             set.items[key] = check
+            if Profiles.GEARS[key] then Profiles.AddGear(set, page, check, key) end
         end
     end
-    set.shown = CreateCheck(page, 16, -62, SetShown)
-    set.locked = CreateCheck(page, 226, -62, SetLocked)
+    set.shown = CreateCheck(page, 370, -1, SetShown)
+    set.locked = CreateCheck(page, 490, -1, SetLocked)
+    set.packLabel = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    set.packLabel:SetPoint("TOPLEFT", 16, -34)
+    set.packs = {}
+    for i, pack in ipairs(Profiles.PACKS) do
+        local button = CreateButton(page, 100, function() Profiles.ApplyPack(pack[1]) end)
+        button:SetPoint("TOPLEFT", 88 + (i - 1) * 104, -30)
+        button.key = pack[1]
+        button:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(T("pk_" .. self.key))
+            GameTooltip:AddLine(T("pk_desc_" .. self.key), 1, 1, 1, true)
+            GameTooltip:Show()
+            Profiles.ShowInfo(set, nil, T("pk_" .. self.key) .. ": " .. T("pk_desc_" .. self.key))
+        end)
+        button:SetScript("OnLeave", function() GameTooltip:Hide(); Profiles.ShowInfo(set, nil) end)
+        set.packs[i] = button
+    end
+    set.packUndo = CreateButton(page, 90, function() Profiles.UndoPack() end)
+    set.packUndo:SetPoint("TOPLEFT", 88 + #Profiles.PACKS * 104 + 4, -30)
     set.appearance = CreateButton(page, 200, function() ns.Appearance.ToggleWindow() end)
     set.appearance:SetPoint("TOPLEFT", 16, -416)
     set.order = CreateButton(page, 200, function() ns.Order.ToggleWindow() end)
@@ -3408,6 +3554,26 @@ local function BuildControls(parent, top)
         RefreshOptions()
     end)
     set.forget:SetPoint("TOPLEFT", 372, -318)
+    -- Perfis (avançado): as mesmas barras em todos os personagens ou só neste, e "Copiar de...".
+    set.profileHeader = CreateHeader(page, -356)
+    set.profileLabel = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    set.profileLabel:SetPoint("TOPLEFT", 20, -382)
+    set.profile = ns.CreateDropdown(page, "FarolProfile" .. index, 170, function()
+        return {
+            { text = T("pfl_account_all"), checked = Profiles.mode ~= "char", onClick = function() Profiles.SetMode("account") end },
+            { text = T("pfl_char_only"), checked = Profiles.mode == "char", onClick = function() Profiles.SetMode("char") end },
+        }
+    end)
+    set.profile:SetPoint("TOPLEFT", 90, -378)
+    set.copy = ns.CreateDropdown(page, "FarolProfileCopy" .. index, 130, function()
+        local items = {}
+        for _, source in ipairs(Profiles.Sources()) do
+            items[#items + 1] = { text = Profiles.SourceLabel(source), onClick = function() Profiles.CopyFrom(source) end }
+        end
+        if #items == 0 then items[1] = { text = T("pfl_none"), r = .6, g = .6, b = .6, onClick = function() end } end
+        return items
+    end)
+    set.copy:SetPoint("TOPLEFT", 270, -378)
 
     -- Aba "Avisos": os controles do módulo de avisos (os do menu do Farol têm os nomes "FarolWarn...").
     if ns.Warnings and ns.Warnings.BuildControls then
@@ -3461,6 +3627,12 @@ RefreshOptions = function()
         set.langHeader:SetText(T("opt_lang"))
         set.allHeader:SetText(T("opt_all_chars"))
         set.restoreHeader:SetText(T("opt_restore"))
+        set.profileHeader:SetText(T("opt_profiles_header"))
+        set.packLabel:SetText(T("pk_label"))
+        for _, button in ipairs(set.packs) do button:SetText(T("pk_" .. button.key)) end
+        set.packUndo:SetText(T("pk_undo"))
+        if Profiles.packBackup then set.packUndo:Enable() else set.packUndo:Disable() end
+        Profiles.ShowInfo(set, set.infoKey)
         for key, check in pairs(set.items) do
             check.label:SetText(T("name_" .. key))
             check:SetChecked(db.items[key])
@@ -3908,7 +4080,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_runs", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_runs", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -3979,6 +4151,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.MinimapButton.HandleCommand(rest)
     elseif cmd == "meta" or cmd == "metas" or cmd == "goal" or cmd == "goals" then
         ns.Goals.HandleCommand(rest)
+    elseif cmd == "pacote" or cmd == "pacotes" or cmd == "pack" or cmd == "preset" then
+        Profiles.PackCommand(rest)
     elseif cmd == "farm" or cmd == "farmar" then
         ns.Farm.HandleCommand(rest)
     elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then

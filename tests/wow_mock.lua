@@ -68,6 +68,7 @@ function Frame:SetScale(scale) self._scale = scale end
 local raiseCounter = 0
 function Frame:Raise() raiseCounter = raiseCounter + 1; self._raisedAt = raiseCounter end
 function Frame:SetToplevel(value) self._toplevel = value end
+function Frame:GetParent() return self._parent end
 function Frame:Enable() self._disabled = false end
 function Frame:Disable() self._disabled = true end
 function Frame:HookScript(name, fn)
@@ -137,6 +138,7 @@ function Mock.new(opts)
     env.CreateFrame = function(kind, name, parent, template)
         local frame = NewObject(env, kind, name)
         frame._template = template
+        frame._parent = parent
         table.insert(H.frames, frame)
         if name then env[name] = frame end
         return frame

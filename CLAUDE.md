@@ -180,6 +180,13 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   prefixo)` (`FarolWarn…` no menu, `FarolPanelWarn…` no painel); não existe mais a janela `FarolWarnings`.
   `ns.OpenOptions(aba)` abre/fecha numa aba (`/farol aviso` → "warnings"; clique direito → "bar"). Item novo na barra:
   também entra num grupo. Opção que existe em duas janelas: chame `ns.RefreshOptions()` depois de mudar.
+  **Menu 3.11:** aba Barra = barra 1/2/3 + Mostrar/Travar, `Profiles.PACKS` (pacotes: só ligam o que o jogador clica;
+  "basic" substitui, os outros somam; `Profiles.packBackup` guarda a barra antes para "Desfazer"; `/farol pacote`),
+  `Profiles.GEARS` (⚙ ao lado do item: aba "warnings" ou função que abre a janela) e a faixa `set.info`
+  (`Profiles.ShowInfo`: `desc_<item>`). Perfil e "Copiar de..." ficam na aba Geral. Aba Avisos: grupos, botões
+  `Warnings.SetAll(true/false)` ("Só os recomendados" = padrões de `DEFAULTS`; o som e "também em lutas" não mudam) e a
+  faixa `Warnings.ShowInfo` (`warn_desc_<chave>`, um teste confere PT/EN). A ordem de criação das caixinhas não mudou
+  (os testes contam por posição): itens, Mostrar, Travar, aba Geral, avisos. Coluna 2 da aba Avisos: rótulos curtos.
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 

@@ -121,13 +121,13 @@ local STRINGS = {
         warn_name_tasks = "tarefas diárias pendentes",
         warn_opt_tasks = "Tarefas diárias pendentes (1 h antes)",
         warn_opt_goals = "Meta alcançada (ouro, nível ou farm)",
-        warn_opt_questFull = "Diário de missões a partir de",
+        warn_opt_questFull = "Diário a partir de",
         warn_unit_quests = "missões",
         warn_name_questFull = "diário de missões quase cheio",
         warn_questFull = "Diário de missões quase cheio: %d/%d.",
         warn_questFull_full = "Diário de missões cheio: %d/%d!",
-        warn_opt_questReady = "Missões prontas (ao entrar numa cidade ou estalagem)",
-        warn_opt_hearthReady = "Pedra de Regresso pronta (espera o combate e a masmorra)",
+        warn_opt_questReady = "Missões prontas ao entrar na cidade",
+        warn_opt_hearthReady = "Pedra de Regresso pronta",
         warn_name_hearthReady = "Pedra de Regresso pronta",
         warn_hearthReady = "Pedra de Regresso pronta (%s).",
         warn_hearthReady_noplace = "Pedra de Regresso pronta.",
@@ -140,7 +140,30 @@ local STRINGS = {
         warn_goals     = "meta alcançada: %s!",
         warn_sec_gear  = "Equipamento e bolsas",
         warn_sec_char  = "Personagem",
-        warn_sec_breaks = "Pausas e lembretes",
+        warn_sec_breaks = "Pausas",
+        warn_sec_quests = "Missões e viagem",
+        warn_recommended = "Só os recomendados",
+        warn_all_off   = "Desligar todos",
+        warn_top_hint  = "Só avisa o que estiver marcado.",
+        warn_set_recommended = "avisos: só os recomendados ligados (durabilidade, bolsas, talentos, graus e profissões).",
+        warn_set_all_off = "avisos: todos desligados (ligue de novo na aba Avisos ou com \"Só os recomendados\").",
+        warn_desc_durab = "avisa quando a peça mais gasta do equipamento fica abaixo da porcentagem escolhida.",
+        warn_desc_bags  = "avisa quando sobram poucos espaços livres nas bolsas (e quanto lixo dá para vender).",
+        warn_desc_ammo  = "avisa quando a munição fica abaixo do limite vermelho; amarelo e vermelho também colorem a barra.",
+        warn_desc_reag  = "avisa quando os reagentes da sua classe ficam abaixo do limite vermelho.",
+        warn_desc_talents = "avisa quando você tem pontos de talento para gastar.",
+        warn_desc_ranks = "avisa quando uma magia de grau antigo está nas suas barras de ação e você já tem um grau melhor.",
+        warn_desc_prof  = "avisa quando uma profissão chega ao limite do treinamento: hora de procurar um instrutor.",
+        warn_desc_restFull = "ao entrar, avisa se outro personagem seu já está com o descanso cheio (estimativa).",
+        warn_desc_goals = "avisa uma vez quando uma meta de ouro, de nível ou de farm é alcançada.",
+        warn_desc_questFull = "avisa quando o diário de missões chega ao número escolhido (e de novo quando enche).",
+        warn_desc_questReady = "ao entrar numa cidade ou estalagem, avisa se há missões prontas para entregar (no máx. a cada 5 min).",
+        warn_desc_hearthReady = "avisa uma vez quando a recarga da Pedra de Regresso termina; espera o combate e a masmorra acabarem.",
+        warn_desc_tasks = "1 hora antes do reset diário, avisa se ainda falta alguma tarefa diária.",
+        warn_desc_pause = "lembra de fazer uma pausa a cada intervalo escolhido.",
+        warn_desc_water = "lembra de beber água a cada intervalo escolhido.",
+        warn_desc_anywhere = "sem esta opção, o lembrete espera a luta acabar e você sair da masmorra ou raide.",
+        warn_desc_sound = "toca um som curto junto com cada aviso.",
         warn_sec_how   = "Como avisar",
         warn_tasks    = "faltam %d tarefas diárias e o reset diário é em %s.",
         warn_task_one = "falta 1 tarefa diária e o reset diário é em %s.",
@@ -240,13 +263,13 @@ local STRINGS = {
         warn_name_tasks = "daily tasks left",
         warn_opt_tasks = "Daily tasks left (1 h before)",
         warn_opt_goals = "Goal reached (gold, level or farm)",
-        warn_opt_questFull = "Quest log with at least",
+        warn_opt_questFull = "Quest log from",
         warn_unit_quests = "quests",
         warn_name_questFull = "quest log almost full",
         warn_questFull = "Quest log almost full: %d/%d.",
         warn_questFull_full = "Quest log full: %d/%d!",
-        warn_opt_questReady = "Quests ready (when entering a city or inn)",
-        warn_opt_hearthReady = "Hearthstone ready (waits for combat and dungeons to end)",
+        warn_opt_questReady = "Quests ready in a city or inn",
+        warn_opt_hearthReady = "Hearthstone ready",
         warn_name_hearthReady = "Hearthstone ready",
         warn_hearthReady = "Hearthstone ready (%s).",
         warn_hearthReady_noplace = "Hearthstone ready.",
@@ -259,7 +282,30 @@ local STRINGS = {
         warn_goals     = "goal reached: %s!",
         warn_sec_gear  = "Gear and bags",
         warn_sec_char  = "Character",
-        warn_sec_breaks = "Breaks and reminders",
+        warn_sec_breaks = "Breaks",
+        warn_sec_quests = "Quests and travel",
+        warn_recommended = "Recommended only",
+        warn_all_off   = "Turn all off",
+        warn_top_hint  = "Only what is ticked warns.",
+        warn_set_recommended = "warnings: only the recommended ones are on (durability, bags, talents, ranks and professions).",
+        warn_set_all_off = "warnings: all off (turn them on again in the Warnings tab or with \"Recommended only\").",
+        warn_desc_durab = "warns when your most worn piece of gear drops below the chosen percentage.",
+        warn_desc_bags  = "warns when only a few free bag slots are left (and how much junk you can sell).",
+        warn_desc_ammo  = "warns when ammo drops below the red limit; yellow and red also color the bar.",
+        warn_desc_reag  = "warns when your class reagents drop below the red limit.",
+        warn_desc_talents = "warns when you have talent points to spend.",
+        warn_desc_ranks = "warns when a lower-rank spell is on your action bars and you already know a better rank.",
+        warn_desc_prof  = "warns when a profession reaches its training limit: time to find a trainer.",
+        warn_desc_restFull = "at login, warns if another of your characters already has full rested XP (estimate).",
+        warn_desc_goals = "warns once when a gold, level or farm goal is reached.",
+        warn_desc_questFull = "warns when your quest log reaches the chosen number (and again when it is full).",
+        warn_desc_questReady = "when you enter a city or inn, warns if there are quests ready to turn in (at most every 5 min).",
+        warn_desc_hearthReady = "warns once when your Hearthstone cooldown ends; waits for combat and dungeons to end.",
+        warn_desc_tasks = "1 hour before the daily reset, warns if a daily task is still left.",
+        warn_desc_pause = "reminds you to take a break at the chosen interval.",
+        warn_desc_water = "reminds you to drink some water at the chosen interval.",
+        warn_desc_anywhere = "without this option, the reminder waits for the fight to end and for you to leave the dungeon or raid.",
+        warn_desc_sound = "plays a short sound with each warning.",
         warn_sec_how   = "How to warn",
         warn_tasks    = "%d daily tasks left and the daily reset is in %s.",
         warn_task_one = "1 daily task left and the daily reset is in %s.",
@@ -1234,7 +1280,7 @@ end)
 
 local RefreshWindow -- definida abaixo
 
-local function SetEnabled(key, value)
+local function SetEnabled(key, value, quiet)
     Settings()[key] = value
     if key == "talents" then state.talents.warnedCount = 0
     elseif key == "ranks" then state.ranks.warned = {}; state.ranks.dirty = true
@@ -1254,7 +1300,20 @@ local function SetEnabled(key, value)
     elseif key == "questFull" then state.questFull.armed, state.questFull.full = true, false
     elseif key == "hearthReady" then state.hearthReady.cooling, state.hearthReady.remindAt = false, nil
     elseif state[key] then state[key].armed = true end
-    Print(string.format(value and T("warn_on") or T("warn_off"), T("warn_name_" .. key)))
+    if not quiet then Print(string.format(value and T("warn_on") or T("warn_off"), T("warn_name_" .. key))) end
+    if RefreshWindow then RefreshWindow() end
+end
+
+-- Botões do topo da aba Avisos: "Só os recomendados" (os padrões aprovados) e "Desligar todos". O som e as opções
+-- "também em lutas" ficam como estão.
+local TOGGLE_KEYS = { "durab", "bags", "ammo", "reag", "talents", "ranks", "prof", "restFull", "goals",
+                      "questFull", "questReady", "hearthReady", "tasks", "pause", "water" }
+function Warnings.SetAll(recommended)
+    for _, key in ipairs(TOGGLE_KEYS) do
+        local value = recommended and DEFAULTS[key] or false
+        if Settings()[key] ~= value then SetEnabled(key, value, true) end
+    end
+    Print(recommended and T("warn_set_recommended") or T("warn_set_all_off"))
     if RefreshWindow then RefreshWindow() end
 end
 
@@ -1377,20 +1436,41 @@ function Warnings.BuildControls(parent, prefix)
         return unit
     end
 
-    -- Coluna 1: equipamento e bolsas; personagem.
-    local x, y = 16, 0
+    -- Topo: "Só os recomendados" e "Desligar todos". Embaixo: a faixa com a explicação do aviso sob o mouse.
+    set.recommended = CreateFrame("Button", prefix .. "Recommended", parent, "UIPanelButtonTemplate")
+    set.recommended:SetSize(160, 22)
+    set.recommended:SetPoint("TOPLEFT", 16, 0)
+    set.recommended:SetScript("OnClick", function() Warnings.SetAll(true) end)
+    set.allOff = CreateFrame("Button", prefix .. "AllOff", parent, "UIPanelButtonTemplate")
+    set.allOff:SetSize(130, 22)
+    set.allOff:SetPoint("LEFT", set.recommended, "RIGHT", 8, 0)
+    set.allOff:SetScript("OnClick", function() Warnings.SetAll(false) end)
+    set.topHint = parent:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    set.topHint:SetPoint("LEFT", set.allOff, "RIGHT", 10, 0)
+    set.info = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    set.info:SetPoint("TOPLEFT", 16, -392)
+    set.info:SetWidth(620)
+    set.info:SetJustifyH("LEFT")
+    local function Explain(check, key)
+        check:SetScript("OnEnter", function() Warnings.ShowInfo(set, key) end)
+        check:SetScript("OnLeave", function() Warnings.ShowInfo(set, nil) end)
+        return check
+    end
+
+    -- Coluna 1: equipamento; personagem.
+    local x, y = 16, -30
     set.gearHeader = Header(x, y)
-    set.durab = Check("Durab", x, y - 18, "durab")
+    set.durab = Explain(Check("Durab", x, y - 18, "durab"), "durab")
     set.durabBox = NumberBox(parent, prefix .. "DurabPct", set.durab.label, SetDurabPct)
     set.durabUnit = Unit(set.durabBox)
-    set.bags = Check("Bags", x, y - 43, "bags")
+    set.bags = Explain(Check("Bags", x, y - 43, "bags"), "bags")
     set.bagsBox = NumberBox(parent, prefix .. "BagSlots", set.bags.label, SetBagSlots)
     set.bagsUnit = Unit(set.bagsBox)
     -- Munição e reagentes: liga/desliga e, na linha de baixo, os limites amarelo e vermelho.
     y = y - 68
     for _, kind in ipairs({ "ammo", "reag" }) do
         local cap = kind == "ammo" and "Ammo" or "Reag"
-        set[kind] = Check(cap, x, y, kind)
+        set[kind] = Explain(Check(cap, x, y, kind), kind)
         local yl = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         yl:SetPoint("TOPLEFT", x + 30, y - 28)
         set[kind .. "YellowLabel"] = yl
@@ -1406,37 +1486,39 @@ function Warnings.BuildControls(parent, prefix)
     end
     y = y - 6
     set.charHeader = Header(x, y)
-    set.talents = Check("Talents", x, y - 18, "talents")
-    set.ranks = Check("Ranks", x, y - 43, "ranks")
-    set.prof = Check("Prof", x, y - 68, "prof")
-    set.restFull = Check("RestFull", x, y - 93, "restFull")
-    set.tasks = Check("Tasks", x, y - 118, "tasks")
-    set.goals = Check("Goals", x, y - 143, "goals")
-    set.questFull = Check("QuestFull", x, y - 168, "questFull")
+    set.talents = Explain(Check("Talents", x, y - 18, "talents"), "talents")
+    set.ranks = Explain(Check("Ranks", x, y - 43, "ranks"), "ranks")
+    set.prof = Explain(Check("Prof", x, y - 68, "prof"), "prof")
+    set.restFull = Explain(Check("RestFull", x, y - 93, "restFull"), "restFull")
+    set.goals = Explain(Check("Goals", x, y - 118, "goals"), "goals")
+    local bottom = y - 146
+
+    -- Coluna 2: missões e viagem; pausas; como avisar.
+    x, y = 330, -30
+    set.questHeader = Header(x, y)
+    set.questFull = Explain(Check("QuestFull", x, y - 18, "questFull"), "questFull")
     set.questBox = NumberBox(parent, prefix .. "QuestMin", set.questFull.label, SetQuestMin, 3)
     set.questUnit = Unit(set.questBox)
-    set.questReady = Check("QuestReady", x, y - 193, "questReady")
-    local bottom = y - 221
-
-    -- Coluna 2: pausas; como avisar.
-    x, y = 330, 0
+    set.questReady = Explain(Check("QuestReady", x, y - 43, "questReady"), "questReady")
+    set.hearthReady = Explain(Check("HearthReady", x, y - 68, "hearthReady"), "hearthReady")
+    set.tasks = Explain(Check("Tasks", x, y - 93, "tasks"), "tasks")
+    y = y - 123
     set.breaksHeader = Header(x, y)
     y = y - 18
     for _, key in ipairs(BREAK_KEYS) do
         local cap = key == "pause" and "Pause" or "Water"
-        local check = Check(cap, x, y, key)
+        local check = Explain(Check(cap, x, y, key), key)
         set[key] = check
         set[key .. "Box"] = NumberBox(parent, prefix .. cap .. "Min", check.label,
             function(text) return SetBreakMinutes(key, text) end, 3)
         set[key .. "Unit"] = Unit(set[key .. "Box"])
-        set[key .. "Anywhere"] = Check(cap .. "Anywhere", x + 22, y - 24, nil,
-            function(value) SetAnywhere(key, value) end)
+        set[key .. "Anywhere"] = Explain(Check(cap .. "Anywhere", x + 22, y - 24, nil,
+            function(value) SetAnywhere(key, value) end), "anywhere")
         y = y - 54
     end
-    set.hearthReady = Check("HearthReady", x, y, "hearthReady")
-    y = y - 30
+    y = y - 4
     set.howHeader = Header(x, y)
-    set.sound = Check("Sound", x, y - 18, "sound")
+    set.sound = Explain(Check("Sound", x, y - 18, "sound"), "sound")
     y = y - 50
     set.remindLabel = parent:CreateFontString(prefix .. "RemindLabel", "OVERLAY", "GameFontHighlight")
     set.remindLabel:SetPoint("TOPLEFT", x + 4, y - 4)
@@ -1444,7 +1526,7 @@ function Warnings.BuildControls(parent, prefix)
         function() return Settings().remindMin end,
         function(minutes) SetRemindDefault(minutes) end))
     set.remindDefault:SetPoint("LEFT", set.remindLabel, "RIGHT", 10, 0)
-    y = y - 32
+    y = y - 30
     set.test = CreateFrame("Button", prefix .. "Test", parent, "UIPanelButtonTemplate")
     set.test:SetSize(130, 22)
     set.test:SetPoint("TOPLEFT", x, y)
@@ -1455,13 +1537,21 @@ function Warnings.BuildControls(parent, prefix)
     set.history:SetSize(130, 22)
     set.history:SetPoint("LEFT", set.test, "RIGHT", 8, 0)
     set.history:SetScript("OnClick", function() Warnings.ToggleHistory() end)
-    set.hint = parent:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    set.hint:SetPoint("TOPLEFT", x, y - 30)
-    set.hint:SetWidth(290)
-    set.hint:SetJustifyH("LEFT")
+    y = y - 40
 
     sets[#sets + 1] = set
-    return set, math.min(bottom, y - 70)
+    return set, math.min(bottom, y)
+end
+
+-- Faixa de explicação: o aviso sob o mouse; sem nada, como os avisos funcionam.
+function Warnings.ShowInfo(set, key)
+    set.infoKey = key
+    if key then
+        local name = key == "anywhere" and T("warn_opt_anywhere") or T("warn_name_" .. key)
+        set.info:SetText("|cffffd100" .. name .. ":|r " .. T("warn_desc_" .. key))
+    else
+        set.info:SetText("|cff9d9d9d" .. T("warn_hint") .. " " .. T("warn_hint_break") .. "|r")
+    end
 end
 
 local function RefreshSet(set)
@@ -1469,6 +1559,11 @@ local function RefreshSet(set)
     set.gearHeader:SetText(T("warn_sec_gear"))
     set.charHeader:SetText(T("warn_sec_char"))
     set.breaksHeader:SetText(T("warn_sec_breaks"))
+    set.questHeader:SetText(T("warn_sec_quests"))
+    set.recommended:SetText(T("warn_recommended"))
+    set.allOff:SetText(T("warn_all_off"))
+    set.topHint:SetText(T("warn_top_hint"))
+    Warnings.ShowInfo(set, set.infoKey)
     set.howHeader:SetText(T("warn_sec_how"))
     for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "goals", "questFull", "questReady", "hearthReady", "sound" }) do
         set[key].label:SetText(T("warn_opt_" .. key))
@@ -1494,7 +1589,6 @@ local function RefreshSet(set)
     end
     set.remindLabel:SetText(T("warn_opt_remind"))
     set.remindDefault:SetText(string.format(T("warn_minutes"), settings.remindMin))
-    set.hint:SetText(T("warn_hint") .. " " .. T("warn_hint_break"))
     set.test:SetText(T("warn_opt_test"))
     set.history:SetText(T("opt_history"))
     if not set.durabBox:HasFocus() then set.durabBox:SetText(tostring(settings.durabPct)) end
@@ -1721,6 +1815,10 @@ function Warnings.HandleCommand(rest)
     elseif word == "lembrar" or word == "remind" then
         if value ~= "" and not ValidRemind(value) then Print(T("warn_bad_remind")) return end
         Warnings.Respond(true, nil, value)
+    elseif word == "recomendados" or word == "recommended" then
+        Warnings.SetAll(true)                         -- /farol aviso recomendados
+    elseif word == "nenhum" or word == "none" then
+        Warnings.SetAll(false)                        -- /farol aviso nenhum
     elseif word == "padrao" or word == "default" then
         SetRemindDefault(value)                       -- /farol aviso padrao 10
     elseif not key then

@@ -19,7 +19,7 @@ return {
         local H = Mock.new({ locale = "ptBR" }):login()
         local before = on(H)
         local _, set = open(H)
-        T.eq(H:text(set.packLabel), "Pacotes:"); T.eq(H:text(set.packs[2]), "Upando")
+        T.eq(H:text(set.packLabel), "Aplicar pacote:"); T.eq(H:text(set.packs[2]), "Upando")
         T.eq(set.packUndo._disabled, true, "nothing to undo yet")
         T.eq(on(H), before, "opening the menu changes nothing")
         H:click(set.packs[2]) -- Upando

@@ -332,7 +332,9 @@ local STRINGS = {
         cb_usage     = "uso: /farol cores daltonismo || /farol cores padrao",
         help_colors  = "  /farol cores         - cores para daltonismo (daltonismo) ou as padrão (padrao)",
         news_packs   = "menu mais simples: pacotes prontos (Básico, Upando, Ouro e farm, Masmorras), engrenagem para configurar cada item e avisos em grupos",
-        pk_label     = "Pacotes:",
+        pk_label     = "Aplicar pacote:",
+        pk_applied   = "Pacote %s aplicado na barra %d (%d mudança(s)). Não gostou? Clique em Desfazer.",
+        bar_pick_info = "Trocar de barra não muda nada: só escolhe qual barra você está editando.",
         pk_basic     = "Básico",       pk_desc_basic = "volta a barra ao básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (desliga o resto).",
         pk_leveling  = "Upando",       pk_desc_leveling = "liga XP, XP por hora, diário de missões e Pedra de Regresso.",
         pk_farm      = "Ouro e farm",  pk_desc_farm = "liga ouro, ouro por hora, bolsas, lixo nas bolsas e metas de farm.",
@@ -398,7 +400,7 @@ local STRINGS = {
         pfl_full     = "limite de perfis atingido; este personagem continua com o perfil da conta.",
         pfl_usage    = "uso: /farol perfil || /farol perfil conta || /farol perfil personagem || /farol perfil copiar Nome (ou conta) || /farol perfil desfazer",
         help_profile = "  /farol perfil        - perfil da conta ou só deste personagem; copiar de outro (\"copiar Nome\")",
-        opt_bar      = "Barra:",
+        opt_bar      = "Editando:",
         bar_n        = "Barra %d",
         bar_off_short = "(desl.)",
         bar_on       = "ligada",
@@ -664,7 +666,9 @@ local STRINGS = {
         cb_usage     = "usage: /farol colors colorblind || /farol colors default",
         help_colors  = "  /farol colors        - colorblind-friendly colors (colorblind) or the default ones (default)",
         news_packs   = "simpler menu: presets (Basic, Leveling, Gold & farm, Dungeons), a gear to set up each item and grouped warnings",
-        pk_label     = "Presets:",
+        pk_label     = "Apply preset:",
+        pk_applied   = "Preset %s applied to bar %d (%d change(s)). Don't like it? Click Undo.",
+        bar_pick_info = "Switching bars changes nothing: it only picks which bar you are editing.",
         pk_basic     = "Basic",        pk_desc_basic = "back to the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (turns the rest off).",
         pk_leveling  = "Leveling",     pk_desc_leveling = "turns on XP, XP per hour, quest log and Hearthstone.",
         pk_farm      = "Gold & farm",  pk_desc_farm = "turns on gold, gold per hour, bags, junk in bags and farm goals.",
@@ -730,7 +734,7 @@ local STRINGS = {
         pfl_full     = "profile limit reached; this character keeps the account profile.",
         pfl_usage    = "usage: /farol profile || /farol profile account || /farol profile character || /farol profile copy Name (or account) || /farol profile undo",
         help_profile = "  /farol profile       - account profile or this character only; copy from another (\"copy Name\")",
-        opt_bar      = "Bar:",
+        opt_bar      = "Editing:",
         bar_n        = "Bar %d",
         bar_off_short = "(off)",
         bar_on       = "on",
@@ -1021,7 +1025,7 @@ local function FormatMoney(copper)
     local gold = math.floor(copper / 10000)
     local silver = math.floor((copper % 10000) / 100)
     local cop = copper % 100
-    return string.format("|cffffd700%dg|r |cffc7c7cf%ds|r |cffeda55f%dc|r", gold, silver, cop)
+    return string.format("%d|cffffd700g|r %d|cffc7c7cfs|r %d|cffeda55fc|r", gold, silver, cop)
 end
 
 -- Cores: verde (bom), amarelo (médio), vermelho (ruim).
@@ -2128,11 +2132,11 @@ local function FormatMoneyShort(copper)
     local silver = math.floor((copper % 10000) / 100)
     local cop = copper % 100
     if gold > 0 then
-        return string.format("|cffffd700%dg|r |cffc7c7cf%ds|r", gold, silver)
+        return string.format("%d|cffffd700g|r %d|cffc7c7cfs|r", gold, silver)
     elseif silver > 0 then
-        return string.format("|cffc7c7cf%ds|r |cffeda55f%dc|r", silver, cop)
+        return string.format("%d|cffc7c7cfs|r %d|cffeda55fc|r", silver, cop)
     end
-    return string.format("|cffeda55f%dc|r", cop)
+    return string.format("%d|cffeda55fc|r", cop)
 end
 
 local function FormatMoneyDelta(delta)
@@ -3299,6 +3303,9 @@ function Profiles.SetColorblind(value)
     Profiles.ApplyPalette()
     UpdateText()
     RefreshOptions()
+    -- Os números dos botões 📝 👜 trocam de cor na hora (não só no próximo aviso/saque).
+    if ns.Warnings and ns.Warnings.UpdateButton then pcall(ns.Warnings.UpdateButton) end
+    if ns.Loot and ns.Loot.UpdateButton then pcall(ns.Loot.UpdateButton) end
     Print(db.colorblind and T("cb_on") or T("cb_off"))
 end
 
@@ -3326,6 +3333,7 @@ end
 
 local function SetItemVisible(key, value)
     db.items[key] = value
+    if Profiles.packBackup then Profiles.packBackup.name = nil end -- a faixa volta a mostrar a contagem
     UpdateText()
     RefreshOptions()
     if ns.Order then ns.Order.Refresh() end -- atualiza o "escondido" na janela de ordem
@@ -3421,7 +3429,7 @@ function Profiles.ApplyPack(name)
     if not pack then return end
     local before = {}
     for _, key in ipairs(ITEM_ORDER) do before[key] = db.items[key] and true or false end
-    Profiles.packBackup = { bar = rawget(db, "activeBar") or 1, items = before }
+    Profiles.packBackup = { bar = rawget(db, "activeBar") or 1, items = before, name = name }
     local wanted, changed = {}, 0
     for _, key in ipairs(pack.items) do wanted[key] = true end
     for _, key in ipairs(ITEM_ORDER) do
@@ -3429,6 +3437,7 @@ function Profiles.ApplyPack(name)
         if value ~= before[key] then changed = changed + 1 end
         db.items[key] = value
     end
+    Profiles.packBackup.changed = changed
     UpdateText(); RefreshOptions()
     if ns.Order then ns.Order.Refresh() end
     Print(string.format(pack.replace and T("pk_done_basic") or T("pk_done"), T("pk_" .. name), changed))
@@ -3516,7 +3525,10 @@ local function BuildControls(parent, top)
     set.bars = {}
     for n = 1, Profiles.MAX_BARS do
         local button = CreateButton(page, 108, function() Profiles.Select(n) end) -- cabe "Barra 2 (desl.)"
-        button:SetPoint("TOPLEFT", 72 + (n - 1) * 112, 0)
+        button:SetPoint("TOPLEFT", 88 + (n - 1) * 112, 0)
+        -- Escolher a barra não muda nada (diferente dos pacotes): a faixa de explicação diz isso.
+        button:SetScript("OnEnter", function() Profiles.ShowInfo(set, nil, T("bar_pick_info")) end)
+        button:SetScript("OnLeave", function() Profiles.ShowInfo(set, nil) end)
         set.bars[n] = button
     end
     set.hint = page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -3547,17 +3559,22 @@ local function BuildControls(parent, top)
             if Profiles.GEARS[key] then Profiles.AddGear(set, page, check, key) end
         end
     end
-    set.shown = CreateCheck(page, 414, -1, SetShown) -- logo depois dos botões Barra 1/2/3 (terminam em 404)
+    set.shown = CreateCheck(page, 430, -1, SetShown) -- logo depois dos botões Barra 1/2/3 (terminam em 420)
     set.locked = CreateCheck(page, 490, -1, SetLocked)
     -- "Travar" logo depois do fim do texto de "Mostrar" (a fonte do jogo é mais larga que a estimativa).
     set.locked:ClearAllPoints()
     set.locked:SetPoint("LEFT", set.shown.label, "RIGHT", 14, 0)
+    -- Pacotes num quadro próprio (fundo escuro): são ações que mudam a barra, não abas.
+    set.packBox = page:CreateTexture(nil, "BACKGROUND")
+    set.packBox:SetPoint("TOPLEFT", 10, -26)
+    set.packBox:SetSize(Profiles.MENU_W - 20, 32)
+    if set.packBox.SetColorTexture then set.packBox:SetColorTexture(0, 0, 0, 0.45) else set.packBox:SetTexture(0, 0, 0, 0.45) end
     set.packLabel = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     set.packLabel:SetPoint("TOPLEFT", 16, -34)
     set.packs = {}
     for i, pack in ipairs(Profiles.PACKS) do
         local button = CreateButton(page, 100, function() Profiles.ApplyPack(pack[1]) end)
-        button:SetPoint("TOPLEFT", 88 + (i - 1) * 104, -30)
+        button:SetPoint("TOPLEFT", 128 + (i - 1) * 104, -30) -- depois de "Aplicar pacote:"
         button.key = pack[1]
         button:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -3570,7 +3587,7 @@ local function BuildControls(parent, top)
         set.packs[i] = button
     end
     set.packUndo = CreateButton(page, 90, function() Profiles.UndoPack() end)
-    set.packUndo:SetPoint("TOPLEFT", 88 + #Profiles.PACKS * 104 + 4, -30)
+    set.packUndo:SetPoint("TOPLEFT", 128 + #Profiles.PACKS * 104 + 4, -30)
     set.appearance = CreateButton(page, 200, function() ns.Appearance.ToggleWindow() end)
     set.appearance:SetPoint("TOPLEFT", 16, -416)
     set.order = CreateButton(page, 200, function() ns.Order.ToggleWindow() end)
@@ -3683,14 +3700,22 @@ RefreshOptions = function()
     for _, set in ipairs(controlSets) do
         for _, key in ipairs(Profiles.TABS) do set.tabs[key]:SetText(T("tab_" .. key)) end
         local on, total = ItemCounts()
-        set.hint:SetText(string.format(T("opt_hint_count"), on, total))
+        local backup = Profiles.packBackup
+        if backup and backup.name then -- logo depois de um pacote (até mexer num item): o que mudou e como voltar
+            set.hint:SetText(ns.C.good .. string.format(T("pk_applied"), T("pk_" .. backup.name), backup.bar, backup.changed or 0) .. "|r")
+        else
+            set.hint:SetText(string.format(T("opt_hint_count"), on, total))
+        end
         set.barLabel:SetText(T("opt_bar"))
         set.profileLabel:SetText(T("opt_profile"))
         set.profile:SetText(Profiles.mode == "char" and T("pfl_char_short") or T("pfl_account"))
         set.copy:SetText(T("opt_copy"))
         for n, button in ipairs(set.bars) do
             button:SetText(string.format(T("bar_n"), n) .. (Profiles.Data(n).shown and "" or " " .. T("bar_off_short")))
-            if n == rawget(db, "activeBar") then button:LockHighlight() else button:UnlockHighlight() end
+            -- A barra escolhida: destacada e com texto branco (as outras, douradas como os botões comuns).
+            local active = n == rawget(db, "activeBar")
+            if active then button:LockHighlight() else button:UnlockHighlight() end
+            if button.SetNormalFontObject then button:SetNormalFontObject(active and "GameFontHighlight" or "GameFontNormal") end
         end
         for g, header in ipairs(set.groups) do header:SetText(T(Profiles.GROUPS[g][1])) end
         set.langHeader:SetText(T("opt_lang"))
@@ -3700,7 +3725,8 @@ RefreshOptions = function()
         set.packLabel:SetText(T("pk_label"))
         for _, button in ipairs(set.packs) do button:SetText(T("pk_" .. button.key)) end
         set.packUndo:SetText(T("pk_undo"))
-        if Profiles.packBackup then set.packUndo:Enable() else set.packUndo:Disable() end
+        -- "Desfazer" só aparece quando há o que desfazer.
+        if Profiles.packBackup then set.packUndo:Enable(); set.packUndo:Show() else set.packUndo:Disable(); set.packUndo:Hide() end
         Profiles.ShowInfo(set, set.infoKey)
         for key, check in pairs(set.items) do
             check.label:SetText(T("name_" .. key))

@@ -39,7 +39,7 @@ local STRINGS = {
         tt_farm_bank  = "conta bolsas + banco (quando o jogo informa)",
         farm_added    = "meta de farm: %s %d/%d.",
         farm_changed  = "meta de farm: %s agora é %d.",
-        farm_removed  = "meta de farm apagada: %s.",
+        farm_removed  = "meta de farm apagada: %s (Desfazer na janela de Metas ou /farol meta item desfazer).",
         farm_cleared  = "metas de farm apagadas.",
         farm_full     = "no máximo %d itens; apague um com /farol meta item remover <nome>.",
         farm_bad_target = "quantidade inválida: use de 1 a 100000.",
@@ -48,9 +48,13 @@ local STRINGS = {
         farm_list     = "metas de farm:",
         farm_none     = "nenhuma meta de farm.",
         farm_reached  = "%s %d/%d",
-        farm_usage    = "uso: /farol meta item [link] N || /farol meta item <nome> N || /farol meta item remover <nome||número> || /farol meta item limpar",
+        farm_usage    = "uso: /farol meta item [link] N || /farol meta item <nome> N || /farol meta item remover <nome||número> || /farol meta item desfazer || /farol meta item limpar",
         farm_header   = "Farm (itens):",
-        farm_remove_tip = "Apagar esta meta",
+        farm_remove_tip = "Apagar esta meta (dá para desfazer)",
+        farm_restored = "meta de farm de volta: %s.",
+        farm_nothing_undo = "nada para desfazer.",
+        farm_undo     = "Desfazer",
+        farm_undo_line = "apagada: %s",
         loot_track    = "+ Meta",
         loot_track_tip = "Acompanhar este item (meta de farm de %d; mude em /farol meta)",
         help_farm     = "  /farol meta item     - metas de farm: quantos itens juntar (Shift + clique no item)",
@@ -68,7 +72,7 @@ local STRINGS = {
         tt_farm_bank  = "counts bags + bank (when the game reports it)",
         farm_added    = "farm goal: %s %d/%d.",
         farm_changed  = "farm goal: %s is now %d.",
-        farm_removed  = "farm goal removed: %s.",
+        farm_removed  = "farm goal removed: %s (Undo in the Goals window or /farol goal item undo).",
         farm_cleared  = "farm goals removed.",
         farm_full     = "at most %d items; remove one with /farol goal item remove <name>.",
         farm_bad_target = "invalid amount: use 1 to 100000.",
@@ -77,9 +81,13 @@ local STRINGS = {
         farm_list     = "farm goals:",
         farm_none     = "no farm goals.",
         farm_reached  = "%s %d/%d",
-        farm_usage    = "usage: /farol goal item [link] N || /farol goal item <name> N || /farol goal item remove <name||number> || /farol goal item clear",
+        farm_usage    = "usage: /farol goal item [link] N || /farol goal item <name> N || /farol goal item remove <name||number> || /farol goal item undo || /farol goal item clear",
         farm_header   = "Farm (items):",
-        farm_remove_tip = "Remove this goal",
+        farm_remove_tip = "Remove this goal (can be undone)",
+        farm_restored = "farm goal back: %s.",
+        farm_nothing_undo = "nothing to undo.",
+        farm_undo     = "Undo",
+        farm_undo_line = "removed: %s",
         loot_track    = "+ Goal",
         loot_track_tip = "Track this item (farm goal of %d; change it in /farol goal)",
         help_farm     = "  /farol goal item     - farm goals: how many items to gather (shift-click the item)",
@@ -422,7 +430,27 @@ function Farm.Remove(index)
     if not entry then Print(T("farm_missing")) return false end
     table.remove(list, index)
     session[entry.id] = nil
+    -- Só na sessão: "Desfazer" devolve a meta ao mesmo lugar (cópia, nunca a mesma tabela).
+    Farm.lastRemoved = { index = index, entry = { id = entry.id, n = entry.n, c = entry.c, w = entry.w } }
     Print(string.format(T("farm_removed"), LiveName(entry.id) or entry.n))
+    Changed()
+    return true
+end
+
+function Farm.Undo()
+    local undo = Farm.lastRemoved
+    if not undo then Print(T("farm_nothing_undo")) return false end
+    local list = List()
+    if #list >= MAX_ITEMS then Print(string.format(T("farm_full"), MAX_ITEMS)) return false end
+    Farm.lastRemoved = nil
+    local entry = undo.entry
+    if not IndexOf(entry.id) then
+        local index = tonumber(undo.index)
+        if not index or index ~= index or index < 1 or index > #list + 1 then index = #list + 1 end -- NaN/fora da lista: no fim
+        index = math.floor(index)
+        table.insert(list, index, { id = entry.id, n = entry.n, c = entry.c, w = entry.w })
+    end
+    Print(string.format(T("farm_restored"), LiveName(entry.id) or entry.n))
     Changed()
     return true
 end
@@ -430,6 +458,7 @@ end
 function Farm.Clear()
     if FarolCharDB then FarolCharDB.farm = {} end
     session = {}
+    Farm.lastRemoved = nil
     Print(T("farm_cleared"))
     Changed()
 end
@@ -449,6 +478,7 @@ end
 
 local REMOVE = { remover = true, remove = true, apagar = true, tirar = true, delete = true }
 local CLEAR = { limpar = true, clear = true }
+local UNDO = { desfazer = true, undo = true, voltar = true }
 
 function Farm.HandleCommand(rest)
     rest = string.match(rest or "", "^%s*(.-)%s*$") or ""
@@ -460,6 +490,8 @@ function Farm.HandleCommand(rest)
         Print(T("farm_usage"))
     elseif CLEAR[word] and tail == "" then
         Farm.Clear()
+    elseif UNDO[word] and tail == "" then
+        Farm.Undo()
     elseif REMOVE[word] and tail ~= "" then
         local index = Find(tail)
         if index then Farm.Remove(index) else Print(T("farm_missing")) end
@@ -484,6 +516,11 @@ local ROW_H = 24
 function Farm.Attach(frame, top)
     frame.farmHeader = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.farmHeader:SetPoint("TOPLEFT", 24, top)
+    -- "Desfazer" ao lado do título, só depois de apagar uma meta.
+    frame.farmUndo = CreateFrame("Button", "FarolFarmUndo", frame, "UIPanelButtonTemplate")
+    frame.farmUndo:SetSize(92, 20)
+    frame.farmUndo:SetPoint("TOPLEFT", 314, top + 3)
+    frame.farmUndo:SetScript("OnClick", function() Farm.Undo() end)
     frame.farmRows = {}
     for i = 1, MAX_ITEMS do
         local y = top - 22 - (i - 1) * ROW_H
@@ -531,7 +568,14 @@ end
 -- Atualiza as linhas; devolve quantas estão em uso (para a janela ajustar a altura).
 function Farm.RefreshRows(frame)
     if not frame or not frame.farmRows then return 0 end
-    frame.farmHeader:SetText(T("farm_header") .. " " .. (#List() == 0 and (ns.C.dim .. T("farm_none") .. "|r") or ""))
+    local undo = Farm.lastRemoved
+    local note = undo and (ns.C.dim .. string.format(T("farm_undo_line"), Short(undo.entry.n)) .. "|r")
+        or (#List() == 0 and (ns.C.dim .. T("farm_none") .. "|r") or "")
+    frame.farmHeader:SetText(T("farm_header") .. " " .. note)
+    if frame.farmUndo then
+        frame.farmUndo:SetText(T("farm_undo"))
+        if undo then frame.farmUndo:Show() else frame.farmUndo:Hide() end
+    end
     local list = Farm.Statuses()
     for i, row in ipairs(frame.farmRows) do
         local status = list[i]

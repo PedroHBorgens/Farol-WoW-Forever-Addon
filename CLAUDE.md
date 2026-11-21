@@ -85,7 +85,13 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   módulos (um teste do `test_a11y.lua` confere). `Profiles.ApplyPalette()` troca a paleta pela opção `colorblind`
   (azul `66b3ff` / amarelo / laranja `ff8a33`; padrão verde / amarelo / vermelho `ff6666`). Texto de apoio: `ns.Dim(fs)`
   (cinza 0,75), não `GameFontDisable`. Campos de número: `box.farolApply` + `ns.TabChain(lista)` (Tab grava só se mudou).
-  `ns.MakeToplevel` também põe o fundo opaco (`frame.farolBacking`).
+  `ns.MakeToplevel` também põe o fundo opaco (`frame.farolBacking`). Selos dos botões 📝 👜 também via `ns.C` (nada de
+  `badge:SetTextColor`); `Profiles.SetColorblind` repinta na hora. Ouro: número na cor do texto, cor só em g/s/c
+  (`FormatMoney`): amarelo é só "atenção".
+- **Desfazer (3.13):** ação que apaga ou muda várias coisas de uma vez tem "Desfazer" visível, só na sessão:
+  `Profiles.packBackup` (pacotes; `name` some ao mexer num item), `Tasks.lastRemoved` / `Farm.lastRemoved` (cópias,
+  nunca a tabela salva; posição inválida → fim da lista; respeita o limite de 10). Botão escondido quando não há o
+  que desfazer.
 - **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
   lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 
@@ -185,7 +191,8 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   prefixo)` (`FarolWarn…` no menu, `FarolPanelWarn…` no painel); não existe mais a janela `FarolWarnings`.
   `ns.OpenOptions(aba)` abre/fecha numa aba (`/farol aviso` → "warnings"; clique direito → "bar"). Item novo na barra:
   também entra num grupo. Opção que existe em duas janelas: chame `ns.RefreshOptions()` depois de mudar.
-  **Menu 3.11:** aba Barra = barra 1/2/3 + Mostrar/Travar, `Profiles.PACKS` (pacotes: só ligam o que o jogador clica;
+  **Menu 3.11:** aba Barra = "Editando:" barra 1/2/3 (só escolhe; a ativa em texto branco) + Mostrar/Travar,
+  quadro "Aplicar pacote:" (`set.packBox`), `Profiles.PACKS` (pacotes: só ligam o que o jogador clica;
   "basic" substitui, os outros somam; `Profiles.packBackup` guarda a barra antes para "Desfazer"; `/farol pacote`),
   `Profiles.GEARS` (⚙ ao lado do item: aba "warnings" ou função que abre a janela) e a faixa `set.info`
   (`Profiles.ShowInfo`: `desc_<item>`). Perfil e "Copiar de..." ficam na aba Geral. Aba Avisos: grupos, botões

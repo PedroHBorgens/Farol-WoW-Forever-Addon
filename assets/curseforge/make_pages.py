@@ -55,8 +55,8 @@ BAR_ITEMS = [
     ("🔭", '<span class="g">60</span> fps'), ("⚡", '<span class="g">42</span> ms'),
     ("🗺️", '45.0, 61.0'), ("🌍", '<span class="zone">Harbor Guild</span>'),
     ("🔨", 'Dur <span class="g">87%</span>'), ("🎒", 'Bags <span class="y">8</span>/80'),
-    ("💰", '<span class="gold">123g</span> <span class="silver">45s</span> <span class="copper">67c</span>'),
-    ("📈", 'Gold/h <span class="g">+</span><span class="gold">12g</span> <span class="silver">30s</span>'),
+    ("💰", '123<span class="gold">g</span> 45<span class="silver">s</span> 67<span class="copper">c</span>'),
+    ("📈", 'Gold/h <span class="g">+</span>12<span class="gold">g</span> 30<span class="silver">s</span>'),
     ("⏳", 'XP/h 18.4k · 42m'),
 ]
 REP_ITEM = ("🏅", 'Harbor Guild <span class="g">Honored</span> 35% <span class="g">+600/h</span>')
@@ -82,9 +82,9 @@ page("farol-01-overview-info-bar", f"""
 # 2. Bar: aligned columns (flexible layout) + tooltip
 gitems = [("🔭",'<span class="g">60</span> fps'),("⚡",'<span class="y">172</span> ms'),("🧠",'Mem <span class="y">235 MB</span>'),
           ("🗺️",'58.5, 54.1'),("🌍",'<span class="zone">Harbor Guild</span>'),("👟",'Speed 100%'),("🔨",'Dur <span class="g">77%</span>'),
-          ("🎒",'Bags <span class="g">13</span>/38'),("🦴",'Junk <span class="gold">3g</span> <span class="silver">26s</span> (3)'),("🏹",'Ammo <span class="y">310</span>'),("💰",'<span class="gold">0g</span> <span class="silver">97s</span> <span class="copper">23c</span>'),
-          ("🪙",'Session <span class="g">+</span><span class="silver">5s</span> <span class="copper">34c</span>'),
-          ("📈",'Gold/h <span class="g">+</span><span class="gold">1g</span> <span class="silver">33s</span>'),
+          ("🎒",'Bags <span class="g">13</span>/38'),("🦴",'Junk 3<span class="gold">g</span> 26<span class="silver">s</span> (3)'),("🏹",'Ammo <span class="y">310</span>'),("💰",'0<span class="gold">g</span> 97<span class="silver">s</span> 23<span class="copper">c</span>'),
+          ("🪙",'Session <span class="g">+</span>5<span class="silver">s</span> 34<span class="copper">c</span>'),
+          ("📈",'Gold/h <span class="g">+</span>1<span class="gold">g</span> 33<span class="silver">s</span>'),
           ("📖",'XP 46% <span class="blue">+0%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,PROF_ITEM,("⏰",'18:49'),
           RESET_ITEM,("⌛",'Played 1h 02m'),("👥",'Friends 4'),("🛡️",'Guild 12')]
 grid = ('<div class="vbar" style="display:grid;grid-template-columns:repeat(3,auto);column-gap:14px;row-gap:6px;position:relative;padding-bottom:16px;font-size:12px;white-space:nowrap">'
@@ -116,9 +116,9 @@ grp = lambda title, idx: (f'<div class="grp"><div class="gh">{title}</div>'
 tabs = lambda active: '<div class="tabs">' + "".join(f'<span class="tab{" on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
 menu = f"""<div class="win menu3" style="width:640px;padding-top:12px;padding-bottom:14px;transform:scale(.86);transform-origin:center"><div class="x">×</div><div class="t">Farol</div>
 {tabs("Bar")}
-<div class="line"><span class="k">Bar:</span><span class="btn hl" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span><span class="ck" style="margin:0 0 0 18px"><span class="box">✓</span>Show</span><span class="ck" style="margin:0 0 0 12px"><span class="box"></span>Lock</span></div>
-<div class="line"><span class="k">Presets:</span><span class="btn" style="padding:2px 9px">Basic</span><span class="btn hl" style="padding:2px 9px">Leveling</span><span class="btn" style="padding:2px 9px">Gold &amp; farm</span><span class="btn" style="padding:2px 9px">Dungeons</span><span class="dim" style="margin-left:6px;font-size:12px">Undo</span></div>
-<div class="dim" style="font-size:12px;margin:4px 0">Bar items: 18 of 28 on — everything is optional, tick only what you want (hover for details).</div>
+<div class="line"><span class="k">Editing:</span><span class="btn hl" style="padding:2px 10px;color:#fff">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span><span class="ck" style="margin:0 0 0 18px"><span class="box">✓</span>Show</span><span class="ck" style="margin:0 0 0 12px"><span class="box"></span>Lock</span></div>
+<div class="line" style="background:#0008;border-radius:4px;padding:3px 6px;margin-left:-6px;margin-right:-6px"><span class="k" style="white-space:nowrap;width:auto;min-width:0;margin-right:10px">Apply preset:</span><span class="btn" style="padding:2px 9px">Basic</span><span class="btn" style="padding:2px 9px">Leveling</span><span class="btn" style="padding:2px 9px">Gold &amp; farm</span><span class="btn" style="padding:2px 9px">Dungeons</span><span class="btn" style="padding:2px 9px">Undo</span></div>
+<div class="g" style="font-size:12px;margin:4px 0">Preset Leveling applied to bar 1 (3 change(s)). Don't like it? Click Undo.</div>
 <div class="cols">{"".join(grp(t, i) for t, i in GROUPS)}</div>
 <div class="info"><b style="color:#ffd100">Hearthstone:</b> where your Hearthstone is bound and how long until you can use it again.</div>
 <div class="line" style="margin-top:10px"><span class="btn">Appearance...</span><span class="btn hl">Order...</span></div></div>"""
@@ -138,7 +138,7 @@ order_names = [("🌍","Zone"),("🔭","FPS"),("⚡","Latency"),("💰","Gold"),
 order = '<div class="win" style="width:330px"><div class="x">×</div><div class="t">Bar order</div>' + "".join(
     f'<div class="ck" style="justify-content:space-between"><span><span class="dim" style="display:inline-block;width:22px;text-align:right">{i+1}.</span> {ic(e)} <span class="{"dim" if "hidden" in n else ""}">{n}</span></span><span>▲ ▼</span></div>'
     for i,(e,n) in enumerate(order_names)) + '<div style="text-align:right;margin-top:10px"><span class="btn">Restore default order</span></div></div>'
-page("farol-03-options-menu-bar-order", menu.replace('<div class="x">×</div><div class="t">Farol</div>', '<div class="x">×</div><div class="t">Farol</div>' + hover_tip, 1) + order, "Menu: presets, items in groups, a gear to set up each one", "Menu: pacotes prontos, itens em grupos e engrenagem para configurar", TAB_CSS)
+page("farol-03-options-menu-bar-order", menu.replace('<div class="x">×</div><div class="t">Farol</div>', '<div class="x">×</div><div class="t">Farol</div>' + hover_tip, 1) + order, "Menu: presets with Undo, items in groups, a gear each", "Menu: pacotes prontos com Desfazer, itens em grupos e engrenagem", TAB_CSS)
 
 # 4. Alarms
 alarms = """<div class="win" style="width:470px"><div class="x">×</div><div class="t">Alarms</div>
@@ -251,7 +251,7 @@ page("farol-08-progress-xp-reputation-professions", f'<div style="display:flex;f
      "Progress: XP, reputation, professions, goals, farm, quests", "Seu progresso: XP, reputação, profissões, metas, farm e missões")
 # 9. Session summary (chat only)
 def chatline(text): return f'<div><span style="color:#33ccff">Farol:</span> {text}</div>'
-G = lambda g, sv: f'<span class="g">+</span><span class="gold">{g}g</span> <span class="silver">{sv}s</span>'
+G = lambda g, sv: f'<span class="g">+</span>{g}<span class="gold">g</span> {sv}<span class="silver">s</span>'
 summary_lines = [
     "session summary (2h 14m):",
     f"&nbsp;&nbsp;Gold: {G(38, 12)} ({G(17, 6)}/h) · XP: +84.2k (1 level, 37.6k/h)",
@@ -291,9 +291,11 @@ twin = ('<div class="win" style="width:470px"><div class="x">×</div><div class=
         + trow("Fishing daily", "daily", True) + trow("Cooking daily", "daily", False) + trow("Sell on the auction house", "daily", True)
         + trow("Ember Depths", "weekly", False) + trow("Guild bank deposit", "weekly", True)
         + '<div style="display:flex;gap:8px;align-items:center;margin-top:12px"><span class="input" style="min-width:200px;text-align:left;color:#aaa">new task…</span>'
-          '<span class="btn">Weekly</span><span class="btn">Add</span></div>'
+          '<span class="btn">Type: Daily</span><span class="btn">Add</span></div>'
         + '<div class="ck" style="margin-top:10px"><span class="box">✓</span>Warn 1 h before the daily reset if a daily task is left</div>'
-        + '<div class="dim" style="font-size:12px;margin-top:4px">Daily reset in 5h 12m · weekly in 2d 4h</div></div>')
+        + '<div class="dim" style="font-size:12px;margin-top:4px">Daily reset in 5h 12m · weekly in 2d 4h</div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12.5px">'
+          '<span>Task removed: Old errand</span><span class="btn" style="padding:1px 10px">Undo</span></div></div>')
 twarn = ('<div class="tip" style="width:420px;font-size:13px"><span style="color:#33ccff">Farol:</span> <span style="color:#ff9900">'
          '1 daily task left and the daily reset is in 58m.</span> <span class="dim">(Silence / Remind in 10 min)</span></div>')
 page("farol-10-daily-weekly-tasks", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{TASK_BAR}{ttasks}{twarn}</div>{twin}',
@@ -301,11 +303,11 @@ page("farol-10-daily-weekly-tasks", f'<div style="display:flex;flex-direction:co
 
 # 11. Dungeon and raid runs
 RUN_BAR = hbar([("🔭",'<span class="g">60</span> fps'),("🔨",'Dur <span class="y">54%</span>'),
-                 ("🗝️",'<span class="zone">Ember Depths</span> 18m · <span class="blue">+4.2k XP</span> · <span class="g">+</span><span class="gold">12g</span>'),
+                 ("🗝️",'<span class="zone">Ember Depths</span> 18m · <span class="blue">+4.2k XP</span> · <span class="g">+</span>12<span class="gold">g</span>'),
                  ("⏳",'XP/h 14.0k · 1h 05m')], "font-size:14px")
 run_summary = ('<div class="tip" style="width:560px;font-size:14px;line-height:1.7;background:#000a;border-color:#3a3f55">'
     '<div><span style="color:#33ccff">Farol:</span> left <span class="zone">Ember Depths</span> (dungeon): <b>32m</b></div>'
-    '<div><span style="color:#33ccff">Farol:</span> &nbsp;XP: <span class="blue">+6.8k</span> · Gold: <span class="g">+</span><span class="gold">18g</span> <span class="silver">40s</span> · Loot: 14 (<span class="q3">2 rares</span>, <span class="q4">1 epic</span>) · Deaths: 1</div></div>')
+    '<div><span style="color:#33ccff">Farol:</span> &nbsp;XP: <span class="blue">+6.8k</span> · Gold: <span class="g">+</span>18<span class="gold">g</span> 40<span class="silver">s</span> · Loot: 14 (<span class="q3">2 rares</span>, <span class="q4">1 epic</span>) · Deaths: 1</div></div>')
 RUNS = [("Today 21:42","Ember Depths","32m","+6.8k","+18g 40s","14",'<span class="q4">1 epic</span>',""),
         ("Today 19:05","Sunken Vault","48m","+9.9k","+25g 10s","21",'<span class="q3">2 rares</span>',"2"),
         ("Yesterday","Ember Depths","35m","+7.1k","+16g 05s","12",'<span class="q3">1 rare</span>',""),

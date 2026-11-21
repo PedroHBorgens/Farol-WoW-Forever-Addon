@@ -14,7 +14,7 @@ return {
         H.talentPoints = 1; H.inCombat = true; H:update(1)
         T.eq(H.warnSounds, 0, "waits for combat to end")
         H.inCombat = false; H:update(1)
-        T.eq(H.warnSounds, 1); T.has(popupText(H), "Você tem 1 ponto(s) de talento para gastar.")
+        T.eq(H.warnSounds, 1); T.has(popupText(H), "Você tem 1 ponto de talento para gastar.")
         H:update(60); T.eq(H.warnSounds, 1, "same number: no repeat")
         H.talentPoints = 2; H:update(1); T.eq(H.warnSounds, 2, "new point: warns again")
         H.talentPoints = 0; H:update(1); H.talentPoints = 1; H:update(1); T.eq(H.warnSounds, 3, "after spending all")
@@ -23,7 +23,7 @@ return {
     { "talents work with the classic API (3.3.5a style) and the modern trait API", function(T, Mock)
         local H = Mock.new({ mode = "wotlk", locale = "enUS" }):login(); fixGear(H)
         H.talentPoints = 3; H:update(1)
-        T.has(H:lastMsg(), "You have 3 unspent talent point(s).")
+        T.has(H:lastMsg(), "You have 3 unspent talent points.")
         local H2 = Mock.new():login(); fixGear(H2)
         H2.env.GetUnspentTalentPoints = nil
         H2.env.C_ClassTalents = { GetActiveConfigID = function() return 7 end }
@@ -32,7 +32,7 @@ return {
             GetTreeCurrencyInfo = function(_, tree) return { { quantity = tree } } end,
         }
         H2:update(1)
-        T.has(H2:lastMsg(), "Você tem 3 ponto(s) de talento")
+        T.has(H2:lastMsg(), "Você tem 3 pontos de talento")
         H2:slash("aviso status")
         T.has(H2.strip(table.concat(H2.msgs, "/")), "talentos: 3 ponto(s) não gasto(s) (função: C_Traits)")
     end },
@@ -45,7 +45,7 @@ return {
         local spent = { 10, 8, 0 } -- 18 pontos gastos no nível 30 (21 esperados) = 3 sobrando
         H.env.GetTalentTabInfo = function(tab) return "Árvore " .. tab, 135, spent[tab], "file" end
         H:update(1)
-        T.has(H:lastMsg(), "Você tem 3 ponto(s) de talento para gastar.")
+        T.has(H:lastMsg(), "Você tem 3 pontos de talento para gastar.")
         H:slash("aviso status")
         local status = H.strip(table.concat(H.msgs, "/"))
         T.has(status, "talentos: 3 ponto(s) não gasto(s) (função: estimativa/estimate)")
@@ -62,7 +62,7 @@ return {
         -- formato Wrath+: id, nome, descrição, ícone, pontosGastos
         H.env.GetTalentTabInfo = function(tab) return 160 + tab, "Tree", "desc", 135, ({ 5, 5, 5 })[tab] end
         H:update(1)
-        T.has(H:lastMsg(), "You have 6 unspent talent point(s).", "21 expected - 15 spent")
+        T.has(H:lastMsg(), "You have 6 unspent talent points.", "21 expected - 15 spent")
         local H2 = Mock.new():login(); fixGear(H2)
         H2.env.GetUnspentTalentPoints = nil
         H2.env.GetNumTalentTabs = function() return 3 end
@@ -115,7 +115,7 @@ return {
     { "popup: Remind in 30 min warns again only if still a problem", function(T, Mock)
         local H = Mock.new():login(); fixGear(H)
         H.talentPoints = 1; H:update(1)
-        H:click(H.env.FarolWarnRemind); T.has(H:lastMsg(), "aviso de novo às")
+        H:click(H.env.FarolWarnRemind); T.has(H:lastMsg(), "volto a avisar às")
         for _ = 1, 29 do H:update(60) end; T.eq(H.warnSounds, 1, "not before 30 min")
         H:update(60); T.eq(H.warnSounds, 2, "reminder after 30 min"); T.ok(H.env.FarolWarnPopup:IsShown())
         H:slash("aviso lembrar")                          -- lembrar de novo pelo chat
@@ -148,12 +148,12 @@ return {
         local popup = H.env.FarolWarnPopup
         T.eq(H:text(popup.title), "Avisos (2)")
         T.has(H:text(popup.rows[1].text), "Durabilidade baixa")
-        T.has(H:text(popup.rows[2].text), "Você tem 2 ponto(s) de talento")
+        T.has(H:text(popup.rows[2].text), "Você tem 2 pontos de talento")
         T.eq(H:text(H.env.FarolWarnSilence), "Silenciar todos")
         T.eq(H:text(H.env.FarolWarnRemind), "Lembrar todos em 30 min")
         H:click(H.env.FarolWarnRow1Silence)              -- responde só a primeira linha
         T.eq(H:text(popup.title), "Aviso", "back to the single layout")
-        T.has(popupText(H), "Você tem 2 ponto(s) de talento")
+        T.has(popupText(H), "Você tem 2 pontos de talento")
         H:click(H.env.FarolWarnSilence)
         T.ok(not popup:IsShown())
         H:slash("aviso silenciar"); T.has(H:lastMsg(), "nenhum aviso aberto")
@@ -183,7 +183,7 @@ return {
         T.eq(H:text(H.env.FarolWarnRemind), "Lembrar todos em 10 min", "default from the settings")
         T.eq(H:text(H.env.FarolWarnRow1Remind), "Lembrar em 10 min")
         H:click(H.env.FarolWarnRemind)
-        T.has(H:lastMsg(), "2 aviso(s) de novo às")
+        T.has(H:lastMsg(), "volto a avisar 2 avisos às")
         T.ok(not H.env.FarolWarnPopup:IsShown())
         for _ = 1, 10 do H:update(60) end
         T.eq(H:text(H.env.FarolWarnPopup.title), "Avisos (2)", "both come back together")

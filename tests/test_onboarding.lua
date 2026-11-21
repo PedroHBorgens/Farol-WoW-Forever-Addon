@@ -28,7 +28,7 @@ return {
     { "first time: a welcome explains that only the basics are on, once", function(T, Mock)
         local H = Mock.new():login()
         local text = chat(H)
-        T.has(text, "bem-vindo! A barra começa só com o básico: FPS, Latência, Coordenadas, Zona, Pedra de Regresso, Durabilidade, Ouro.")
+        T.has(text, "Boas-vindas! A barra começa só com o básico: FPS, Latência, Coordenadas, Zona, Pedra de Regresso, Durabilidade, Ouro.")
         T.has(text, "há mais 21 informações e vários avisos desligados — clique com o botão direito na barra")
         T.hasnt(text, "novidades", "a new player gets the welcome, not the news")
         local N = relog(H, Mock)
@@ -100,7 +100,7 @@ return {
         for _, key in ipairs(H.ns.ITEM_ORDER) do H:slash("show " .. key) end
         T.has(tip(H), "Clique direito: opções.", "all on: the plain hint")
         local E = Mock.new({ locale = "enUS" }):login()
-        T.has(chat(E), "welcome! The bar starts with the basics only: FPS, Latency, Coordinates, Zone, Hearthstone, Durability, Gold.")
+        T.has(chat(E), "Welcome! The bar starts with the basics only: FPS, Latency, Coordinates, Zone, Hearthstone, Durability, Gold.")
         T.has(chat(E), "there are 21 more items and several warnings turned off")
     end },
 }

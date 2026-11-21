@@ -55,7 +55,8 @@ local STRINGS = {
         run_empty     = "Nenhuma corrida ainda: entre numa masmorra ou raide.",
         run_summary   = "Mostrar o resumo no chat ao sair",
         run_clear     = "Limpar histórico",
-        run_clear_confirm = "Clique de novo",
+        run_clear_confirm = "Apagar %d corridas?",
+        run_clear_confirm_1 = "Apagar %d corrida?",
         run_cleared   = "histórico de masmorras apagado.",
         run_sum_on    = "resumo ao sair de masmorras: ligado.",
         run_sum_off   = "resumo ao sair de masmorras: desligado.",
@@ -92,7 +93,8 @@ local STRINGS = {
         run_empty     = "No runs yet: go into a dungeon or raid.",
         run_summary   = "Show the summary in chat when leaving",
         run_clear     = "Clear history",
-        run_clear_confirm = "Click again",
+        run_clear_confirm = "Delete %d runs?",
+        run_clear_confirm_1 = "Delete %d run?",
         run_cleared   = "dungeon history cleared.",
         run_sum_on    = "summary when leaving dungeons: on.",
         run_sum_off   = "summary when leaving dungeons: off.",
@@ -424,20 +426,11 @@ local function CreateWindow()
     frame.summary.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.summary.label:SetPoint("LEFT", frame.summary, "RIGHT", 4, 0)
     frame.summary:SetScript("OnClick", function(self) SetSummary(self:GetChecked() and true or false) end)
-    -- "Limpar histórico": pede um segundo clique (em até 5 s) para confirmar.
+    -- "Limpar histórico": o 1º clique pergunta ("Apagar 7 corridas?"), o 2º (em até 5 s) apaga.
     frame.clear = CreateFrame("Button", "FarolRunsClear", frame, "UIPanelButtonTemplate")
     frame.clear:SetSize(160, 22)
     frame.clear:SetPoint("TOPRIGHT", -24, bottom)
-    frame.clear:SetScript("OnClick", function(self)
-        local now = GetTime()
-        if self.confirmAt and now - self.confirmAt <= 5 then
-            self.confirmAt = nil
-            ClearHistory()
-        else
-            self.confirmAt = now
-            self:SetText(T("run_clear_confirm"))
-        end
-    end)
+    frame.clear:SetScript("OnClick", function(self) ns.ConfirmClick(self, #Data().list, "run_clear_confirm", ClearHistory) end)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolRuns") -- ESC fecha
@@ -465,7 +458,7 @@ RefreshWindow = function()
     local db = ns.GetDB()
     window.summary:SetChecked(db and db.runSummary or false)
     window.summary.label:SetText(T("run_summary"))
-    window.clear.confirmAt = nil
+    window.clear.farolAsk = nil
     window.clear:SetText(T("run_clear"))
 end
 

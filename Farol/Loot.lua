@@ -49,7 +49,10 @@ local STRINGS = {
         loot_scroll   = "%d–%d de %d",
         opt_loot      = "Saques...",
         loot_button_tip = "Últimos saques",
-        loot_button_new = "%d item(ns) novo(s) — clique para ver",
+        loot_button_new = "%d itens novos — clique para ver",
+        loot_button_new_1 = "%d item novo — clique para ver",
+        loot_clear_ask = "Apagar %d itens?",
+        loot_clear_ask_1 = "Apagar %d item?",
         loot_button_none = "Clique para ver",
         loot_when     = "Saqueado: %s",
         help_loot     = "  /farol saque [limpar] - abrir a janela de últimos saques (ou apagar o histórico)",
@@ -72,7 +75,10 @@ local STRINGS = {
         loot_scroll   = "%d–%d of %d",
         opt_loot      = "Loot...",
         loot_button_tip = "Recent loot",
-        loot_button_new = "%d new item(s) — click to view",
+        loot_button_new = "%d new items — click to view",
+        loot_button_new_1 = "%d new item — click to view",
+        loot_clear_ask = "Delete %d items?",
+        loot_clear_ask_1 = "Delete %d item?",
         loot_button_none = "Click to view",
         loot_when     = "Looted: %s",
         help_loot     = "  /farol loot [clear]  - open the recent loot window (or clear the history)",
@@ -251,7 +257,7 @@ local function UpdateButton()
         lootButton:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:AddLine(T("loot_button_tip"))
-            GameTooltip:AddLine(unseen > 0 and string.format(T("loot_button_new"), unseen) or T("loot_button_none"),
+            GameTooltip:AddLine(unseen > 0 and string.format(ns.TN("loot_button_new", unseen), unseen) or T("loot_button_none"),
                 0.8, 0.8, 0.8)
             GameTooltip:Show()
         end)
@@ -607,15 +613,18 @@ local function CreateWindow()
 
     -- Rodapé: dica, posição da rolagem, Limpar e alça de redimensionar.
     frame.hint = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
-    frame.hint:SetPoint("BOTTOMLEFT", 22, 20)
-    frame.hint:SetPoint("RIGHT", frame, "RIGHT", -120, 0)
-    frame.hint:SetJustifyH("LEFT")
+    -- Linha de baixo: posição da rolagem à esquerda e Limpar à direita (largo para "Apagar 100 itens?");
+    -- a dica fica na linha de cima, com a largura toda.
     frame.scrollInfo = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    frame.scrollInfo:SetPoint("BOTTOMLEFT", frame.hint, "TOPLEFT", 0, 4)
+    frame.scrollInfo:SetPoint("BOTTOMLEFT", 22, 21)
+    frame.hint:SetPoint("BOTTOMLEFT", frame.scrollInfo, "TOPLEFT", 0, 8)
+    frame.hint:SetPoint("RIGHT", frame, "RIGHT", -24, 0)
+    frame.hint:SetJustifyH("LEFT")
     frame.clear = CreateFrame("Button", "FarolLootClear", frame, "UIPanelButtonTemplate")
-    frame.clear:SetSize(80, 22)
+    frame.clear:SetSize(140, 22) -- cabe "Apagar 100 itens?"
     frame.clear:SetPoint("BOTTOMRIGHT", -30, 16)
-    frame.clear:SetScript("OnClick", function() Loot.Clear() end)
+    -- "Limpar": o 1º clique pergunta ("Apagar 23 itens?"), o 2º apaga.
+    frame.clear:SetScript("OnClick", function(self) ns.ConfirmClick(self, #history, "loot_clear_ask", Loot.Clear) end)
 
     local grip = CreateFrame("Button", "FarolLootResize", frame)
     grip:SetSize(16, 16)
@@ -659,7 +668,7 @@ RefreshWindow = function()
     window.qualityLabel:SetText(T("loot_quality"))
     window.countDropdown:SetText(tostring(settings.count))
     window.qualityDropdown:SetText(QualitySummary())
-    window.clear:SetText(T("loot_clear"))
+    window.clear:SetText(T("loot_clear")); window.clear.farolAsk = nil
     window.hint:SetText(T("loot_hint"))
 
     -- Os N mais recentes que passam no filtro, do mais novo para o mais antigo.

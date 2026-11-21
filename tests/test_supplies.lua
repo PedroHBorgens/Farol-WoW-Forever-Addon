@@ -43,7 +43,7 @@ return {
         H.ammo = 310; H:update(1); T.has(cellText(H), "|cffffff3a310|r", "yellow below 400")
         H.ammo = 150; H:update(1); T.has(cellText(H), "|cffff6666150|r", "red below 200")
         local text = hover(H)
-        T.has(text, "Munição = 150"); T.has(text, "Amarelo / vermelho abaixo de = 400 / 200")
+        T.has(text, "Munição = 150"); T.has(text, "Atenção / crítico abaixo de = 400 / 200")
         T.has(text, "o Farol só conta, nunca compra")
     end },
 
@@ -71,9 +71,9 @@ return {
         T.has(cellText(H), "|cffffff3a300|r")
         H:slash("aviso municao 250 100")
         T.eq(H.env.FarolDB.warnings.ammoYellow, 250); T.eq(H.env.FarolDB.warnings.ammoRed, 100)
-        T.has(H:lastMsg(), "munição: amarelo abaixo de 250, vermelho abaixo de 100.")
+        T.has(H:lastMsg(), "munição: atenção abaixo de 250, crítico abaixo de 100.")
         H:update(1); T.hasnt(cellText(H), "|cff", "300 is now above the yellow limit")
-        H:slash("aviso municao 100 300"); T.has(H:lastMsg(), "vermelho menor que o amarelo")
+        H:slash("aviso municao 100 300"); T.has(H:lastMsg(), "crítico menor que o de atenção")
         T.eq(H.env.FarolDB.warnings.ammoYellow, 250, "unchanged")
         H:slash("aviso municao 6000 10"); T.has(H:lastMsg(), "de 0 a 5000")
         H:slash("aviso reagentes 0 3"); T.eq(H.env.FarolDB.warnings.reagYellow, 0, "0 = no yellow")

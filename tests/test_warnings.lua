@@ -41,7 +41,7 @@ return {
         local H = Mock.new({ locale = "enUS" }):login()
         setDurability(H, 100)
         setFree(H, 2); H:update(1)
-        T.eq(H.warnSounds, 1); T.has(H.strip(H.screen), "Bags almost full: 2 free slot(s).")
+        T.eq(H.warnSounds, 1); T.has(H.strip(H.screen), "Bags almost full: 2 free slots.")
         setFree(H, 1); H:update(1); setFree(H, 2); H:update(1)
         T.eq(H.warnSounds, 1, "no repeat while it changes between 1 and 2")
         setFree(H, 0); H:update(1)

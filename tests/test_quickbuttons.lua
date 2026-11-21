@@ -25,7 +25,7 @@ return {
         loot(H, 1); loot(H, 2); loot(H, 3)
         T.eq(H:text(button.badge), "3")
         button._scripts.OnEnter(button)
-        T.has(table.concat(H.env.GameTooltip.lines, " "), "3 new item(s)")
+        T.has(table.concat(H.env.GameTooltip.lines, " "), "3 new items")
         H:click(button)
         T.eq(H:text(button.badge), "", "opening the window clears the counter")
         loot(H, 4)

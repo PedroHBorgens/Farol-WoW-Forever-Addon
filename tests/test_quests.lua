@@ -54,7 +54,7 @@ return {
         T.has(t, "[40] A Torre Alta = 0/1", "highest level first, with its objective")
         T.has(t, "= 1/4"); T.has(t, "= falhou")
         T.has(t, "… e mais 4")
-        T.has(t, "2 missão(ões) bem acima do seu nível (37+)")
+        T.has(t, "2 missões bem acima do seu nível (37+)")
         T.hasnt(H.env.GameTooltip.lines[1] or "", "|Hitem")
         local raw = table.concat(H.env.GameTooltip.lines, "\n")
         T.has(raw, "|cffff1919[40]|r", "red: 5+ levels above")

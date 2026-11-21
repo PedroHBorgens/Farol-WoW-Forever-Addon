@@ -148,7 +148,7 @@ return {
         T.eq(H:text(H.env.FarolWarnPause.label), "Break every")
         T.eq(H:text(H.env.FarolWarnWater.label), "Drink water every")
         T.eq(H:text(H.env.FarolWarnWaterAnywhere.label), "Also in fights and dungeons")
-        T.eq(H:text(H.env.FarolOptions.controls.warnings.remindLabel), "\"Remind in\" starts at:")
+        T.eq(H:text(H.env.FarolOptions.controls.warnings.remindLabel), "\"Remind in\" default:")
         H:slash("warn break on"); H:slash("warn break 90"); H:slash("warn water fights on"); H:slash("warn default 5")
         local w = H.env.FarolDB.warnings
         T.eq(w.pause, true); T.eq(w.pauseMin, 90); T.eq(w.waterAnywhere, true); T.eq(w.remindMin, 5)

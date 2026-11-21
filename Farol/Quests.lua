@@ -38,7 +38,8 @@ local STRINGS = {
         tt_quests_active = "Em andamento (%d)",
         tt_quests_more = "… e mais %d",
         tt_quests_failed = "falhou",
-        tt_quests_high = "%d missão(ões) bem acima do seu nível (%d+) — melhor deixar para depois",
+        tt_quests_high = "%d missões bem acima do seu nível (%d+) — melhor deixar para depois",
+        tt_quests_high_1 = "%d missão bem acima do seu nível (%d+) — melhor deixar para depois",
         tt_quests_none = "nenhuma missão no diário",
         tt_quests_closed = "algumas categorias estão fechadas no diário (o Farol não as abre)",
         tt_quests_colors = "cor do nível = dificuldade, como no jogo",
@@ -56,7 +57,8 @@ local STRINGS = {
         tt_quests_active = "In progress (%d)",
         tt_quests_more = "… and %d more",
         tt_quests_failed = "failed",
-        tt_quests_high = "%d quest(s) well above your level (%d+) — better leave them for later",
+        tt_quests_high = "%d quests well above your level (%d+) — better leave them for later",
+        tt_quests_high_1 = "%d quest well above your level (%d+) — better leave it for later",
         tt_quests_none = "no quests in your log",
         tt_quests_closed = "some categories are collapsed in your quest log (Farol does not open them)",
         tt_quests_colors = "level color = difficulty, as in the game",
@@ -305,7 +307,7 @@ function Quests.Tooltip()
     List(T("tt_quests_ready"), data.ready, 0.25, 1, 0.25, data.level)
     List(T("tt_quests_active"), data.active, 1, 0.82, 0, data.level)
     if data.high > 0 and data.level then
-        GameTooltip:AddLine("   " .. string.format(T("tt_quests_high"), data.high, data.level + HIGH_LEVELS), 1, 0.4, 0.4, true)
+        GameTooltip:AddLine("   " .. string.format(ns.TN("tt_quests_high", data.high), data.high, data.level + HIGH_LEVELS), 1, 0.4, 0.4, true)
     end
     if data.closed then GameTooltip:AddLine("   " .. T("tt_quests_closed"), 0.6, 0.6, 0.6, true) end
     GameTooltip:AddLine("   " .. T("tt_quests_colors"), 0.5, 0.5, 0.5)

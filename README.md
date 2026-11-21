@@ -214,8 +214,9 @@ When there is junk to sell, the bag warning says so: "… 3 slot(s) hold junk (3
 
 The **Ammo & reagents** bar item (off by default) counts what your class uses: hunter ammo, warlock Soul Shards,
 mage Arcane Powder and runes, priest candles, paladin symbols, druid seeds and Gift reagents, shaman Ankhs, rogue
-powders. **You choose when the number turns yellow and red** in the Warnings tab (defaults: ammo 400 / 200,
-reagents 10 / 5; red must be lower than yellow, 0 in yellow = never yellow), or with `/farol warn ammo 400 200` and
+powders. **You choose the warning and critical limits** in the Warnings tab (defaults: ammo 400 / 200,
+reagents 10 / 5; critical must be lower than warning, 0 in warning = no warning level; on the bar, warning = yellow and
+critical = red, or orange with the colorblind-friendly colors), or with `/farol warn ammo 400 200` and
 `/farol warn reagents 10 5`. Optional warnings (off by default) fire once below red, wait for combat to end, and come
 back after you restock: "Ammo: 150 running low — restock before leaving town." A reagent is only tracked after the
 character has had at least one (a level 10 mage is not warned about Arcane Powder). Farol only **counts** — it never
@@ -383,7 +384,8 @@ A separate window listing the items **you** looted or received, newest first.
   **Yesterday 21:27**, or the date for older items (**Nov 8 21:12**). Hover for the item tooltip, which also shows
   the full date ("Looted: Sunday, Nov 8, 2026 at 21:12"); **Shift-click** puts the link in your chat box (you decide
   whether to send it).
-- History is saved **per character** (last 100 items). **Clear** erases it.
+- History is saved **per character** (last 100 items). **Clear** asks first ("Delete 23 items?") and a second click
+  within 5 seconds erases it. The same goes for the warning history and the dungeon log.
 
 It reads only the game's own loot messages about **you** ("You receive loot: …"), using the client's text,
 so it works in any language. Other players' loot is ignored. In some instance/combat situations the

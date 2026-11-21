@@ -93,9 +93,11 @@ Tick or untick each item — no commands needed. Open it in any of these ways:
 
 The menu has **four tabs**:
 
-- **Bar** — what belongs to the chosen bar: **Bar 1 / 2 / 3**, **Show** and **Lock**; the **presets** (**Basic**
+- **Bar** — what belongs to the chosen bar: **Editing: Bar 1 / 2 / 3** (only picks which bar you are editing; it
+  changes nothing), **Show** and **Lock**; in a box of its own, **Apply preset:** with the **presets** (**Basic**
   goes back to the basics; **Leveling**, **Gold & farm** and **Dungeons** turn on a set of items that go together;
-  **Undo** goes back — also `/farol preset leveling` / `/farol preset undo`); the items in groups (Performance,
+  after applying one, the menu says what changed and an **Undo** button appears — also `/farol preset leveling` /
+  `/farol preset undo`); the items in groups (Performance,
   Location, Gear and bags, Gold, Progress, Time and social), with a **gear** next to the ones that have settings (it
   opens that item's window or warning); a **strip at the bottom explains the hovered item**; and the
   **Appearance...** and **Order...** buttons of this bar.
@@ -117,7 +119,7 @@ Press **Esc** to close it. If you hide the bar, use `/farol menu` to bring it ba
 
 ### Up to 3 bars
 
-At the top of the menu, **Bar: [Bar 1] [Bar 2] [Bar 3]** chooses which bar the menu, **Appearance...** and
+At the top of the menu, **Editing: [Bar 1] [Bar 2] [Bar 3]** chooses which bar the menu, **Appearance...** and
 **Order...** change. Pick **Bar 2**, tick **Show** and the items you want: each bar has its **own items,
 position, appearance (scale, background, text, layout, hide in combat) and order**. Right-clicking a bar opens the
 menu with that bar already chosen. Bars 2 and 3 start off (and below bar 1); `/farol bar 2 show` / `/farol bar 2 hide`
@@ -284,7 +286,8 @@ later). The bar item **Farm** (off by default) shows the item and its progress (
 yellow, green when done) or, with several goals, how many are done (`Farm 2/5`). The tooltip lists each item with how
 many you got this session, the pace per hour and an estimate ("+18 this session (~24/h) · ~32m left"). The count
 includes the bank when the game reports it. The **Goals...** window lists the items so you can change the amount or
-remove them (X). Up to 10 items per character; the "goal reached" warning covers them too, once per item.
+remove them (X — removed one by mistake? **Undo**, next to the "Farm" title, or `/farol goal item undo`). Up to 10
+items per character; the "goal reached" warning covers them too, once per item.
 `/farol goal item remove <name or number>`, `/farol goal item clear`. Farol only **counts** items: it never moves, sells,
 uses or loots anything, and nothing is sent.
 
@@ -292,7 +295,11 @@ uses or loots anything, and nothing is sent.
 
 - **Colorblind-friendly colors** (General tab, off by default; `/farol colors colorblind` / `/farol colors default`):
   green (good) becomes **blue** and red (bad) becomes **orange**, while yellow (warning) stays. The three colors stay
-  distinct for protanopia, deuteranopia and tritanopia. It applies to the bar and the tooltips.
+  distinct for protanopia, deuteranopia and tritanopia. It applies to the bar, the tooltips and the counters on the
+  📝 👜 buttons.
+- Gold amounts show the number in the normal text color and only the **g / s / c** letters in gold, silver and
+  copper, so yellow always means "warning".
+- Removing a task or a farm goal, or applying a preset, can be **undone** with one click (this session).
 - Status colors always come with a number or a word (`60 fps`, `Dur 54%`, `ready`): color is never the only cue.
 - The bar's red is lighter, for better reading over bright scenery; windows have an opaque background and hints use a
   lighter gray.
@@ -341,7 +348,9 @@ shows how many are done (`Tasks 3/5`, yellow while something is left, green when
 Optional warning (off by default): **1 hour before the daily reset, if a daily task is left**.
 
 Farol does not check anything in the game — you tick the tasks yourself. Commands: `/farol task add [daily|weekly] Name`,
-`/farol task done N`, `/farol task remove N`, `/farol task list`, `/farol task warn on|off`.
+`/farol task done N`, `/farol task remove N`, `/farol task undo`, `/farol task list`, `/farol task warn on|off`.
+In the window, **Type: Daily / Weekly** picks the type of the new task; removed one by mistake (X)? A
+**Task removed: ... [Undo]** line appears and puts it back in the same place (this session only).
 
 ## Session summary
 

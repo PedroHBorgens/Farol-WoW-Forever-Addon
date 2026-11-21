@@ -43,14 +43,19 @@ local STRINGS = {
         task_warn     = "Avisar 1 h antes do reset diário se faltar alguma diária",
         task_resets   = "Reset diário em %s · semanal em %s",
         task_added    = "tarefa adicionada: %s (%s).",
-        task_removed  = "tarefa apagada: %s.",
+        task_removed  = "tarefa apagada: %s (Desfazer na janela ou /farol tarefa desfazer).",
+        task_restored = "tarefa de volta: %s.",
+        task_nothing_undo = "nada para desfazer.",
+        task_undo     = "Desfazer",
+        task_undo_line = "Tarefa apagada: %s",
+        task_kind     = "Tipo: %s",
         task_marked   = "tarefa %s: %s.",
         task_full     = "a lista já tem 10 tarefas; apague uma antes.",
         task_bad_name = "escreva um nome para a tarefa (até 40 letras, sem \"||\").",
         task_bad_num  = "não existe a tarefa %s (use /farol tarefa lista).",
         task_list     = "Farol — tarefas (%d de %d feitas):",
         task_line     = "  %d. %s (%s): %s",
-        task_usage    = "uso: /farol tarefa || /farol tarefa add [diaria||semanal] Nome || /farol tarefa feita N || /farol tarefa apagar N || /farol tarefa lista || /farol tarefa aviso on||off",
+        task_usage    = "uso: /farol tarefa || /farol tarefa add [diaria||semanal] Nome || /farol tarefa feita N || /farol tarefa apagar N || /farol tarefa desfazer || /farol tarefa lista || /farol tarefa aviso on||off",
         help_tasks    = "  /farol tarefa        - lista de tarefas diárias e semanais (zera sozinha no reset)",
         opt_tasks     = "Tarefas...",
         news_tasks    = "lista de tarefas diárias e semanais que zera sozinha no reset (/farol tarefa)",
@@ -75,14 +80,19 @@ local STRINGS = {
         task_warn     = "Warn 1 h before the daily reset if a daily task is left",
         task_resets   = "Daily reset in %s · weekly in %s",
         task_added    = "task added: %s (%s).",
-        task_removed  = "task removed: %s.",
+        task_removed  = "task removed: %s (Undo in the window or /farol task undo).",
+        task_restored = "task back: %s.",
+        task_nothing_undo = "nothing to undo.",
+        task_undo     = "Undo",
+        task_undo_line = "Task removed: %s",
+        task_kind     = "Type: %s",
         task_marked   = "task %s: %s.",
         task_full     = "the list already has 10 tasks; remove one first.",
         task_bad_name = "type a name for the task (up to 40 letters, no \"||\").",
         task_bad_num  = "there is no task %s (use /farol task list).",
         task_list     = "Farol — tasks (%d of %d done):",
         task_line     = "  %d. %s (%s): %s",
-        task_usage    = "usage: /farol task || /farol task add [daily||weekly] Name || /farol task done N || /farol task remove N || /farol task list || /farol task warn on||off",
+        task_usage    = "usage: /farol task || /farol task add [daily||weekly] Name || /farol task done N || /farol task remove N || /farol task undo || /farol task list || /farol task warn on||off",
         help_tasks    = "  /farol task          - daily and weekly task list (resets on its own)",
         opt_tasks     = "Tasks...",
         news_tasks    = "daily and weekly task list that resets on its own (/farol task)",
@@ -251,8 +261,25 @@ function Tasks.Remove(index)
     local task = list[index]
     if not task then Print(string.format(T("task_bad_num"), tostring(index))) return end
     table.remove(list, index)
+    -- Só na sessão: "Desfazer" devolve a tarefa ao mesmo lugar (cópia, nunca a mesma tabela).
+    Tasks.lastRemoved = { index = index, task = { n = task.n, w = task.w, d = task.d } }
     Print(string.format(T("task_removed"), task.n))
     Changed()
+end
+
+function Tasks.Undo()
+    local undo = Tasks.lastRemoved
+    if not undo then Print(T("task_nothing_undo")) return false end
+    local list = List()
+    if #list >= MAX_TASKS then Print(T("task_full")) return false end
+    Tasks.lastRemoved = nil
+    local index = tonumber(undo.index)
+    if not index or index ~= index or index < 1 or index > #list + 1 then index = #list + 1 end -- NaN/fora da lista: no fim
+    index = math.floor(index)
+    table.insert(list, index, { n = undo.task.n, w = undo.task.w, d = undo.task.d })
+    Print(string.format(T("task_restored"), undo.task.n))
+    Changed()
+    return true
 end
 
 -- Marca (true) ou desmarca (false) a tarefa; sem "value", inverte.
@@ -337,12 +364,12 @@ local function CreateWindow()
 
     local addY = -70 - MAX_TASKS * ROW_HEIGHT - 10
     frame.name = CreateFrame("EditBox", "FarolTaskName", frame, "InputBoxTemplate")
-    frame.name:SetSize(220, 20)
+    frame.name:SetSize(180, 20)
     frame.name:SetPoint("TOPLEFT", 30, addY)
     frame.name:SetAutoFocus(false)
     frame.name:SetMaxLetters(MAX_NAME_CHARS)
     frame.kind = CreateFrame("Button", "FarolTaskKind", frame, "UIPanelButtonTemplate")
-    frame.kind:SetSize(80, 22)
+    frame.kind:SetSize(120, 22) -- chave Diária/Semanal: "Tipo: Semanal"
     frame.kind:SetPoint("LEFT", frame.name, "RIGHT", 8, 0)
     frame.kind:SetScript("OnClick", function() newWeekly = not newWeekly; RefreshWindow() end)
     frame.add = CreateFrame("Button", "FarolTaskAdd", frame, "UIPanelButtonTemplate")
@@ -364,6 +391,16 @@ local function CreateWindow()
     frame.warn:SetScript("OnClick", function(self) SetWarning(self:GetChecked() and true or false) end)
     frame.resets = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.resets:SetPoint("TOPLEFT", 26, addY - 60)
+    -- Faixa "Tarefa apagada: X [Desfazer]" (só depois de apagar; some ao desfazer).
+    frame.undoText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    frame.undoText:SetPoint("TOPLEFT", 26, addY - 86)
+    frame.undoText:SetWidth(300)
+    frame.undoText:SetJustifyH("LEFT")
+    if frame.undoText.SetWordWrap then frame.undoText:SetWordWrap(false) end
+    frame.undo = CreateFrame("Button", "FarolTaskUndo", frame, "UIPanelButtonTemplate")
+    frame.undo:SetSize(96, 22)
+    frame.undo:SetPoint("TOPRIGHT", -26, addY - 82)
+    frame.undo:SetScript("OnClick", function() Tasks.Undo() end)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolTasks") -- ESC fecha
@@ -392,7 +429,15 @@ RefreshWindow = function()
             row.check:Hide(); row.text:Hide(); row.kind:Hide(); row.remove:Hide()
         end
     end
-    window.kind:SetText(newWeekly and T("task_weekly") or T("task_daily"))
+    window.kind:SetText(string.format(T("task_kind"), newWeekly and T("task_weekly") or T("task_daily")))
+    local undo = Tasks.lastRemoved
+    if undo then
+        window.undoText:SetText(string.format(T("task_undo_line"), undo.task.n))
+        window.undo:SetText(T("task_undo"))
+        window.undoText:Show(); window.undo:Show()
+    else
+        window.undoText:Hide(); window.undo:Hide()
+    end
     window.add:SetText(T("task_add"))
     local settings = ns.GetDB() and ns.GetDB().warnings
     window.warn:SetChecked(settings and settings.tasks or false)
@@ -416,6 +461,7 @@ local WORDS = {
     feita = "done", feito = "done", done = "done", marcar = "done", check = "done",
     apagar = "remove", remover = "remove", remove = "remove", del = "remove", delete = "remove",
     lista = "list", listar = "list", list = "list",
+    desfazer = "undo", undo = "undo", voltar = "undo",
     aviso = "warn", avisar = "warn", warn = "warn", warning = "warn",
 }
 local KINDS = { diaria = false, daily = false, semanal = true, weekly = true }
@@ -454,6 +500,8 @@ function Tasks.HandleCommand(rest)
         if action == "done" then Tasks.SetDone(n) else Tasks.Remove(n) end
     elseif action == "list" and tail == "" then
         PrintList()
+    elseif action == "undo" and tail == "" then
+        Tasks.Undo()
     elseif action == "warn" and SWITCH[string.lower(tail or "")] ~= nil then
         SetWarning(SWITCH[string.lower(tail)])
     else

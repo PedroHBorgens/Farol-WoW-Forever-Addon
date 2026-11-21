@@ -74,7 +74,7 @@ return {
         T.ok(W:IsShown(), "window open"); T.eq(H.env.UISpecialFrames[#H.env.UISpecialFrames], "FarolTasks")
         T.ok(W.empty:IsShown(), "empty hint")
         H.env.FarolTaskName:SetText("Vender no leilão"); H:click(H.env.FarolTaskAdd)
-        H:click(H.env.FarolTaskKind); T.eq(H.env.FarolTaskKind._text, "Semanal")
+        H:click(H.env.FarolTaskKind); T.eq(H.env.FarolTaskKind._text, "Tipo: Semanal")
         H.env.FarolTaskName:SetText("Raide"); H:click(H.env.FarolTaskAdd)
         T.eq(H.env.FarolCharDB.tasks[1].w, false); T.eq(H.env.FarolCharDB.tasks[2].w, true)
         T.eq(H.env.FarolTaskName:GetText(), "", "box cleared")

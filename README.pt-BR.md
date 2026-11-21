@@ -93,9 +93,11 @@ Marque ou desmarque cada item, sem precisar de comandos. Abra de qualquer um des
 
 O menu tem **quatro abas**:
 
-- **Barra** — o que é da barra escolhida: **Barra 1 / 2 / 3**, **Mostrar** e **Travar**; os **pacotes prontos**
+- **Barra** — o que é da barra escolhida: **Editando: Barra 1 / 2 / 3** (só escolhe qual barra você está editando,
+  não muda nada), **Mostrar** e **Travar**; num quadro à parte, **Aplicar pacote:** com os **pacotes prontos**
   (**Básico** volta ao básico; **Upando**, **Ouro e farm** e **Masmorras** ligam um conjunto de itens que combinam;
-  **Desfazer** volta como estava — também `/farol pacote upando` / `/farol pacote desfazer`); os itens em grupos
+  depois de aplicar, o menu diz o que mudou e aparece **Desfazer** para voltar como estava — também
+  `/farol pacote upando` / `/farol pacote desfazer`); os itens em grupos
   (Desempenho, Lugar, Equipamento e bolsas, Ouro, Progresso, Tempo e social), com uma **engrenagem** ao lado dos que
   têm configuração (ela abre a janela ou o aviso daquele item); uma **faixa embaixo explica o item sob o mouse**; e os
   botões **Aparência...** e **Ordem...** desta barra.
@@ -118,7 +120,7 @@ Aperte **Esc** para fechar. Se esconder a barra, use `/farol menu` para trazê-l
 
 ### Até 3 barras
 
-No alto do menu, **Barra: [Barra 1] [Barra 2] [Barra 3]** escolhe qual barra o menu, a **Aparência...** e a
+No alto do menu, **Editando: [Barra 1] [Barra 2] [Barra 3]** escolhe qual barra o menu, a **Aparência...** e a
 **Ordem...** mudam. Escolha **Barra 2**, marque **Mostrar** e os itens que quiser: cada barra tem **itens,
 posição, aparência (escala, fundo, texto, formato, esconder em combate) e ordem próprios**. O clique direito numa barra
 abre o menu já com ela escolhida. As barras 2 e 3 começam desligadas (e abaixo da barra 1); também dá para usar
@@ -288,7 +290,8 @@ que você muda depois). O item **Farm** da barra (desligado por padrão) mostra 
 (`Tecido de Seda 27/40`: vermelho no começo, amarelo, verde ao completar) ou, com várias metas, quantas já foram
 concluídas (`Farm 2/5`). O tooltip lista cada item com quantos você pegou nesta sessão, o ritmo por hora e a
 estimativa ("+18 nesta sessão (~24/h) · faltam ~32m"). A contagem inclui o banco quando o jogo informa. A janela
-**Metas...** lista os itens para mudar a quantidade ou apagar (X). Até 10 itens por personagem; o aviso de meta
+**Metas...** lista os itens para mudar a quantidade ou apagar (X — apagou sem querer? **Desfazer**, ao lado do título
+"Farm", ou `/farol meta item desfazer`). Até 10 itens por personagem; o aviso de meta
 alcançada vale também para eles, uma vez por item. `/farol meta item remover <nome ou número>`, `/farol meta item limpar`.
 O Farol só **conta** os itens: nunca move, vende, usa ou saqueia nada, e nada é enviado.
 
@@ -296,7 +299,11 @@ O Farol só **conta** os itens: nunca move, vende, usa ou saqueia nada, e nada �
 
 - **Cores para daltonismo** (aba Geral, desligada por padrão; `/farol cores daltonismo` / `/farol cores padrao`):
   troca o verde (bom) por **azul** e o vermelho (ruim) por **laranja**, mantendo o amarelo (atenção). As três cores
-  continuam diferentes para quem tem protanopia, deuteranopia ou tritanopia. Vale para a barra e para os tooltips.
+  continuam diferentes para quem tem protanopia, deuteranopia ou tritanopia. Vale para a barra, os tooltips e os
+  números dos botões 📝 👜.
+- Valores em ouro mostram o número na cor normal do texto e só as letras **g / s / c** em dourado, prateado e cobre:
+  assim o amarelo sempre quer dizer "atenção".
+- Apagar uma tarefa ou uma meta de farm, ou aplicar um pacote, pode ser **desfeito** com um clique (nesta sessão).
 - As cores de estado sempre vêm com um número ou uma palavra (`60 fps`, `Dur 54%`, `pronta`): a cor nunca é a única
   informação.
 - O vermelho da barra é mais claro, para ler melhor sobre cenários claros; as janelas têm fundo opaco e as dicas usam
@@ -348,7 +355,9 @@ quantas já fez (`Tarefas 3/5`, amarelo enquanto falta alguma, verde quando toda
 a lista. Aviso opcional (desligado): **1 hora antes do reset diário, se faltar alguma diária**.
 
 O Farol não confere nada no jogo — quem marca as tarefas é você. Comandos: `/farol tarefa add [diaria|semanal] Nome`,
-`/farol tarefa feita N`, `/farol tarefa apagar N`, `/farol tarefa lista`, `/farol tarefa aviso on|off`.
+`/farol tarefa feita N`, `/farol tarefa apagar N`, `/farol tarefa desfazer`, `/farol tarefa lista`, `/farol tarefa aviso on|off`.
+Na janela, **Tipo: Diária / Semanal** escolhe o tipo da nova tarefa; apagou uma sem querer (X)? Aparece
+**Tarefa apagada: ... [Desfazer]**, que a devolve ao mesmo lugar (só nesta sessão).
 
 ## Resumo da sessão
 

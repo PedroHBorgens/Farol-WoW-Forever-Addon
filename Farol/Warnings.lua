@@ -635,7 +635,6 @@ local function UpdateButton()
         historyButton.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
         historyButton.badge = historyButton:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         historyButton.badge:SetPoint("BOTTOMRIGHT", 4, -2)
-        historyButton.badge:SetTextColor(1, 0.2, 0.2)
         historyButton:RegisterForClicks("LeftButtonUp")
         historyButton:SetScript("OnClick", function() Warnings.ToggleHistory() end)
         historyButton:SetScript("OnEnter", function(self)
@@ -647,7 +646,8 @@ local function UpdateButton()
         end)
         historyButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
     end
-    historyButton.badge:SetText(unread > 0 and tostring(unread) or "")
+    -- Cor da paleta (ns.C): segue a opção de cores para daltonismo.
+    historyButton.badge:SetText(unread > 0 and (ns.C.bad .. tostring(unread) .. "|r") or "")
     historyButton:Show()
     ns.LayoutQuickButtons()
 end

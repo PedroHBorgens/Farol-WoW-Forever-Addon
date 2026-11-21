@@ -2,6 +2,17 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.13.0 — Clearer menu and Undo
+- Bar tab: the row now reads **Editing: [Bar 1] [Bar 2] [Bar 3]** (the chosen bar in white; hovering explains that
+  switching bars changes nothing), and the presets sit in a box of their own, **Apply preset:**.
+- After a preset, the menu says what changed ("Preset Leveling applied to bar 1 (3 changes)") and the **Undo** button
+  appears (hidden when there is nothing to undo).
+- **Undo** when removing a task (Tasks window, `/farol task undo`) or a farm goal (Goals window, `/farol goal item
+  undo`): it goes back to the same place, this session only.
+- Tasks window: the type of the new task is now **Type: Daily / Weekly**.
+- Gold amounts: the number in the normal text color, only **g / s / c** colored, so yellow always means "warning".
+- The counters on the 📝 👜 buttons follow the palette (and the colorblind option, right away).
+
 ## 3.12.0 — Accessibility
 - New option **Colorblind-friendly colors** (General tab, off by default; `/farol colors colorblind`): good = blue,
   warning = yellow, bad = orange, distinct for protanopia, deuteranopia and tritanopia. All modules use one palette.

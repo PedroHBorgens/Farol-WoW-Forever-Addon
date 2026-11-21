@@ -19,12 +19,12 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · **Hearthstone: where
 - **Right-click** the bar (or `/farol menu`): a **tabbed menu** — Bar (items in groups), Warnings, Tools, General — to tick the items you want, and **choose their order** with [▲]/[▼] arrows. **Presets** (Basic, Leveling, Gold & farm, Dungeons) set up the bar in one click (with Undo); a **gear** next to an item opens its settings; a strip explains the item under the mouse.
 - **Up to 3 bars**, each with its own items, position, appearance and order (menu → Bar 2 / Bar 3 → Show).
 - **Profiles:** the same bars on every character, or **this character only** — and **Copy from...** another character.
-- **Daily & weekly tasks:** your own checklist (`/farol task`) that resets on its own at the daily/weekly reset.
+- **Daily & weekly tasks:** your own checklist (`/farol task`) that resets on its own at the daily/weekly reset (removed one by mistake? Undo).
 - **Minimap button:** click for the menu, right-click to hide/show every bar at once (no other addon needed).
 - **Hover** an item for its own short tooltip (gold, durability, resets…); hold **Shift** to see everything: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
 
 ### Appearance
-- **Colorblind-friendly colors** (blue · yellow · orange) as an option; opaque windows and lighter hint text.
+- **Colorblind-friendly colors** (blue · yellow · orange) as an option; opaque windows, lighter hint text and gold amounts that never look like a warning.
 - Scale 50–200%, **text size**, **icon size**, background opacity, border, **flexible layout** (drag the corner: one line, one column or aligned columns), **hide in combat** and **hide in instances**.
 
 ### Clock alarms
@@ -76,12 +76,12 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · **Pedra de 
 - **Clique direito** na barra (ou `/farol menu`): um **menu em abas** — Barra (itens em grupos), Avisos, Ferramentas, Geral — para marcar os itens que quiser e **escolher a ordem** com as setas [▲]/[▼]. **Pacotes prontos** (Básico, Upando, Ouro e farm, Masmorras) montam a barra com um clique (com Desfazer); a **engrenagem** ao lado de um item abre a configuração dele; uma faixa explica o item sob o mouse.
 - **Até 3 barras**, cada uma com itens, posição, aparência e ordem próprios (menu → Barra 2 / Barra 3 → Mostrar).
 - **Perfis:** as mesmas barras em todos os personagens, ou **só deste personagem** — e **Copiar de...** outro personagem.
-- **Tarefas diárias e semanais:** sua lista (`/farol tarefa`) que zera sozinha no reset diário/semanal.
+- **Tarefas diárias e semanais:** sua lista (`/farol tarefa`) que zera sozinha no reset diário/semanal (apagou sem querer? Desfazer).
 - **Botão no minimapa:** clique para o menu, clique direito para esconder/mostrar todas as barras (não precisa de outro addon).
 - **Passe o mouse** num item para ver um tooltip curto só dele (ouro, durabilidade, resets…); segure **Shift** para ver tudo: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.
 
 ### Aparência
-- **Cores para daltonismo** (azul · amarelo · laranja) como opção; janelas opacas e dicas mais legíveis.
+- **Cores para daltonismo** (azul · amarelo · laranja) como opção; janelas opacas, dicas mais legíveis e valores em ouro que não parecem alerta.
 - Escala de 50 a 200%, **tamanho do texto**, **tamanho dos ícones**, opacidade do fundo, borda, **formato livre** (arraste o canto: uma linha, uma coluna ou colunas alinhadas), **esconder em combate** e **esconder em instâncias**.
 
 ### Alarmes do relógio

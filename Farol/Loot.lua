@@ -246,7 +246,6 @@ local function UpdateButton()
         lootButton.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
         lootButton.badge = lootButton:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         lootButton.badge:SetPoint("BOTTOMRIGHT", 4, -2)
-        lootButton.badge:SetTextColor(0.3, 1, 0.3)
         lootButton:RegisterForClicks("LeftButtonUp")
         lootButton:SetScript("OnClick", function() Loot.ToggleWindow() end)
         lootButton:SetScript("OnEnter", function(self)
@@ -259,7 +258,8 @@ local function UpdateButton()
         lootButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
         table.insert(ns.quickButtons, lootButton)
     end
-    lootButton.badge:SetText(unseen > 0 and tostring(unseen) or "")
+    -- Cor da paleta (ns.C): segue a opção de cores para daltonismo.
+    lootButton.badge:SetText(unseen > 0 and (ns.C.good .. tostring(unseen) .. "|r") or "")
     lootButton:Show()
     ns.LayoutQuickButtons()
 end

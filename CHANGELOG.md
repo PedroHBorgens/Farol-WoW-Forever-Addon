@@ -2,6 +2,15 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.12.0 — Accessibility
+- New option **Colorblind-friendly colors** (General tab, off by default; `/farol colors colorblind`): good = blue,
+  warning = yellow, bad = orange, distinct for protanopia, deuteranopia and tritanopia. All modules use one palette.
+- The default red is lighter (contrast on bright scenery 2.9:1 → 3.7:1).
+- Windows get an opaque background (the scenery no longer shows through); hint and "empty" texts use a lighter gray.
+- The gear next to items is bigger (16 px, 24×24 click area).
+- **Tab** moves between number fields (Warnings tab, Goals window), saving only what changed.
+- A test keeps status colors in the palette, so the option reaches every module.
+
 ## 3.11.1 — Text review and menu fixes
 - Bar tab: "Lock" no longer overlaps "Show" (it now sits right after the label, whatever the font); the row reads
   "Bar: [1] [2] [3]  Show  Lock", and the bar buttons are wider so "Bar 2 (off)" fits.

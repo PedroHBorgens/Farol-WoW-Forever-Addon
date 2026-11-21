@@ -77,6 +77,7 @@ local DEFAULTS = {
     goldTotal = false,  -- item Ouro mostra também o total de todos os seus personagens do reino
     tooltipFull = false, -- false = cada item mostra só o seu tooltip (Shift mostra tudo); true = sempre completo
     runSummary = true,  -- resumo no chat ao sair de uma masmorra ou raide (Runs.lua)
+    colorblind = false, -- cores para daltonismo: azul / amarelo / laranja no lugar de verde / amarelo / vermelho
     newsSeen = 0,       -- quantas novidades (NEWS) o jogador já viu; boas-vindas/novidades aparecem uma vez
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
     -- Aparência
@@ -323,6 +324,13 @@ local STRINGS = {
         opt_hint     = "Marque o que deseja ver na barra.",
         opt_hint_count = "Itens na barra: %d de %d ligados — tudo é opcional, marque só o que quiser (passe o mouse para ver detalhes).",
         news_off_bar = " — desligado (ligue em Menu > Barra)",
+        news_off_general = " — desligado (ligue em Menu > Geral)",
+        news_colors  = "cores para daltonismo (azul, amarelo e laranja) e janelas mais legíveis",
+        opt_colorblind = "Cores para daltonismo (azul · amarelo · laranja)",
+        cb_on        = "cores para daltonismo: ligadas (bom = azul, atenção = amarelo, ruim = laranja).",
+        cb_off       = "cores para daltonismo: desligadas (bom = verde, atenção = amarelo, ruim = vermelho).",
+        cb_usage     = "uso: /farol cores daltonismo || /farol cores padrao",
+        help_colors  = "  /farol cores         - cores para daltonismo (daltonismo) ou as padrão (padrao)",
         news_packs   = "menu mais simples: pacotes prontos (Básico, Upando, Ouro e farm, Masmorras), engrenagem para configurar cada item e avisos em grupos",
         pk_label     = "Pacotes:",
         pk_basic     = "Básico",       pk_desc_basic = "volta a barra ao básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (desliga o resto).",
@@ -648,6 +656,13 @@ local STRINGS = {
         opt_hint     = "Tick what you want to see on the bar.",
         opt_hint_count = "Bar items: %d of %d on — everything is optional, tick only what you want (hover for details).",
         news_off_bar = " — off (turn it on in Menu > Bar)",
+        news_off_general = " — off (turn it on in Menu > General)",
+        news_colors  = "colorblind-friendly colors (blue, yellow and orange) and easier-to-read windows",
+        opt_colorblind = "Colorblind-friendly colors (blue · yellow · orange)",
+        cb_on        = "colorblind-friendly colors: on (good = blue, warning = yellow, bad = orange).",
+        cb_off       = "colorblind-friendly colors: off (good = green, warning = yellow, bad = red).",
+        cb_usage     = "usage: /farol colors colorblind || /farol colors default",
+        help_colors  = "  /farol colors        - colorblind-friendly colors (colorblind) or the default ones (default)",
         news_packs   = "simpler menu: presets (Basic, Leveling, Gold & farm, Dungeons), a gear to set up each item and grouped warnings",
         pk_label     = "Presets:",
         pk_basic     = "Basic",        pk_desc_basic = "back to the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (turns the rest off).",
@@ -794,8 +809,34 @@ ns.ICON = ICON
 -- clicar em qualquer uma a traz para a frente (como as janelas do próprio jogo).
 function ns.MakeToplevel(frame)
     if frame.SetToplevel then frame:SetToplevel(true) end
+    -- Fundo opaco por baixo da textura de diálogo: o cenário não aparece através da janela (acessibilidade: contraste).
+    if frame.CreateTexture and not frame.farolBacking then
+        local bg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+        bg:SetPoint("TOPLEFT", 11, -12)
+        bg:SetPoint("BOTTOMRIGHT", -12, 11)
+        if bg.SetColorTexture then bg:SetColorTexture(0.05, 0.05, 0.07, 0.94) else bg:SetTexture(0.05, 0.05, 0.07, 0.94) end
+        frame.farolBacking = bg
+    end
     if frame.HookScript then
         frame:HookScript("OnShow", function(self) self:Raise() end)
+    end
+end
+-- Texto de apoio (dicas, "vazio"): cinza claro em vez da fonte apagada do jogo (contraste >= 4,5:1).
+function ns.Dim(fs)
+    if fs and fs.SetTextColor then fs:SetTextColor(0.75, 0.75, 0.75) end
+    return fs
+end
+-- Tab passa para o próximo campo de número da lista (e o último volta ao primeiro). Só grava se o valor mudou,
+-- usando box.farolApply(box) (a mesma ação do Enter).
+function ns.TabChain(list)
+    for i, box in ipairs(list) do
+        box:SetScript("OnEditFocusGained", function(self) self.farolStart = self:GetText() end)
+        box:SetScript("OnTabPressed", function(self)
+            if self.farolApply and self:GetText() ~= self.farolStart then self.farolApply(self) end
+            self:ClearFocus()
+            local nextBox = list[i % #list + 1]
+            if nextBox and nextBox.SetFocus and nextBox:IsShown() then nextBox:SetFocus() end
+        end)
     end
 end
 ns.Print = Print
@@ -984,7 +1025,10 @@ local function FormatMoney(copper)
 end
 
 -- Cores: verde (bom), amarelo (médio), vermelho (ruim).
-local GREEN, YELLOW, RED = "|cff00ff00", "|cffffff00", "|cffff3333"
+local GREEN, YELLOW, RED = "|cff00ff00", "|cffffff00", "|cffff6666" -- trocadas por Profiles.ApplyPalette
+-- Paleta das cores de estado, usada por todos os módulos (ns.C.good/warn/bad/dim). "Cores para daltonismo" troca
+-- verde/vermelho por azul/laranja (distintas em protanopia, deuteranopia e tritanopia; contraste >= 4,5:1).
+ns.C = { good = "|cff40ff40", warn = "|cffffff3a", bad = "|cffff6666", dim = "|cffb3b3b3" }
 
 local function ColorLowIsGood(value, good, ok)
     if value <= good then return GREEN end
@@ -1221,7 +1265,7 @@ local function ProfState(p)
 end
 ns.ProfState = ProfState
 
-local PROF_COLORS = { cap = "|cffff4040", near = "|cffffff3a", final = "|cff40ff40" }
+local PROF_COLORS = { cap = "|cffff6666", near = "|cffffff3a", final = "|cff40ff40" } -- Profiles.ApplyPalette
 
 local function ProfText(p)
     local value = p.level .. "/" .. p.max
@@ -1838,7 +1882,16 @@ local function GetSupplies()
 end
 ns.GetSupplies = GetSupplies
 
-local SUPPLY_COLORS = { low = "|cffffff3a", out = "|cffff4040" }
+local SUPPLY_COLORS = { low = "|cffffff3a", out = "|cffff6666" } -- Profiles.ApplyPalette
+
+-- Paleta: padrão (verde / amarelo / vermelho claro) ou para daltonismo (azul / amarelo / laranja).
+function Profiles.ApplyPalette()
+    local cb = db and db.colorblind
+    GREEN, YELLOW, RED = cb and "|cff66b3ff" or "|cff00ff00", "|cffffff00", cb and "|cffff8a33" or "|cffff6666"
+    ns.C.good, ns.C.bad = cb and "|cff66b3ff" or "|cff40ff40", cb and "|cffff8a33" or "|cffff6666"
+    PROF_COLORS.cap, PROF_COLORS.final = ns.C.bad, ns.C.good
+    SUPPLY_COLORS.out = ns.C.bad
+end
 local function SupplyText(s)
     local n = tostring(s.count)
     if SUPPLY_COLORS[s.state] then n = SUPPLY_COLORS[s.state] .. n .. "|r" end
@@ -2298,7 +2351,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2315,10 +2368,13 @@ Profiles.NEWS_ITEM = { news_rep = "rep", news_reset = "reset", news_prof = "prof
                        news_tasks = "tasks", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests",
                        news_hearth = "hearth" }
 Profiles.NEWS_WARN = { news_breaks = "pause" }
+Profiles.NEWS_OPTION = { news_colors = "colorblind" } -- opções da aba Geral
 function Profiles.NewsLine(key)
     local item, warn = Profiles.NEWS_ITEM[key], Profiles.NEWS_WARN[key]
     if item and not db.items[item] then return T(key) .. T("news_off_bar") end
     if warn and db.warnings and not db.warnings[warn] then return T(key) .. T("news_off_warn") end
+    local option = Profiles.NEWS_OPTION[key]
+    if option and not db[option] then return T(key) .. T("news_off_general") end
     return T(key)
 end
 
@@ -2435,7 +2491,7 @@ local ITEM_TEXT = {
         local _, _, pct = RepProgress(f)
         if pct then text = text .. string.format(" %d%%", pct) end
         local rate = GetRepRate()
-        if rate then text = text .. " |cff4dff4d+" .. FormatBig(rate) .. "/h|r" end
+        if rate then text = text .. " " .. ns.C.good .. "+" .. FormatBig(rate) .. "/h|r" end
         return text
     end,
     ammo = function()
@@ -2722,7 +2778,7 @@ function Profiles.Layout()
     end
 
     if #parts == 0 then
-        parts = { "|cff888888" .. T("none_shown") .. "|r" }
+        parts = { ns.C.dim .. T("none_shown") .. "|r" }
     end
 
     -- Largura de cada informação.
@@ -2893,7 +2949,7 @@ TIP.alts = function()
         GameTooltip:AddLine(T("tt_rest_title"), GOLD_TXT[1], GOLD_TXT[2], GOLD_TXT[3])
         for i = 1, math.min(LIST_MAX, #rested) do
             local r = rested[i]
-            local status = r.full and ("|cff40ff40" .. T("tt_rest_full") .. "|r")
+            local status = r.full and (ns.C.good .. T("tt_rest_full") .. "|r")
                 or string.format(T("tt_rest_eta"), FormatCountdown(r.eta))
             local place = "|cff8c8c8c" .. (r.inn and T("tt_rest_inn") or T("tt_rest_out")) .. "|r"
             GameTooltip:AddDoubleLine("   " .. FactionName(r.name) .. " (" .. r.level .. ")",
@@ -3238,6 +3294,14 @@ local function SetSummary(value)
     RefreshOptions()
 end
 
+function Profiles.SetColorblind(value)
+    db.colorblind = value and true or false
+    Profiles.ApplyPalette()
+    UpdateText()
+    RefreshOptions()
+    Print(db.colorblind and T("cb_on") or T("cb_off"))
+end
+
 local function SetGoldTotal(value)
     db.goldTotal = value
     UpdateText()
@@ -3399,7 +3463,8 @@ Profiles.GEARS = {
 }
 function Profiles.AddGear(set, page, check, key)
     local gear = CreateFrame("Button", NextName("Gear"), page)
-    gear:SetSize(14, 14)
+    gear:SetSize(16, 16)
+    if gear.SetHitRectInsets then gear:SetHitRectInsets(-4, -4, -4, -4) end -- área de clique 24×24
     gear:SetPoint("LEFT", check.label, "RIGHT", 4, 0)
     gear:SetNormalTexture("Interface\\Icons\\INV_Misc_Gear_01")
     gear:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
@@ -3426,7 +3491,7 @@ function Profiles.ShowInfo(set, key, text)
     set.infoKey = key
     if text then set.info:SetText(text)
     elseif key then set.info:SetText("|cffffd100" .. T("name_" .. key) .. ":|r " .. T("desc_" .. key))
-    else set.info:SetText("|cff9d9d9d" .. T("opt_info_default") .. "|r") end
+    else set.info:SetText(ns.C.dim .. T("opt_info_default") .. "|r") end
 end
 
 -- Cria todos os controles dentro de "parent", começando na altura "top".
@@ -3532,15 +3597,16 @@ local function BuildControls(parent, top)
     set.lootButton = CreateCheck(page, 20, -208, function(value) Profiles.SetGlobalToggle("lootButton", value) end)
     set.minimap = CreateCheck(page, 20, -234, function(value) ns.MinimapButton.SetShown(value) end)
     set.minimapLock = CreateCheck(page, 20, -260, function(value) ns.MinimapButton.SetLocked(value) end)
-    set.restoreHeader = CreateHeader(page, -298)
+    set.colorblind = CreateCheck(page, 20, -286, function(value) Profiles.SetColorblind(value) end)
+    set.restoreHeader = CreateHeader(page, -322)
     set.reset = CreateButton(page, 170, function() ResetPosition() end)
-    set.reset:SetPoint("TOPLEFT", 20, -318)
+    set.reset:SetPoint("TOPLEFT", 20, -342)
     set.sessionReset = CreateButton(page, 170, function()
         ResetSession()
         UpdateText()
         Print(T("session_reset"))
     end)
-    set.sessionReset:SetPoint("TOPLEFT", 196, -318)
+    set.sessionReset:SetPoint("TOPLEFT", 196, -342)
     -- "Esquecer personagens": pede um segundo clique (em até 5 s) para confirmar.
     set.forget = CreateButton(page, 190, nil)
     set.forget:SetScript("OnClick", function(self)
@@ -3556,18 +3622,18 @@ local function BuildControls(parent, top)
         end
         RefreshOptions()
     end)
-    set.forget:SetPoint("TOPLEFT", 372, -318)
+    set.forget:SetPoint("TOPLEFT", 372, -342)
     -- Perfis (avançado): as mesmas barras em todos os personagens ou só neste, e "Copiar de...".
-    set.profileHeader = CreateHeader(page, -356)
+    set.profileHeader = CreateHeader(page, -378)
     set.profileLabel = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    set.profileLabel:SetPoint("TOPLEFT", 20, -382)
+    set.profileLabel:SetPoint("TOPLEFT", 20, -404)
     set.profile = ns.CreateDropdown(page, "FarolProfile" .. index, 170, function()
         return {
             { text = T("pfl_account_all"), checked = Profiles.mode ~= "char", onClick = function() Profiles.SetMode("account") end },
             { text = T("pfl_char_only"), checked = Profiles.mode == "char", onClick = function() Profiles.SetMode("char") end },
         }
     end)
-    set.profile:SetPoint("TOPLEFT", 90, -378)
+    set.profile:SetPoint("TOPLEFT", 90, -400)
     set.copy = ns.CreateDropdown(page, "FarolProfileCopy" .. index, 130, function()
         local items = {}
         for _, source in ipairs(Profiles.Sources()) do
@@ -3576,7 +3642,7 @@ local function BuildControls(parent, top)
         if #items == 0 then items[1] = { text = T("pfl_none"), r = .6, g = .6, b = .6, onClick = function() end } end
         return items
     end)
-    set.copy:SetPoint("TOPLEFT", 270, -378)
+    set.copy:SetPoint("TOPLEFT", 270, -400)
 
     -- Aba "Avisos": os controles do módulo de avisos (os do menu do Farol têm os nomes "FarolWarn...").
     if ns.Warnings and ns.Warnings.BuildControls then
@@ -3660,6 +3726,8 @@ RefreshOptions = function()
         set.minimap:SetChecked(db.minimap and db.minimap.show or false)
         set.minimapLock.label:SetText(T("opt_minimap_lock"))
         set.minimapLock:SetChecked(db.minimap and db.minimap.locked or false)
+        set.colorblind.label:SetText(T("opt_colorblind"))
+        set.colorblind:SetChecked(db.colorblind)
         set.forget.confirmAt = nil
         set.forget:SetText(T("opt_forget"))
         for lang, button in pairs(set.langs) do
@@ -4033,6 +4101,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         ApplyVisibility()
         pcall(RegisterSettingsPanel) -- se a API de configurações mudar, o addon continua funcionando
         pcall(ns.MinimapButton.Apply) -- botão no minimapa (se o jogo tiver minimapa)
+        Profiles.ApplyPalette() -- cores de estado (padrão ou para daltonismo)
         self:UnregisterEvent("ADDON_LOADED")
         return
     end
@@ -4083,7 +4152,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_runs", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -4154,6 +4223,10 @@ SlashCmdList["FAROL"] = function(msg)
         ns.MinimapButton.HandleCommand(rest)
     elseif cmd == "meta" or cmd == "metas" or cmd == "goal" or cmd == "goals" then
         ns.Goals.HandleCommand(rest)
+    elseif cmd == "cores" or cmd == "colors" or cmd == "colours" then
+        local on = { on = true, ligar = true, daltonismo = true, colorblind = true }
+        local off = { off = true, desligar = true, padrao = true, default = true }
+        if on[arg] then Profiles.SetColorblind(true) elseif off[arg] then Profiles.SetColorblind(false) else Print(T("cb_usage")) end
     elseif cmd == "pacote" or cmd == "pacotes" or cmd == "pack" or cmd == "preset" then
         Profiles.PackCommand(rest)
     elseif cmd == "farm" or cmd == "farmar" then

@@ -1404,6 +1404,10 @@ local function NumberBox(frame, name, anchor, onSave, digits)
         self:ClearFocus()
     end)
     box:SetScript("OnEscapePressed", function(self) RefreshWindow(); self:ClearFocus() end)
+    box.farolApply = function(self) if not onSave(self:GetText()) then RefreshWindow() end end
+    frame.farolBoxes = frame.farolBoxes or {}
+    table.insert(frame.farolBoxes, box)
+    ns.TabChain(frame.farolBoxes) -- Tab: próximo campo de número da aba
     return box
 end
 
@@ -1445,7 +1449,7 @@ function Warnings.BuildControls(parent, prefix)
     set.allOff:SetSize(130, 22)
     set.allOff:SetPoint("LEFT", set.recommended, "RIGHT", 8, 0)
     set.allOff:SetScript("OnClick", function() Warnings.SetAll(false) end)
-    set.topHint = parent:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    set.topHint = ns.Dim(parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     set.topHint:SetPoint("LEFT", set.allOff, "RIGHT", 10, 0)
     set.info = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     set.info:SetPoint("TOPLEFT", 16, -392)
@@ -1550,7 +1554,7 @@ function Warnings.ShowInfo(set, key)
         local name = key == "anywhere" and T("warn_opt_anywhere") or T("warn_name_" .. key)
         set.info:SetText("|cffffd100" .. name .. ":|r " .. T("warn_desc_" .. key))
     else
-        set.info:SetText("|cff9d9d9d" .. T("warn_hint") .. " " .. T("warn_hint_break") .. "|r")
+        set.info:SetText(ns.C.dim .. T("warn_hint") .. " " .. T("warn_hint_break") .. "|r")
     end
 end
 
@@ -1631,7 +1635,7 @@ local function CreateHistoryWindow()
     frame.title:SetPoint("TOP", 0, -18)
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -6, -6)
-    frame.empty = frame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    frame.empty = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
     frame.empty:SetPoint("TOPLEFT", 24, -52)
     frame.rows = {}
     for i = 1, HISTORY_MAX do

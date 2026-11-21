@@ -288,6 +288,16 @@ remove them (X). Up to 10 items per character; the "goal reached" warning covers
 `/farol goal item remove <name or number>`, `/farol goal item clear`. Farol only **counts** items: it never moves, sells,
 uses or loots anything, and nothing is sent.
 
+## Accessibility
+
+- **Colorblind-friendly colors** (General tab, off by default; `/farol colors colorblind` / `/farol colors default`):
+  green (good) becomes **blue** and red (bad) becomes **orange**, while yellow (warning) stays. The three colors stay
+  distinct for protanopia, deuteranopia and tritanopia. It applies to the bar and the tooltips.
+- Status colors always come with a number or a word (`60 fps`, `Dur 54%`, `ready`): color is never the only cue.
+- The bar's red is lighter, for better reading over bright scenery; windows have an opaque background and hints use a
+  lighter gray.
+- **Tab** moves to the next number field (Warnings tab and Goals window); Enter confirms and Esc closes.
+
 ## Hearthstone
 
 The **Hearthstone** item shows where it is bound and how long until it is ready: `Lighthouse Village · 23m` (yellow),

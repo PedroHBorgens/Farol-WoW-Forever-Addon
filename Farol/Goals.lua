@@ -202,15 +202,15 @@ local function Duration(seconds)
 end
 
 local function Part(text, status)
-    if status.done then return text .. " |cff40ff40" .. T("goal_done") .. "|r" end
+    if status.done then return text .. " " .. ns.C.good .. T("goal_done") .. "|r" end
     if not status.pct then return text .. " --" end
     local eta = status.eta and (" ~" .. Duration(status.eta)) or ""
-    return string.format("%s |cffffff3a%d%%|r%s", text, status.pct, eta)
+    return string.format("%s %s%d%%|r%s", text, ns.C.warn, status.pct, eta)
 end
 
 function Goals.BarText()
     local gold, level = Goals.GoldStatus(), Goals.LevelStatus()
-    if not gold and not level then return T("label_goals") .. " |cff888888--|r" end
+    if not gold and not level then return T("label_goals") .. " " .. ns.C.dim .. "--|r" end
     local parts = {}
     if gold then parts[#parts + 1] = Part(Short(gold.target), gold) end
     if level then parts[#parts + 1] = Part(T("label_goal_level") .. " " .. level.target, level) end
@@ -232,7 +232,7 @@ function Goals.Tooltip()
         return
     end
     local function Lines(name, status, haveText, targetText, rateText)
-        local value = status.done and ("|cff40ff40" .. T("goal_done") .. "|r")
+        local value = status.done and (ns.C.good .. T("goal_done") .. "|r")
             or (status.pct and string.format(T("tt_goal_have"), haveText, targetText, status.pct) or "--")
         GameTooltip:AddDoubleLine("   " .. name .. " " .. targetText, value, 0.9, 0.9, 0.9, 1, 1, 1)
         if status.done then return end
@@ -364,6 +364,7 @@ local function CreateWindow()
         row.box:SetNumeric(true)
         row.box:SetMaxLetters(digits)
         local function apply() if onSet(row.box:GetText()) then row.box:ClearFocus() end end
+        row.box.farolApply = function() onSet(row.box:GetText()) end
         row.box:SetScript("OnEnterPressed", apply)
         row.box:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
         row.set = CreateFrame("Button", "FarolGoal" .. kind .. "Set", frame, "UIPanelButtonTemplate")
@@ -389,6 +390,10 @@ local function CreateWindow()
     frame.warn:SetScript("OnClick", function(self) SetWarning(self:GetChecked() and true or false) end)
 
     if ns.Farm then ns.Farm.Attach(frame, -192) end -- metas de farm (Farm.lua)
+    -- Tab: ouro → nível → quantidade de cada meta de farm
+    local chain = { frame.gold.box, frame.level.box }
+    for _, row in ipairs(frame.farmRows or {}) do chain[#chain + 1] = row.box end
+    ns.TabChain(chain)
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolGoals") -- ESC fecha
     ns.MakeToplevel(frame)
@@ -398,7 +403,7 @@ end
 
 local function StatusText(status, have, target)
     if not status then return "" end
-    if status.done then return "|cff40ff40" .. T("goal_done") .. "|r" end
+    if status.done then return ns.C.good .. T("goal_done") .. "|r" end
     if not status.pct then return "--" end
     local text = string.format(T("tt_goal_have"), have, target, status.pct)
     if status.eta then text = text .. " · ~" .. Duration(status.eta) end

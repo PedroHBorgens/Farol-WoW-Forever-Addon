@@ -140,10 +140,10 @@ local function Duration(seconds)
 end
 
 local function State(status)
-    if status.stone == false then return "|cff9d9d9d" .. T("hearth_none") .. "|r" end
-    if status.left == nil then return "|cff888888--|r" end
-    if status.left == 0 then return "|cff40ff40" .. T("hearth_ready") .. "|r" end
-    return "|cffffff3a" .. Duration(status.left) .. "|r"
+    if status.stone == false then return ns.C.dim .. T("hearth_none") .. "|r" end
+    if status.left == nil then return ns.C.dim .. "--|r" end
+    if status.left == 0 then return ns.C.good .. T("hearth_ready") .. "|r" end
+    return ns.C.warn .. Duration(status.left) .. "|r"
 end
 
 -- Sem o lugar (o jogo não informou), o item some da barra, como a corrida fora de masmorras.

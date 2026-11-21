@@ -260,25 +260,25 @@ end
 ---------------------------------------------------------------------------
 
 local function CountColor(count, max)
-    if count >= max then return "|cffff4040" end
-    if count >= max - 3 then return "|cffffff3a" end
-    return "|cff40ff40"
+    if count >= max then return ns.C.bad end
+    if count >= max - 3 then return ns.C.warn end
+    return ns.C.good
 end
 
 function Quests.BarText()
     local data = Quests.Read()
-    if not data then return T("label_quests") .. " |cff888888--|r" end
+    if not data then return T("label_quests") .. " " .. ns.C.dim .. "--|r" end
     local text = string.format("%s %s%d/%d|r", T("label_quests"), CountColor(data.count, data.max), data.count, data.max)
     local ready = #data.ready
     if ready > 0 then
-        text = text .. " · |cff40ff40" .. (ready == 1 and T("quests_ready_1") or string.format(T("quests_ready_n"), ready)) .. "|r"
+        text = text .. " · " .. ns.C.good .. (ready == 1 and T("quests_ready_1") or string.format(T("quests_ready_n"), ready)) .. "|r"
     end
     return text
 end
 
 local function Line(entry, playerLevel)
     local level = entry.level and string.format("|cff%s[%d]|r ", LevelColor(entry.level, playerLevel), entry.level) or ""
-    local right = entry.failed and ("|cffff4040" .. T("tt_quests_failed") .. "|r") or (entry.objective or "")
+    local right = entry.failed and (ns.C.bad .. T("tt_quests_failed") .. "|r") or (entry.objective or "")
     GameTooltip:AddDoubleLine("      " .. level .. entry.title, right, 0.9, 0.9, 0.9, 0.7, 0.7, 0.7)
 end
 

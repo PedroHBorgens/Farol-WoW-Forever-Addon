@@ -289,9 +289,9 @@ local function Short(name)
 end
 
 local function Color(status)
-    if status.done then return "|cff40ff40" end
-    if status.pct and status.pct < 25 then return "|cffff4040" end
-    return "|cffffff3a"
+    if status.done then return ns.C.good end
+    if status.pct and status.pct < 25 then return ns.C.bad end
+    return ns.C.warn
 end
 
 local function Progress(status)
@@ -301,11 +301,11 @@ end
 
 function Farm.BarText()
     local list = Farm.Statuses()
-    if #list == 0 then return T("label_farm") .. " |cff888888--|r" end
+    if #list == 0 then return T("label_farm") .. " " .. ns.C.dim .. "--|r" end
     if #list == 1 then return Short(list[1].name) .. " " .. Progress(list[1]) end
     local done = 0
     for _, status in ipairs(list) do if status.done then done = done + 1 end end
-    local color = done >= #list and "|cff40ff40" or "|cffffff3a"
+    local color = done >= #list and ns.C.good or ns.C.warn
     return string.format("%s %s%d/%d|r", T("label_farm"), color, done, #list)
 end
 
@@ -504,6 +504,10 @@ function Farm.Attach(frame, top)
             if entry and Farm.Set(entry.id, entry.n, tonumber(row.box:GetText())) then row.box:ClearFocus() end
         end
         row.box:SetScript("OnEnterPressed", apply)
+        row.box.farolApply = function()
+            local entry = List()[i]
+            if entry then Farm.Set(entry.id, entry.n, tonumber(row.box:GetText())) end
+        end
         row.box:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
         row.set = CreateFrame("Button", "FarolFarmSet" .. i, frame, "UIPanelButtonTemplate")
         row.set:SetSize(64, 20)
@@ -527,7 +531,7 @@ end
 -- Atualiza as linhas; devolve quantas estão em uso (para a janela ajustar a altura).
 function Farm.RefreshRows(frame)
     if not frame or not frame.farmRows then return 0 end
-    frame.farmHeader:SetText(T("farm_header") .. " " .. (#List() == 0 and ("|cff888888" .. T("farm_none") .. "|r") or ""))
+    frame.farmHeader:SetText(T("farm_header") .. " " .. (#List() == 0 and (ns.C.dim .. T("farm_none") .. "|r") or ""))
     local list = Farm.Statuses()
     for i, row in ipairs(frame.farmRows) do
         local status = list[i]

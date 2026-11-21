@@ -36,7 +36,7 @@ return {
         log(H, 17, 3); H:update(1)
         T.has(H:bar(), "Missões 17/20 · 3 prontas"); T.has(H:barRaw(), "|cffffff3a17/20|r", "yellow from max - 3")
         log(H, 20, 1); H:update(1)
-        T.has(H:bar(), "Missões 20/20 · 1 pronta"); T.has(H:barRaw(), "|cffff404020/20|r", "red when full")
+        T.has(H:bar(), "Missões 20/20 · 1 pronta"); T.has(H:barRaw(), "|cffff666620/20|r", "red when full")
     end },
 
     { "tooltip: ready first, then in progress with objectives; level colors; and N more; high level", function(T, Mock)

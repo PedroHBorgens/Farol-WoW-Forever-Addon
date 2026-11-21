@@ -24,6 +24,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · **Hearthstone: where
 - **Hover** an item for its own short tooltip (gold, durability, resets…); hold **Shift** to see everything: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
 
 ### Appearance
+- **Colorblind-friendly colors** (blue · yellow · orange) as an option; opaque windows and lighter hint text.
 - Scale 50–200%, **text size**, **icon size**, background opacity, border, **flexible layout** (drag the corner: one line, one column or aligned columns), **hide in combat** and **hide in instances**.
 
 ### Clock alarms
@@ -80,6 +81,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · **Pedra de 
 - **Passe o mouse** num item para ver um tooltip curto só dele (ouro, durabilidade, resets…); segure **Shift** para ver tudo: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.
 
 ### Aparência
+- **Cores para daltonismo** (azul · amarelo · laranja) como opção; janelas opacas e dicas mais legíveis.
 - Escala de 50 a 200%, **tamanho do texto**, **tamanho dos ícones**, opacidade do fundo, borda, **formato livre** (arraste o canto: uma linha, uma coluna ou colunas alinhadas), **esconder em combate** e **esconder em instâncias**.
 
 ### Alarmes do relógio

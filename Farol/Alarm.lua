@@ -439,7 +439,7 @@ local function ListAlarms()
     if #db.alarms == 0 then Print(T("al_list_empty")) return end
     Print(T("al_list_title"))
     for i, alarm in ipairs(db.alarms) do
-        local state = alarm.enabled and "|cff00ff00ON|r" or "|cffff3333OFF|r"
+        local state = alarm.enabled and (ns.C.good .. "ON|r") or (ns.C.bad .. "OFF|r")
         Print(string.format("  %d. %s  %s", i, Describe(alarm), state))
     end
 end
@@ -477,7 +477,7 @@ local function CreateWindow()
 
     frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.hint:SetPoint("TOPLEFT", 20, -46)
-    frame.empty = frame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    frame.empty = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
     frame.empty:SetPoint("TOPLEFT", 24, -72)
 
     -- Linhas da lista (uma por alarme).
@@ -540,7 +540,7 @@ local function CreateWindow()
     frame.label:SetAutoFocus(false)
     frame.label:SetMaxLetters(60)
     frame.label:SetScript("OnEscapePressed", frame.label.ClearFocus)
-    frame.labelHint = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    frame.labelHint = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.labelHint:SetPoint("TOPLEFT", frame.label, "BOTTOMLEFT", 0, -2)
 
     local function Submit()

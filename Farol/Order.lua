@@ -144,7 +144,7 @@ local function CreateWindow()
     for i = 1, count do
         local y = -64 - (i - 1) * ROW_HEIGHT
         local row = {}
-        row.number = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+        row.number = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
         row.number:SetPoint("TOPLEFT", 22, y - 4)
         row.number:SetWidth(22)
         row.number:SetJustifyH("RIGHT")

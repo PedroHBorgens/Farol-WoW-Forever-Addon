@@ -292,6 +292,17 @@ estimativa ("+18 nesta sessão (~24/h) · faltam ~32m"). A contagem inclui o ban
 alcançada vale também para eles, uma vez por item. `/farol meta item remover <nome ou número>`, `/farol meta item limpar`.
 O Farol só **conta** os itens: nunca move, vende, usa ou saqueia nada, e nada é enviado.
 
+## Acessibilidade
+
+- **Cores para daltonismo** (aba Geral, desligada por padrão; `/farol cores daltonismo` / `/farol cores padrao`):
+  troca o verde (bom) por **azul** e o vermelho (ruim) por **laranja**, mantendo o amarelo (atenção). As três cores
+  continuam diferentes para quem tem protanopia, deuteranopia ou tritanopia. Vale para a barra e para os tooltips.
+- As cores de estado sempre vêm com um número ou uma palavra (`60 fps`, `Dur 54%`, `pronta`): a cor nunca é a única
+  informação.
+- O vermelho da barra é mais claro, para ler melhor sobre cenários claros; as janelas têm fundo opaco e as dicas usam
+  um cinza mais claro.
+- **Tab** passa para o próximo campo de número (aba Avisos e janela Metas); Enter confirma e Esc fecha.
+
 ## Pedra de Regresso
 
 O item **Pedra de Regresso** mostra onde ela está vinculada e quanto falta da recarga: `Vila do Farol · 23m` (amarelo),

@@ -81,6 +81,11 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   `GetItemCooldown` (antigos) — duração ≤ 1,5 s é a recarga global e não conta. Sem lugar informado, o item some da barra.
 - Item da barra **ausente** nos dados salvos (item novo para quem já usa) vem **desligado**; o padrão de `ITEM_DEFAULTS`
   só vale em instalação nova (sem lista de itens salva). Valor inválido volta ao padrão.
+- **Cores de estado só pela paleta `ns.C`** (`good`/`warn`/`bad`/`dim`, Core): nunca escreva `|cff40ff40` etc. nos
+  módulos (um teste do `test_a11y.lua` confere). `Profiles.ApplyPalette()` troca a paleta pela opção `colorblind`
+  (azul `66b3ff` / amarelo / laranja `ff8a33`; padrão verde / amarelo / vermelho `ff6666`). Texto de apoio: `ns.Dim(fs)`
+  (cinza 0,75), não `GameFontDisable`. Campos de número: `box.farolApply` + `ns.TabChain(lista)` (Tab grava só se mudou).
+  `ns.MakeToplevel` também põe o fundo opaco (`frame.farolBacking`).
 - **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
   lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 

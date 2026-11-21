@@ -188,8 +188,8 @@ end
 
 function Tasks.BarText()
     local done, total = Tasks.Counts()
-    if total == 0 then return T("label_tasks") .. " |cff888888--|r" end
-    local color = done >= total and "|cff40ff40" or "|cffffff3a"
+    if total == 0 then return T("label_tasks") .. " " .. ns.C.dim .. "--|r" end
+    local color = done >= total and ns.C.good or ns.C.warn
     return string.format("%s %s%d/%d|r", T("label_tasks"), color, done, total)
 end
 
@@ -215,7 +215,7 @@ function Tasks.Tooltip()
     for _, task in ipairs(list) do
         local ok = IsDone(task, now, daily, weekly)
         local kind = task.w and T("tt_task_weekly") or T("tt_task_daily")
-        GameTooltip:AddDoubleLine("   " .. task.n .. " |cff888888(" .. kind .. ")|r",
+        GameTooltip:AddDoubleLine("   " .. task.n .. " " .. ns.C.dim .. "(" .. kind .. ")|r",
             ok and T("tt_task_done") or T("tt_task_todo"),
             0.9, 0.9, 0.9, ok and 0.25 or 1, ok and 1 or 1, ok and 0.25 or 0.23)
     end
@@ -310,7 +310,7 @@ local function CreateWindow()
     frame.hint:SetPoint("TOPLEFT", 22, -44)
     frame.hint:SetWidth(416)
     frame.hint:SetJustifyH("LEFT")
-    frame.empty = frame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    frame.empty = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
     frame.empty:SetPoint("TOPLEFT", 26, -80)
 
     frame.rows = {}
@@ -325,7 +325,7 @@ local function CreateWindow()
         row.text:SetPoint("LEFT", row.check, "RIGHT", 4, 0)
         row.text:SetWidth(270)
         row.text:SetJustifyH("LEFT")
-        row.kind = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+        row.kind = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
         row.kind:SetPoint("TOPRIGHT", -62, y - 6)
         row.remove = CreateFrame("Button", "FarolTaskRemove" .. i, frame, "UIPanelButtonTemplate")
         row.remove:SetSize(24, 20)
@@ -362,7 +362,7 @@ local function CreateWindow()
     frame.warn.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.warn.label:SetPoint("LEFT", frame.warn, "RIGHT", 4, 0)
     frame.warn:SetScript("OnClick", function(self) SetWarning(self:GetChecked() and true or false) end)
-    frame.resets = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    frame.resets = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.resets:SetPoint("TOPLEFT", 26, addY - 60)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
@@ -385,7 +385,7 @@ RefreshWindow = function()
         if task then
             local ok = IsDone(task, now, daily, weekly)
             row.check:SetChecked(ok)
-            row.text:SetText(ok and ("|cff40ff40" .. task.n .. "|r") or task.n)
+            row.text:SetText(ok and (ns.C.good .. task.n .. "|r") or task.n)
             row.kind:SetText(task.w and T("tt_task_weekly") or T("tt_task_daily"))
             row.check:Show(); row.text:Show(); row.kind:Show(); row.remove:Show()
         else

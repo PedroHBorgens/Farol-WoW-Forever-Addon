@@ -414,7 +414,7 @@ local function CreateWindow()
         end
         frame.rows[r] = row
     end
-    frame.empty = frame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    frame.empty = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
     frame.empty:SetPoint("TOPLEFT", 22, -92)
 
     local bottom = -96 - MAX_RUNS * 20
@@ -458,7 +458,7 @@ RefreshWindow = function()
         local run = list[#list - r + 1] -- mais recente primeiro
         local values = run and {
             ns.FormatWhen and ns.FormatWhen(run.t) or "", "|cffffcc66" .. run.n .. "|r", Duration(run.s),
-            "|cff4da6ff+" .. Short(run.x) .. "|r", Gold(run.g), LootText(run), run.d > 0 and ("|cffff4040" .. run.d .. "|r") or "",
+            "|cff4da6ff+" .. Short(run.x) .. "|r", Gold(run.g), LootText(run), run.d > 0 and (ns.C.bad .. run.d .. "|r") or "",
         } or {}
         for i, fs in ipairs(row) do fs:SetText(values[i] or "") end
     end

@@ -556,7 +556,7 @@ local function CreateWindow()
     frame.qualityDropdown = CreateDropdown(frame, "FarolLootQuality", 150, QualityItems)
     frame.qualityDropdown:SetPoint("LEFT", frame.qualityLabel, "RIGHT", 6, 0)
 
-    frame.empty = frame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    frame.empty = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
     frame.empty:SetPoint("TOPLEFT", 24, LIST_TOP - 4)
 
     -- Linhas da lista
@@ -581,7 +581,7 @@ local function CreateWindow()
             GameTooltip:Show()
         end)
         row.track:SetScript("OnLeave", function() GameTooltip:Hide() end)
-        row.info = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+        row.info = ns.Dim(row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
         row.info:SetPoint("RIGHT", row.track, "LEFT", -6, 0)
         row.info:SetJustifyH("RIGHT")
         row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -606,7 +606,7 @@ local function CreateWindow()
     end
 
     -- Rodapé: dica, posição da rolagem, Limpar e alça de redimensionar.
-    frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    frame.hint = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.hint:SetPoint("BOTTOMLEFT", 22, 20)
     frame.hint:SetPoint("RIGHT", frame, "RIGHT", -120, 0)
     frame.hint:SetJustifyH("LEFT")

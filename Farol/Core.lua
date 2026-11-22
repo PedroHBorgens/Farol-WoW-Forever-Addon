@@ -840,6 +840,36 @@ function ns.Dim(fs)
     if fs and fs.SetTextColor then fs:SetTextColor(0.75, 0.75, 0.75) end
     return fs
 end
+-- Apara espaços em tempo linear, depois de cortar em maxBytes. O padrão "^%s*(.-)%s*$" fica quadrático com
+-- muitos espaços seguidos: um arquivo salvo adulterado com um nome enorme travaria o jogo ao entrar.
+function ns.Trim(text, maxBytes)
+    if type(text) ~= "string" then return "" end
+    text = string.sub(text, 1, maxBytes or 1024)
+    local first = string.find(text, "%S")
+    if not first then return "" end
+    local last = #text
+    while last > first and string.find(string.sub(text, last, last), "^%s$") do last = last - 1 end
+    return string.sub(text, first, last)
+end
+-- Os "max" últimos itens válidos de uma lista salva (do mais antigo para o mais novo), em tempo linear: percorre do
+-- fim e para ao juntar "max" (antes, tirar o mais antigo um por vez travava com uma lista adulterada enorme).
+function ns.KeepLast(list, max, clean)
+    local picked = {}
+    if type(list) ~= "table" then return picked end
+    local n = #list
+    if type(n) ~= "number" or n ~= n then return picked end
+    for i = n, 1, -1 do
+        local value = clean(list[i])
+        if value ~= nil then
+            picked[#picked + 1] = value
+            if #picked >= max then break end
+        end
+    end
+    for i = 1, math.floor(#picked / 2) do -- volta à ordem original
+        picked[i], picked[#picked - i + 1] = picked[#picked - i + 1], picked[i]
+    end
+    return picked
+end
 -- Plural: com n == 1 usa a chave "<key>_1" (se existir); senão, a chave normal (mesmos %d/%s nas duas).
 function ns.TN(key, n)
     if n == 1 then

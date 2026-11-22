@@ -143,16 +143,15 @@ end
 function Loot.SanitizeHistory(saved)
     local clean = {}
     if type(saved) ~= "table" or type(saved.items) ~= "table" then return { items = clean } end
-    for _, entry in ipairs(saved.items) do
-        if type(entry) == "table" and ValidLink(entry.link) then
-            local count = tonumber(entry.count) or 1
-            if count < 1 or count > 100000 or count ~= math.floor(count) then count = 1 end
-            local q = tonumber(entry.q)
-            if q and (q < 0 or q > 9 or q ~= math.floor(q)) then q = nil end
-            clean[#clean + 1] = { link = entry.link, count = count, q = q, t = ValidTime(entry.t) or 0 }
-        end
-    end
-    while #clean > HISTORY_MAX do table.remove(clean, 1) end
+    -- Só os HISTORY_MAX mais recentes válidos (linear, mesmo com uma lista adulterada enorme).
+    clean = ns.KeepLast(saved.items, HISTORY_MAX, function(entry)
+        if type(entry) ~= "table" or not ValidLink(entry.link) then return nil end
+        local count = tonumber(entry.count) or 1
+        if count < 1 or count > 100000 or count ~= math.floor(count) then count = 1 end
+        local q = tonumber(entry.q)
+        if q and (q < 0 or q > 9 or q ~= math.floor(q)) then q = nil end
+        return { link = entry.link, count = count, q = q, t = ValidTime(entry.t) or 0 }
+    end)
     history = clean
     return { items = clean }
 end

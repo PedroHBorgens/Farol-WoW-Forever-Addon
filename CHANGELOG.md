@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.13.2 — Security hardening
+- Manual security audit of the whole add-on, CI workflow and asset scripts (details in the pull request).
+- Fixed: a tampered saved-variables file with a huge loot history, warning history or dungeon log, or a name made
+  of hundreds of thousands of spaces, could freeze the game at login (trimming lists one item at a time and the
+  `^%s*(.-)%s*$` trim pattern were quadratic). Lists now keep the most recent entries in linear time (`ns.KeepLast`)
+  and names are trimmed in linear time (`ns.Trim`). No change for normal saved data.
+- New `tests/test_hardening.lua`; SECURITY.md mentions the check.
+
 ## 3.13.1 — Text review
 - **Clear** in the loot window and the warning history now asks first ("Delete 23 items?"); a second click within
   5 seconds deletes. The dungeon log asks the same way ("Delete 7 runs?"). Empty lists clear at once.

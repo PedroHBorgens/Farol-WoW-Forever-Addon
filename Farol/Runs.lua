@@ -143,7 +143,7 @@ end
 local function CleanName(text)
     if type(text) ~= "string" or (ns.IsSecret and ns.IsSecret(text)) then return "" end
     text = string.gsub(text, "[|%c]", "")
-    text = string.match(text, "^%s*(.-)%s*$") or ""
+    text = ns.Trim(text) -- linear (nome enorme num arquivo adulterado não trava)
     local out, count = {}, 0
     for char in string.gmatch(text, "[\1-\127\194-\244][\128-\191]*") do
         count = count + 1
@@ -180,11 +180,8 @@ function Runs.Sanitize(saved)
     local clean = { list = {} }
     if type(saved) ~= "table" then return clean end
     if type(saved.list) == "table" then
-        for _, run in ipairs(saved.list) do
-            local r = CleanRun(run, false)
-            if r then clean.list[#clean.list + 1] = r end
-        end
-        while #clean.list > MAX_RUNS do table.remove(clean.list, 1) end
+        -- Só as MAX_RUNS mais recentes válidas (linear, mesmo com uma lista adulterada enorme).
+        clean.list = ns.KeepLast(saved.list, MAX_RUNS, function(run) return CleanRun(run, false) end)
     end
     clean.cur = CleanRun(saved.cur, true)
     return clean

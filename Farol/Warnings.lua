@@ -625,13 +625,12 @@ end
 function Warnings.SanitizeHistory(saved)
     local clean = {}
     if type(saved) ~= "table" then return clean end
-    for _, entry in ipairs(saved) do
-        if type(entry) == "table" and type(entry.text) == "string" and ValidTime(entry.t) then
-            local text = string.gsub(entry.text, "[|%c]", "")
-            clean[#clean + 1] = { t = ValidTime(entry.t), text = string.sub(text, 1, 200) }
-        end
-    end
-    while #clean > HISTORY_MAX do table.remove(clean, 1) end
+    -- Só os HISTORY_MAX mais recentes válidos (linear, mesmo com uma lista adulterada enorme).
+    clean = ns.KeepLast(saved, HISTORY_MAX, function(entry)
+        if type(entry) ~= "table" or type(entry.text) ~= "string" or not ValidTime(entry.t) then return nil end
+        local text = string.gsub(string.sub(entry.text, 1, 1000), "[|%c]", "")
+        return { t = ValidTime(entry.t), text = string.sub(text, 1, 200) }
+    end)
     return clean
 end
 

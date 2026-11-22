@@ -122,7 +122,7 @@ local function CleanName(text, limit)
     if type(text) ~= "string" then return "" end
     text = string.gsub(text, "|", "")
     text = string.gsub(text, "%c", "")
-    text = string.match(text, "^%s*(.-)%s*$") or ""
+    text = ns.Trim(text) -- linear (nome enorme num arquivo adulterado não trava)
     local out, count = {}, 0
     for char in string.gmatch(text, "[\1-\127\194-\244][\128-\191]*") do
         count = count + 1
@@ -481,7 +481,7 @@ local CLEAR = { limpar = true, clear = true }
 local UNDO = { desfazer = true, undo = true, voltar = true }
 
 function Farm.HandleCommand(rest)
-    rest = string.match(rest or "", "^%s*(.-)%s*$") or ""
+    rest = ns.Trim(rest or "") -- linear; textos longos demais são recusados logo abaixo
     if #rest > 500 then Print(T("farm_usage")) return end
     local word, tail = string.match(rest, "^(%a*)%s*(.-)$")
     word = string.lower(word or "")

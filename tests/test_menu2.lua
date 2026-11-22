@@ -24,7 +24,7 @@ return {
         T.eq(on(H), before, "opening the menu changes nothing")
         H:click(set.packs[2]) -- Upando
         for _, key in ipairs({ "xp", "xph", "quests", "hearth", "fps", "gold" }) do T.eq(H.env.FarolDB.items[key], true, key) end
-        T.has(H:lastMsg(), "pacote Upando: 3 item(ns) ligado(s)")
+        T.has(H:lastMsg(), "pacote Upando: 3 itens ligados")
         T.ok(not set.packUndo._disabled, "undo enabled")
         H:click(set.packs[3]) -- Ouro e farm (soma)
         T.eq(H.env.FarolDB.items.farm, true); T.eq(H.env.FarolDB.items.xp, true, "presets add, they do not remove")
@@ -99,13 +99,13 @@ return {
         T.eq(H.env.FarolPanelWarnDurab._checked, true, "settings panel synced")
         H:slash("aviso nenhum"); T.eq(H.env.FarolDB.warnings.durab, false)
         H:slash("aviso recomendados"); T.eq(H.env.FarolDB.warnings.durab, true)
-        T.has(H:text(w.info), "Avisa uma vez")
+        T.has(H:text(w.info), "Cada aviso aparece uma vez")
         H.env.FarolWarnHearthReady._scripts.OnEnter(H.env.FarolWarnHearthReady)
         T.has(H:text(w.info), "Pedra de Regresso pronta: avisa uma vez quando a recarga")
         H.env.FarolWarnPauseAnywhere._scripts.OnEnter(H.env.FarolWarnPauseAnywhere)
         T.has(H:text(w.info), "Também em lutas e masmorras: sem esta opção")
         H.env.FarolWarnPauseAnywhere._scripts.OnLeave(H.env.FarolWarnPauseAnywhere)
-        T.has(H:text(w.info), "Avisa uma vez")
+        T.has(H:text(w.info), "Cada aviso aparece uma vez")
     end },
 
     { "every warning has a description in both languages", function(T, Mock)

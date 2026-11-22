@@ -36,7 +36,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · **Hearthstone: where
 - Configurable limits and sound; never repeats while the number flickers.
 - **Unspent talent points** and **lower-rank spells on your action bars** (never changes your bars for you).
 - **Profession at its training limit**: "find a trainer to keep leveling" (once per limit).
-- **Ammo and reagents running low**, with the yellow/red limits you choose (off by default; Farol never buys anything).
+- **Ammo and reagents running low**, with the warning/critical limits you choose (off by default; Farol never buys anything).
 - Each warning lets you **Silence** it or get a **reminder in 2, 5, 10, 15 or 30 minutes** (your choice). Several warnings at once appear together in one window.
 - Optional **break** and **drink water** reminders (off by default): you choose how often (15–240 min) and whether they can show during fights, raids and dungeons.
 - **History of the last 10 warnings**: button next to the bar (with unread counter), key binding or `/farol history`.
@@ -93,7 +93,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · **Pedra de 
 - Limites e som configuráveis; não fica repetindo quando o número oscila.
 - **Pontos de talento não gastos** e **magias de grau antigo na barra de ações** (nunca mexe nas suas barras).
 - **Profissão no máximo do treinamento**: "procure um instrutor para continuar subindo" (uma vez por limite).
-- **Munição e reagentes acabando**, com os limites amarelo/vermelho que você escolhe (desligado por padrão; o Farol nunca compra nada).
+- **Munição e reagentes acabando**, com os limites de atenção/crítico que você escolhe (desligado por padrão; o Farol nunca compra nada).
 - Cada aviso deixa você **Silenciar** ou ser **lembrado em 2, 5, 10, 15 ou 30 minutos** (você escolhe). Vários avisos ao mesmo tempo aparecem juntos numa janela só.
 - Lembretes opcionais de **pausa** e de **beber água** (desligados por padrão): você escolhe de quanto em quanto tempo (15–240 min) e se podem aparecer em lutas, raides e masmorras.
 - **Histórico dos 10 últimos avisos**: botão ao lado da barra (com contador de novos), atalho de teclado ou `/farol historico`.

@@ -60,7 +60,8 @@ local STRINGS = {
     pt = {
         warn_title      = "Avisos",
         warn_durab      = "Durabilidade baixa: %d%% — hora de reparar!",
-        warn_bags       = "Bolsas quase cheias: %d espaço(s) livre(s).",
+        warn_bags       = "Bolsas quase cheias: %d espaços livres.",
+        warn_bags_1     = "Bolsas quase cheias: %d espaço livre.",
         warn_bags_full  = "Bolsas cheias!",
         warn_opt_durab  = "Durabilidade abaixo de",
         warn_opt_bags   = "Bolsas com até",
@@ -69,7 +70,8 @@ local STRINGS = {
         warn_opt_sound  = "Tocar som",
         warn_opt_talents = "Pontos de talento não gastos",
         warn_opt_ranks  = "Magias de grau antigo nas barras",
-        warn_talents    = "Você tem %d ponto(s) de talento para gastar.",
+        warn_talents    = "Você tem %d pontos de talento para gastar.",
+        warn_talents_1  = "Você tem %d ponto de talento para gastar.",
         warn_ranks      = "Magia de grau antigo na barra: %s.",
         warn_rank_item  = "%s (Grau %d) — você já tem o Grau %d",
         warn_more       = " e mais %d",
@@ -87,25 +89,28 @@ local STRINGS = {
         warn_remind_all = "Lembrar todos em %d min",
         warn_silenced   = "aviso silenciado: só volta se a situação mudar.",
         warn_silenced_session = "lembrete silenciado até o fim da sessão.",
-        warn_silenced_n = "%d aviso(s) silenciado(s).",
-        warn_reminded   = "ok: aviso de novo às %s se o problema continuar.",
-        warn_reminded_n = "ok: %d aviso(s) de novo às %s (se ainda for preciso).",
+        warn_silenced_n = "%d avisos silenciados.",
+        warn_silenced_n_1 = "%d aviso silenciado.",
+        warn_reminded   = "Ok — volto a avisar às %s se continuar.",
+        warn_reminded_n = "Ok — volto a avisar %d avisos às %s, se ainda for preciso.",
+        warn_reminded_n_1 = "Ok — volto a avisar %d aviso às %s, se ainda for preciso.",
         warn_chat_hint  = " — /farol aviso silenciar ou /farol aviso lembrar [minutos]",
         warn_pause      = "Você está jogando há %s — que tal uma pausa?",
         warn_prof       = "%s no máximo do treinamento — procure um instrutor para continuar subindo.",
-        warn_bags_junk  = " Há %d espaço(s) com lixo (%s) para vender.",
+        warn_bags_junk  = " Há %d espaços com lixo (%s) para vender.",
+        warn_bags_junk_1 = " Há %d espaço com lixo (%s) para vender.",
         warn_restFull   = "Descanso cheio (150%%): %s — bom momento para jogar com eles.",
         warn_supply     = "%s acabando — reabasteça antes de sair da cidade.",
         supply_status   = "munição/reagentes: %s.",
         supply_status_none = "munição/reagentes: nada para a sua classe (ou ainda não encontrado nas bolsas).",
         warn_opt_ammo   = "Munição acabando",
         warn_opt_reag   = "Reagentes acabando",
-        warn_yellow     = "amarelo:",
-        warn_red        = "vermelho:",
+        warn_yellow     = "atenção:",
+        warn_red        = "crítico:",
         warn_name_ammo  = "munição",
         warn_name_reag  = "reagentes",
-        warn_set_supply = "%s: amarelo abaixo de %d, vermelho abaixo de %d.",
-        warn_bad_supply = "valores inválidos: use amarelo e vermelho de 0 a %d, com o vermelho menor que o amarelo.",
+        warn_set_supply = "%s: atenção abaixo de %d, crítico abaixo de %d.",
+        warn_bad_supply = "valores inválidos: use atenção e crítico de 0 a %d, com o crítico menor que o de atenção.",
         warn_opt_restFull = "Outro personagem com descanso cheio",
         warn_name_restFull = "descanso cheio",
         warn_opt_prof   = "Profissão no limite do treinamento",
@@ -115,7 +120,7 @@ local STRINGS = {
         warn_opt_water  = "Água a cada",
         warn_unit_min   = "min",
         warn_opt_anywhere = "Também em lutas e masmorras",
-        warn_opt_remind = "\"Lembrar em\" vem com:",
+        warn_opt_remind = "\"Lembrar em\" padrão:",
         warn_name_pause = "pausa",
         warn_name_water = "beber água",
         warn_name_tasks = "tarefas diárias pendentes",
@@ -126,7 +131,7 @@ local STRINGS = {
         warn_name_questFull = "diário de missões quase cheio",
         warn_questFull = "Diário de missões quase cheio: %d/%d.",
         warn_questFull_full = "Diário de missões cheio: %d/%d!",
-        warn_opt_questReady = "Missões prontas ao entrar na cidade",
+        warn_opt_questReady = "Missões prontas (cidade/estalagem)",
         warn_opt_hearthReady = "Pedra de Regresso pronta",
         warn_name_hearthReady = "Pedra de Regresso pronta",
         warn_hearthReady = "Pedra de Regresso pronta (%s).",
@@ -149,8 +154,8 @@ local STRINGS = {
         warn_set_all_off = "avisos: todos desligados (ligue de novo na aba Avisos ou com \"Só os recomendados\").",
         warn_desc_durab = "avisa quando a peça mais gasta do equipamento fica abaixo da porcentagem escolhida.",
         warn_desc_bags  = "avisa quando sobram poucos espaços livres nas bolsas (e quanto lixo dá para vender).",
-        warn_desc_ammo  = "avisa quando a munição fica abaixo do limite vermelho; amarelo e vermelho também colorem a barra.",
-        warn_desc_reag  = "avisa quando os reagentes da sua classe ficam abaixo do limite vermelho.",
+        warn_desc_ammo  = "avisa quando a munição fica abaixo do limite crítico; os limites de atenção e crítico também colorem a barra.",
+        warn_desc_reag  = "avisa quando os reagentes da sua classe ficam abaixo do limite crítico.",
         warn_desc_talents = "avisa quando você tem pontos de talento para gastar.",
         warn_desc_ranks = "avisa quando uma magia de grau antigo está nas suas barras de ação e você já tem um grau melhor.",
         warn_desc_prof  = "avisa quando uma profissão chega ao limite do treinamento: hora de procurar um instrutor.",
@@ -179,15 +184,19 @@ local STRINGS = {
         hist_clear      = "Limpar",
         hist_cleared    = "histórico de avisos apagado.",
         hist_button_tip = "Últimos avisos",
-        hist_button_new = "%d novo(s) — clique para ver",
+        hist_button_new = "%d novos — clique para ver",
+        hist_button_new_1 = "%d novo — clique para ver",
+        hist_clear_ask  = "Apagar %d avisos?",
+        hist_clear_ask_1 = "Apagar %d aviso?",
         hist_button_none = "Clique para ver",
         opt_history     = "Histórico...",
         help_history    = "  /farol historico     - ver os 10 últimos avisos (também pelo botão ao lado da barra ou por atalho de teclado)",
         warn_opt_test   = "Testar aviso",
-        warn_hint       = "Tudo é opcional: só avisa o que você deixar marcado. Avisa uma vez; avisa de novo depois que melhorar (mín. 5 min).",
+        warn_hint       = "Tudo é opcional: só avisa o que você deixar marcado. Cada aviso aparece uma vez e só volta se a situação melhorar e piorar de novo (no mínimo 5 min depois).",
         warn_hint_break = "Pausa e água vêm desligadas; sem a opção acima, esperam a luta e a masmorra acabarem.",
         warn_set_durab  = "aviso de durabilidade: abaixo de %d%%.",
-        warn_set_bags   = "aviso de bolsas: até %d espaço(s) livre(s).",
+        warn_set_bags   = "aviso de bolsas: até %d espaços livres.",
+        warn_set_bags_1 = "aviso de bolsas: até %d espaço livre.",
         warn_on         = "aviso ligado: %s",
         warn_off        = "aviso desligado: %s",
         warn_name_durab = "durabilidade",
@@ -202,7 +211,8 @@ local STRINGS = {
     en = {
         warn_title      = "Warnings",
         warn_durab      = "Low durability: %d%% — time to repair!",
-        warn_bags       = "Bags almost full: %d free slot(s).",
+        warn_bags       = "Bags almost full: %d free slots.",
+        warn_bags_1     = "Bags almost full: %d free slot.",
         warn_bags_full  = "Bags full!",
         warn_opt_durab  = "Durability below",
         warn_opt_bags   = "Bags with only",
@@ -211,7 +221,8 @@ local STRINGS = {
         warn_opt_sound  = "Play a sound",
         warn_opt_talents = "Unspent talent points",
         warn_opt_ranks  = "Lower-rank spells on your bars",
-        warn_talents    = "You have %d unspent talent point(s).",
+        warn_talents    = "You have %d unspent talent points.",
+        warn_talents_1  = "You have %d unspent talent point.",
         warn_ranks      = "Lower-rank spell on your bars: %s.",
         warn_rank_item  = "%s (Rank %d) — you already know Rank %d",
         warn_more       = " and %d more",
@@ -229,25 +240,28 @@ local STRINGS = {
         warn_remind_all = "Remind all in %d min",
         warn_silenced   = "warning silenced: it only comes back if the situation changes.",
         warn_silenced_session = "reminder silenced until the end of the session.",
-        warn_silenced_n = "%d warning(s) silenced.",
-        warn_reminded   = "ok: I'll warn you again at %s if it's still a problem.",
-        warn_reminded_n = "ok: %d warning(s) again at %s (if still needed).",
+        warn_silenced_n = "%d warnings silenced.",
+        warn_silenced_n_1 = "%d warning silenced.",
+        warn_reminded   = "Ok — you'll be warned again at %s if it's still a problem.",
+        warn_reminded_n = "Ok — %d warnings will come back at %s, if still needed.",
+        warn_reminded_n_1 = "Ok — %d warning will come back at %s, if still needed.",
         warn_chat_hint  = " — /farol warn silence or /farol warn remind [minutes]",
         warn_pause      = "You've been playing for %s — time for a break?",
         warn_prof       = "%s at the training limit — find a trainer to keep leveling.",
-        warn_bags_junk  = " %d slot(s) hold junk (%s) you can sell.",
+        warn_bags_junk  = " %d slots hold junk (%s) you can sell.",
+        warn_bags_junk_1 = " %d slot holds junk (%s) you can sell.",
         warn_restFull   = "Rested XP full (150%%): %s — a good time to play them.",
         warn_supply     = "%s running low — restock before leaving town.",
         supply_status   = "ammo/reagents: %s.",
         supply_status_none = "ammo/reagents: nothing for your class (or not found in your bags yet).",
         warn_opt_ammo   = "Ammo running low",
         warn_opt_reag   = "Reagents running low",
-        warn_yellow     = "yellow:",
-        warn_red        = "red:",
+        warn_yellow     = "warning:",
+        warn_red        = "critical:",
         warn_name_ammo  = "ammo",
         warn_name_reag  = "reagents",
-        warn_set_supply = "%s: yellow below %d, red below %d.",
-        warn_bad_supply = "invalid values: use yellow and red from 0 to %d, with red lower than yellow.",
+        warn_set_supply = "%s: warning below %d, critical below %d.",
+        warn_bad_supply = "invalid values: use warning and critical from 0 to %d, with critical lower than warning.",
         warn_opt_restFull = "Another character fully rested",
         warn_name_restFull = "full rested XP",
         warn_opt_prof   = "Profession at its training limit",
@@ -257,7 +271,7 @@ local STRINGS = {
         warn_opt_water  = "Drink water every",
         warn_unit_min   = "min",
         warn_opt_anywhere = "Also in fights and dungeons",
-        warn_opt_remind = "\"Remind in\" starts at:",
+        warn_opt_remind = "\"Remind in\" default:",
         warn_name_pause = "break",
         warn_name_water = "drink water",
         warn_name_tasks = "daily tasks left",
@@ -286,13 +300,13 @@ local STRINGS = {
         warn_sec_quests = "Quests and travel",
         warn_recommended = "Recommended only",
         warn_all_off   = "Turn all off",
-        warn_top_hint  = "Only what is ticked warns.",
+        warn_top_hint  = "Only ticked warnings are active.",
         warn_set_recommended = "warnings: only the recommended ones are on (durability, bags, talents, ranks and professions).",
         warn_set_all_off = "warnings: all off (turn them on again in the Warnings tab or with \"Recommended only\").",
         warn_desc_durab = "warns when your most worn piece of gear drops below the chosen percentage.",
         warn_desc_bags  = "warns when only a few free bag slots are left (and how much junk you can sell).",
-        warn_desc_ammo  = "warns when ammo drops below the red limit; yellow and red also color the bar.",
-        warn_desc_reag  = "warns when your class reagents drop below the red limit.",
+        warn_desc_ammo  = "warns when ammo drops below the critical limit; the warning and critical limits also color the bar.",
+        warn_desc_reag  = "warns when your class reagents drop below the critical limit.",
         warn_desc_talents = "warns when you have talent points to spend.",
         warn_desc_ranks = "warns when a lower-rank spell is on your action bars and you already know a better rank.",
         warn_desc_prof  = "warns when a profession reaches its training limit: time to find a trainer.",
@@ -322,14 +336,18 @@ local STRINGS = {
         hist_cleared    = "warning history cleared.",
         hist_button_tip = "Recent warnings",
         hist_button_new = "%d new — click to view",
+        hist_button_new_1 = "%d new — click to view",
+        hist_clear_ask  = "Delete %d warnings?",
+        hist_clear_ask_1 = "Delete %d warning?",
         hist_button_none = "Click to view",
         opt_history     = "History...",
         help_history    = "  /farol history       - view the last 10 warnings (also via the button next to the bar or a key binding)",
         warn_opt_test   = "Test warning",
-        warn_hint       = "Everything is optional: only what you leave ticked warns. Warns once; warns again after it improves (min. 5 min).",
+        warn_hint       = "Everything is optional: you only get the warnings you leave ticked. Each warning shows once and only comes back if things improve and get worse again (at least 5 min later).",
         warn_hint_break = "Break and water start off; without the option above they wait for fights and dungeons to end.",
         warn_set_durab  = "durability warning: below %d%%.",
-        warn_set_bags   = "bag warning: %d free slot(s) or fewer.",
+        warn_set_bags   = "bag warning: %d free slots or fewer.",
+        warn_set_bags_1 = "bag warning: %d free slot or fewer.",
         warn_on         = "warning on: %s",
         warn_off        = "warning off: %s",
         warn_name_durab = "durability",
@@ -640,7 +658,7 @@ local function UpdateButton()
         historyButton:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:AddLine(T("hist_button_tip"))
-            GameTooltip:AddLine(unread > 0 and string.format(T("hist_button_new"), unread) or T("hist_button_none"),
+            GameTooltip:AddLine(unread > 0 and string.format(ns.TN("hist_button_new", unread), unread) or T("hist_button_none"),
                 0.8, 0.8, 0.8)
             GameTooltip:Show()
         end)
@@ -726,7 +744,7 @@ function Warnings.Respond(remind, key, minutes)
     if #answered == 0 then Print(T("warn_none")) return end
     local at = date("%H:%M", time() + minutes * 60)
     if #answered > 1 then
-        Print(remind and string.format(T("warn_reminded_n"), #answered, at) or string.format(T("warn_silenced_n"), #answered))
+        Print(remind and string.format(ns.TN("warn_reminded_n", #answered), #answered, at) or string.format(ns.TN("warn_silenced_n", #answered), #answered))
     elseif remind then
         Print(string.format(T("warn_reminded"), at))
     else
@@ -791,7 +809,7 @@ local function JunkHint()
     if not ns.GetJunk then return "" end
     local ok, junk = pcall(ns.GetJunk)
     if not ok or not junk or junk.slots == 0 then return "" end
-    return string.format(T("warn_bags_junk"), junk.slots, PlainMoney(junk.total))
+    return string.format(ns.TN("warn_bags_junk", junk.slots), junk.slots, PlainMoney(junk.total))
 end
 
 local function CheckBags(now)
@@ -808,7 +826,7 @@ local function CheckBags(now)
     end
     if free > 0 then entry.full = false end
     -- Texto montado só na hora de avisar (a dica do lixo lê as bolsas).
-    local function Text() return (free == 0 and T("warn_bags_full") or string.format(T("warn_bags"), free)) .. JunkHint() end
+    local function Text() return (free == 0 and T("warn_bags_full") or string.format(ns.TN("warn_bags", free), free)) .. JunkHint() end
     if free == 0 and not entry.full then
         -- Encheu de vez: avisa mesmo que já tenha avisado "quase cheias" há pouco.
         entry.full = true
@@ -910,10 +928,10 @@ local function CheckTalents(now)
     elseif points > entry.warnedCount then
         entry.warnedCount = points
         entry.remindAt = nil
-        Announce(string.format(T("warn_talents"), points), "talents")
+        Announce(string.format(ns.TN("warn_talents", points), points), "talents")
     elseif ReminderDue(entry, now) then
         entry.remindAt = nil
-        Announce(string.format(T("warn_talents"), points), "talents")
+        Announce(string.format(ns.TN("warn_talents", points), points), "talents")
     end
 end
 
@@ -1383,7 +1401,7 @@ local function SetBagSlots(value)
     if not slots then Print(T("warn_bad_bags")) return false end
     Settings().bagSlots = slots
     state.bags.armed = true
-    Print(string.format(T("warn_set_bags"), slots))
+    Print(string.format(ns.TN("warn_set_bags", slots), slots))
     if RefreshWindow then RefreshWindow() end
     return true
 end
@@ -1647,13 +1665,16 @@ local function CreateHistoryWindow()
         frame.rows[i] = row
     end
     frame.clear = CreateFrame("Button", "FarolWarnHistoryClear", frame, "UIPanelButtonTemplate")
-    frame.clear:SetSize(100, 22)
+    frame.clear:SetSize(150, 22) -- cabe "Apagar 10 avisos?"
     frame.clear:SetPoint("BOTTOMRIGHT", -24, 16)
-    frame.clear:SetScript("OnClick", function()
+    -- "Limpar": o 1º clique pergunta ("Apagar 10 avisos?"), o 2º apaga.
+    frame.clear:SetScript("OnClick", function(self)
         local history = History()
-        for i = #history, 1, -1 do history[i] = nil end
-        Print(T("hist_cleared"))
-        RefreshHistory()
+        ns.ConfirmClick(self, #history, "hist_clear_ask", function()
+            for i = #history, 1, -1 do history[i] = nil end
+            Print(T("hist_cleared"))
+            RefreshHistory()
+        end)
     end)
     frame:SetScript("OnShow", function()
         unread = 0
@@ -1669,7 +1690,7 @@ end
 RefreshHistory = function()
     if not historyWindow or not historyWindow:IsShown() then return end
     historyWindow.title:SetText(T("hist_title"))
-    historyWindow.clear:SetText(T("hist_clear"))
+    historyWindow.clear:SetText(T("hist_clear")); historyWindow.clear.farolAsk = nil
     local history = History()
     historyWindow.empty:SetText(T("hist_empty"))
     if #history == 0 then historyWindow.empty:Show() else historyWindow.empty:Hide() end

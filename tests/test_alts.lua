@@ -75,7 +75,7 @@ return {
         T.eq(H.env.FarolDB.chars.Azralon.Thrall, nil, "forgotten after confirming")
         T.ok(H.env.FarolDB.chars.Azralon.Garrosh, "current character stays")
         T.ok(H.env.FarolDB.chars.Nemesis.Sylvanas, "other realms untouched")
-        T.has(H:lastMsg(), "1 personagem(ns) deste reino esquecido(s)")
+        T.has(H:lastMsg(), "1 personagem deste reino esquecido")
     end },
 
     { "a late second click does not confirm", function(T, Mock)

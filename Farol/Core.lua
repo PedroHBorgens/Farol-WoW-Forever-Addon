@@ -122,8 +122,8 @@ local STRINGS = {
         lang_auto    = "idioma: automático (segue o cliente).",
         lang_usage   = "uso: /farol idioma pt || en || auto",
         item_usage   = "uso: /farol mostrar||esconder",
-        item_on      = "%s: |cff00ff00visível|r",
-        item_off     = "%s: |cffff3333escondido|r",
+        item_on      = "%s: %svisível|r",
+        item_off     = "%s: %sescondido|r",
         items_title  = "itens da barra:",
         none_shown   = "Farol — /farol mostrar <item>",
         name_fps = "FPS",              cmd_fps = "fps",
@@ -171,7 +171,7 @@ local STRINGS = {
         sup_flash    = "Pó de Lampejo",
         sup_blind    = "Pó Cegante",
         tt_supply    = "Munição e reagentes",
-        tt_supply_limits = "Amarelo / vermelho abaixo de",
+        tt_supply_limits = "Atenção / crítico abaixo de",
         tt_supply_hint = "Reabasteça num vendedor (o Farol só conta, nunca compra).",
         tt_supply_none = "nenhum reagente acompanhado para a sua classe ainda",
         label_playtime = "Jogando",
@@ -205,7 +205,8 @@ local STRINGS = {
         tt_rest_inn  = "estalagem/cidade",
         tt_rest_out  = "fora",
         gold_forgot  = "personagem esquecido: %s.",
-        gold_forgot_all = "%d personagem(ns) deste reino esquecido(s) (o atual continua).",
+        gold_forgot_all = "%d personagens deste reino esquecidos (o atual continua).",
+        gold_forgot_all_1 = "%d personagem deste reino esquecido (o atual continua).",
         gold_forget_self = "não dá para esquecer o personagem em que você está.",
         gold_not_found = "personagem não encontrado neste reino: %s.",
         gold_list    = "ouro dos seus personagens em %s (total %s):",
@@ -246,7 +247,8 @@ local STRINGS = {
         tt_prof      = "Profissões",
         tt_junk      = "Lixo nas bolsas (valor de venda)",
         tt_junk_slots = "Espaços ocupados por lixo",
-        tt_junk_pending = "carregando informações de %d item(ns)...",
+        tt_junk_pending = "carregando informações de %d itens...",
+        tt_junk_pending_1 = "carregando informações de %d item...",
         tt_junk_hint = "Venda no comerciante (o Farol só mostra, nunca vende).",
         junk_status  = "lixo nas bolsas: %s em %d espaço(s) (função: %s).",
         tt_prof_none = "nenhuma profissão aprendida",
@@ -333,15 +335,18 @@ local STRINGS = {
         help_colors  = "  /farol cores         - cores para daltonismo (daltonismo) ou as padrão (padrao)",
         news_packs   = "menu mais simples: pacotes prontos (Básico, Upando, Ouro e farm, Masmorras), engrenagem para configurar cada item e avisos em grupos",
         pk_label     = "Aplicar pacote:",
-        pk_applied   = "Pacote %s aplicado na barra %d (%d mudança(s)). Não gostou? Clique em Desfazer.",
+        pk_applied   = "Pacote %s aplicado na barra %d (%d mudanças). Não gostou? Clique em Desfazer.",
+        pk_applied_1 = "Pacote %s aplicado na barra %d (%d mudança). Não gostou? Clique em Desfazer.",
         bar_pick_info = "Trocar de barra não muda nada: só escolhe qual barra você está editando.",
         pk_basic     = "Básico",       pk_desc_basic = "volta a barra ao básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (desliga o resto).",
         pk_leveling  = "Upando",       pk_desc_leveling = "liga XP, XP por hora, diário de missões e Pedra de Regresso.",
         pk_farm      = "Ouro e farm",  pk_desc_farm = "liga ouro, ouro por hora, bolsas, lixo nas bolsas e metas de farm.",
         pk_dungeon   = "Masmorras",    pk_desc_dungeon = "liga durabilidade, bolsas, munição e reagentes, masmorra / raide atual e resets.",
         pk_undo      = "Desfazer",
-        pk_done      = "pacote %s: %d item(ns) ligado(s) (Desfazer no menu ou /farol pacote desfazer).",
-        pk_done_basic = "pacote %s: a barra voltou ao básico, %d item(ns) mudaram (Desfazer no menu ou /farol pacote desfazer).",
+        pk_done      = "pacote %s: %d itens ligados (Desfazer no menu ou /farol pacote desfazer).",
+        pk_done_1    = "pacote %s: %d item ligado (Desfazer no menu ou /farol pacote desfazer).",
+        pk_done_basic = "pacote %s: a barra voltou ao básico, %d itens mudaram (Desfazer no menu ou /farol pacote desfazer).",
+        pk_done_basic_1 = "pacote %s: a barra voltou ao básico, %d item mudou (Desfazer no menu ou /farol pacote desfazer).",
         pk_undone    = "pacote desfeito: a barra voltou a como estava.",
         pk_nothing   = "nada para desfazer.",
         pk_usage     = "uso: /farol pacote basico||upando||farm||masmorras||desfazer",
@@ -361,7 +366,7 @@ local STRINGS = {
         tt_rightclick_more = "Clique direito: opções (mais %d informações para ligar).",
         tt_shift_full = "Segure Shift para ver todas as informações.",
         tt_more      = "e mais %d",
-        welcome1     = "bem-vindo! A barra começa só com o básico: %s.",
+        welcome1     = "Boas-vindas! A barra começa só com o básico: %s.",
         welcome2     = "há mais %d informações e vários avisos desligados — clique com o botão direito na barra para escolher (ou /farol menu). /farol ajuda lista os comandos.",
         news_title   = "novidades desde a sua última versão (a maioria vem desligada — ative no menu: clique direito na barra):",
         news_rep     = "reputação na barra",
@@ -411,13 +416,13 @@ local STRINGS = {
         bar_usage    = "uso: /farol barra || /farol barra N || /farol barra N mostrar || /farol barra N esconder (N = 1 a 3)",
         help_bars    = "  /farol barra N       - escolher a barra 1, 2 ou 3 (\"mostrar\" / \"esconder\" para ligar/desligar)",
         help_news    = "  /farol novidades     - ver de novo as novidades das últimas versões",
-        desc_fps      = "Quadros por segundo (verde 50+, amarelo 25+).",
+        desc_fps      = "Quadros por segundo (bom 50+, atenção 25+).",
         desc_ms       = "Latência: a maior entre local e mundo.",
         desc_mem      = "Memória Lua usada pela interface e addons.",
         desc_coords   = "Sua posição no mapa (some em instâncias).",
         desc_zone     = "Nome da zona atual.",
         desc_speed    = "Velocidade de movimento (100% = correr normal).",
-        desc_durab    = "Sua peça mais gasta (vermelho abaixo de 20%).",
+        desc_durab    = "Sua peça mais gasta (alerta abaixo de 20%).",
         desc_bags     = "Espaços livres / total nas bolsas.",
         desc_junk     = "Valor de venda dos itens cinzentos (o Farol nunca vende).",
         desc_ammo     = "Munição e reagentes da sua classe; cores pelos limites da aba Avisos.",
@@ -456,8 +461,8 @@ local STRINGS = {
         lang_auto    = "language: automatic (follows the client).",
         lang_usage   = "usage: /farol lang pt || en || auto",
         item_usage   = "usage: /farol show||hide",
-        item_on      = "%s: |cff00ff00shown|r",
-        item_off     = "%s: |cffff3333hidden|r",
+        item_on      = "%s: %sshown|r",
+        item_off     = "%s: %shidden|r",
         items_title  = "bar items:",
         none_shown   = "Farol — /farol show <item>",
         name_fps = "FPS",              cmd_fps = "fps",
@@ -505,7 +510,7 @@ local STRINGS = {
         sup_flash    = "Flash Powder",
         sup_blind    = "Blinding Powder",
         tt_supply    = "Ammo & reagents",
-        tt_supply_limits = "Yellow / red below",
+        tt_supply_limits = "Warning / critical below",
         tt_supply_hint = "Restock at a vendor (Farol only counts, it never buys).",
         tt_supply_none = "no reagent tracked for your class yet",
         label_playtime = "Played",
@@ -539,7 +544,8 @@ local STRINGS = {
         tt_rest_inn  = "inn/city",
         tt_rest_out  = "outside",
         gold_forgot  = "character forgotten: %s.",
-        gold_forgot_all = "%d character(s) on this realm forgotten (the current one stays).",
+        gold_forgot_all = "%d characters on this realm forgotten (the current one stays).",
+        gold_forgot_all_1 = "%d character on this realm forgotten (the current one stays).",
         gold_forget_self = "you cannot forget the character you are playing.",
         gold_not_found = "character not found on this realm: %s.",
         gold_list    = "gold of your characters on %s (total %s):",
@@ -580,7 +586,8 @@ local STRINGS = {
         tt_prof      = "Professions",
         tt_junk      = "Junk in bags (vendor value)",
         tt_junk_slots = "Slots taken by junk",
-        tt_junk_pending = "loading information for %d item(s)...",
+        tt_junk_pending = "loading information for %d items...",
+        tt_junk_pending_1 = "loading information for %d item...",
         tt_junk_hint = "Sell it at a vendor (Farol only shows it, it never sells).",
         junk_status  = "junk in bags: %s in %d slot(s) (function: %s).",
         tt_prof_none = "no profession learned",
@@ -667,15 +674,18 @@ local STRINGS = {
         help_colors  = "  /farol colors        - colorblind-friendly colors (colorblind) or the default ones (default)",
         news_packs   = "simpler menu: presets (Basic, Leveling, Gold & farm, Dungeons), a gear to set up each item and grouped warnings",
         pk_label     = "Apply preset:",
-        pk_applied   = "Preset %s applied to bar %d (%d change(s)). Don't like it? Click Undo.",
+        pk_applied   = "Preset %s applied to bar %d (%d changes). Don't like it? Click Undo.",
+        pk_applied_1 = "Preset %s applied to bar %d (%d change). Don't like it? Click Undo.",
         bar_pick_info = "Switching bars changes nothing: it only picks which bar you are editing.",
         pk_basic     = "Basic",        pk_desc_basic = "back to the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (turns the rest off).",
         pk_leveling  = "Leveling",     pk_desc_leveling = "turns on XP, XP per hour, quest log and Hearthstone.",
         pk_farm      = "Gold & farm",  pk_desc_farm = "turns on gold, gold per hour, bags, junk in bags and farm goals.",
         pk_dungeon   = "Dungeons",     pk_desc_dungeon = "turns on durability, bags, ammo and reagents, dungeon / raid run and resets.",
         pk_undo      = "Undo",
-        pk_done      = "preset %s: %d item(s) turned on (Undo in the menu or /farol preset undo).",
-        pk_done_basic = "preset %s: the bar is back to the basics, %d item(s) changed (Undo in the menu or /farol preset undo).",
+        pk_done      = "preset %s: %d items turned on (Undo in the menu or /farol preset undo).",
+        pk_done_1    = "preset %s: %d item turned on (Undo in the menu or /farol preset undo).",
+        pk_done_basic = "preset %s: the bar is back to the basics, %d items changed (Undo in the menu or /farol preset undo).",
+        pk_done_basic_1 = "preset %s: the bar is back to the basics, %d item changed (Undo in the menu or /farol preset undo).",
         pk_undone    = "preset undone: the bar is back to how it was.",
         pk_nothing   = "nothing to undo.",
         pk_usage     = "usage: /farol preset basic||leveling||farm||dungeons||undo",
@@ -695,7 +705,7 @@ local STRINGS = {
         tt_rightclick_more = "Right-click: options (%d more items you can turn on).",
         tt_shift_full = "Hold Shift to see all information.",
         tt_more      = "and %d more",
-        welcome1     = "welcome! The bar starts with the basics only: %s.",
+        welcome1     = "Welcome! The bar starts with the basics only: %s.",
         welcome2     = "there are %d more items and several warnings turned off — right-click the bar to choose (or /farol menu). /farol help lists the commands.",
         news_title   = "new since your last version (most are off by default — turn them on in the menu: right-click the bar):",
         news_rep     = "reputation on the bar",
@@ -745,13 +755,13 @@ local STRINGS = {
         bar_usage    = "usage: /farol bar || /farol bar N || /farol bar N show || /farol bar N hide (N = 1 to 3)",
         help_bars    = "  /farol bar N         - pick bar 1, 2 or 3 (\"show\" / \"hide\" to turn it on/off)",
         help_news    = "  /farol news          - show the news of the latest versions again",
-        desc_fps      = "Frames per second (green 50+, yellow 25+).",
+        desc_fps      = "Frames per second (good 50+, warning 25+).",
         desc_ms       = "Latency: the higher of home and world.",
         desc_mem      = "Lua memory used by the UI and addons.",
         desc_coords   = "Your map position (hidden in instances).",
         desc_zone     = "Current zone name.",
         desc_speed    = "Movement speed (100% = normal running).",
-        desc_durab    = "Your most damaged item (red below 20%).",
+        desc_durab    = "Your most damaged item (alert below 20%).",
         desc_bags     = "Free / total bag slots.",
         desc_junk     = "Vendor value of gray items (Farol never sells).",
         desc_ammo     = "Ammo and reagents of your class; colors follow the limits in the Warnings tab.",
@@ -829,6 +839,27 @@ end
 function ns.Dim(fs)
     if fs and fs.SetTextColor then fs:SetTextColor(0.75, 0.75, 0.75) end
     return fs
+end
+-- Plural: com n == 1 usa a chave "<key>_1" (se existir); senão, a chave normal (mesmos %d/%s nas duas).
+function ns.TN(key, n)
+    if n == 1 then
+        local one = T(key .. "_1")
+        if one ~= key .. "_1" then return one end
+    end
+    return T(key)
+end
+-- Botão que apaga algo: o 1º clique pergunta ("Apagar 23 itens?"), o 2º, em até 5 s, faz. Sem nada a perder
+-- (count 0), faz direto. Quem atualiza a janela zera a pergunta (button.farolAsk = nil).
+function ns.ConfirmClick(button, count, question, action)
+    local ok, now = pcall(GetTime)
+    if not ok or type(now) ~= "number" or now ~= now then now = 0 end
+    if count == 0 or (button.farolAsk and now - button.farolAsk >= 0 and now - button.farolAsk <= 5) then
+        button.farolAsk = nil
+        action()
+    else
+        button.farolAsk = now
+        button:SetText(string.format(ns.TN(question, count), count))
+    end
 end
 -- Tab passa para o próximo campo de número da lista (e o último volta ao primeiro). Só grava se o valor mudou,
 -- usando box.farolApply(box) (a mesma ação do Enter).
@@ -1636,7 +1667,7 @@ local function ForgetCharacters(target)
         for charName in pairs(chars) do
             if charName ~= name then chars[charName] = nil; own[charName] = nil; count = count + 1 end
         end
-        Print(string.format(T("gold_forgot_all"), count))
+        Print(string.format(ns.TN("gold_forgot_all", count), count))
         return
     end
     for charName in pairs(chars) do
@@ -3008,7 +3039,7 @@ TIP.junk = function()
         More(#junk.items)
         GameTooltip:AddLine(T("tt_junk_hint"), 0.6, 0.6, 0.6)
     end
-    if junk.pending > 0 then GameTooltip:AddLine(string.format(T("tt_junk_pending"), junk.pending), 0.6, 0.6, 0.6) end
+    if junk.pending > 0 then GameTooltip:AddLine(string.format(ns.TN("tt_junk_pending", junk.pending), junk.pending), 0.6, 0.6, 0.6) end
 end
 
 TIP.xp = function()
@@ -3440,7 +3471,7 @@ function Profiles.ApplyPack(name)
     Profiles.packBackup.changed = changed
     UpdateText(); RefreshOptions()
     if ns.Order then ns.Order.Refresh() end
-    Print(string.format(pack.replace and T("pk_done_basic") or T("pk_done"), T("pk_" .. name), changed))
+    Print(string.format(ns.TN(pack.replace and "pk_done_basic" or "pk_done", changed), T("pk_" .. name), changed))
 end
 
 function Profiles.UndoPack()
@@ -3702,7 +3733,7 @@ RefreshOptions = function()
         local on, total = ItemCounts()
         local backup = Profiles.packBackup
         if backup and backup.name then -- logo depois de um pacote (até mexer num item): o que mudou e como voltar
-            set.hint:SetText(ns.C.good .. string.format(T("pk_applied"), T("pk_" .. backup.name), backup.bar, backup.changed or 0) .. "|r")
+            set.hint:SetText(ns.C.good .. string.format(ns.TN("pk_applied", backup.changed or 0), T("pk_" .. backup.name), backup.bar, backup.changed or 0) .. "|r")
         else
             set.hint:SetText(string.format(T("opt_hint_count"), on, total))
         end
@@ -4188,7 +4219,7 @@ local function ListItems()
     Print(T("items_title"))
     for _, key in ipairs(ITEM_ORDER) do
         local name = T("name_" .. key) .. " (" .. T("cmd_" .. key) .. ")"
-        Print("  " .. string.format(db.items[key] and T("item_on") or T("item_off"), name))
+        Print("  " .. string.format(db.items[key] and T("item_on") or T("item_off"), name, db.items[key] and ns.C.good or ns.C.dim))
     end
 end
 
@@ -4201,7 +4232,7 @@ local function SetItem(alias, visible)
         return
     end
     SetItemVisible(key, visible)
-    Print(string.format(visible and T("item_on") or T("item_off"), T("name_" .. key)))
+    Print(string.format(visible and T("item_on") or T("item_off"), T("name_" .. key), visible and ns.C.good or ns.C.dim))
 end
 
 SLASH_FAROL1 = "/farol"

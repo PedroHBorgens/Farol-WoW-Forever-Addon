@@ -2,6 +2,17 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.13.1 — Text review
+- **Clear** in the loot window and the warning history now asks first ("Delete 23 items?"); a second click within
+  5 seconds deletes. The dungeon log asks the same way ("Delete 7 runs?"). Empty lists clear at once.
+- Real plurals instead of "(s)": "3 free slots", "1 unspent talent point", "3 changes"...
+- Texts describe the state, not the color, so they hold with the colorblind option: ammo/reagent limits are
+  **warning / critical** (were yellow / red), FPS "good 50+, warning 25+", durability "alert below 20%".
+- `/farol items` uses the palette (it was the last place with fixed colors).
+- Same words for the same actions: alarms are turned **on/off** and **deleted** like everything else; neutral welcome
+  in Portuguese; clearer Warnings tab hint, "Remind in" default, "Quests ready (city/inn)" and "+ Goal" tooltip.
+- Loot window footer: scroll position and Clear on the bottom line, the hint above with the full width.
+
 ## 3.13.0 — Clearer menu and Undo
 - Bar tab: the row now reads **Editing: [Bar 1] [Bar 2] [Bar 3]** (the chosen bar in white; hovering explains that
   switching bars changes nothing), and the presets sit in a box of their own, **Apply preset:**.

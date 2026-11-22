@@ -49,7 +49,7 @@ return {
         H.bagItems = { [0] = { [1] = { 9001, 8 }, [2] = { 9003, 1 } } }
         H.itemsLoading = { [9003] = true }; H:update(1)
         T.has(H:bar(), "Junk 64s 0c (1)", "the sword is not loaded yet")
-        T.has(tip(H), "loading information for 1 item(s)...")
+        T.has(tip(H), "loading information for 1 item...")
         H.itemsLoading = nil; H:update(1)
         T.has(H:bar(), "Junk 3g 14s (2)", "counted once the game loads it")
     end },
@@ -68,13 +68,13 @@ return {
         local H = Mock.new():login(); fixGear(H)
         H.bagFree = { [0] = 1, 0, 0, 0, 0 }; H:update(1)
         local text = H:text(H.env.FarolWarnPopup.text)
-        T.has(text, "Bolsas quase cheias: 1 espaço(s) livre(s). Há 3 espaço(s) com lixo (3g 26s) para vender.")
+        T.has(text, "Bolsas quase cheias: 1 espaço livre. Há 3 espaços com lixo (3g 26s) para vender.")
         local history = H.env.FarolCharDB.warnHistory
         T.has(history[#history].text, "(3g 26s)"); T.hasnt(history[#history].text, "|")
         H:click(H.env.FarolWarnSilence)
         local N = Mock.new():login(); fixGear(N)
         N.bagItems = {}; N.bagFree = { [0] = 1, 0, 0, 0, 0 }; N:update(1)
-        T.eq(N:text(N.env.FarolWarnPopup.text), "Bolsas quase cheias: 1 espaço(s) livre(s).", "no junk: no hint")
+        T.eq(N:text(N.env.FarolWarnPopup.text), "Bolsas quase cheias: 1 espaço livre.", "no junk: no hint")
     end },
 
     { "bad, blocked or missing values never break the bar", function(T, Mock)

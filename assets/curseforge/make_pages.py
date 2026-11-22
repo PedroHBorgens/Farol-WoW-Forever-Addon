@@ -118,7 +118,7 @@ menu = f"""<div class="win menu3" style="width:640px;padding-top:12px;padding-bo
 {tabs("Bar")}
 <div class="line"><span class="k">Editing:</span><span class="btn hl" style="padding:2px 10px;color:#fff">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn" style="padding:2px 10px">Bar 3 (off)</span><span class="ck" style="margin:0 0 0 18px"><span class="box">✓</span>Show</span><span class="ck" style="margin:0 0 0 12px"><span class="box"></span>Lock</span></div>
 <div class="line" style="background:#0008;border-radius:4px;padding:3px 6px;margin-left:-6px;margin-right:-6px"><span class="k" style="white-space:nowrap;width:auto;min-width:0;margin-right:10px">Apply preset:</span><span class="btn" style="padding:2px 9px">Basic</span><span class="btn" style="padding:2px 9px">Leveling</span><span class="btn" style="padding:2px 9px">Gold &amp; farm</span><span class="btn" style="padding:2px 9px">Dungeons</span><span class="btn" style="padding:2px 9px">Undo</span></div>
-<div class="g" style="font-size:12px;margin:4px 0">Preset Leveling applied to bar 1 (3 change(s)). Don't like it? Click Undo.</div>
+<div class="g" style="font-size:12px;margin:4px 0">Preset Leveling applied to bar 1 (3 changes). Don't like it? Click Undo.</div>
 <div class="cols">{"".join(grp(t, i) for t, i in GROUPS)}</div>
 <div class="info"><b style="color:#ffd100">Hearthstone:</b> where your Hearthstone is bound and how long until you can use it again.</div>
 <div class="line" style="margin-top:10px"><span class="btn">Appearance...</span><span class="btn hl">Order...</span></div></div>"""

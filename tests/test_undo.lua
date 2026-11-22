@@ -26,7 +26,7 @@ return {
         for _, key in ipairs(H.ns.ITEM_ORDER) do T.eq(H.env.FarolDB.items[key], before[key], "picking a bar changes nothing: " .. key) end
         H:click(set.packs[2])
         T.ok(set.packUndo:IsShown(), "Undo shown after a preset")
-        T.has(H.strip(H:text(set.hint)), "Pacote Upando aplicado na barra 1 (3 mudança(s))")
+        T.has(H.strip(H:text(set.hint)), "Pacote Upando aplicado na barra 1 (3 mudanças)")
         H:check(set.items.mem, true)
         T.has(H.strip(H:text(set.hint)), "ligados", "touching an item brings the count back")
         T.ok(set.packUndo:IsShown(), "Undo still available")

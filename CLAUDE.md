@@ -87,7 +87,12 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   (cinza 0,75), não `GameFontDisable`. Campos de número: `box.farolApply` + `ns.TabChain(lista)` (Tab grava só se mudou).
   `ns.MakeToplevel` também põe o fundo opaco (`frame.farolBacking`). Selos dos botões 📝 👜 também via `ns.C` (nada de
   `badge:SetTextColor`); `Profiles.SetColorblind` repinta na hora. Ouro: número na cor do texto, cor só em g/s/c
-  (`FormatMoney`): amarelo é só "atenção".
+  (`FormatMoney`): amarelo é só "atenção". **Textos descrevem o estado, não a cor** ("bom/atenção/alerta",
+  limites "atenção/crítico"): com a opção de daltonismo, verde/vermelho viram azul/laranja (`test_copy.lua` confere).
+- **Plurais e "Limpar" (3.13.1):** nada de "(s)"/"(ns)" (só em textos de diagnóstico `*_status`/`*_usage`): chave
+  normal = plural e `<chave>_1` = singular, com os mesmos `%d/%s`; use `ns.TN(chave, n)`. Botão que apaga uma lista
+  usa `ns.ConfirmClick(botão, n, "chave_ask", ação)`: 1º clique pergunta "Apagar N itens?", 2º em até 5 s faz;
+  lista vazia faz direto; quem atualiza a janela zera `botão.farolAsk`.
 - **Desfazer (3.13):** ação que apaga ou muda várias coisas de uma vez tem "Desfazer" visível, só na sessão:
   `Profiles.packBackup` (pacotes; `name` some ao mexer num item), `Tasks.lastRemoved` / `Farm.lastRemoved` (cópias,
   nunca a tabela salva; posição inválida → fim da lista; respeita o limite de 10). Botão escondido quando não há o

@@ -216,9 +216,9 @@ Quando há lixo para vender, o aviso de bolsas diz: "… Há 3 espaço(s) com li
 
 O item **Munição e reagentes** (desligado por padrão) conta o que a sua classe usa: munição do caçador, Fragmentos
 de Alma do bruxo, Pó Arcano e runas do mago, velas do sacerdote, símbolos do paladino, sementes e reagentes de Dádiva
-do druida, Ankhs do xamã, pós do ladino. **Você escolhe quando o número fica amarelo e vermelho** na janela de Avisos
-(padrão: munição 400 / 200, reagentes 10 / 5; o vermelho precisa ser menor que o amarelo, 0 no amarelo = nunca
-amarelo), ou com `/farol aviso municao 400 200` e `/farol aviso reagentes 10 5`. Os avisos opcionais (desligados por
+do druida, Ankhs do xamã, pós do ladino. **Você escolhe os limites de atenção e crítico** na aba Avisos
+(padrão: munição 400 / 200, reagentes 10 / 5; o crítico precisa ser menor que o de atenção, 0 em atenção = sem
+atenção; na barra, atenção = amarelo e crítico = vermelho, ou laranja com as cores para daltonismo), ou com `/farol aviso municao 400 200` e `/farol aviso reagentes 10 5`. Os avisos opcionais (desligados por
 padrão) aparecem uma vez abaixo do vermelho, esperam a luta acabar e voltam depois que você reabastecer:
 "Munição: 150 acabando — reabasteça antes de sair da cidade." Um reagente só passa a ser acompanhado depois que o
 personagem já teve pelo menos um (um mago de nível 10 não é avisado sobre Pó Arcano). O Farol só **conta** — nunca
@@ -390,7 +390,8 @@ Uma janela separada que lista os itens que **você** saqueou ou recebeu, do mais
   **Ontem 21:27**, ou a data para os mais antigos (**08/11 21:12**). Passe o mouse para ver o tooltip do item, que
   também mostra a data completa ("Saqueado: domingo, 08/11/2026 às 21:12"); **Shift+clique** coloca o link na sua
   caixa de chat (você decide se envia).
-- O histórico é salvo **por personagem** (últimos 100 itens). **Limpar** apaga tudo.
+- O histórico é salvo **por personagem** (últimos 100 itens). **Limpar** pergunta antes ("Apagar 23 itens?") e o
+  segundo clique, em até 5 segundos, apaga tudo. O mesmo vale para o Histórico de avisos e para as masmorras.
 
 Ele lê só as mensagens de saque do próprio jogo sobre **você** ("Você recebe saque: …"), usando os textos do
 cliente, então funciona em qualquer idioma. O saque de outros jogadores é ignorado. Em algumas situações de

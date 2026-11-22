@@ -36,7 +36,10 @@ e o branch `main` recebem correções.
 - Automated tests (`tests/`) run on every push and pull request, including:
   - a scan that fails if the code uses automation, messaging, item/vendor or dynamic-code APIs;
   - a check that no generic global names are created;
-  - fuzzing with random and malicious commands, chat messages and tampered saved data.
+  - fuzzing with random and malicious commands, chat messages and tampered saved data;
+  - a check that huge tampered saved data (hundreds of thousands of entries, names with megabytes of spaces) loads
+    in well under a second instead of freezing the game at login. / dados salvos adulterados e enormes carregam em
+    menos de um segundo, sem travar o jogo ao entrar.
 - The `main` branch is protected: changes only by pull request with passing tests. GitHub's AI code scanning is used
   when it runs; when it does not, a full local security review is required before merging.
 - GitHub Actions run with read-only permissions, no secrets, `persist-credentials: false`, and actions pinned by

@@ -93,6 +93,11 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   normal = plural e `<chave>_1` = singular, com os mesmos `%d/%s`; use `ns.TN(chave, n)`. Botão que apaga uma lista
   usa `ns.ConfirmClick(botão, n, "chave_ask", ação)`: 1º clique pergunta "Apagar N itens?", 2º em até 5 s faz;
   lista vazia faz direto; quem atualiza a janela zera `botão.farolAsk`.
+- **Dados salvos enormes (3.13.2):** um arquivo adulterado pode ter centenas de milhares de itens ou nomes com
+  megabytes de espaços. No `Sanitize`, listas usam `ns.KeepLast(lista, máx., limpar)` (pega os mais recentes do fim
+  para o começo, linear) — nunca `while #l > máx. do table.remove(l, 1) end` — e textos usam `ns.Trim(texto)` (corta em
+  1024 bytes e apara em tempo linear) — nunca `string.match(texto, "^%s*(.-)%s*$")` em texto salvo (quadrático). Só
+  comandos do chat (≤ 255 letras) podem usar esse padrão. `tests/test_hardening.lua` confere.
 - **Desfazer (3.13):** ação que apaga ou muda várias coisas de uma vez tem "Desfazer" visível, só na sessão:
   `Profiles.packBackup` (pacotes; `name` some ao mexer num item), `Tasks.lastRemoved` / `Farm.lastRemoved` (cópias,
   nunca a tabela salva; posição inválida → fim da lista; respeita o limite de 10). Botão escondido quando não há o

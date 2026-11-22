@@ -117,7 +117,7 @@ local function CleanName(text)
     if type(text) ~= "string" then return "" end
     text = string.gsub(text, "|", "")
     text = string.gsub(text, "%c", "")
-    text = string.match(text, "^%s*(.-)%s*$") or ""
+    text = ns.Trim(text) -- linear (nome enorme num arquivo adulterado não trava)
     local out, count = {}, 0
     for char in string.gmatch(text, "[\1-\127\194-\244][\128-\191]*") do
         count = count + 1

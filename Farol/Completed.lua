@@ -18,6 +18,8 @@ local _, ns = ...
 
 local MAX_LIST = 2000        -- missões guardadas por personagem (as mais recentes)
 local MAX_OLD = 15000        -- IDs de missões concluídas guardados por personagem (as de antes do registro)
+local MAX_DICT = 5000        -- dicionário ID -> nome aprendido com o jogo (conta toda; os mais recentes)
+local SCAN_INTERVAL = 5      -- segundos entre leituras do diário para aprender nomes
 local NAME_MAX, ZONE_MAX = 60, 40
 local MAX_ID = 10000000
 local MAX_REALMS, MAX_NAMES = 20, 60
@@ -46,9 +48,11 @@ local STRINGS = {
         qd_total      = "Total no jogo: %s",
         qd_total_note = "(inclui marcadores internos)",
         qd_record     = "Registrar missões entregues (só neste computador; nada é enviado)",
-        qd_note       = "Missões de antes do registro só têm o ID: o jogo não informa os nomes delas.",
+        qd_note       = "Os nomes vêm do próprio jogo: o Farol aprende o nome de cada missão que você vê (no NPC ou no diário).",
         qd_old        = "Mostrar missões de antes do registro (só o ID)",
-        qd_old_name   = "(antes do registro)",
+        qd_old_name   = "antes do registro",
+        qd_unseen     = "(nome ainda não visto)",
+        qd_known      = "Nomes conhecidos: %d de %d",
         qd_link_label = "Wowhead (Ctrl+C):",
         qd_link_tip   = "Clique para copiar o link do Wowhead desta missão",
         qd_wowhead_url = "https://www.wowhead.com/forever/pt/quest=%d/",
@@ -71,6 +75,7 @@ local STRINGS = {
         news_qdone    = "missões concluídas de cada personagem: janela em Menu > Ferramentas (o registro e o item da barra vêm desligados)",
         news_qdone_old = "missões concluídas: opção para mostrar também as de antes do registro, só pelo ID (na janela; vem desligada)",
         news_qdone_link = "missões concluídas: clique numa missão para copiar o link dela no Wowhead (seção WoW Forever)",
+        news_qdone_names = "missões concluídas: o Farol aprende os nomes das missões que você vê no jogo e mostra nas de antes do registro (com o registro ligado)",
         qd_on_word    = "ligado",
         qd_off_word   = "desligado",
     },
@@ -87,9 +92,11 @@ local STRINGS = {
         qd_total      = "Total in game: %s",
         qd_total_note = "(includes internal markers)",
         qd_record     = "Record turned-in quests (on this computer only; nothing is sent)",
-        qd_note       = "Quests from before recording only have their ID: the game does not report their names.",
+        qd_note       = "Names come from the game itself: Farol learns the name of each quest you see (at the NPC or in your log).",
         qd_old        = "Show quests from before recording (ID only)",
-        qd_old_name   = "(before recording)",
+        qd_old_name   = "before recording",
+        qd_unseen     = "(name not seen yet)",
+        qd_known      = "Known names: %d of %d",
         qd_link_label = "Wowhead (Ctrl+C):",
         qd_link_tip   = "Click to copy this quest's Wowhead link",
         qd_wowhead_url = "https://www.wowhead.com/forever/quest=%d",
@@ -112,6 +119,7 @@ local STRINGS = {
         news_qdone    = "completed quests of each character: window in Menu > Tools (recording and the bar item start off)",
         news_qdone_old = "completed quests: option to also show the ones from before recording, by ID only (in the window; starts off)",
         news_qdone_link = "completed quests: click a quest to copy its Wowhead link (WoW Forever section)",
+        news_qdone_names = "completed quests: Farol learns the names of the quests you see in the game and shows them for earlier quests (with recording on)",
         qd_on_word    = "on",
         qd_off_word   = "off",
     },
@@ -205,6 +213,26 @@ function Completed.Sanitize(saved)
     end)
 end
 
+-- Dicionário ID -> { n = nome, l = nível?, t = quando foi visto }, da conta toda (só os mais recentes).
+function Completed.SanitizeNames(saved)
+    local clean = {}
+    if type(saved) ~= "table" then return clean end
+    -- 1) escolhe os mais recentes só pelos números (barato); 2) limpa o texto só desses (um arquivo adulterado com
+    -- centenas de milhares de nomes carrega rápido).
+    local candidates = {}
+    for id, entry in pairs(saved) do
+        local qid = Int(id, 1, MAX_ID)
+        if qid and type(entry) == "table" and type(entry.n) == "string" then
+            candidates[qid] = { raw = entry, t = Int(entry.t, 0, MAX_TIME) or 0 }
+        end
+    end
+    for qid, c in pairs(ns.KeepRecent(candidates, MAX_DICT, function(e) return e.t end)) do
+        local name = Clean(c.raw.n, NAME_MAX)
+        if name ~= "" then clean[qid] = { n = name, l = Int(c.raw.l, 0, 200), t = c.t } end
+    end
+    return clean
+end
+
 local function DB() return ns.GetDB() end
 local function Realms()
     local db = DB()
@@ -213,6 +241,59 @@ local function Realms()
     return rawget(db, "completed")
 end
 local function Recording() local db = DB() return db and db.questRecord == true end
+local function Names()
+    local db = DB()
+    if not db then return {} end
+    if type(rawget(db, "questNames")) ~= "table" then rawset(db, "questNames", {}) end
+    return rawget(db, "questNames")
+end
+local namesCount -- quantos nomes há no dicionário (contado na primeira vez)
+
+-- Aprende o nome de uma missão vista no jogo (só com o registro ligado: regra 8). Leitura local; nada é pedido.
+function Completed.Learn(questID, title, level)
+    if not Recording() then return end
+    local id = Int(questID, 1, MAX_ID)
+    if not id or Secret(title) then return end
+    local name = Clean(title, NAME_MAX)
+    if name == "" then return end
+    local names = Names()
+    if not namesCount then namesCount = 0; for _ in pairs(names) do namesCount = namesCount + 1 end end
+    if not names[id] then namesCount = namesCount + 1 end
+    names[id] = { n = name, l = Int(level, 0, 200) or (names[id] and names[id].l), t = Now() }
+    if namesCount > MAX_DICT + 100 then -- corte de vez em quando (não a cada missão)
+        local db = DB()
+        rawset(db, "questNames", ns.KeepRecent(names, MAX_DICT, function(e) return e.t end))
+        namesCount = MAX_DICT
+    end
+end
+
+function Completed.NameOf(questID)
+    local id = Int(questID, 1, MAX_ID)
+    local entry = id and Names()[id]
+    return entry and entry.n or nil
+end
+
+-- Lê o diário de missões e aprende os nomes (moderno: C_QuestLog; antigo: GetQuestLogTitle com o ID no 9º valor).
+local lastScan
+function Completed.ScanLog()
+    if not Recording() then return end
+    local okT, now = pcall(GetTime)
+    if okT and type(now) == "number" and lastScan and now - lastScan >= 0 and now - lastScan < SCAN_INTERVAL then return end
+    lastScan = okT and type(now) == "number" and now or nil
+    if C_QuestLog and C_QuestLog.GetNumQuestLogEntries and C_QuestLog.GetInfo then
+        local ok, count = pcall(C_QuestLog.GetNumQuestLogEntries)
+        for i = 1, (ok and Int(count, 0, 200)) or 0 do
+            local okI, info = pcall(C_QuestLog.GetInfo, i)
+            if okI and type(info) == "table" and not info.isHeader then Completed.Learn(info.questID, info.title, info.level) end
+        end
+    elseif GetNumQuestLogEntries and GetQuestLogTitle then
+        local ok, count = pcall(GetNumQuestLogEntries)
+        for i = 1, (ok and Int(count, 0, 200)) or 0 do
+            local okI, title, level, _, _, header, _, _, _, questID = pcall(GetQuestLogTitle, i)
+            if okI and not header then Completed.Learn(questID, title, level) end
+        end
+    end
+end
 
 -- Registro do personagem atual (cria se "create"); nil se o jogo ainda não informou o nome.
 local function Own(create)
@@ -339,6 +420,21 @@ local function OnQuestComplete()
         end
     end
     pending = { id = id, n = Clean(title, NAME_MAX), l = level }
+    Completed.Learn(id, title, level)
+end
+
+-- Missão lida no NPC (QUEST_DETAIL): só aprende o nome (não aceita nada).
+local function OnQuestDetail()
+    local id, title
+    if GetQuestID then
+        local ok, value = pcall(GetQuestID)
+        if ok then id = Int(value, 1, MAX_ID) end
+    end
+    if GetTitleText then
+        local ok, value = pcall(GetTitleText)
+        if ok and type(value) == "string" then title = value end
+    end
+    Completed.Learn(id, title, nil)
 end
 
 local function Zone()
@@ -360,13 +456,14 @@ function Completed.Record(questID, title)
         if name == "" then name = pending.n end
         id, level = id or pending.id, pending.l
     end
+    if name == "" and id then name = Completed.NameOf(id) or "" end -- dicionário aprendido com o jogo
     if name == "" and id and C_QuestLog and C_QuestLog.GetTitleForQuestID then
         local ok, value = pcall(C_QuestLog.GetTitleForQuestID, id)
         if ok then name = Clean(value, NAME_MAX) end
     end
     pending = nil
     if name == "" and not id then return end
-    if name == "" then name = T("qd_unknown") .. " #" .. id end
+    if name == "" then name = T("qd_unknown") .. " #" .. id else Completed.Learn(id, name, level) end
     if total then total = total + 1 end
     if not Recording() then return end
     local own = Own(true)
@@ -392,7 +489,8 @@ end
 local turnedInEvent = false -- o cliente tem QUEST_TURNED_IN: a mensagem do sistema é ignorada
 
 local events = CreateFrame("Frame")
-for _, event in ipairs({ "QUEST_TURNED_IN", "QUEST_COMPLETE", "CHAT_MSG_SYSTEM", "PLAYER_ENTERING_WORLD" }) do
+for _, event in ipairs({ "QUEST_TURNED_IN", "QUEST_COMPLETE", "CHAT_MSG_SYSTEM", "PLAYER_ENTERING_WORLD", "QUEST_DETAIL",
+                         "QUEST_ACCEPTED", "QUEST_LOG_UPDATE" }) do
     local ok = pcall(events.RegisterEvent, events, event)
     if ok and event == "QUEST_TURNED_IN" and C_QuestLog then turnedInEvent = true end
 end
@@ -408,6 +506,12 @@ events:SetScript("OnEvent", function(_, event, arg1)
         if title then pcall(Completed.Record, nil, title) end
     elseif event == "PLAYER_ENTERING_WORLD" then
         Completed.Refresh()
+        lastScan = nil; pcall(Completed.ScanLog)
+    elseif event == "QUEST_DETAIL" then
+        pcall(OnQuestDetail)
+    elseif event == "QUEST_ACCEPTED" or event == "QUEST_LOG_UPDATE" then
+        if event == "QUEST_ACCEPTED" then lastScan = nil end -- missão nova: lê o diário já
+        pcall(Completed.ScanLog)
     end
 end)
 
@@ -532,8 +636,10 @@ local function Filtered(info)
         for _, entry in ipairs(info.list) do if entry.i then recorded[entry.i] = true end end
         for i = #info.a, 1, -1 do
             local id = info.a[i]
-            if not recorded[id] and (wanted == "" or (idWanted and string.find(tostring(id), idWanted, 1, true))) then
-                out[#out + 1] = { i = id, old = true }
+            local known = Completed.NameOf(id)
+            if not recorded[id] and (wanted == "" or (idWanted and string.find(tostring(id), idWanted, 1, true))
+                    or (known and string.find(string.lower(known), wanted, 1, true))) then
+                out[#out + 1] = { i = id, old = true, n = known }
             end
         end
     end
@@ -599,6 +705,8 @@ local function CreateWindow()
 
     frame.recorded = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.recorded:SetPoint("TOPLEFT", 24, -82)
+    frame.known = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall") -- "Nomes conhecidos: 37 de 131"
+    frame.known:SetPoint("TOPLEFT", 150, -82)
     frame.totalText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.totalText:SetPoint("TOPRIGHT", -30, -82)
 
@@ -716,6 +824,9 @@ RefreshWindow = function()
     window.searchHint:SetText(T("qd_search"))
     if window.search:GetText() == "" and not window.search:HasFocus() then window.searchHint:Show() else window.searchHint:Hide() end
     window.recorded:SetText(string.format(T("qd_recorded"), info and #info.list or 0))
+    local knownCount, allIDs = 0, info and info.a and #info.a or 0
+    if info and info.a then for _, id in ipairs(info.a) do if Completed.NameOf(id) then knownCount = knownCount + 1 end end end
+    window.known:SetText(allIDs > 0 and string.format(T("qd_known"), knownCount, allIDs) or "")
     local shownTotal = isCurrent and (total or (info and info.t)) or (info and info.t)
     window.totalText:SetText(string.format(T("qd_total"), shownTotal and tostring(shownTotal) or "--") .. " " .. ns.C.dim .. T("qd_total_note") .. "|r")
 
@@ -726,10 +837,14 @@ RefreshWindow = function()
         local entry = list[offset + i]
         if entry then
             row.level:SetText(entry.l and (ns.C.warn .. "[" .. entry.l .. "]|r") or "")
-            row.name:SetText(entry.old and (ns.C.dim .. T("qd_old_name") .. "|r") or entry.n)
+            if entry.old then
+                row.name:SetText(entry.n or (ns.C.dim .. T("qd_unseen") .. "|r"))
+            else
+                row.name:SetText(entry.n)
+            end
             row.id:SetText(entry.i and ("#" .. entry.i) or T("qd_no_id"))
             row.zone:SetText(entry.z or "")
-            row.when:SetText(entry.t and ns.FormatWhen(entry.t) or "")
+            row.when:SetText(entry.old and T("qd_old_name") or (entry.t and ns.FormatWhen(entry.t) or ""))
             row.level:Show(); row.name:Show(); row.id:Show(); row.zone:Show(); row.when:Show()
             row.click.questID = entry.i
             if entry.i then row.click:Show() else row.click:Hide() end

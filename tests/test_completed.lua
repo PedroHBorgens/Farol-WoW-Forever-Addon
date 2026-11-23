@@ -195,7 +195,7 @@ return {
         H:check(H.env.FarolCompletedOld, true); T.eq(H.env.FarolDB.questShowOld, true)
         T.eq(H:text(W.scrollInfo), "1–4 de 4")
         T.eq(H:text(W.rows[1].name), "Lobos"); T.eq(H:text(W.rows[1].id), "#1001")
-        T.eq(H:text(W.rows[2].id), "#9"); T.has(H:text(W.rows[2].name), "(antes do registro)"); T.eq(H:text(W.rows[2].when), "")
+        T.eq(H:text(W.rows[2].id), "#9"); T.has(H:text(W.rows[2].name), "(nome ainda não visto)"); T.eq(H:text(W.rows[2].when), "antes do registro")
         T.eq(H:text(W.rows[4].id), "#3", "highest IDs first; the recorded one is not repeated")
         H.env.FarolCompletedSearch:SetText("5"); H.env.FarolCompletedSearch._scripts.OnTextChanged(H.env.FarolCompletedSearch)
         T.eq(H:text(W.scrollInfo), "1–1 de 1"); T.eq(H:text(W.rows[1].id), "#5")
@@ -237,5 +237,50 @@ return {
         for _, bad in ipairs({ 0 / 0, -1, 1.5, "x", 1e12 }) do T.eq(H.ns.Completed.WowheadURL(bad), nil) end
         local E = Mock.new({ locale = "enUS" }):login()
         T.eq(E.ns.Completed.WowheadURL(791), "https://www.wowhead.com/forever/quest=791")
+    end },
+
+    { "learned names: from the NPC, the quest log and turn-ins; shown for earlier quests; only with recording on", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H.completedIDs = { 791, 788, 99582 }
+        H.quests = { { title = "Cabeçalho", header = true }, { title = "Ervas para a Curandeira", level = 12 } }
+        H:login()
+        H.rewardQuest = { id = 791, title = "O Mapa Rasgado" }; H:event("QUEST_DETAIL")
+        T.eq(next(H.env.FarolDB.questNames), nil, "recording off: nothing is learned or saved")
+        H:slash("concluidas registrar on")
+        H:event("QUEST_DETAIL") -- leu a missão no NPC
+        H:event("QUEST_ACCEPTED", 1002); H.rewardQuest = nil -- diário: questID 1002 = "Ervas..." (simulador)
+        local names = H.env.FarolDB.questNames
+        T.eq(names[791].n, "O Mapa Rasgado"); T.eq(names[1002].n, "Ervas para a Curandeira"); T.eq(names[1002].l, 12)
+        T.eq(names[1001], nil, "headers are not quests")
+        H:slash("concluidas"); H:check(H.env.FarolCompletedOld, true)
+        local W = H.env.FarolCompleted
+        T.eq(H:text(W.known), "Nomes conhecidos: 1 de 3")
+        T.eq(H:text(W.rows[1].id), "#99582"); T.has(H:text(W.rows[1].name), "(nome ainda não visto)")
+        T.eq(H:text(W.rows[2].id), "#791"); T.eq(H:text(W.rows[2].name), "O Mapa Rasgado"); T.eq(H:text(W.rows[2].when), "antes do registro")
+        T.eq(H:text(W.rows[3].id), "#788"); T.has(H:text(W.rows[3].name), "(nome ainda não visto)")
+        H.env.FarolCompletedSearch:SetText("mapa"); H.env.FarolCompletedSearch._scripts.OnTextChanged(H.env.FarolCompletedSearch)
+        T.eq(H:text(W.scrollInfo), "1–1 de 1"); T.eq(H:text(W.rows[1].id), "#791")
+        -- Entrega sem a janela de recompensa: o nome vem do dicionário.
+        H:event("QUEST_TURNED_IN", 1002, 0, 0)
+        T.eq(H.env.FarolDB.completed.Azralon.Garrosh.list[1].n, "Ervas para a Curandeira")
+        -- Vale para outro personagem da conta (dicionário compartilhado).
+        local O = Mock.new({ locale = "ptBR" }); O.playerName = "Mira"; O.completedIDs = { 791 }
+        O:login(H.env.FarolDB); O:slash("concluidas"); O:check(O.env.FarolCompletedOld, true)
+        T.eq(O:text(O.env.FarolCompleted.rows[1].name), "O Mapa Rasgado")
+    end },
+
+    { "the name dictionary is validated: bad IDs/names dropped, '|' removed, at most 5000 (the most recent)", function(T, Mock)
+        local names = { [5] = { n = "|cffff0000Ok|r", t = 1 }, [6] = { n = "" }, ["x"] = { n = "a" }, [7] = "x",
+                        [8] = { n = "Bom", l = 999, t = 0 / 0 }, [0 / 0 == 0 and 1 or 9] = { n = {} } }
+        for i = 1, 6000 do names[100 + i] = { n = "N" .. i, t = i } end
+        local H = Mock.new():login({ questNames = names })
+        local clean = H.env.FarolDB.questNames
+        local n = 0
+        for _ in pairs(clean) do n = n + 1 end
+        T.eq(n, 5000); T.ok(clean[6100], "most recent kept"); T.eq(clean[101], nil, "oldest dropped")
+        local B = Mock.new():login({ questNames = { [5] = { n = "|cffff0000Ok|r", t = 1 }, [6] = { n = "" }, [8] = { n = "Bom", l = 999 } } })
+        T.eq(B.env.FarolDB.questNames[5].n, "cffff0000Okr"); T.eq(B.env.FarolDB.questNames[6], nil); T.eq(B.env.FarolDB.questNames[8].l, nil)
+        for _, bad in ipairs({ "x", 5, 0 / 0 }) do
+            local ok, err = pcall(function() Mock.new():login({ questNames = bad }) end); T.ok(ok, tostring(err))
+        end
     end },
 }

@@ -345,6 +345,10 @@ it only builds the address. At the top, pick the character (only yours, on the s
   recording)`, highest first, searchable by ID. Farol saves those IDs (up to 15,000 per character) each time you log in
   with recording on; other characters show up after they log in once with it on. The list includes internal markers of
   the game (IDs that are not real quests).
+- **Names learned from the game:** with recording on, Farol saves the name of every quest you **see** — when you read
+  it at the NPC, accept it, while it is in your log and when you turn it in — in an account-wide dictionary (up to
+  5,000 names, for all your characters). Quests from before recording show their name once it is known; the others show
+  "(name not seen yet)". The window shows "Known names: X of Y". All local reads: no server requests.
 - **Total in game:** how many quests the game says the character has completed, **including those from before
   recording**. Their names are not shown: the game only reports them if the add-on asks the server, and Farol does not
   make that request. The total includes some internal markers of the game, so it may be a little higher than the real

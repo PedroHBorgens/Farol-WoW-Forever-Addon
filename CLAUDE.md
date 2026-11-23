@@ -30,6 +30,10 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 - O cliente lê **`Farol_Mainline.toc`** (não o `Farol.toc`). `Farol_Camelot.toc` é reserva. Ao mudar a versão do
   cliente, atualize a linha `## Interface:` (versão `1.60.1` → `16001`).
 - Pasta de addons: `World of Warcraft/_forever_/Interface/AddOns/`.
+- **Personagem (3.15.1):** o WoW Forever devolve `GetRealmName() == ""` e tem sobrenome: `UnitName("player")` =
+  ("Oxis", "Raknash"). `CurrentCharacter` usa nome + sobrenome ("Oxis Raknash") e o reino de reserva
+  `Profiles.REALM_FALLBACK` ("-", mostrado como "este reino" por `Profiles.RealmLabel`). Nunca mostre o "-" cru: use
+  `ns.RealmLabel`. `/farol aviso status` mostra como o personagem foi identificado.
 - **"Secret values"** (restrições do Midnight): em combate alguns valores ficam bloqueados. Toda leitura passa por
   `pcall` / `Safe()` e `ns.IsSecret()`; se bloqueado, a barra mostra `--` em vez de dar erro.
 - **Talentos no estilo clássico** (3 árvores, 1 ponto por nível a partir do 10, 51 no 60) e **magias com graus**.

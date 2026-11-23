@@ -1814,6 +1814,11 @@ local function PrintStatus()
         Print(string.format(T("quests_status"), (okQ and data) and (data.count .. "/" .. data.max) or "--",
             (okQ and data) and #data.ready or 0, ns.Quests.Source()))
     end
+    do -- como o Farol identificou o personagem (nome e reino; o WoW Forever não informa o reino)
+        local name, realm = ns.CurrentCharacter()
+        Print(string.format(T("char_status"), name or "--",
+            realm == ns.REALM_FALLBACK and T("realm_none") or (realm and ns.RealmLabel(realm) or "--")))
+    end
     if ns.Completed then
         local okC, line = pcall(ns.Completed.StatusLine)
         if okC then Print(line) end

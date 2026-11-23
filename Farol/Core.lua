@@ -213,6 +213,9 @@ local STRINGS = {
         gold_forget_self = "não dá para esquecer o personagem em que você está.",
         gold_not_found = "personagem não encontrado neste reino: %s.",
         gold_list    = "ouro dos seus personagens em %s (total %s):",
+        realm_this   = "este reino",
+        char_status  = "personagem: %s · reino: %s",
+        realm_none   = "o jogo não informou (usando um reino de reserva)",
         gold_total_on = "total de ouro na barra: ligado.",
         gold_total_off = "total de ouro na barra: desligado.",
         help_gold    = "  /farol ouro [total on||off || esquecer Nome] - ouro de todos os seus personagens do reino",
@@ -552,6 +555,9 @@ local STRINGS = {
         gold_forget_self = "you cannot forget the character you are playing.",
         gold_not_found = "character not found on this realm: %s.",
         gold_list    = "gold of your characters on %s (total %s):",
+        realm_this   = "this realm",
+        char_status  = "character: %s · realm: %s",
+        realm_none   = "not reported by the game (using a fallback realm)",
         gold_total_on = "gold total on the bar: on.",
         gold_total_off = "gold total on the bar: off.",
         help_gold    = "  /farol gold [total on||off || forget Name] - gold of all your characters on this realm",
@@ -1490,15 +1496,28 @@ local function SanitizeChars(saved)
     end)
 end
 
--- Quem está jogando agora: nome e reino (nil se o jogo ainda não informou).
+-- Reino de reserva quando o jogo não informa o reino (o WoW Forever devolve ""). Só uma chave interna; nos textos
+-- aparece como "este reino" (Profiles.RealmLabel).
+Profiles.REALM_FALLBACK = "-"
+function Profiles.RealmLabel(realm)
+    if realm == Profiles.REALM_FALLBACK then return T("realm_this") end
+    return (string.gsub(tostring(realm), "|", "||"))
+end
+ns.RealmLabel, ns.REALM_FALLBACK = Profiles.RealmLabel, Profiles.REALM_FALLBACK
+
+-- Quem está jogando agora: nome e reino (nil se o jogo ainda não informou o nome).
 local function CurrentCharacter()
-    local okName, name = pcall(UnitName, "player")
+    local okName, name, second = pcall(UnitName, "player")
     local getRealm = GetNormalizedRealmName or GetRealmName
     local okRealm, realm = false, nil
     if GetRealmName then okRealm, realm = pcall(GetRealmName) end
     if (not okRealm or not ValidName(realm)) and getRealm then okRealm, realm = pcall(getRealm) end
     if not okName or not ValidName(name) or name == UNKNOWNOBJECT or name == "Unknown" then return nil end
-    if not okRealm or not ValidName(realm) then return nil end
+    -- O WoW Forever devolve o reino vazio: em vez de descartar o personagem, usa um reino de reserva fixo.
+    if not okRealm or not ValidName(realm) then realm = Profiles.REALM_FALLBACK end
+    -- O WoW Forever tem sobrenome: UnitName("player") devolve ("Oxis", "Raknash") (no WoW comum o 2º valor seria o reino,
+    -- e para o próprio jogador vem vazio). Nome + sobrenome identifica o personagem sem misturar homônimos.
+    if ValidName(second) and second ~= realm and ValidName(name .. " " .. second) then name = name .. " " .. second end
     return name, realm
 end
 ns.CurrentCharacter = CurrentCharacter
@@ -1819,7 +1838,7 @@ function Profiles.SourceLabel(source)
     if source.account then return T("pfl_account") end
     local _, realm = CurrentCharacter()
     if source.realm == realm then return source.name end
-    return source.name .. " (" .. source.realm .. ")"
+    return source.name .. " (" .. Profiles.RealmLabel(source.realm) .. ")"
 end
 
 -- Última bolsa a ler (mochila = 0). Valor do jogo validado: um número estranho nunca vira um laço sem fim.
@@ -3009,7 +3028,7 @@ TIP.gold = function()
     end
     local chars, charsTotal, realm = Safe(RealmCharacters)
     if chars and #chars > 1 then
-        AddPair(string.format(T("tt_gold_total"), FactionName(realm)), FormatMoneyShort(charsTotal))
+        AddPair(string.format(T("tt_gold_total"), realm == Profiles.REALM_FALLBACK and T("realm_this") or FactionName(realm)), FormatMoneyShort(charsTotal))
         for i = 1, math.min(LIST_MAX, #chars) do
             local c = chars[i]
             local when = c.current and T("tt_gold_this") or FormatWhen(c.t)
@@ -4386,11 +4405,13 @@ SlashCmdList["FAROL"] = function(msg)
             pcall(RecordCharacter)
             local list, total, realm = RealmCharacters()
             if list then
-                Print(string.format(T("gold_list"), (string.gsub(realm, "|", "||")), FormatMoneyShort(total)))
+                Print(string.format(T("gold_list"), Profiles.RealmLabel(realm), FormatMoneyShort(total)))
                 for _, c in ipairs(list) do
                     Print("  " .. FactionName(c.name) .. " (" .. c.level .. "): " .. FormatMoneyShort(c.gold)
                         .. (c.current and (" — " .. T("tt_gold_this")) or ""))
                 end
+            else
+                Print(T("pfl_no_name")) -- nunca em silêncio: o jogo ainda não informou o personagem
             end
         end
     elseif cmd == "resumo" or cmd == "summary" then

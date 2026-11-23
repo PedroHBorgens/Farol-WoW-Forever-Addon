@@ -128,7 +128,7 @@ return {
         H.playerName = "Unknown"; H:login(); H:update(1)
         T.eq(next(H.env.FarolDB.chars), nil, "nothing recorded while the name is unknown")
         H.playerName = "Garrosh"; H.realm = nil; H:update(1)
-        T.eq(next(H.env.FarolDB.chars), nil, "nothing without a realm")
+        T.ok(H.env.FarolDB.chars["-"] and H.env.FarolDB.chars["-"].Garrosh, "no realm (WoW Forever): fallback realm \"-\"")
         local E = Mock.new({ locale = "enUS" }):login(savedWithAlts(os.time())); E:update(1)
         T.has(tip(E), "Gold on this account (Azralon) = 1482g 10s")
         T.has(tip(E), "this one")

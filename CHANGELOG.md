@@ -8,6 +8,7 @@ All notable changes to Farol. Versions follow the `## Version:` line of the `.to
   fallback realm is now used (shown as "this realm").
 - WoW Forever characters have a surname: `UnitName("player")` returns ("Name", "Surname"). The character is now
   identified as "Name Surname", so characters with the same first name are not mixed up.
+- `/farol gold` no longer stays silent when the character is not identified; it says so.
 - `/farol warn status` shows the identified character and realm. New `tests/test_realm.lua`.
 
 ## 3.15.0 — Earlier completed quests by ID

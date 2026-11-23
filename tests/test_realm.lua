@@ -65,4 +65,16 @@ return {
             N:login(); T.eq((N.ns.CurrentCharacter()), "Garrosh", "second value '" .. second:sub(1, 8) .. "' ignored")
         end
     end },
+
+    { "/farol ouro never stays silent: lists this character (WoW Forever) or says the name is not known yet", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H.realm = ""
+        H.env.UnitName = function(unit) if unit == "player" then return "Oxis", "Raknash" end end
+        H:login(); H.msgs = {}
+        H:slash("ouro")
+        local text = H.strip(table.concat(H.msgs, "\n"))
+        T.has(text, "ouro dos seus personagens em este reino"); T.has(text, "Oxis Raknash (")
+        local N = Mock.new({ locale = "ptBR" }); N.env.UnitName = function() return nil end
+        N:login(); N.msgs = {}; N:slash("ouro")
+        T.has(N.strip(table.concat(N.msgs, "\n")), "o jogo ainda não informou o nome do personagem")
+    end },
 }

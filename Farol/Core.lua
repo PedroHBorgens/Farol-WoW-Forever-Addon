@@ -4410,6 +4410,8 @@ SlashCmdList["FAROL"] = function(msg)
                     Print("  " .. FactionName(c.name) .. " (" .. c.level .. "): " .. FormatMoneyShort(c.gold)
                         .. (c.current and (" — " .. T("tt_gold_this")) or ""))
                 end
+            else
+                Print(T("pfl_no_name")) -- nunca em silêncio: o jogo ainda não informou o personagem
             end
         end
     elseif cmd == "resumo" or cmd == "summary" then

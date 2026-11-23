@@ -334,7 +334,8 @@ qwin = ('<div class="win" style="width:640px"><div class="x">×</div><div class=
     '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Recorded: <b>8</b></span><span>Total in game: <b>412</b> <span class="dim">(includes internal markers)</span></span></div>'
     + qrows +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span class="ck" style="margin:0"><span class="box">✓</span>Record turned-in quests (on this computer only; nothing is sent)</span><span class="dim" style="font-size:12px">1–8 of 8</span></div>'
-    '<div class="dim" style="font-size:12px;margin-top:4px">Quests from before recording only count in the total (the game does not report their names).</div></div>')
+    '<div class="ck" style="margin-top:4px"><span class="box"></span>Show quests from before recording (ID only)</div>'
+    '<div class="dim" style="font-size:12px;margin-top:4px">Quests from before recording only have their ID: the game does not report their names.</div></div>')
 QD_BAR = hbar([("📜",'Quests <span class="g">12/20</span>'),("✅",'Completed 412')], "font-size:14px")
 qtip = ('<div class="tip" style="width:330px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol · Completed quests</div>'
     '<div class="row"><span class="k">Aldric (this one)</span><span>412 · today +3</span></div>'

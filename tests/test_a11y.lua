@@ -38,7 +38,7 @@ return {
     end },
 
     { "news line says the option is off and where to turn it on", function(T, Mock)
-        local H = Mock.new():login({ items = { fps = true }, newsSeen = #Mock.new():login().ns.NEWS - 2 })
+        local H = Mock.new():login({ items = { fps = true }, newsSeen = #Mock.new():login().ns.NEWS - 3 })
         T.has(all(H), "cores para daltonismo (azul, amarelo e laranja) e janelas mais legíveis — desligado (ligue em Menu > Geral)")
     end },
 

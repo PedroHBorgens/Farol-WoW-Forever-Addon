@@ -17,6 +17,7 @@
 local _, ns = ...
 
 local MAX_LIST = 2000        -- missões guardadas por personagem (as mais recentes)
+local MAX_OLD = 15000        -- IDs de missões concluídas guardados por personagem (as de antes do registro)
 local NAME_MAX, ZONE_MAX = 60, 40
 local MAX_ID = 10000000
 local MAX_REALMS, MAX_NAMES = 20, 60
@@ -45,7 +46,9 @@ local STRINGS = {
         qd_total      = "Total no jogo: %s",
         qd_total_note = "(inclui marcadores internos)",
         qd_record     = "Registrar missões entregues (só neste computador; nada é enviado)",
-        qd_note       = "Missões de antes do registro entram só no total (o jogo não informa os nomes delas).",
+        qd_note       = "Missões de antes do registro só têm o ID: o jogo não informa os nomes delas.",
+        qd_old        = "Mostrar missões de antes do registro (só o ID)",
+        qd_old_name   = "(antes do registro)",
         qd_empty_off  = "Nenhuma missão registrada. Marque \"Registrar missões entregues\" abaixo e entregue uma missão.",
         qd_empty_on   = "Nenhuma missão registrada ainda: entregue uma missão.",
         qd_no_match   = "Nenhuma missão com esse nome ou ID.",
@@ -63,6 +66,7 @@ local STRINGS = {
         tool_qdone    = "Missões concluídas...",
         tool_qdone_desc = "por personagem, com busca",
         news_qdone    = "missões concluídas de cada personagem: janela em Menu > Ferramentas (o registro e o item da barra vêm desligados)",
+        news_qdone_old = "missões concluídas: opção para mostrar também as de antes do registro, só pelo ID (na janela; vem desligada)",
         qd_on_word    = "ligado",
         qd_off_word   = "desligado",
     },
@@ -79,7 +83,9 @@ local STRINGS = {
         qd_total      = "Total in game: %s",
         qd_total_note = "(includes internal markers)",
         qd_record     = "Record turned-in quests (on this computer only; nothing is sent)",
-        qd_note       = "Quests from before recording only count in the total (the game does not report their names).",
+        qd_note       = "Quests from before recording only have their ID: the game does not report their names.",
+        qd_old        = "Show quests from before recording (ID only)",
+        qd_old_name   = "(before recording)",
         qd_empty_off  = "No quests recorded. Tick \"Record turned-in quests\" below and turn in a quest.",
         qd_empty_on   = "No quests recorded yet: turn in a quest.",
         qd_no_match   = "No quest with that name or ID.",
@@ -97,6 +103,7 @@ local STRINGS = {
         tool_qdone    = "Completed quests...",
         tool_qdone_desc = "per character, with search",
         news_qdone    = "completed quests of each character: window in Menu > Tools (recording and the bar item start off)",
+        news_qdone_old = "completed quests: option to also show the ones from before recording, by ID only (in the window; starts off)",
         qd_on_word    = "on",
         qd_off_word   = "off",
     },
@@ -155,7 +162,13 @@ local function CleanChar(info)
     local clean = { list = ns.KeepLast(info.list, MAX_LIST, CleanEntry) }
     clean.t = Int(info.t, 0, 1000000)
     clean.tt = Int(info.tt, 0, MAX_TIME)
-    if not clean.t and #clean.list == 0 then return nil end
+    -- IDs de todas as missões concluídas (lidos do jogo com o registro ligado): só números válidos, sem repetir.
+    local seen, ids = {}, {}
+    for _, id in ipairs(ns.KeepLast(info.a, MAX_OLD, function(v) return Int(v, 1, MAX_ID) end)) do
+        if not seen[id] then seen[id] = true; ids[#ids + 1] = id end
+    end
+    if #ids > 0 then clean.a = ids end
+    if not clean.t and #clean.list == 0 and not clean.a then return nil end
     return clean
 end
 
@@ -235,12 +248,49 @@ function Completed.ReadTotal()
     return nil, "--"
 end
 
+-- IDs das missões concluídas que o jogo informa (em ordem crescente, no máximo MAX_OLD, os maiores). Só leitura local:
+-- nada é pedido ao servidor e os nomes não são buscados (pedir o nome de missões antigas seria um pedido ao servidor).
+function Completed.ReadIDs()
+    local raw
+    if C_QuestLog and C_QuestLog.GetAllCompletedQuestIDs then
+        local ok, ids = pcall(C_QuestLog.GetAllCompletedQuestIDs)
+        if ok and type(ids) == "table" and not Secret(ids) then raw = {}; for i = 1, math.min(#ids, 1000000) do raw[i] = ids[i] end end
+    end
+    if not raw and GetQuestsCompleted then
+        local ok, map = pcall(GetQuestsCompleted)
+        if ok and type(map) == "table" and not Secret(map) then
+            raw = {}
+            for id in pairs(map) do
+                raw[#raw + 1] = id
+                if #raw > 1000000 then break end
+            end
+        end
+    end
+    if not raw then return nil end
+    local seen, out = {}, {}
+    for _, v in ipairs(raw) do
+        local id = Int(v, 1, MAX_ID)
+        if id and not seen[id] then seen[id] = true; out[#out + 1] = id end
+    end
+    table.sort(out)
+    if #out > MAX_OLD then
+        local cut = {}
+        for i = #out - MAX_OLD + 1, #out do cut[#cut + 1] = out[i] end
+        out = cut
+    end
+    return out
+end
+
 function Completed.Refresh()
     local ok, n, source = pcall(Completed.ReadTotal)
     if ok then total, totalSource = n, source else total, totalSource = nil, "--" end
     if total and Recording() then
         local own = Own(true)
-        if own then own.t, own.tt = total, Now() end
+        if own then
+            own.t, own.tt = total, Now()
+            local okIDs, ids = pcall(Completed.ReadIDs)
+            if okIDs and ids and #ids > 0 then own.a = ids end
+        end
     end
 end
 
@@ -453,17 +503,30 @@ local function Selected()
     return realm, name, true
 end
 
+local function ShowOld() local db = DB() return db and db.questShowOld == true end
+
 local function Filtered(info)
     local out = {}
     if not info then return out end
     local wanted = string.lower(search)
+    local idWanted = string.match(wanted, "^#?(%d+)$")
     for i = #info.list, 1, -1 do -- mais nova primeiro
         local entry = info.list[i]
         -- Busca pelo nome ou pelo ID da missão (o número que o jogo dá a cada missão; "#123" ou "123").
         local id = entry.i and tostring(entry.i)
-        local idWanted = string.match(wanted, "^#?(%d+)$")
         if wanted == "" or string.find(string.lower(entry.n), wanted, 1, true) or (idWanted and id and string.find(id, idWanted, 1, true)) then
             out[#out + 1] = entry
+        end
+    end
+    -- Missões de antes do registro (opção, desligada): só o ID, das maiores para as menores; as já registradas ficam de fora.
+    if ShowOld() and info.a then
+        local recorded = {}
+        for _, entry in ipairs(info.list) do if entry.i then recorded[entry.i] = true end end
+        for i = #info.a, 1, -1 do
+            local id = info.a[i]
+            if not recorded[id] and (wanted == "" or (idWanted and string.find(tostring(id), idWanted, 1, true))) then
+                out[#out + 1] = { i = id, old = true }
+            end
         end
     end
     return out
@@ -471,7 +534,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolCompleted", UIParent, ns.backdropTemplate)
-    frame:SetSize(640, 150 + ROWS * ROW_H + 70)
+    frame:SetSize(640, 150 + ROWS * ROW_H + 94)
     frame:SetPoint("CENTER", 0, 20)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -580,7 +643,18 @@ local function CreateWindow()
     frame.scrollInfo = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.scrollInfo:SetPoint("TOPRIGHT", -30, bottom - 6)
     frame.note = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
-    frame.note:SetPoint("TOPLEFT", 24, bottom - 30)
+    frame.old = CreateFrame("CheckButton", "FarolCompletedOld", frame, "UICheckButtonTemplate")
+    frame.old:SetSize(24, 24)
+    frame.old:SetPoint("TOPLEFT", 20, bottom - 24)
+    frame.old.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    frame.old.label:SetPoint("LEFT", frame.old, "RIGHT", 4, 0)
+    frame.old:SetScript("OnClick", function(self)
+        local db = DB()
+        if db then db.questShowOld = self:GetChecked() and true or false end
+        offset = 0
+        RefreshWindow()
+    end)
+    frame.note:SetPoint("TOPLEFT", 24, bottom - 54)
     frame.note:SetWidth(590)
     frame.note:SetJustifyH("LEFT")
 
@@ -611,17 +685,17 @@ RefreshWindow = function()
         local entry = list[offset + i]
         if entry then
             row.level:SetText(entry.l and (ns.C.warn .. "[" .. entry.l .. "]|r") or "")
-            row.name:SetText(entry.n)
+            row.name:SetText(entry.old and (ns.C.dim .. T("qd_old_name") .. "|r") or entry.n)
             row.id:SetText(entry.i and ("#" .. entry.i) or T("qd_no_id"))
             row.zone:SetText(entry.z or "")
-            row.when:SetText(ns.FormatWhen(entry.t))
+            row.when:SetText(entry.t and ns.FormatWhen(entry.t) or "")
             row.level:Show(); row.name:Show(); row.id:Show(); row.zone:Show(); row.when:Show()
         else
             row.level:Hide(); row.name:Hide(); row.id:Hide(); row.zone:Hide(); row.when:Hide()
         end
     end
     if #list == 0 then
-        local key = (info and #info.list > 0) and "qd_no_match" or (Recording() and "qd_empty_on" or "qd_empty_off")
+        local key = (info and (#info.list > 0 or (ShowOld() and info.a))) and "qd_no_match" or (Recording() and "qd_empty_on" or "qd_empty_off")
         window.empty:SetText(T(key)); window.empty:Show()
     else
         window.empty:Hide()
@@ -630,6 +704,8 @@ RefreshWindow = function()
     window.record:SetChecked(Recording())
     window.record.label:SetText(T("qd_record"))
     window.note:SetText(T("qd_note"))
+    window.old:SetChecked(ShowOld())
+    window.old.label:SetText(T("qd_old"))
 end
 
 function Completed.ToggleWindow()

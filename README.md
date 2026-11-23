@@ -337,6 +337,11 @@ quest up in guides and websites. At the top, pick the character (only yours, on 
 
 - **Recording starts off.** Tick **"Record turned-in quests"** in the window (or `/farol completed record on`) and from
   then on each quest you turn in is saved with name, level, zone and date (up to 2,000 per character, the most recent).
+- **Quests from before recording, by ID only:** tick **"Show quests from before recording (ID only)"** in the window
+  (off by default) to see, after the recorded ones, the quests the game reports as completed: `#3210 (before
+  recording)`, highest first, searchable by ID. Farol saves those IDs (up to 15,000 per character) each time you log in
+  with recording on; other characters show up after they log in once with it on. The list includes internal markers of
+  the game (IDs that are not real quests).
 - **Total in game:** how many quests the game says the character has completed, **including those from before
   recording**. Their names are not shown: the game only reports them if the add-on asks the server, and Farol does not
   make that request. The total includes some internal markers of the game, so it may be a little higher than the real

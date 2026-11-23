@@ -50,7 +50,7 @@ return {
     { "tampered saved data with wrong types never breaks any window", function(T, Mock)
         local KEYS = { "x", "y", "point", "lang", "scale", "bgAlpha", "fontSize", "iconSize", "barWidth", "items",
                        "alarms", "loot", "warnings", "order", "snoozeMinutes", "shown", "locked", "icons", "vertical",
-                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind", "questRecord", "completed" }
+                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind", "questRecord", "questShowOld", "completed" }
         for i = 1, 60 do
             local db = {}
             for _, key in ipairs(KEYS) do if random(3) > 1 then db[key] = pick(BAD) end end
@@ -65,7 +65,8 @@ return {
             if random(3) == 1 then -- personagens: lugar da Pedra de Regresso adulterado
                 db.chars = { Azralon = { Mira = { gold = 100, level = 20, t = 1700000000, bind = pick(BAD) }, [pick({ "x", 1 })] = pick(BAD) } }
                 db.completed = random(3) == 1 and pick(BAD) or { Azralon = { Garrosh = { t = pick(BAD), tt = pick(BAD),
-                    list = { { i = pick(BAD), n = pick(BAD), l = pick(BAD), z = pick(BAD), t = pick(BAD) }, pick(BAD) } },
+                    list = { { i = pick(BAD), n = pick(BAD), l = pick(BAD), z = pick(BAD), t = pick(BAD) }, pick(BAD) },
+                    a = random(2) == 1 and pick(BAD) or { pick(BAD), 5, pick(BAD) } },
                     [pick({ "x", 1 })] = pick(BAD) }, [pick({ "y", 2 })] = pick(BAD) }
             end
             if random(2) == 1 then -- perfis da 3.x: estrutura e cada campo da barra adulterados

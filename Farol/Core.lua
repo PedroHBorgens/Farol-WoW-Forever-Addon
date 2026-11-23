@@ -2445,7 +2445,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -4187,6 +4187,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         db.order = ns.Order.Sanitize(type(saved) == "table" and saved.order or nil)
         db.chars = SanitizeChars(type(saved) == "table" and saved.chars or nil)
         db.completed = ns.Completed.Sanitize(type(saved) == "table" and saved.completed or nil) -- missões concluídas
+        db.questNames = ns.Completed.SanitizeNames(type(saved) == "table" and saved.questNames or nil) -- nomes aprendidos
         local extra = {} -- barras 2 e 3, validadas do mesmo jeito
         for n = 2, Profiles.MAX_BARS do extra[n] = Profiles.SanitizeBar(FarolDB, n) end
         db.minimap = ns.MinimapButton.Sanitize(type(saved) == "table" and saved.minimap or nil) -- botão do minimapa

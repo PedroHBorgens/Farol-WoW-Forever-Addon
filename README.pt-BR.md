@@ -350,6 +350,10 @@ também para as missões de antes do registro, que só têm o ID. O Farol não a
   registro)`, das maiores para as menores, e buscáveis pelo ID. O Farol guarda esses IDs (até 15.000 por personagem) cada
   vez que você entra com o registro ligado; outros personagens aparecem depois que entrarem uma vez com ele ligado. A
   lista inclui marcadores internos do jogo (IDs que não são missões de verdade).
+- **Nomes aprendidos com o jogo:** com o registro ligado, o Farol guarda o nome de cada missão que você **vê** — ao ler
+  no NPC, ao aceitar, enquanto está no diário e ao entregar — num dicionário da conta (até 5.000 nomes, para todos os
+  seus personagens). As missões de antes do registro mostram o nome quando ele já é conhecido; as outras aparecem como
+  "(nome ainda não visto)". A janela mostra "Nomes conhecidos: X de Y". Tudo é leitura local: nenhum pedido ao servidor.
 - **Total no jogo:** o número de missões que o jogo diz que o personagem já concluiu, **incluindo as de antes do
   registro**. Os nomes dessas missões antigas não aparecem: o jogo só os informa se o addon pedir ao servidor, e o Farol
   não faz esse pedido. O total inclui alguns marcadores internos do jogo, então pode ser um pouco maior que o real. Se o

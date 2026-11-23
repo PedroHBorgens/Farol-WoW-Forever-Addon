@@ -2,6 +2,15 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.17.0 — Quest names learned from the game
+- Completed quests: with recording on, Farol learns the **name of every quest you see** — at the NPC (`QUEST_DETAIL`),
+  when you accept it (`QUEST_ACCEPTED`), while it is in your log (`QUEST_LOG_UPDATE`, read at most every 5 s) and when
+  you turn it in — into an account-wide dictionary (`FarolDB.questNames`, up to 5,000 names, the most recent, validated
+  on load; a huge tampered file loads in under a second).
+- Quests from before recording show their name when it is known ("(name not seen yet)" otherwise); search by name finds
+  them; new counter "Known names: X of Y"; turn-ins without the reward window take the name from the dictionary.
+- Local reads only: no server request, nothing sent; nothing is learned or saved while recording is off.
+
 ## 3.16.0 — Wowhead link for completed quests
 - Completed quests window: click a quest (recorded or from before recording) to get its **Wowhead link** in the WoW
   Forever section (`wowhead.com/forever/pt/quest=ID/` in Portuguese, `wowhead.com/forever/quest=ID` in English),

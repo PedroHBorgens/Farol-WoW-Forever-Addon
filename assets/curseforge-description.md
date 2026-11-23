@@ -19,7 +19,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · **Hearthstone: where
 - **Right-click** the bar (or `/farol menu`): a **tabbed menu** — Bar (items in groups), Warnings, Tools, General — to tick the items you want, and **choose their order** with [▲]/[▼] arrows. **Presets** (Basic, Leveling, Gold & farm, Dungeons) set up the bar in one click (with Undo); a **gear** next to an item opens its settings; a strip explains the item under the mouse.
 - **Up to 3 bars**, each with its own items, position, appearance and order (menu → Bar 2 / Bar 3 → Show).
 - **Profiles:** the same bars on every character, or **this character only** — and **Copy from...** another character.
-- **Completed quests of each character:** a list of the quests each of your characters turned in, with their quest IDs and a search by name or ID (recording starts off) and the total the game reports; stays on your computer.
+- **Completed quests of each character:** a list of the quests each of your characters turned in, with their quest IDs, a search by name or ID and a click-to-copy Wowhead link (recording starts off) and the total the game reports; stays on your computer.
 - **Daily & weekly tasks:** your own checklist (`/farol task`) that resets on its own at the daily/weekly reset (removed one by mistake? Undo).
 - **Minimap button:** click for the menu, right-click to hide/show every bar at once (no other addon needed).
 - **Hover** an item for its own short tooltip (gold, durability, resets…); hold **Shift** to see everything: home/world latency, subzone, every damaged item, exact XP, local *and* server time, and more.
@@ -77,7 +77,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · **Pedra de 
 - **Clique direito** na barra (ou `/farol menu`): um **menu em abas** — Barra (itens em grupos), Avisos, Ferramentas, Geral — para marcar os itens que quiser e **escolher a ordem** com as setas [▲]/[▼]. **Pacotes prontos** (Básico, Upando, Ouro e farm, Masmorras) montam a barra com um clique (com Desfazer); a **engrenagem** ao lado de um item abre a configuração dele; uma faixa explica o item sob o mouse.
 - **Até 3 barras**, cada uma com itens, posição, aparência e ordem próprios (menu → Barra 2 / Barra 3 → Mostrar).
 - **Perfis:** as mesmas barras em todos os personagens, ou **só deste personagem** — e **Copiar de...** outro personagem.
-- **Missões concluídas de cada personagem:** lista das missões que cada personagem seu entregou, com o ID de cada uma e busca pelo nome ou ID (o registro vem desligado) e o total que o jogo informa; fica só no seu computador.
+- **Missões concluídas de cada personagem:** lista das missões que cada personagem seu entregou, com o ID de cada uma, busca pelo nome ou ID e o link do Wowhead para copiar com um clique (o registro vem desligado) e o total que o jogo informa; fica só no seu computador.
 - **Tarefas diárias e semanais:** sua lista (`/farol tarefa`) que zera sozinha no reset diário/semanal (apagou sem querer? Desfazer).
 - **Botão no minimapa:** clique para o menu, clique direito para esconder/mostrar todas as barras (não precisa de outro addon).
 - **Passe o mouse** num item para ver um tooltip curto só dele (ouro, durabilidade, resets…); segure **Shift** para ver tudo: latência local/mundo, subzona, cada peça danificada, XP exato, hora local *e* do servidor, e mais.

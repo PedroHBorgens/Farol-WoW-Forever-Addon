@@ -338,7 +338,9 @@ compartilha missões, e não abre categorias fechadas do diário. `/farol aviso 
 A janela **Missões concluídas** (Menu > Ferramentas, ou `/farol concluidas`) mostra as missões que cada um dos **seus**
 personagens entregou: `[32] Entrega na Baía do Farol — #4127 — Vale Norte — Hoje 21:40`, da mais nova para a mais
 antiga, com **busca pelo nome ou pelo ID** e rolagem com a roda do mouse. O **ID** (`#4127`) é o número único que o jogo
-dá a cada missão, útil para procurar a missão em guias e sites. No alto, escolha o personagem (só os seus, do mesmo reino).
+dá a cada missão. **Clique numa missão** para ver o link dela no Wowhead, na seção do WoW Forever
+(`https://www.wowhead.com/forever/pt/quest=ID/`), já selecionado para copiar com Ctrl+C e colar no navegador. Vale
+também para as missões de antes do registro, que só têm o ID. O Farol não acessa a internet: só monta o endereço. No alto, escolha o personagem (só os seus, do mesmo reino).
 
 - **O registro vem desligado.** Marque **"Registrar missões entregues"** na janela (ou `/farol concluidas registrar on`)
   e, a partir daí, cada missão entregue é guardada com nome, nível, zona e data (até 2.000 por personagem, as mais

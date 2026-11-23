@@ -214,4 +214,28 @@ return {
         T.eq(#g, 15000); T.eq(g[15000], 16100); T.eq(g[1], 1101)
         T.eq(H.env.FarolDB.completed.Azralon.Mira, nil); T.eq(H.env.FarolDB.completed.Azralon.Tor, nil)
     end },
+
+    { "clicking a quest shows its Wowhead link (WoW Forever section) to copy; read-only; English URL", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H.completedIDs = { 791, 5 }
+        H:login({ questRecord = true, questShowOld = true, completed = { Azralon = { Garrosh = { list = {
+            { n = "Sem ID", t = 1700000000 }, { i = 1234, n = "Lobos", t = 1700000100 } } } } } })
+        H:slash("concluidas")
+        local W, link = H.env.FarolCompleted, H.env.FarolCompletedLink
+        T.ok(not link:IsShown(), "no link until a click"); T.ok(W.note:IsShown())
+        T.eq(H.env.FarolCompletedRow1.questID, 1234); T.ok(H.env.FarolCompletedRow1:IsShown())
+        T.ok(not H.env.FarolCompletedRow2:IsShown(), "no ID: the row is not clickable")
+        H:click(H.env.FarolCompletedRow1)
+        T.ok(link:IsShown()); T.eq(link:GetText(), "https://www.wowhead.com/forever/pt/quest=1234/")
+        T.eq(H:text(W.linkLabel), "Wowhead (Ctrl+C):"); T.ok(not W.note:IsShown(), "the link takes the note's place")
+        link:SetText("https://outro.site/"); link._scripts.OnTextChanged(link, true)
+        T.eq(link:GetText(), "https://www.wowhead.com/forever/pt/quest=1234/", "typing does not change the link")
+        H:click(H.env.FarolCompletedRow3) -- missão de antes do registro (só o ID)
+        T.eq(link:GetText(), "https://www.wowhead.com/forever/pt/quest=791/")
+        link._scripts.OnEscapePressed(link); T.ok(not link:IsShown()); T.ok(W.note:IsShown())
+        H.env.FarolCompletedRow1._scripts.OnEnter(H.env.FarolCompletedRow1)
+        T.has(table.concat(H.env.GameTooltip.lines, " "), "Clique para copiar o link do Wowhead desta missão")
+        for _, bad in ipairs({ 0 / 0, -1, 1.5, "x", 1e12 }) do T.eq(H.ns.Completed.WowheadURL(bad), nil) end
+        local E = Mock.new({ locale = "enUS" }):login()
+        T.eq(E.ns.Completed.WowheadURL(791), "https://www.wowhead.com/forever/quest=791")
+    end },
 }

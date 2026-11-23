@@ -335,7 +335,8 @@ qwin = ('<div class="win" style="width:640px"><div class="x">×</div><div class=
     + qrows +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span class="ck" style="margin:0"><span class="box">✓</span>Record turned-in quests (on this computer only; nothing is sent)</span><span class="dim" style="font-size:12px">1–8 of 8</span></div>'
     '<div class="ck" style="margin-top:4px"><span class="box"></span>Show quests from before recording (ID only)</div>'
-    '<div class="dim" style="font-size:12px;margin-top:4px">Quests from before recording only have their ID: the game does not report their names.</div></div>')
+    '<div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px"><span class="k" style="color:#ffd100;width:auto">Wowhead (Ctrl+C):</span>'
+    '<span style="background:#000;border:1px solid #c9a24a;padding:2px 8px;color:#fff">https://www.wowhead.com/forever/quest=4127</span></div></div>')
 QD_BAR = hbar([("📜",'Quests <span class="g">12/20</span>'),("✅",'Completed 412')], "font-size:14px")
 qtip = ('<div class="tip" style="width:330px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol · Completed quests</div>'
     '<div class="row"><span class="k">Aldric (this one)</span><span>412 · today +3</span></div>'
@@ -344,5 +345,5 @@ qtip = ('<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
     '<div class="dim" style="margin-top:6px">Latest: Delivery to Lighthouse Bay · Wolves of the Gray Hill</div></div>')
 QD_CSS = """.qrow{display:grid;grid-template-columns:40px 230px 56px 120px 106px;gap:6px;font-size:13px;padding:3px 0;border-bottom:1px solid #ffffff10}"""
 page("farol-12-completed-quests", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{QD_BAR}{qtip}</div>{qwin}',
-     "Completed quests of each character, with search", "Missões concluídas de cada personagem, com busca", QD_CSS)
+     "Completed quests of each character, with search and Wowhead links", "Missões concluídas de cada personagem, com busca e link do Wowhead", QD_CSS)
 print("pages ok")

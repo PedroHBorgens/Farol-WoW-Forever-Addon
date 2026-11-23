@@ -114,6 +114,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   `questRecord` desligado (regra 8); o total ao vivo aparece na barra mesmo assim (só leitura). 3.15: com o registro
   ligado, `Completed.ReadIDs` guarda os IDs concluídos em `completed[...].a` (crescente, sem repetir, máx. 15000, os
   maiores) a cada login; a opção `questShowOld` (desligada) mostra na janela os que não estão no registro, só pelo ID.
+  3.16: clicar numa linha mostra o link do Wowhead (`Completed.WowheadURL`: `wowhead.com/forever/pt/quest=ID/` ou
+  `/forever/quest=ID` em inglês, sem barra no fim; só de ID inteiro válido) numa caixa só de leitura para Ctrl+C; o addon não acessa a internet.
 - **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
   lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 

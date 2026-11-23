@@ -333,7 +333,10 @@ abandons or shares quests, and never opens collapsed categories. `/farol warn st
 The **Completed quests** window (Menu > Tools, or `/farol completed`) shows the quests each of **your** characters has
 turned in: `[32] Delivery to Lighthouse Bay — #4127 — North Vale — Today 21:40`, newest first, with a **search by name
 or ID** and mouse wheel scrolling. The **ID** (`#4127`) is the unique number the game gives each quest, handy to look the
-quest up in guides and websites. At the top, pick the character (only yours, on the same realm).
+quest up. **Click a quest** to see its Wowhead link in the WoW Forever section
+(`https://www.wowhead.com/forever/quest=ID`), already selected so you can copy it with Ctrl+C and paste it in your
+browser. It also works for quests from before recording, which only have their ID. Farol does not access the internet:
+it only builds the address. At the top, pick the character (only yours, on the same realm).
 
 - **Recording starts off.** Tick **"Record turned-in quests"** in the window (or `/farol completed record on`) and from
   then on each quest you turn in is saved with name, level, zone and date (up to 2,000 per character, the most recent).

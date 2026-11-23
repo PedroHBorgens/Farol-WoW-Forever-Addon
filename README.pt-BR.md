@@ -539,7 +539,8 @@ mostra `--` em vez de dar erro.
 O WoW Forever **não informa o reino** e os personagens têm **nome e sobrenome**. O Farol identifica cada personagem
 pelo nome + sobrenome (ex.: "Oxis Raknash") e agrupa todos num reino de reserva, mostrado como "este reino". Isso vale
 para o ouro e o descanso dos seus personagens, as instâncias salvas, os perfis por personagem e as missões concluídas.
-`/farol aviso status` mostra como o personagem foi identificado.
+`/farol aviso status` mostra como o personagem foi identificado. No momento de sair do jogo, o WoW Forever informa
+0 de ouro; por isso o Farol grava o ouro da última leitura feita durante o jogo.
 
 ## Segurança
 

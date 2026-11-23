@@ -1380,7 +1380,7 @@ local function SampleRep()
 end
 
 local function ResetSession()
-    session.startMoney = GetMoney()
+    session.startMoney = Profiles.Money() -- também guarda a primeira leitura válida (Profiles.lastMoney)
     session.startTime = GetTime()
     session.startClock = time() -- hora do relógio: separa os saques e avisos desta sessão
     local okLevel, level = pcall(UnitLevel, "player")
@@ -1609,9 +1609,9 @@ local function RecordCharacter(force)
     if not db or type(db.chars) ~= "table" then return end
     local name, realm = CurrentCharacter()
     if not name then return end
-    local okMoney, gold = pcall(GetMoney)
+    local gold = Profiles.Money() -- ao sair do jogo: a última leitura feita durante o jogo
     local okLevel, level = pcall(UnitLevel, "player")
-    if not okMoney or type(gold) ~= "number" or IsSecret(gold) or gold ~= gold or gold < 0 or gold > 1e12 then return end
+    if not gold then return end
     if not okLevel or type(level) ~= "number" or IsSecret(level) or level < 1 or level > 200 then return end
     local chars = db.chars[realm]
     if not chars then
@@ -2022,9 +2022,24 @@ end
 ns.GetJunk = GetJunk -- usado pelo aviso de bolsas
 ns.ReadBagSlot, ns.LastBag = ReadSlot, LastBag -- busca de item pelo nome nas metas de farm (Farm.lua; só lê)
 
+-- Ouro atual. O WoW Forever devolve 0 no momento de sair do jogo (PLAYER_LOGOUT, também no /reload): nessa hora
+-- vale a última leitura feita durante o jogo (Profiles.lastMoney), para não gravar "0" no ouro do personagem nem no
+-- resumo da sessão.
+function Profiles.Money()
+    if Profiles.loggingOut and Profiles.lastMoney then return Profiles.lastMoney end
+    local ok, money = pcall(GetMoney)
+    if not ok or type(money) ~= "number" or IsSecret(money) or money ~= money or money < 0 or money > 1e12 then return nil end
+    if not Profiles.loggingOut then Profiles.lastMoney = money end
+    return money
+end
+
+ns.Money = function() return Profiles.Money() end -- leitura segura do ouro (Runs/Goals)
+
 local function GetSessionMoney()
     if not session.startMoney then return nil end
-    return GetMoney() - session.startMoney
+    local money = Profiles.Money()
+    if not money then return nil end
+    return money - session.startMoney
 end
 
 local function GetXPInfo()
@@ -4158,6 +4173,7 @@ end
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 frame:RegisterEvent("PLAYER_LOGOUT") -- guardar o resumo da sessão (também acontece no /reload)
+pcall(frame.RegisterEvent, frame, "PLAYER_MONEY") -- última leitura do ouro (o WoW Forever devolve 0 ao sair)
 frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 frame:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
@@ -4231,7 +4247,12 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
     end
     if not db then return end
 
+    if event == "PLAYER_MONEY" then -- guarda a última leitura do ouro (mesmo com as barras escondidas)
+        Profiles.Money()
+        return
+    end
     if event == "PLAYER_LOGOUT" then
+        Profiles.loggingOut = true -- daqui em diante, o ouro é a última leitura feita durante o jogo
         SaveSummary()
         pcall(RecordCharacter, true) -- grava o descanso e se está em estalagem/cidade ao sair
         return

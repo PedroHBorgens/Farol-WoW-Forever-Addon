@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.17.1 — Gold of your other characters on WoW Forever
+- Fixed: WoW Forever reports 0 gold at the moment you log out, so the character you left was saved with 0 gold
+  (`/farol gold` and the gold tooltip) and the next session summary could show the whole gold as lost. Farol now
+  saves the last gold reading made while playing (`Profiles.Money`, also sampled on `PLAYER_MONEY`, so it works with
+  the bars hidden). The dungeon/raid log and the gold goal use the same safe reading (logging out inside a dungeon no
+  longer records the whole gold as lost).
+- New regression tests with the values seen in game.
+
 ## 3.17.0 — Quest names learned from the game
 - Completed quests: with recording on, Farol learns the **name of every quest you see** — at the NPC (`QUEST_DETAIL`),
   when you accept it (`QUEST_ACCEPTED`), while it is in your log (`QUEST_LOG_UPDATE`, read at most every 5 s) and when

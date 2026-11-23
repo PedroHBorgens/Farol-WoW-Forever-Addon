@@ -530,7 +530,8 @@ shows `--` instead of raising an error.
 WoW Forever **does not report the realm** and characters have a **first name and a surname**. Farol identifies each
 character by name + surname (e.g. "Oxis Raknash") and groups them all under a fallback realm, shown as "this realm".
 This applies to your characters' gold and rested XP, saved instances, per-character profiles and completed quests.
-`/farol warn status` shows how the character was identified.
+`/farol warn status` shows how the character was identified. When you log out, WoW Forever reports 0 gold, so Farol
+saves the gold from the last reading made while you were playing.
 ## Security
 
 Information security is this project's first rule:

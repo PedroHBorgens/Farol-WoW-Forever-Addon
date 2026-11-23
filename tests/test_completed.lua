@@ -178,4 +178,40 @@ return {
         T.has(E:text(E.env.FarolCompletedRecord.label), "Record turned-in quests")
         E:slash("help"); T.has(all(E), "/farol completed")
     end },
+
+    { "earlier quests by ID only: off by default, listed after the recorded ones, searchable, saved only when recording", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H.completedIDs = { 5, 3, 1001, 9, 3, 0 / 0, -1 }
+        H.quests = { { title = "Lobos", level = 31, done = true } }
+        H:login()
+        H:event("PLAYER_ENTERING_WORLD"); T.eq(own(H), nil, "recording off: no IDs are saved")
+        H:slash("concluidas registrar on")
+        turnIn(H, 1001, "Lobos")
+        H:slash("concluidas")
+        local W = H.env.FarolCompleted
+        T.eq(table.concat(own(H).a, ","), "3,5,9,1001", "valid IDs, sorted, no repeats")
+        T.eq(H.env.FarolCompletedOld._checked, false, "option off by default"); T.eq(H.env.FarolDB.questShowOld, false)
+        T.eq(H:text(W.scrollInfo), "1–1 de 1", "only the recorded quest")
+        T.eq(H:text(H.env.FarolCompletedOld.label), "Mostrar missões de antes do registro (só o ID)")
+        H:check(H.env.FarolCompletedOld, true); T.eq(H.env.FarolDB.questShowOld, true)
+        T.eq(H:text(W.scrollInfo), "1–4 de 4")
+        T.eq(H:text(W.rows[1].name), "Lobos"); T.eq(H:text(W.rows[1].id), "#1001")
+        T.eq(H:text(W.rows[2].id), "#9"); T.has(H:text(W.rows[2].name), "(antes do registro)"); T.eq(H:text(W.rows[2].when), "")
+        T.eq(H:text(W.rows[4].id), "#3", "highest IDs first; the recorded one is not repeated")
+        H.env.FarolCompletedSearch:SetText("5"); H.env.FarolCompletedSearch._scripts.OnTextChanged(H.env.FarolCompletedSearch)
+        T.eq(H:text(W.scrollInfo), "1–1 de 1"); T.eq(H:text(W.rows[1].id), "#5")
+        H.env.FarolCompletedSearch:SetText("antes"); H.env.FarolCompletedSearch._scripts.OnTextChanged(H.env.FarolCompletedSearch)
+        T.eq(H:text(W.empty), "Nenhuma missão com esse nome ou ID.", "earlier quests have no name to search")
+        -- Cliente antigo: IDs pelo GetQuestsCompleted (mapa).
+        local O = Mock.new({ mode = "wotlk" }); O.completedMap = { [12] = true, [7] = true }
+        O:login({ questRecord = true }); T.eq(table.concat(own(O).a, ","), "7,12")
+    end },
+
+    { "saved earlier IDs are validated: bad values and repeats dropped, at most 15000 (the highest)", function(T, Mock)
+        local a = { 1, 1, "x", 0 / 0, -3, 2.5, 99999999999 }
+        for i = 1, 16000 do a[#a + 1] = 100 + i end
+        local H = Mock.new():login({ completed = { Azralon = { Garrosh = { a = a }, Mira = { a = "x" }, Tor = { a = { "y" } } } } })
+        local g = H.env.FarolDB.completed.Azralon.Garrosh.a
+        T.eq(#g, 15000); T.eq(g[15000], 16100); T.eq(g[1], 1101)
+        T.eq(H.env.FarolDB.completed.Azralon.Mira, nil); T.eq(H.env.FarolDB.completed.Azralon.Tor, nil)
+    end },
 }

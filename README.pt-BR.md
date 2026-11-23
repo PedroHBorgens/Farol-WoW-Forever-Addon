@@ -343,6 +343,11 @@ dá a cada missão, útil para procurar a missão em guias e sites. No alto, esc
 - **O registro vem desligado.** Marque **"Registrar missões entregues"** na janela (ou `/farol concluidas registrar on`)
   e, a partir daí, cada missão entregue é guardada com nome, nível, zona e data (até 2.000 por personagem, as mais
   recentes).
+- **Missões de antes do registro, só pelo ID:** marque **"Mostrar missões de antes do registro (só o ID)"** na janela
+  (vem desligado) para ver, depois das registradas, as missões que o jogo informa como concluídas: `#3210 (antes do
+  registro)`, das maiores para as menores, e buscáveis pelo ID. O Farol guarda esses IDs (até 15.000 por personagem) cada
+  vez que você entra com o registro ligado; outros personagens aparecem depois que entrarem uma vez com ele ligado. A
+  lista inclui marcadores internos do jogo (IDs que não são missões de verdade).
 - **Total no jogo:** o número de missões que o jogo diz que o personagem já concluiu, **incluindo as de antes do
   registro**. Os nomes dessas missões antigas não aparecem: o jogo só os informa se o addon pedir ao servidor, e o Farol
   não faz esse pedido. O total inclui alguns marcadores internos do jogo, então pode ser um pouco maior que o real. Se o

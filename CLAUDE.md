@@ -107,7 +107,9 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   `C_QuestLog`) pela mensagem do sistema `ERR_QUEST_COMPLETE_S`. Total: `C_QuestLog.GetAllCompletedQuestIDs` (moderno) ou
   `GetQuestsCompleted` (antigo; 0 = não informado, porque no 3.3.5a precisa de `QueryQuestsCompleted`, um pedido ao
   servidor que **não** fazemos). Nomes de missões antigas exigiriam pedir ao servidor: não pedimos. Nada é gravado com
-  `questRecord` desligado (regra 8); o total ao vivo aparece na barra mesmo assim (só leitura).
+  `questRecord` desligado (regra 8); o total ao vivo aparece na barra mesmo assim (só leitura). 3.15: com o registro
+  ligado, `Completed.ReadIDs` guarda os IDs concluídos em `completed[...].a` (crescente, sem repetir, máx. 15000, os
+  maiores) a cada login; a opção `questShowOld` (desligada) mostra na janela os que não estão no registro, só pelo ID.
 - **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
   lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 
@@ -185,7 +187,8 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   (bind = onde a Pedra de Regresso estava vinculada, texto limpo até 40 letras)
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle
   e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores), `questRecord` (registro de
-  missões, desligado), `completed[reino][nome] = { t = total do jogo, tt = quando, list = { {i, n ≤ 60, l, z ≤ 40, t} } }`
+  missões, desligado), `questShowOld` (mostrar as de antes do registro, desligado), `completed[reino][nome] = { t = total
+  do jogo, tt = quando, a = { IDs concluídos, máx. 15000 }, list = { {i, n ≤ 60, l, z ≤ 40, t} } }`
   (máx. 2000 por personagem, 20 reinos × 60 nomes; só os próprios personagens; `ns.KeepLast`/`ns.KeepRecent`) e
   `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `runs` = `{ list (máx. 10), cur }` corridas
   em masmorras/raides `{ n, k = "party"/"raid", t, s ≥ 60, x, g, l, r, e, d, u (só cur) }` — o `/reload` continua a

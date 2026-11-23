@@ -79,6 +79,7 @@ local DEFAULTS = {
     tooltipFull = false, -- false = cada item mostra só o seu tooltip (Shift mostra tudo); true = sempre completo
     runSummary = true,  -- resumo no chat ao sair de uma masmorra ou raide (Runs.lua)
     questRecord = false, -- registrar missões entregues (Completed.lua): regra 8, só o jogador liga
+    questShowOld = false, -- janela de missões concluídas: mostrar também as de antes do registro (só o ID)
     colorblind = false, -- cores para daltonismo: azul / amarelo / laranja no lugar de verde / amarelo / vermelho
     newsSeen = 0,       -- quantas novidades (NEWS) o jogador já viu; boas-vindas/novidades aparecem uma vez
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
@@ -2425,7 +2426,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false

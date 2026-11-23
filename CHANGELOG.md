@@ -2,6 +2,13 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.15.0 — Earlier completed quests by ID
+- Completed quests window: new option **"Show quests from before recording (ID only)"** (off by default). It lists, after
+  the recorded quests, the IDs the game reports as completed (`#3210 (before recording)`), highest first, searchable by ID.
+- With recording on, Farol saves each character's completed quest IDs at login (up to 15,000, the highest, validated on
+  load); names are still not requested from the server. The list includes some internal markers of the game.
+- Tests: earlier IDs (off by default, order, search, old client, validation) and fuzzing.
+
 ## 3.14.0 — Completed quests
 - New **Completed quests** window (Menu > Tools, `/farol completed`): the quests each of your characters turned in, with
   name, level, the game's unique **quest ID**, zone and date, newest first, a search by name or ID and a character

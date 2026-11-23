@@ -2,6 +2,13 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.16.0 — Wowhead link for completed quests
+- Completed quests window: click a quest (recorded or from before recording) to get its **Wowhead link** in the WoW
+  Forever section (`wowhead.com/forever/pt/quest=ID/` in Portuguese, `wowhead.com/forever/quest=ID` in English),
+  already selected to copy with Ctrl+C. Read-only box; the address is built only from a valid quest ID.
+- Farol still does not access the internet: it only shows the address for you to copy.
+- Tests for the link (clicks, read-only box, invalid IDs, English) and the adversarial script.
+
 ## 3.15.1 — Characters on WoW Forever (no realm, name + surname)
 - Fixed: WoW Forever returns an empty realm, so Farol could not identify the character and the completed quests list,
   the gold/rested XP of your characters, saved instances of alts and per-character profiles stayed empty. A fixed

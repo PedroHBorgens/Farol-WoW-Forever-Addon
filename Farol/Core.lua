@@ -2445,7 +2445,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false

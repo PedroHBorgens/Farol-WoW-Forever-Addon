@@ -49,6 +49,9 @@ local STRINGS = {
         qd_note       = "Missões de antes do registro só têm o ID: o jogo não informa os nomes delas.",
         qd_old        = "Mostrar missões de antes do registro (só o ID)",
         qd_old_name   = "(antes do registro)",
+        qd_link_label = "Wowhead (Ctrl+C):",
+        qd_link_tip   = "Clique para copiar o link do Wowhead desta missão",
+        qd_wowhead_url = "https://www.wowhead.com/forever/pt/quest=%d/",
         qd_empty_off  = "Nenhuma missão registrada. Marque \"Registrar missões entregues\" abaixo e entregue uma missão.",
         qd_empty_on   = "Nenhuma missão registrada ainda: entregue uma missão.",
         qd_no_match   = "Nenhuma missão com esse nome ou ID.",
@@ -67,6 +70,7 @@ local STRINGS = {
         tool_qdone_desc = "por personagem, com busca",
         news_qdone    = "missões concluídas de cada personagem: janela em Menu > Ferramentas (o registro e o item da barra vêm desligados)",
         news_qdone_old = "missões concluídas: opção para mostrar também as de antes do registro, só pelo ID (na janela; vem desligada)",
+        news_qdone_link = "missões concluídas: clique numa missão para copiar o link dela no Wowhead (seção WoW Forever)",
         qd_on_word    = "ligado",
         qd_off_word   = "desligado",
     },
@@ -86,6 +90,9 @@ local STRINGS = {
         qd_note       = "Quests from before recording only have their ID: the game does not report their names.",
         qd_old        = "Show quests from before recording (ID only)",
         qd_old_name   = "(before recording)",
+        qd_link_label = "Wowhead (Ctrl+C):",
+        qd_link_tip   = "Click to copy this quest's Wowhead link",
+        qd_wowhead_url = "https://www.wowhead.com/forever/quest=%d",
         qd_empty_off  = "No quests recorded. Tick \"Record turned-in quests\" below and turn in a quest.",
         qd_empty_on   = "No quests recorded yet: turn in a quest.",
         qd_no_match   = "No quest with that name or ID.",
@@ -104,6 +111,7 @@ local STRINGS = {
         tool_qdone_desc = "per character, with search",
         news_qdone    = "completed quests of each character: window in Menu > Tools (recording and the bar item start off)",
         news_qdone_old = "completed quests: option to also show the ones from before recording, by ID only (in the window; starts off)",
+        news_qdone_link = "completed quests: click a quest to copy its Wowhead link (WoW Forever section)",
         qd_on_word    = "on",
         qd_off_word   = "off",
     },
@@ -621,6 +629,20 @@ local function CreateWindow()
         for _, fs in ipairs({ row.level, row.name, row.id, row.zone, row.when }) do
             if fs.SetWordWrap then fs:SetWordWrap(false) end
         end
+        -- A linha inteira é clicável: mostra o link do Wowhead da missão para copiar (o addon não abre nada).
+        row.click = CreateFrame("Button", "FarolCompletedRow" .. i, frame)
+        row.click:SetPoint("TOPLEFT", 22, y + 3)
+        row.click:SetSize(596, ROW_H)
+        row.click:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+        row.click:SetScript("OnClick", function(self) if self.questID then Completed.ShowLink(self.questID) end end)
+        row.click:SetScript("OnEnter", function(self)
+            if not self.questID then return end
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine("#" .. self.questID)
+            GameTooltip:AddLine(T("qd_link_tip"), 1, 1, 1, true)
+            GameTooltip:Show()
+        end)
+        row.click:SetScript("OnLeave", function() GameTooltip:Hide() end)
         frame.rows[i] = row
     end
     frame.empty = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
@@ -657,6 +679,25 @@ local function CreateWindow()
     frame.note:SetPoint("TOPLEFT", 24, bottom - 54)
     frame.note:SetWidth(590)
     frame.note:SetJustifyH("LEFT")
+    -- Link do Wowhead para copiar (aparece no lugar da nota): só texto, o addon não acessa a internet.
+    frame.linkLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    frame.linkLabel:SetPoint("TOPLEFT", 24, bottom - 54)
+    frame.link = CreateFrame("EditBox", "FarolCompletedLink", frame, "InputBoxTemplate")
+    frame.link:SetSize(440, 20)
+    frame.link:SetPoint("TOPLEFT", 150, bottom - 50)
+    frame.link:SetAutoFocus(false)
+    frame.link:SetMaxLetters(120)
+    frame.link:SetScript("OnTextChanged", function(self, userInput)
+        -- Só leitura: se o jogador digitar, o link volta (assim o Ctrl+C sempre copia o endereço certo).
+        if userInput and self.farolURL and self:GetText() ~= self.farolURL then
+            self:SetText(self.farolURL); self:HighlightText()
+        end
+    end)
+    local function HideLink(self) self:ClearFocus(); Completed.HideLink() end
+    frame.link:SetScript("OnEscapePressed", HideLink)
+    frame.link:SetScript("OnEnterPressed", HideLink)
+    frame.link:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
+    frame.linkLabel:Hide(); frame.link:Hide()
 
     frame:SetScript("OnShow", function() Completed.Refresh(); RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolCompleted") -- ESC fecha
@@ -690,8 +731,11 @@ RefreshWindow = function()
             row.zone:SetText(entry.z or "")
             row.when:SetText(entry.t and ns.FormatWhen(entry.t) or "")
             row.level:Show(); row.name:Show(); row.id:Show(); row.zone:Show(); row.when:Show()
+            row.click.questID = entry.i
+            if entry.i then row.click:Show() else row.click:Hide() end
         else
             row.level:Hide(); row.name:Hide(); row.id:Hide(); row.zone:Hide(); row.when:Hide()
+            row.click.questID = nil; row.click:Hide()
         end
     end
     if #list == 0 then
@@ -704,6 +748,8 @@ RefreshWindow = function()
     window.record:SetChecked(Recording())
     window.record.label:SetText(T("qd_record"))
     window.note:SetText(T("qd_note"))
+    window.linkLabel:SetText(T("qd_link_label"))
+    if window.link:IsShown() then window.note:Hide() else window.note:Show() end
     window.old:SetChecked(ShowOld())
     window.old.label:SetText(T("qd_old"))
 end
@@ -714,6 +760,27 @@ function Completed.ToggleWindow()
 end
 
 function Completed.RefreshWindow() if RefreshWindow then RefreshWindow() end end
+
+-- Endereço do Wowhead (seção WoW Forever, no idioma do Farol) só a partir de um ID inteiro válido.
+function Completed.WowheadURL(questID)
+    local id = Int(questID, 1, MAX_ID)
+    return id and string.format(T("qd_wowhead_url"), id) or nil
+end
+
+function Completed.ShowLink(questID)
+    local url = Completed.WowheadURL(questID)
+    if not url or not window then return end
+    window.link.farolURL = url
+    window.link:SetText(url)
+    window.note:Hide(); window.linkLabel:Show(); window.link:Show()
+    window.link:SetFocus(); window.link:HighlightText()
+end
+
+function Completed.HideLink()
+    if not window then return end
+    window.link.farolURL = nil
+    window.link:Hide(); window.linkLabel:Hide(); window.note:Show()
+end
 
 ---------------------------------------------------------------------------
 -- Comandos e diagnóstico

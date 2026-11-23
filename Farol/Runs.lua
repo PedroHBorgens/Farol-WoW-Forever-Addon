@@ -236,7 +236,9 @@ local function Sample(run)
         if baseXP and xp > baseXP then run.x = math.min(1e9, run.x + math.floor(xp - baseXP)) end
         baseXP = xp
     end
-    local money = Num((Read(GetMoney)))
+    -- Ouro pela leitura segura do Core: o WoW Forever devolve 0 ao sair do jogo (sair dentro da masmorra não pode
+    -- virar "perdeu todo o ouro").
+    local money = ns.Money and Num(ns.Money()) or Num((Read(GetMoney)))
     if money then
         if baseMoney then run.g = math.max(-1e11, math.min(1e11, run.g + math.floor(money - baseMoney))) end
         baseMoney = money

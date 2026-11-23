@@ -77,4 +77,31 @@ return {
         N:login(); N.msgs = {}; N:slash("ouro")
         T.has(N.strip(table.concat(N.msgs, "\n")), "o jogo ainda não informou o nome do personagem")
     end },
+
+    { "WoW Forever returns 0 gold at logout: the last in-game reading is saved (character gold and session summary)", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H.realm = ""
+        H.env.UnitName = function(unit) if unit == "player" then return "Oxis", "Raknash" end end
+        H.money = 20000 -- 2g ao entrar
+        H:login(); H:update(1)
+        H.money = 22800; H:event("PLAYER_MONEY") -- ganhou 28s jogando
+        H.env.GetTime = function() return H.now + 3600 end -- sessão longa o bastante para ter resumo
+        H.money = 0 -- o jogo devolve 0 ao sair
+        H:event("PLAYER_LOGOUT")
+        local entry = H.env.FarolDB.chars["-"]["Oxis Raknash"]
+        T.eq(entry.gold, 22800, "character gold is the last in-game reading, not 0"); T.eq(entry.level, H.env.UnitLevel("player"))
+        local last = H.env.FarolCharDB.lastSession
+        T.ok(last, "session summary saved")
+        T.eq(last.money, 2800, "session gold +28s, not -2g")
+        -- Com as barras escondidas, a leitura do PLAYER_MONEY ainda vale.
+        local B = Mock.new(); B.realm = ""; B.money = 5000
+        B:login({ shown = false }); B.money = 7000; B:event("PLAYER_MONEY"); B.money = 0; B:event("PLAYER_LOGOUT")
+        T.eq(B.env.FarolDB.chars["-"].Garrosh.gold, 7000)
+        -- Sair do jogo dentro de uma masmorra: o ouro da corrida não vira "perdeu tudo".
+        local D = Mock.new(); D.realm = ""; D.money = 10000
+        D.instanceType, D.instanceName = "party", "Cripta"
+        D:login(); D:update(1); D.money = 12500; D:event("PLAYER_MONEY"); D:update(1)
+        D.money = 0; D:event("PLAYER_LOGOUT")
+        local cur = D.env.FarolCharDB.runs.cur
+        T.ok(cur, "run in progress kept"); T.eq(cur.g, 2500, "run gold +25s, not -1g")
+    end },
 }

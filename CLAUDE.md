@@ -34,6 +34,9 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   ("Oxis", "Raknash"). `CurrentCharacter` usa nome + sobrenome ("Oxis Raknash") e o reino de reserva
   `Profiles.REALM_FALLBACK` ("-", mostrado como "este reino" por `Profiles.RealmLabel`). Nunca mostre o "-" cru: use
   `ns.RealmLabel`. `/farol aviso status` mostra como o personagem foi identificado.
+- **Ouro ao sair (3.17.1):** no `PLAYER_LOGOUT` o WoW Forever devolve `GetMoney() == 0`. Leia o ouro só por
+  `Profiles.Money()` (guarda `Profiles.lastMoney` durante o jogo e no `PLAYER_MONEY`; com `Profiles.loggingOut` devolve
+  a última leitura). Nunca chame `GetMoney` direto no que roda ao sair (ouro dos personagens, resumo da sessão).
 - **"Secret values"** (restrições do Midnight): em combate alguns valores ficam bloqueados. Toda leitura passa por
   `pcall` / `Safe()` e `ns.IsSecret()`; se bloqueado, a barra mostra `--` em vez de dar erro.
 - **Talentos no estilo clássico** (3 árvores, 1 ponto por nível a partir do 10, 51 no 60) e **magias com graus**.

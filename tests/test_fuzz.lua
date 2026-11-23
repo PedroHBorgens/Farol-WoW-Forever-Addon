@@ -6,7 +6,7 @@ local ALPHA = { "a", "0", "9", " ", ":", "%", "|", "c", "H", "T", "\n", "\0", "√
                 "%s", "%d", "%1$s", "|cff", "|H", "|T", "|A", "|r" }
 local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", "durab", "bolsas", "talentos",
                 "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "municao", "reagentes", "400", "5000", "15", "240", "2",
-                "graus", "som", "status", "concluidas", "completed", "registrar", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
+                "graus", "som", "status", "concluidas", "completed", "registrar", "diagnostico", "diag", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
                 "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "undo", "voltar", "pacote", "Garrosh", "tarefa", "task", "feita", "apagar", "semanal", "diaria", "meta", "goal", "nivel", "limpar", "item", "farm", "remover", "missoes", "prontas", "aviso", "quests", "19", "regresso", "hearth", "pedra", "|cffffffff|Hitem:4306::|h[Seda]|h|r", "[Seda]", "|Hitem:abc|h", "40", "1000000", "masmorra", "dungeon", "resumo", "minimapa", "minimap", "travar", "on", "off", "07:30", "25:99", "-1", "99999" }
 local BAD = { "x", 1e309, -1e309, 0 / 0, true, false, {}, { 1, 2 }, -5, 3.7, "" }
@@ -88,6 +88,7 @@ return {
                 runs = random(3) == 1 and pick(BAD) or { list = { { n = pick(BAD), k = pick({ "party", "raid", pick(BAD) }), t = pick(BAD), s = pick(BAD),
                     x = pick(BAD), g = pick(BAD), l = pick(BAD), r = pick(BAD), e = pick(BAD), d = pick(BAD) }, pick(BAD) },
                     cur = random(2) == 1 and pick(BAD) or { n = "Ok", k = "party", t = pick(BAD), u = pick(BAD), x = pick(BAD) } },
+                diag = random(3) == 1 and pick(BAD) or { lz = pick(BAD), t = pick(BAD) },
                 goals = random(3) == 1 and pick(BAD) or { gold = pick(BAD), level = pick(BAD), ls = pick(BAD), gw = pick(BAD), lw = pick(BAD) },
                 tasks = random(3) == 1 and pick(BAD) or { { n = pick(BAD), w = pick(BAD), d = pick(BAD) }, pick(BAD), { n = "Ok", d = pick(BAD) } },
                 farm = random(3) == 1 and pick(BAD) or { { id = pick(BAD), n = pick(BAD), c = pick(BAD), w = pick(BAD) }, pick(BAD),
@@ -104,7 +105,7 @@ return {
                 local H = Mock.new():login(db, char)
                 H:event("PLAYER_ENTERING_WORLD", true, false) -- mostra o resumo salvo (se ficou v√°lido)
                 H:update(1)
-                for _, cmd in ipairs({ "menu", "saque", "historico", "ordem", "alarme", "aviso", "aparencia", "resumo", "meta", "farm" }) do
+                for _, cmd in ipairs({ "menu", "saque", "historico", "ordem", "alarme", "aviso", "aparencia", "resumo", "meta", "farm", "diagnostico" }) do
                     H:slash(cmd)
                 end
             end)

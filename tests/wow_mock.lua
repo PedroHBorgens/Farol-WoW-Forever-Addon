@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "MinimapButton.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Diag.lua", "MinimapButton.lua" }
 
 local function noop() end
 
@@ -181,8 +181,12 @@ function Mock.new(opts)
     env.GetFramerate = function() return 60.2 end
     -- Personagem atual e reino (o ouro de outros personagens vem do FarolDB salvo).
     H.playerName, H.realm = "Garrosh", "Azralon"
-    env.UnitName = function(unit) if unit == "player" then return H.playerName end return nil end
+    -- Mock.REAL (passada "forever-real" do run.lua): como o WoW Forever responde de verdade — reino vazio ("") e
+    -- sobrenome no 2º valor de UnitName("player"). Testes que fixam H.realm/H.playerName continuam valendo.
+    if Mock.REAL then H.realm, H.surname = "", "Montes" end
+    env.UnitName = function(unit) if unit == "player" then return H.playerName, H.surname end return nil end
     env.GetRealmName = function() return H.realm end
+    env.GetNormalizedRealmName = function() return H.realm end
     env.IsResting = function() return H.resting or false end -- estalagem/cidade
     -- Diário de missões: H.quests = { { title, level, header?, done?, failed?, have?, need?, collapsed? } }
     -- (moderno: C_QuestLog; 3.3.5a: GetQuestLogTitle com o "grupo sugerido" no 4º valor). H.questMax = limite.
@@ -270,7 +274,11 @@ function Mock.new(opts)
         end
         return l[1], 100 + i, l[4], 9, true, false, 0, true, 40, "40 Player", l[3], l[2]
     end
-    env.GetMoney = function() return H.money or 1234567 end
+    -- WoW Forever: no PLAYER_LOGOUT (também no /reload) o jogo devolve 0 de ouro (H.loggingOut, ligado por H:event).
+    env.GetMoney = function()
+        if H.loggingOut and mode == "forever" then return 0 end
+        return H.money or 1234567
+    end
     env.GetRealZoneText = function() return "Floresta de Elwynn" end
     env.GetSubZoneText = function() return "Vale Norte" end
     H.durability = { [1] = { 50, 100 }, [5] = { 15, 100 }, [16] = { 100, 100 } }
@@ -530,11 +538,13 @@ function Mock.new(opts)
     end
 
     function H:event(name, ...)
+        if name == "PLAYER_LOGOUT" then self.loggingOut = true end
         for _, frame in ipairs(self.frames) do
             if frame._events[name] and frame._scripts.OnEvent then
                 frame._scripts.OnEvent(frame, name, ...)
             end
         end
+        self.loggingOut = nil
     end
 
     -- Carrega o addon e simula a entrada no mundo.

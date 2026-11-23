@@ -19,6 +19,9 @@ local function login(Mock, opts, saved)
 end
 
 return {
+    -- Os casos usam um reino e um nome fixos nos dados salvos; na passada "Forever real" eles seguem com essa
+    -- identidade (o resto do comportamento real, como o ouro 0 ao sair, continua valendo). Ver test_forever_real.lua.
+    fixedIdentity = true,
     { "asks the server once at login and at most once a minute after that", function(T, Mock)
         local H = Mock.new():login()
         local after = H.raidInfoRequests

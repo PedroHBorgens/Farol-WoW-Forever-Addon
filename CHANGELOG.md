@@ -2,6 +2,21 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.18.0 — Diagnostics and tests that answer like WoW Forever
+- New command **`/farol diag`** (`/farol diagnostico`): shows in your own chat how the game answered — name and
+  surname, the realm as reported (WoW Forever: empty), current gold, whether the game reported 0 gold at your last
+  logout (and Farol kept the right value), server time and resets, completed quests and how many times some events
+  happened this session (quest turn-in, reward window, quest accepted, quest completed message, gold changed). It warns
+  when there was a reward window but no turn-in event. Read-only: nothing is sent or requested from the server; the
+  counts live only in memory; the only saved value is a yes/no + time of the last logout (`FarolCharDB.diag`,
+  validated on load). It is just a command: it turns nothing on.
+- Fixed (preventive): at logout, a game reading that fails at that moment (rested XP, saved instances) no longer
+  erases what was already saved for the character.
+- Gold is read in a single place (`Profiles.Money`) and the character/realm in a single place
+  (`Profiles.ReadIdentity`); a test fails if any file calls `GetMoney`, `GetRealmName` or `UnitName("player")` directly.
+- Tests: the whole suite now runs twice — "textbook" mock and **forever-real** (empty realm, surname, 0 gold at logout);
+  new `test_forever_real.lua` with a "wrong moment" logout where every reading returns 0/empty. 690 tests.
+
 ## 3.17.1 — Gold of your other characters on WoW Forever
 - Fixed: WoW Forever reports 0 gold at the moment you log out, so the character you left was saved with 0 gold
   (`/farol gold` and the gold tooltip) and the next session summary could show the whole gold as lost. Farol now

@@ -19,6 +19,9 @@ local function all(H) return H.strip(table.concat(H.msgs, "\n")) end
 local function count(text, pattern) return select(2, string.gsub(text, pattern, "")) end
 
 return {
+    -- Os casos usam um reino e um nome fixos nos dados salvos; na passada "Forever real" eles seguem com essa
+    -- identidade (o resto do comportamento real, como o ouro 0 ao sair, continua valendo). Ver test_forever_real.lua.
+    fixedIdentity = true,
     { "fresh install: on, shows the place and ready / cooldown / no stone", function(T, Mock)
         local H = setup(Mock)
         T.eq(H.env.FarolDB.items.hearth, true, "approved default on a fresh install")

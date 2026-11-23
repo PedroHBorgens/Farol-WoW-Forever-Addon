@@ -487,6 +487,11 @@ if type(ERR_QUEST_COMPLETE_S) == "string" then
     completePattern = "^" .. p .. "$"
 end
 local turnedInEvent = false -- o cliente tem QUEST_TURNED_IN: a mensagem do sistema é ignorada
+-- A mensagem do sistema "<missão> concluída." (mesmo nos clientes modernos): contada pelo /farol diagnostico.
+function Completed.MatchComplete(msg)
+    if not completePattern or type(msg) ~= "string" or Secret(msg) or #msg > 300 then return nil end
+    return string.match(msg, completePattern)
+end
 
 local events = CreateFrame("Frame")
 for _, event in ipairs({ "QUEST_TURNED_IN", "QUEST_COMPLETE", "CHAT_MSG_SYSTEM", "PLAYER_ENTERING_WORLD", "QUEST_DETAIL",

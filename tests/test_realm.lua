@@ -6,6 +6,9 @@
 local function all(H) return H.strip(table.concat(H.msgs, "\n")) end
 
 return {
+    -- Os casos usam um reino e um nome fixos nos dados salvos; na passada "Forever real" eles seguem com essa
+    -- identidade (o resto do comportamento real, como o ouro 0 ao sair, continua valendo). Ver test_forever_real.lua.
+    fixedIdentity = true,
     { "empty or missing realm: the character is still identified, with a fallback realm", function(T, Mock)
         for _, realm in ipairs({ "", false }) do
             local H = Mock.new({ locale = "ptBR" }); H.realm = realm or nil

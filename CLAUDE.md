@@ -27,6 +27,18 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ## WoW Forever: fatos técnicos que custaram descobrir
 
 - Cliente **1.60.1**, **Interface 16001**, família *Mainline* (API moderna, a mesma do Midnight).
+- **O jogo nem sempre responde como a documentação diz (3.18).** Antes de usar uma API, pergunte: (1) e se vier `""`
+  em vez de `nil` (reino vazio)? (2) o que o 2º/3º retorno significa *aqui* (no Forever o 2º de `UnitName` é o
+  sobrenome, não o reino)? (3) funciona na hora em que vou ler — antes do `PLAYER_LOGIN`, em combate, no
+  `PLAYER_LOGOUT` (ouro 0)? Ao sair, leitura que falhou **nunca apaga** o que já estava salvo (`RecordCharacter`
+  mantém descanso e instâncias). Em dúvida, peça ao dono um `/run print(...)` no jogo **antes** do merge, e acrescente
+  a resposta real ao simulador (modo `Mock.REAL`). Ouro só por `Profiles.Money()`; nome/reino só por
+  `Profiles.ReadIdentity()`/`CurrentCharacter` (o `test_forever_real.lua` falha se outro arquivo chamar `GetMoney`,
+  `GetRealmName`, `GetNormalizedRealmName`, `UnitName("player")` ou `UnitFullName`).
+- **`/farol diagnostico` (Diag.lua, 3.18):** mostra no chat do jogador as leituras cruas (nome, sobrenome, reino,
+  ouro), o último logout (`FarolCharDB.diag = { lz = o jogo deu 0 de ouro, t }`, validado) e contagens de eventos só
+  na memória (`QUEST_TURNED_IN`, `QUEST_COMPLETE`, `QUEST_ACCEPTED`, mensagem `ERR_QUEST_COMPLETE_S`, `PLAYER_MONEY`).
+  Ao descobrir outro comportamento estranho do jogo, acrescente uma linha ao diagnóstico.
 - O cliente lê **`Farol_Mainline.toc`** (não o `Farol.toc`). `Farol_Camelot.toc` é reserva. Ao mudar a versão do
   cliente, atualize a linha `## Interface:` (versão `1.60.1` → `16001`).
 - Pasta de addons: `World of Warcraft/_forever_/Interface/AddOns/`.
@@ -131,7 +143,7 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Goals, Farm, Quests, Hearth, Runs, Completed, MinimapButton
+                    Appearance, Order, Tasks, Goals, Farm, Quests, Hearth, Runs, Completed, Diag, MinimapButton
   Core.lua          barras (até 3, grade de células), 29 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
@@ -150,6 +162,7 @@ Farol/
   Runs.lua          registro de masmorras/raides (corrida atual no item "run", resumo ao sair, 10 últimas, /farol masmorra)
   Completed.lua     missões concluídas por personagem (janela com busca, item "qdone", registro desligado até o
                     jogador ligar, total do jogo; /farol concluidas)
+  Diag.lua          /farol diagnostico: leituras cruas do jogo, último logout e contagem de eventos (só leitura)
   MinimapButton.lua botão próprio no minimapa (sem bibliotecas) + entrada AddonCompartment do .toc (/farol minimapa)
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
   Media/Farol.tga   ícone original (64×64)
@@ -211,7 +224,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   (≤ 1 milhão de ouro), level = nível alvo, ls = nível ao criar, gw/lw = "alcançada" já avisada }`, `tasks` = lista de tarefas
   `{ n = nome limpo (≤ 40 letras), w = semanal?, d = time() da marca }` (máx. 10; feita = `d` depois do último reset do
   tipo, calculado com `ns.GetResetTimes`), `farm` = metas de itens `{ id, n = nome limpo (≤ 40 letras), c = alvo
-  1–100000, w = "alcançada" já avisada }` (máx. 10, sem id repetido), `lastSession` = resumo da última sessão, só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
+  1–100000, w = "alcançada" já avisada }` (máx. 10, sem id repetido), `diag = { lz, t }` = o jogo deu 0 de ouro no último logout? (para o `/farol diagnostico`), `lastSession` = resumo da última sessão, só números, salvo em `PLAYER_LOGOUT` — que também acontece no `/reload`). O Core monta o `db` limpo em
   `ADDON_LOADED` chamando o `Sanitize` de cada módulo; chaves desconhecidas são descartadas.
 - **Tooltip:** dividido em seções (`TIP.perf`, `TIP.gold`, `TIP.reset`…). Cada célula tem uma área invisível de
   mouse (`AttachHover`) que mostra só as seções do item (`TIP_SECTIONS`) e repassa arrastar/clique para a barra.
@@ -242,8 +255,13 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 ## Testes
 
 ```
-lua5.1 tests/run.lua        # ~150 testes; deve terminar com "0 failed"
+lua5.1 tests/run.lua        # ~690 testes (2 passadas); deve terminar com "0 failed"
 ```
+
+- **Duas passadas (3.18):** a 1ª com o simulador "de livro"; a 2ª, **forever-real** (`Mock.REAL`), com reino `""` e
+  sobrenome ("Montes"). O ouro 0 no `PLAYER_LOGOUT` vale sempre no modo `forever` (`H.loggingOut`; dispare
+  `PLAYER_MONEY` ao mudar `H.money` no meio do teste, como o jogo faz). Suítes com dados salvos num reino/nome fixos
+  declaram `fixedIdentity = true` e mantêm essa identidade na 2ª passada. `FAROL_PASS=1`/`2` roda só uma.
 
 - Barras 2/3 nos testes: `H.env.FarolBar2._fontStrings` (`H:cells()`/`H:bar()` leem só a barra 1); `tests/test_bars.lua`.
 - `tests/wow_mock.lua`: simulador da API (modos `forever`, `wotlk` e `secret`). `H:login()`, `H:slash()`,

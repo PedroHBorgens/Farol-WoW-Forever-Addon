@@ -23,6 +23,9 @@ local function background(H)
 end
 
 return {
+    -- Os casos usam um reino e um nome fixos nos dados salvos; na passada "Forever real" eles seguem com essa
+    -- identidade (o resto do comportamento real, como o ouro 0 ao sair, continua valendo). Ver test_forever_real.lua.
+    fixedIdentity = true,
     { "each item shows only its own details (much smaller tooltip)", function(T, Mock)
         local H = Mock.new():login(); H:update(1)
         local gold = hover(H, "gold")

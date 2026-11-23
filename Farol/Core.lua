@@ -1505,13 +1505,22 @@ function Profiles.RealmLabel(realm)
 end
 ns.RealmLabel, ns.REALM_FALLBACK = Profiles.RealmLabel, Profiles.REALM_FALLBACK
 
--- Quem está jogando agora: nome e reino (nil se o jogo ainda não informou o nome).
-local function CurrentCharacter()
+-- Leituras cruas de quem está jogando (o único lugar que chama UnitName("player") e GetRealmName; um teste confere).
+-- Devolve: ok do nome, nome, 2º valor (sobrenome no WoW Forever), ok do reino, reino. Usado por CurrentCharacter e pelo
+-- /farol diagnostico (que mostra os valores como vieram do jogo).
+function Profiles.ReadIdentity()
     local okName, name, second = pcall(UnitName, "player")
     local getRealm = GetNormalizedRealmName or GetRealmName
     local okRealm, realm = false, nil
     if GetRealmName then okRealm, realm = pcall(GetRealmName) end
     if (not okRealm or not ValidName(realm)) and getRealm then okRealm, realm = pcall(getRealm) end
+    return okName, name, second, okRealm, realm
+end
+ns.ReadIdentity = function() return Profiles.ReadIdentity() end
+
+-- Quem está jogando agora: nome e reino (nil se o jogo ainda não informou o nome).
+local function CurrentCharacter()
+    local okName, name, second, okRealm, realm = Profiles.ReadIdentity()
     if not okName or not ValidName(name) or name == UNKNOWNOBJECT or name == "Unknown" then return nil end
     -- O WoW Forever devolve o reino vazio: em vez de descartar o personagem, usa um reino de reserva fixo.
     if not okRealm or not ValidName(realm) then realm = Profiles.REALM_FALLBACK end
@@ -1634,6 +1643,12 @@ local function RecordCharacter(force)
     -- Instâncias salvas: atualizadas só quando a resposta do servidor já chegou; senão, mantém as anteriores.
     local locks = entry and entry.locks
     if locksLoaded then locks = LocksToSave(ReadLockouts()) end
+    -- Ao sair, o jogo pode responder 0/vazio (no WoW Forever o ouro vem 0): leitura que falhou nessa hora não apaga o
+    -- que já estava salvo. Instâncias vencidas somem sozinhas na exibição (r = data do fim).
+    if Profiles.loggingOut and entry then
+        if not rest and entry.rest and level == entry.level then rest, max, inn = entry.rest, entry.max, entry.inn end
+        if not locks then locks = entry.locks end
+    end
     local bind = ns.Hearth and ns.Hearth.BindLocation() or (entry and entry.bind) -- onde a Pedra está vinculada
     chars[name] = { gold = gold, level = level, t = time(), rest = rest, max = max, inn = rest and inn or nil,
                     locks = locks, bind = bind }
@@ -1710,6 +1725,7 @@ local function RealmCharacters()
     end)
     return list, total, realm
 end
+ns.RealmCharacters = RealmCharacters -- /farol diagnostico (Diag.lua)
 
 -- Esquece um personagem deste reino (ou todos, menos o atual, com name = nil).
 local function ForgetCharacters(target)
@@ -2025,10 +2041,16 @@ ns.ReadBagSlot, ns.LastBag = ReadSlot, LastBag -- busca de item pelo nome nas me
 -- Ouro atual. O WoW Forever devolve 0 no momento de sair do jogo (PLAYER_LOGOUT, também no /reload): nessa hora
 -- vale a última leitura feita durante o jogo (Profiles.lastMoney), para não gravar "0" no ouro do personagem nem no
 -- resumo da sessão.
+-- É o único lugar que chama GetMoney (um teste confere). Ao sair, também anota se o jogo informou 0 tendo ouro antes
+-- (Profiles.logoutZero), para o /farol diagnostico mostrar que a proteção agiu.
 function Profiles.Money()
-    if Profiles.loggingOut and Profiles.lastMoney then return Profiles.lastMoney end
     local ok, money = pcall(GetMoney)
-    if not ok or type(money) ~= "number" or IsSecret(money) or money ~= money or money < 0 or money > 1e12 then return nil end
+    local valid = ok and type(money) == "number" and not IsSecret(money) and money == money and money >= 0 and money <= 1e12
+    if Profiles.loggingOut and Profiles.lastMoney then
+        if valid and money == 0 and Profiles.lastMoney > 0 then Profiles.logoutZero = true end
+        return Profiles.lastMoney
+    end
+    if not valid then return nil end
     if not Profiles.loggingOut then Profiles.lastMoney = money end
     return money
 end
@@ -2171,6 +2193,7 @@ local function FormatCountdown(seconds)
     end
     return FormatDuration(seconds)
 end
+ns.FormatCountdown, ns.FormatMoney = FormatCountdown, FormatMoney -- /farol diagnostico (Diag.lua)
 
 -- Quando o reset acontece: dia da semana (se for depois de hoje) e hora local, mais a hora do servidor.
 local function ResetMoment(seconds)
@@ -2460,7 +2483,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2549,7 +2572,9 @@ local ITEM_TEXT = {
         return string.format("%s %s%d%%|r", T("label_durab"), ColorHighIsGood(pct, 50, 20), math.floor(pct))
     end,
     gold = function()
-        local text = FormatMoney(GetMoney())
+        local money = Profiles.Money()
+        if not money then return nil end
+        local text = FormatMoney(money)
         if db.goldTotal then
             local list, total = RealmCharacters()
             if list and #list > 1 then
@@ -3030,7 +3055,7 @@ TIP.durab = function()
 end
 
 TIP.gold = function()
-    local money = Safe(GetMoney)
+    local money = Profiles.Money()
     AddPair(T("tt_gold"), money and FormatMoney(money) or "--")
     local delta = Safe(GetSessionMoney)
     if delta then AddPair(T("tt_session"), FormatMoneyDelta(delta)) end
@@ -4228,6 +4253,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         FarolCharDB.goals = ns.Goals.Sanitize(type(savedChar) == "table" and savedChar.goals or nil) -- metas
         FarolCharDB.farm = ns.Farm.Sanitize(type(savedChar) == "table" and savedChar.farm or nil) -- metas de farm
         FarolCharDB.tasks = ns.Tasks.Sanitize(type(savedChar) == "table" and savedChar.tasks or nil) -- lista de tarefas
+        FarolCharDB.diag = ns.Diag.Sanitize(type(savedChar) == "table" and savedChar.diag or nil) -- último logout
         -- Perfil deste personagem: o da conta (padrão) ou o próprio.
         FarolCharDB.profile = type(savedChar) == "table" and savedChar.profile == "char" and "char" or "account"
         Profiles.mode = FarolCharDB.profile
@@ -4255,6 +4281,8 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         Profiles.loggingOut = true -- daqui em diante, o ouro é a última leitura feita durante o jogo
         SaveSummary()
         pcall(RecordCharacter, true) -- grava o descanso e se está em estalagem/cidade ao sair
+        Profiles.Money() -- confere a leitura do jogo ao sair (anota Profiles.logoutZero; o valor não é usado)
+        FarolCharDB.diag = { lz = Profiles.logoutZero and true or false, t = time() } -- só para o /farol diagnostico
         return
     end
 
@@ -4297,7 +4325,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_diag", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -4410,6 +4438,8 @@ SlashCmdList["FAROL"] = function(msg)
                 Print("  " .. FactionName(a.name) .. " (" .. a.level .. "): " .. table.concat(a.locks, ", "))
             end
         end
+    elseif cmd == "diagnostico" or cmd == "diag" or cmd == "diagnostic" or cmd == "diagnose" then
+        ns.Diag.Report()
     elseif cmd == "novidades" or cmd == "news" then
         ShowNews(0)
     elseif cmd == "ouro" or cmd == "gold" then

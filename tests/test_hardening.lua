@@ -61,7 +61,7 @@ return {
 
     { "the quadratic trim pattern is not used on saved text", function(T)
         for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Tasks.lua", "Goals.lua", "Farm.lua",
-                                "Quests.lua", "Hearth.lua", "Runs.lua", "MinimapButton.lua", "Appearance.lua", "Order.lua" }) do
+                                "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "MinimapButton.lua", "Appearance.lua", "Order.lua" }) do
             local f = io.open("Farol/" .. file, "r"); local code = f:read("*a"); f:close()
             code = string.gsub(code, "%-%-[^\n]*", "") -- comentários podem citar o padrão
             T.ok(not code:find('"^%s*(.-)%s*$"', 1, true), file .. ": use ns.Trim instead of \"^%s*(.-)%s*$\"")

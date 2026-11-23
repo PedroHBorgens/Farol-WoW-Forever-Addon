@@ -2,6 +2,19 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.14.0 — Completed quests
+- New **Completed quests** window (Menu > Tools, `/farol completed`): the quests each of your characters turned in, with
+  name, level, zone and date, newest first, a name search and a character menu (your own characters only).
+- **Recording starts off** (rule 8): tick "Record turned-in quests" in the window or `/farol completed record on`.
+  Up to 2,000 quests per character; validated on load; "Forget characters" also deletes the lists.
+- **Total in game** for each character (`C_QuestLog.GetAllCompletedQuestIDs` or `GetQuestsCompleted`), including quests
+  from before recording (names are not available without a server request, which Farol does not make).
+- New bar item **Completed** (off by default) with each character's total, today's count and the latest quests.
+- Turn-ins come from `QUEST_TURNED_IN` (+ the reward window for the name and level); old clients use the system
+  message "<quest> completed.". Read-only: no quest is accepted, turned in or abandoned; nothing is sent.
+- Options menu: the Bar tab is a little taller (8 items in the Progress group).
+- New `tests/test_completed.lua`; fuzzing covers the new saved data.
+
 ## 3.13.2 — Security hardening
 - Manual security audit of the whole add-on, CI workflow and asset scripts (details in the pull request).
 - Fixed: a tampered saved-variables file with a huge loot history, warning history or dungeon log, or a name made

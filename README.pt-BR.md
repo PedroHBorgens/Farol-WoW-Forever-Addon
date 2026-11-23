@@ -4,7 +4,7 @@
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · Pedra de Regresso · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · diário de missões · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (28 itens).
+XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · diário de missões · missões concluídas · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (29 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -15,7 +15,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 
 | Vem ligado na primeira vez | Todo o resto vem desligado |
 |---|---|
-| Barra com o básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (7 de 28 itens) | Os outros 21 itens da barra e a 2ª e 3ª barras |
+| Barra com o básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (7 de 29 itens) | Os outros 22 itens da barra e a 2ª e 3ª barras |
 | Avisos de durabilidade, bolsas, talentos não gastos, magias de grau antigo e profissões (com som) | Munição, reagentes, pausa, água, tarefas, metas, missões, descanso dos personagens |
 | Resumo da sessão ao entrar e ao sair de masmorra — só no **seu** chat | Tooltip completo, horário do servidor, ouro de todos os personagens, esconder em combate |
 | Botão no minimapa | Perfis por personagem, alarmes, tarefas, metas |
@@ -64,6 +64,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol meta item`  | Metas de farm: `/farol meta item [link] 40` (Shift + clique no item) ou pelo nome; `remover`, `limpar` |
 | `/farol minimapa`   | Mostra/esconde ou trava o botão do minimapa (`on`, `off`, `travar`, `destravar`) |
 | `/farol masmorra`   | Suas 10 últimas masmorras e raides: tempo, XP, ouro, saques, mortes |
+| `/farol concluidas` | Missões concluídas de cada personagem (lista com busca e total); `registrar on\|off` |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
 | `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
 | `/farol barra 2 mostrar` | Liga a barra 2 (ou 3) e escolhe ela para o menu, a Aparência e a Ordem (`/farol barra` lista as barras) |
@@ -105,7 +106,7 @@ O menu tem **quatro abas**:
   (som, "Lembrar em", testar, histórico). No topo, **Só os recomendados** e **Desligar todos**
   (`/farol aviso recomendados` / `/farol aviso nenhum`); embaixo, a explicação do aviso sob o mouse. `/farol aviso`
   abre o menu nesta aba.
-- **Ferramentas** — um botão para cada janela, com o que ela faz: Alarmes, Tarefas, Saques, Histórico e **Resumo agora**.
+- **Ferramentas** — um botão para cada janela, com o que ela faz: Alarmes, Tarefas, Metas, Masmorras, **Missões concluídas**, Saques, Histórico e **Resumo agora**.
 - **Geral** — o que vale para todos os seus personagens: idioma (Auto / Português / English), hora do servidor, resumo
   da sessão ao entrar, ouro de todos os personagens, tooltip completo, os botões rápidos ao lado da barra 1, o **botão
   do minimapa** (mostrar / travar); **Restaurar**: posição da barra, zerar sessão, esquecer personagens; e
@@ -332,6 +333,25 @@ cheio). O tooltip lista primeiro as **prontas para entregar** e depois as **em a
 (`/farol aviso prontas on`; no máximo a cada 5 minutos). O Farol só **lê** o diário: nunca aceita, entrega, abandona ou
 compartilha missões, e não abre categorias fechadas do diário. `/farol aviso status` mostra o que foi lido.
 
+## Missões concluídas
+
+A janela **Missões concluídas** (Menu > Ferramentas, ou `/farol concluidas`) mostra as missões que cada um dos **seus**
+personagens entregou: `[32] Entrega na Baía do Farol — Vale Norte — Hoje 21:40`, da mais nova para a mais antiga, com
+**busca pelo nome** e rolagem com a roda do mouse. No alto, escolha o personagem (só os seus, do mesmo reino).
+
+- **O registro vem desligado.** Marque **"Registrar missões entregues"** na janela (ou `/farol concluidas registrar on`)
+  e, a partir daí, cada missão entregue é guardada com nome, nível, zona e data (até 2.000 por personagem, as mais
+  recentes).
+- **Total no jogo:** o número de missões que o jogo diz que o personagem já concluiu, **incluindo as de antes do
+  registro**. Os nomes dessas missões antigas não aparecem: o jogo só os informa se o addon pedir ao servidor, e o Farol
+  não faz esse pedido. O total inclui alguns marcadores internos do jogo, então pode ser um pouco maior que o real. Se o
+  cliente não informar, aparece `--` (a lista do registro continua funcionando).
+- Item opcional na barra (desligado): `Concluídas 412`, com o total de cada personagem, quantas foram entregues hoje e as
+  últimas no tooltip.
+- Fica tudo no seu computador (`FarolDB`); nada é enviado. **Esquecer personagens** também apaga a lista deles.
+  `/farol aviso status` mostra qual função do jogo informou o total. O Farol só **lê**: nunca aceita, entrega ou
+  abandona missões.
+
 ## Masmorras e raides
 
 Ao entrar numa **masmorra ou raide**, o Farol começa uma "corrida" sozinho: tempo dentro, **XP**, **ouro** (o saldo,
@@ -424,6 +444,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | XP por hora      | XP/h e tempo até o próximo nível (após 1 min de sessão)   | `xph`           | desligado  |
 | Reputação        | Facção acompanhada: nível (cores do jogo), progresso %, rep/hora | `rep`           | desligado  |
 | Profissões       | Profissões principais com nível/limite do treinamento (amarelo perto, vermelho no limite) | `prof` | desligado |
+| Missões concluídas | Total de missões concluídas deste personagem (lista de cada personagem na janela) | `concluidas` | desligado |
 | Horário          | Hora local, ou do servidor (opção no menu)                | `hora`          | desligado  |
 | Resets           | Tempo até o reset diário e o semanal                      | `reset`         | desligado  |
 | Tempo de sessão  | Quanto tempo está jogando desde que entrou / `/reload`    | `tempo`         | desligado  |

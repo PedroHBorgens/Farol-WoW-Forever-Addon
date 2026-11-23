@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "MinimapButton.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "MinimapButton.lua" }
 
 local function noop() end
 
@@ -232,6 +232,10 @@ function Mock.new(opts)
                 return { { text = "Objetivo", finished = q.have >= q.need, numFulfilled = q.have, numRequired = q.need } }
             end,
             GetMaxNumQuestsCanAccept = function() return H.questMax end,
+            -- Missões concluídas (Completed.lua): H.completedIDs = lista de números; H.questTitles[id] = nome.
+            GetAllCompletedQuestIDs = function() return H.completedIDs end,
+            GetTitleForQuestID = function(id) return H.questTitles[id] end,
+            GetLogIndexForQuestID = function(id) local i = id - 1000; return H.quests[i] and i or nil end,
         }
         env.GetQuestDifficultyColor = function(level)
             local d = level - (H.xp.level or 1)
@@ -242,6 +246,12 @@ function Mock.new(opts)
             return { r = 0.5, g = 0.5, b = 0.5 }
         end
     end
+    -- Janela de recompensa da missão (QUEST_COMPLETE): H.rewardQuest = { id, title } (GetQuestID/GetTitleText).
+    H.completedIDs, H.completedMap, H.questTitles, H.rewardQuest = nil, nil, {}, nil
+    env.GetQuestID = function() return H.rewardQuest and H.rewardQuest.id or 0 end
+    env.GetTitleText = function() return H.rewardQuest and H.rewardQuest.title or "" end
+    env.ERR_QUEST_COMPLETE_S = mode == "wotlk" and "%s completed." or "%s concluída."
+    if mode == "wotlk" then env.GetQuestsCompleted = function() return H.completedMap or {} end end
     -- Classe e contagens: H.class ("WARRIOR" não usa reagentes), H.itemCounts[id], H.ammo (espaço da munição).
     H.class, H.itemCounts, H.ammo = "WARRIOR", {}, 0
     env.UnitClass = function() return "Classe", H.class, 1 end

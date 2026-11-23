@@ -29,7 +29,7 @@ return {
         local H = Mock.new():login()
         local text = chat(H)
         T.has(text, "Boas-vindas! A barra começa só com o básico: FPS, Latência, Coordenadas, Zona, Pedra de Regresso, Durabilidade, Ouro.")
-        T.has(text, "há mais 21 informações e vários avisos desligados — clique com o botão direito na barra")
+        T.has(text, "há mais 22 informações e vários avisos desligados — clique com o botão direito na barra")
         T.hasnt(text, "novidades", "a new player gets the welcome, not the news")
         local N = relog(H, Mock)
         T.hasnt(chat(N), "bem-vindo", "only once")
@@ -72,11 +72,11 @@ return {
         local _, window = menuChecks(H)
         local hints = {}
         hints[#hints + 1] = H:text(H.env.FarolOptions.controls.hint) -- texto da aba Barra
-        T.has(table.concat(hints, " | "), "Itens na barra: 7 de 28 ligados — tudo é opcional, marque só o que quiser")
+        T.has(table.concat(hints, " | "), "Itens na barra: 7 de 29 ligados — tudo é opcional, marque só o que quiser")
         H:slash("show lixo")
         hints = {}
         hints[#hints + 1] = H:text(H.env.FarolOptions.controls.hint) -- texto da aba Barra
-        T.has(table.concat(hints, " | "), "Itens na barra: 8 de 28 ligados", "updates when an item is turned on")
+        T.has(table.concat(hints, " | "), "Itens na barra: 8 de 29 ligados", "updates when an item is turned on")
         local junk
         for _, check in ipairs(H:framesOf("CheckButton")) do
             if check.label and H:text(check.label) == "Lixo nas bolsas" then junk = check end
@@ -96,11 +96,11 @@ return {
 
     { "bar tooltip says how many more items can be turned on; English welcome", function(T, Mock)
         local H = Mock.new():login()
-        T.has(tip(H), "Clique direito: opções (mais 21 informações para ligar).")
+        T.has(tip(H), "Clique direito: opções (mais 22 informações para ligar).")
         for _, key in ipairs(H.ns.ITEM_ORDER) do H:slash("show " .. key) end
         T.has(tip(H), "Clique direito: opções.", "all on: the plain hint")
         local E = Mock.new({ locale = "enUS" }):login()
         T.has(chat(E), "Welcome! The bar starts with the basics only: FPS, Latency, Coordinates, Zone, Hearthstone, Durability, Gold.")
-        T.has(chat(E), "there are 21 more items and several warnings turned off")
+        T.has(chat(E), "there are 22 more items and several warnings turned off")
     end },
 }

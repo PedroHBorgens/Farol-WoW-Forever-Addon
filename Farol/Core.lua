@@ -20,7 +20,7 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "hearth", "durab", "bags", "junk", "ammo",
-    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "farm", "quests", "clock", "reset", "tasks", "playtime", "run", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "farm", "quests", "qdone", "clock", "reset", "tasks", "playtime", "run", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
@@ -28,7 +28,7 @@ local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     hearth = true, -- aprovado pelo dono (3.10): só em instalação nova; quem já usa recebe desligado
     mem = false, speed = false, bags = false, session = false, xp = false,
-    goldh = false, xph = false, rep = false, prof = false, goals = false, farm = false, quests = false, junk = false, ammo = false,
+    goldh = false, xph = false, rep = false, prof = false, goals = false, farm = false, quests = false, qdone = false, junk = false, ammo = false,
     clock = false, reset = false, tasks = false, playtime = false, run = false, friends = false, guild = false,
 }
 
@@ -58,6 +58,7 @@ local ITEM_ALIASES = {
     metas = "goals", meta = "goals", goals = "goals", goal = "goals", objetivo = "goals",
     farm = "farm", farmar = "farm", coleta = "farm",
     missoes = "quests", missao = "quests", quests = "quests", quest = "quests", diario = "quests",
+    concluidas = "qdone", concluida = "qdone", completed = "qdone", completas = "qdone", qdone = "qdone",
     masmorra = "run", masmorras = "run", dungeon = "run", dungeons = "run", run = "run", corrida = "run",
     tempo = "playtime", playtime = "playtime", played = "playtime",
     amigos = "friends", friends = "friends",
@@ -77,6 +78,7 @@ local DEFAULTS = {
     goldTotal = false,  -- item Ouro mostra também o total de todos os seus personagens do reino
     tooltipFull = false, -- false = cada item mostra só o seu tooltip (Shift mostra tudo); true = sempre completo
     runSummary = true,  -- resumo no chat ao sair de uma masmorra ou raide (Runs.lua)
+    questRecord = false, -- registrar missões entregues (Completed.lua): regra 8, só o jogador liga
     colorblind = false, -- cores para daltonismo: azul / amarelo / laranja no lugar de verde / amarelo / vermelho
     newsSeen = 0,       -- quantas novidades (NEWS) o jogador já viu; boas-vindas/novidades aparecem uma vez
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
@@ -1429,6 +1431,8 @@ local function KeepRecent(map, limit, recentOf)
     return kept
 end
 
+ns.ValidName, ns.KeepRecent = ValidName, KeepRecent -- também usados por Completed.lua
+
 local function SanitizeChars(saved)
     local clean = {}
     if type(saved) ~= "table" then return clean end
@@ -1496,6 +1500,7 @@ local function CurrentCharacter()
     if not okRealm or not ValidName(realm) then return nil end
     return name, realm
 end
+ns.CurrentCharacter = CurrentCharacter
 
 -- XP descansado do personagem atual: descanso, XP do nível e se está em estalagem/cidade (nil no nível máximo).
 local function CurrentRest()
@@ -1695,7 +1700,10 @@ local function ForgetCharacters(target)
         local count = 0
         local own = rawget(db, "profiles").chars[realm] or {}
         for charName in pairs(chars) do
-            if charName ~= name then chars[charName] = nil; own[charName] = nil; count = count + 1 end
+            if charName ~= name then
+                chars[charName] = nil; own[charName] = nil; count = count + 1
+                if ns.Completed then ns.Completed.Forget(realm, charName) end -- a lista de missões também
+            end
         end
         Print(string.format(ns.TN("gold_forgot_all", count), count))
         return
@@ -1706,6 +1714,7 @@ local function ForgetCharacters(target)
             chars[charName] = nil
             local own = rawget(db, "profiles").chars[realm]
             if own then own[charName] = nil end -- o perfil dele também
+            if ns.Completed then ns.Completed.Forget(realm, charName) end -- e a lista de missões
             Print(string.format(T("gold_forgot"), (string.gsub(charName, "|", "||"))))
             return
         end
@@ -2416,7 +2425,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2611,6 +2620,10 @@ local ITEM_TEXT = {
     hearth = function() -- Pedra de Regresso (Hearth.lua); sem o lugar informado, some da barra
         if not ns.Hearth then return nil end
         return ns.Hearth.BarText()
+    end,
+    qdone = function() -- missões concluídas (Completed.lua)
+        if not ns.Completed then return nil end
+        return ns.Completed.BarText()
     end,
     quests = function() -- diário de missões (Quests.lua)
         if not ns.Quests then return nil end
@@ -2811,7 +2824,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  quests = "INV_Misc_Book_09",  hearth = "INV_Misc_Rune_01",  run = "INV_Misc_Key_03",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  quests = "INV_Misc_Book_09",  qdone = "INV_Misc_Book_08",  hearth = "INV_Misc_Rune_01",  run = "INV_Misc_Key_03",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
@@ -3157,6 +3170,7 @@ TIP.run = function() if ns.Runs then ns.Runs.Tooltip() end end
 TIP.farm = function() if ns.Farm then ns.Farm.Tooltip() end end
 TIP.quests = function() if ns.Quests then ns.Quests.Tooltip() end end
 TIP.hearth = function() if ns.Hearth then ns.Hearth.Tooltip() end end
+TIP.qdone = function() if ns.Completed then ns.Completed.Tooltip() end end
 
 TIP.playtime = function()
     local seconds = Safe(GetSessionSeconds)
@@ -3176,7 +3190,7 @@ local TIP_SECTIONS = {
     coords = { "place" }, zone = { "place" }, speed = { "place" }, hearth = { "hearth" },
     durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
-    xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" }, farm = { "farm" }, quests = { "quests" },
+    xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" }, farm = { "farm" }, quests = { "quests" }, qdone = { "qdone" },
     clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, playtime = { "playtime" }, run = { "run" },
     friends = { "social" }, guild = { "social" },
 }
@@ -3184,8 +3198,8 @@ ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
 local TIP_ORDER = { "perf", "place", "hearth", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
-                    "rep", "junk", "supply", "prof", "goals", "farm", "quests", "reset", "tasks", "playtime", "run", "social" }
-local TIP_NEEDS_ITEM = { hearth = "hearth", rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", farm = "farm", quests = "quests", run = "run" }
+                    "rep", "junk", "supply", "prof", "goals", "farm", "quests", "qdone", "reset", "tasks", "playtime", "run", "social" }
+local TIP_NEEDS_ITEM = { hearth = "hearth", rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", farm = "farm", quests = "quests", qdone = "qdone", run = "run" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -3449,11 +3463,11 @@ Profiles.GROUPS = {
     { "grp_place", { "coords", "zone", "speed", "hearth" } },
     { "grp_gear", { "durab", "bags", "junk", "ammo" } },
     { "grp_gold", { "gold", "session", "goldh" } },
-    { "grp_progress", { "xp", "xph", "rep", "prof", "goals", "farm", "quests" } },
+    { "grp_progress", { "xp", "xph", "rep", "prof", "goals", "farm", "quests", "qdone" } },
     { "grp_time", { "clock", "reset", "tasks", "playtime", "run", "friends", "guild" } },
 }
 ns.ITEM_GROUPS = Profiles.GROUPS
-Profiles.MENU_W, Profiles.PAGE_H = 660, 444
+Profiles.MENU_W, Profiles.PAGE_H = 660, 460 -- 8 itens no grupo Progresso (3.14)
 
 -- Opções de aparência que valem para todos (ficam na aba Geral; também na janela Aparência).
 function Profiles.SetGlobalToggle(key, value)
@@ -3529,7 +3543,7 @@ Profiles.GEARS = {
     hearth = "warnings", ammo = "warnings", quests = "warnings",
     goals = function() ns.Goals.ToggleWindow() end, farm = function() ns.Goals.ToggleWindow() end,
     clock = function() ns.Alarm.ToggleWindow() end, tasks = function() ns.Tasks.ToggleWindow() end,
-    run = function() ns.Runs.ToggleWindow() end,
+    run = function() ns.Runs.ToggleWindow() end, qdone = function() ns.Completed.ToggleWindow() end,
 }
 function Profiles.AddGear(set, page, check, key)
     local gear = CreateFrame("Button", NextName("Gear"), page)
@@ -3595,7 +3609,7 @@ local function BuildControls(parent, top)
     set.hint = page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     set.hint:SetPoint("TOPLEFT", 16, -60)
     set.info = page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    set.info:SetPoint("TOPLEFT", 16, -380)
+    set.info:SetPoint("TOPLEFT", 16, -400) -- abaixo do 8º item do grupo Progresso
     set.info:SetWidth(Profiles.MENU_W - 40)
     set.info:SetJustifyH("LEFT")
     for g, group in ipairs(Profiles.GROUPS) do
@@ -3650,9 +3664,9 @@ local function BuildControls(parent, top)
     set.packUndo = CreateButton(page, 90, function() Profiles.UndoPack() end)
     set.packUndo:SetPoint("TOPLEFT", 128 + #Profiles.PACKS * 104 + 4, -30)
     set.appearance = CreateButton(page, 200, function() ns.Appearance.ToggleWindow() end)
-    set.appearance:SetPoint("TOPLEFT", 16, -416)
+    set.appearance:SetPoint("TOPLEFT", 16, -432)
     set.order = CreateButton(page, 200, function() ns.Order.ToggleWindow() end)
-    set.order:SetPoint("TOPLEFT", 226, -416)
+    set.order:SetPoint("TOPLEFT", 226, -432)
 
     -- Aba "Geral": o que vale para todos os personagens.
     page = set.pages.general
@@ -3734,6 +3748,7 @@ local function BuildControls(parent, top)
         { "tasks", function() ns.Tasks.ToggleWindow() end },
         { "goals", function() ns.Goals.ToggleWindow() end },
         { "runs", function() ns.Runs.ToggleWindow() end },
+        { "qdone", function() ns.Completed.ToggleWindow() end },
         { "loot", function() ns.Loot.ToggleWindow() end },
         { "history", function() ns.Warnings.ToggleHistory() end },
         { "summary", function()
@@ -4151,6 +4166,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         db.warnings = ns.Warnings.Sanitize(type(saved) == "table" and saved.warnings or nil)
         db.order = ns.Order.Sanitize(type(saved) == "table" and saved.order or nil)
         db.chars = SanitizeChars(type(saved) == "table" and saved.chars or nil)
+        db.completed = ns.Completed.Sanitize(type(saved) == "table" and saved.completed or nil) -- missões concluídas
         local extra = {} -- barras 2 e 3, validadas do mesmo jeito
         for n = 2, Profiles.MAX_BARS do extra[n] = Profiles.SanitizeBar(FarolDB, n) end
         db.minimap = ns.MinimapButton.Sanitize(type(saved) == "table" and saved.minimap or nil) -- botão do minimapa
@@ -4239,7 +4255,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -4318,6 +4334,8 @@ SlashCmdList["FAROL"] = function(msg)
         Profiles.PackCommand(rest)
     elseif cmd == "farm" or cmd == "farmar" then
         ns.Farm.HandleCommand(rest)
+    elseif cmd == "concluidas" or cmd == "concluida" or cmd == "completed" or cmd == "completas" then
+        ns.Completed.HandleCommand(rest)
     elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then
         ns.Tasks.HandleCommand(rest)
     elseif cmd == "perfil" or cmd == "perfis" or cmd == "profile" or cmd == "profiles" then

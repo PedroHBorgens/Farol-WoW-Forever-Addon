@@ -86,7 +86,7 @@ gitems = [("🔭",'<span class="g">60</span> fps'),("⚡",'<span class="y">172</
           ("🪙",'Session <span class="g">+</span>5<span class="silver">s</span> 34<span class="copper">c</span>'),
           ("📈",'Gold/h <span class="g">+</span>1<span class="gold">g</span> 33<span class="silver">s</span>'),
           ("📖",'XP 46% <span class="blue">+0%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,PROF_ITEM,("⏰",'18:49'),
-          RESET_ITEM,("⌛",'Played 1h 02m'),("👥",'Friends 4'),("🛡️",'Guild 12')]
+          ("✅",'Completed 412'),RESET_ITEM,("⌛",'Played 1h 02m'),("👥",'Friends 4'),("🛡️",'Guild 12')]
 grid = ('<div class="vbar" style="display:grid;grid-template-columns:repeat(3,auto);column-gap:14px;row-gap:6px;position:relative;padding-bottom:16px;font-size:12px;white-space:nowrap">'
         + "".join(item(e,h) for e,h in gitems)
         + '<span style="position:absolute;right:4px;bottom:0;color:#ccc;font-size:14px">◢</span></div>')
@@ -101,16 +101,16 @@ tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
 page("farol-02-bar-items-layout-tooltip", f"""
 <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
-     "28 items, each with its own short tooltip (Shift: all)", "28 informações, cada uma com o seu tooltip curto (Shift: tudo)")
+     "29 items, each with its own short tooltip (Shift: all)", "29 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid run","Friends online","Guild online"]
-on = {0,1,3,4,6,7,8,9,10,11,13,15,16,17,18,19,20,22}
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Completed quests","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid run","Friends online","Guild online"]
+on = {0,1,3,4,6,7,8,9,10,11,13,15,16,17,18,19,20,23}
 half = 12
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
 GROUPS = [("Performance", [0, 1, 2]), ("Location", [3, 4, 5, 6]), ("Gear and bags", [7, 8, 9, 10]), ("Gold", [11, 12, 13]),
-          ("Progress", [14, 15, 16, 17, 18, 19, 20]), ("Time and social", [21, 22, 23, 24, 25, 26, 27])]
-GEAR = {6, 10, 18, 19, 20, 21, 23, 25}  # itens com ⚙ (configuração)
+          ("Progress", [14, 15, 16, 17, 18, 19, 20, 21]), ("Time and social", [22, 23, 24, 25, 26, 27, 28])]
+GEAR = {6, 10, 18, 19, 20, 21, 22, 24, 26}  # itens com ⚙ (configuração)
 grp = lambda title, idx: (f'<div class="grp"><div class="gh">{title}</div>'
                           + "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}{"<span class=gear>⚙</span>" if i in GEAR else ""}</div>' for i in idx) + '</div>')
 tabs = lambda active: '<div class="tabs">' + "".join(f'<span class="tab{" on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
@@ -322,4 +322,26 @@ RUN_CSS = """.rrow{display:grid;grid-template-columns:82px 140px 54px 56px 76px 
 .rrow.head{color:#ffd100;font-weight:bold;font-size:12px}"""
 page("farol-11-dungeon-raid-runs", f'<div style="display:flex;flex-direction:column;gap:14px;align-items:center;transform:scale(.92)">{RUN_BAR}{run_summary}{run_win}</div>',
      "Dungeon & raid log: time, XP, gold, loot, deaths", "Registro de masmorras e raides: tempo, XP, ouro, saques e mortes", RUN_CSS)
+# 12. Completed quests of each character
+QD = [("32","Delivery to Lighthouse Bay","North Vale","Today 21:40"),("31","Wolves of the Gray Hill","Gray Hill","Today 20:58"),
+      ("31","The Torn Map","Old Harbor","Today 20:12"),("30","Herbs for the Healer","North Vale","Yesterday 22:31"),
+      ("30","The Tall Tower (group)","Dry Moor","Yesterday 21:05"),("29","Letters for the Keeper","Old Harbor","Nov 20"),
+      ("29","Ore from the Deep Mine","Deep Mine","Nov 20"),("28","Road Patrol","Dry Moor","Nov 19")]
+qrows = "".join(f'<div class="qrow"><span class="y">[{l}]</span><span>{n}</span><span class="dim">{z}</span><span class="dim" style="text-align:right">{d}</span></div>' for l, n, z, d in QD)
+qwin = ('<div class="win" style="width:640px"><div class="x">×</div><div class="t">Completed quests</div>'
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span>Character: <span class="btn" style="padding:2px 10px;color:#fff">Aldric — this one ▾</span></span>'
+    '<span style="background:#000;border:1px solid #777;padding:3px 8px;width:200px;color:#888;font-size:13px">search by name...</span></div>'
+    '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Recorded: <b>8</b></span><span>Total in game: <b>412</b> <span class="dim">(includes internal markers)</span></span></div>'
+    + qrows +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span class="ck" style="margin:0"><span class="box">✓</span>Record turned-in quests (on this computer only; nothing is sent)</span><span class="dim" style="font-size:12px">1–8 of 8</span></div>'
+    '<div class="dim" style="font-size:12px;margin-top:4px">Quests from before recording only count in the total (the game does not report their names).</div></div>')
+QD_BAR = hbar([("📜",'Quests <span class="g">12/20</span>'),("✅",'Completed 412')], "font-size:14px")
+qtip = ('<div class="tip" style="width:330px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol · Completed quests</div>'
+    '<div class="row"><span class="k">Aldric (this one)</span><span>412 · today +3</span></div>'
+    '<div class="row"><span class="k">Mira (34)</span><span>468</span></div>'
+    '<div class="row"><span class="k">Tor (12)</span><span>57</span></div>'
+    '<div class="dim" style="margin-top:6px">Latest: Delivery to Lighthouse Bay · Wolves of the Gray Hill</div></div>')
+QD_CSS = """.qrow{display:grid;grid-template-columns:40px 270px 130px 110px;gap:6px;font-size:13px;padding:3px 0;border-bottom:1px solid #ffffff10}"""
+page("farol-12-completed-quests", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{QD_BAR}{qtip}</div>{qwin}',
+     "Completed quests of each character, with search", "Missões concluídas de cada personagem, com busca", QD_CSS)
 print("pages ok")

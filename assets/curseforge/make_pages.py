@@ -323,14 +323,14 @@ RUN_CSS = """.rrow{display:grid;grid-template-columns:82px 140px 54px 56px 76px 
 page("farol-11-dungeon-raid-runs", f'<div style="display:flex;flex-direction:column;gap:14px;align-items:center;transform:scale(.92)">{RUN_BAR}{run_summary}{run_win}</div>',
      "Dungeon & raid log: time, XP, gold, loot, deaths", "Registro de masmorras e raides: tempo, XP, ouro, saques e mortes", RUN_CSS)
 # 12. Completed quests of each character
-QD = [("32","Delivery to Lighthouse Bay","North Vale","Today 21:40"),("31","Wolves of the Gray Hill","Gray Hill","Today 20:58"),
-      ("31","The Torn Map","Old Harbor","Today 20:12"),("30","Herbs for the Healer","North Vale","Yesterday 22:31"),
-      ("30","The Tall Tower (group)","Dry Moor","Yesterday 21:05"),("29","Letters for the Keeper","Old Harbor","Nov 20"),
-      ("29","Ore from the Deep Mine","Deep Mine","Nov 20"),("28","Road Patrol","Dry Moor","Nov 19")]
-qrows = "".join(f'<div class="qrow"><span class="y">[{l}]</span><span>{n}</span><span class="dim">{z}</span><span class="dim" style="text-align:right">{d}</span></div>' for l, n, z, d in QD)
+QD = [("32","Delivery to Lighthouse Bay","#4127","North Vale","Today 21:40"),("31","Wolves of the Gray Hill","#4093","Gray Hill","Today 20:58"),
+      ("31","The Torn Map","#4088","Old Harbor","Today 20:12"),("30","Herbs for the Healer","#3961","North Vale","Yesterday 22:31"),
+      ("30","The Tall Tower (group)","#3954","Dry Moor","Yesterday 21:05"),("29","Letters for the Keeper","#3810","Old Harbor","Nov 20"),
+      ("29","Ore from the Deep Mine","#3802","Deep Mine","Nov 20"),("28","Road Patrol","#3755","Dry Moor","Nov 19")]
+qrows = "".join(f'<div class="qrow"><span class="y">[{l}]</span><span>{n}</span><span class="dim">{i}</span><span class="dim">{z}</span><span class="dim" style="text-align:right">{d}</span></div>' for l, n, i, z, d in QD)
 qwin = ('<div class="win" style="width:640px"><div class="x">×</div><div class="t">Completed quests</div>'
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span>Character: <span class="btn" style="padding:2px 10px;color:#fff">Aldric — this one ▾</span></span>'
-    '<span style="background:#000;border:1px solid #777;padding:3px 8px;width:200px;color:#888;font-size:13px">search by name...</span></div>'
+    '<span style="background:#000;border:1px solid #777;padding:3px 8px;width:200px;color:#888;font-size:13px">search by name or ID...</span></div>'
     '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Recorded: <b>8</b></span><span>Total in game: <b>412</b> <span class="dim">(includes internal markers)</span></span></div>'
     + qrows +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span class="ck" style="margin:0"><span class="box">✓</span>Record turned-in quests (on this computer only; nothing is sent)</span><span class="dim" style="font-size:12px">1–8 of 8</span></div>'
@@ -341,7 +341,7 @@ qtip = ('<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
     '<div class="row"><span class="k">Mira (34)</span><span>468</span></div>'
     '<div class="row"><span class="k">Tor (12)</span><span>57</span></div>'
     '<div class="dim" style="margin-top:6px">Latest: Delivery to Lighthouse Bay · Wolves of the Gray Hill</div></div>')
-QD_CSS = """.qrow{display:grid;grid-template-columns:40px 270px 130px 110px;gap:6px;font-size:13px;padding:3px 0;border-bottom:1px solid #ffffff10}"""
+QD_CSS = """.qrow{display:grid;grid-template-columns:40px 230px 56px 120px 106px;gap:6px;font-size:13px;padding:3px 0;border-bottom:1px solid #ffffff10}"""
 page("farol-12-completed-quests", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{QD_BAR}{qtip}</div>{qwin}',
      "Completed quests of each character, with search", "Missões concluídas de cada personagem, com busca", QD_CSS)
 print("pages ok")

@@ -4,7 +4,8 @@ All notable changes to Farol. Versions follow the `## Version:` line of the `.to
 
 ## 3.14.0 — Completed quests
 - New **Completed quests** window (Menu > Tools, `/farol completed`): the quests each of your characters turned in, with
-  name, level, zone and date, newest first, a name search and a character menu (your own characters only).
+  name, level, the game's unique **quest ID**, zone and date, newest first, a search by name or ID and a character
+  menu (your own characters only).
 - **Recording starts off** (rule 8): tick "Record turned-in quests" in the window or `/farol completed record on`.
   Up to 2,000 quests per character; validated on load; "Forget characters" also deletes the lists.
 - **Total in game** for each character (`C_QuestLog.GetAllCompletedQuestIDs` or `GetQuestsCompleted`), including quests

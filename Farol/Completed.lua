@@ -39,7 +39,8 @@ local STRINGS = {
         qd_title      = "Missões concluídas",
         qd_char       = "Personagem:",
         qd_this       = "este",
-        qd_search     = "buscar pelo nome...",
+        qd_search     = "buscar pelo nome ou ID...",
+        qd_no_id      = "--",
         qd_recorded   = "Registradas: %d",
         qd_total      = "Total no jogo: %s",
         qd_total_note = "(inclui marcadores internos)",
@@ -47,7 +48,7 @@ local STRINGS = {
         qd_note       = "Missões de antes do registro entram só no total (o jogo não informa os nomes delas).",
         qd_empty_off  = "Nenhuma missão registrada. Marque \"Registrar missões entregues\" abaixo e entregue uma missão.",
         qd_empty_on   = "Nenhuma missão registrada ainda: entregue uma missão.",
-        qd_no_match   = "Nenhuma missão com esse nome.",
+        qd_no_match   = "Nenhuma missão com esse nome ou ID.",
         qd_scroll     = "%d–%d de %d",
         qd_unknown    = "Missão",
         qd_rec_on     = "registro de missões entregues: ligado (só neste computador).",
@@ -72,7 +73,8 @@ local STRINGS = {
         qd_title      = "Completed quests",
         qd_char       = "Character:",
         qd_this       = "this one",
-        qd_search     = "search by name...",
+        qd_search     = "search by name or ID...",
+        qd_no_id      = "--",
         qd_recorded   = "Recorded: %d",
         qd_total      = "Total in game: %s",
         qd_total_note = "(includes internal markers)",
@@ -80,7 +82,7 @@ local STRINGS = {
         qd_note       = "Quests from before recording only count in the total (the game does not report their names).",
         qd_empty_off  = "No quests recorded. Tick \"Record turned-in quests\" below and turn in a quest.",
         qd_empty_on   = "No quests recorded yet: turn in a quest.",
-        qd_no_match   = "No quest with that name.",
+        qd_no_match   = "No quest with that name or ID.",
         qd_scroll     = "%d–%d of %d",
         qd_unknown    = "Quest",
         qd_rec_on     = "recording turned-in quests: on (on this computer only).",
@@ -457,7 +459,12 @@ local function Filtered(info)
     local wanted = string.lower(search)
     for i = #info.list, 1, -1 do -- mais nova primeiro
         local entry = info.list[i]
-        if wanted == "" or string.find(string.lower(entry.n), wanted, 1, true) then out[#out + 1] = entry end
+        -- Busca pelo nome ou pelo ID da missão (o número que o jogo dá a cada missão; "#123" ou "123").
+        local id = entry.i and tostring(entry.i)
+        local idWanted = string.match(wanted, "^#?(%d+)$")
+        if wanted == "" or string.find(string.lower(entry.n), wanted, 1, true) or (idWanted and id and string.find(id, idWanted, 1, true)) then
+            out[#out + 1] = entry
+        end
     end
     return out
 end
@@ -534,17 +541,21 @@ local function CreateWindow()
         row.level:SetJustifyH("LEFT")
         row.name = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         row.name:SetPoint("TOPLEFT", 64, y)
-        row.name:SetWidth(300)
+        row.name:SetWidth(240)
         row.name:SetJustifyH("LEFT")
         row.zone = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
-        row.zone:SetPoint("TOPLEFT", 372, y)
-        row.zone:SetWidth(140)
+        row.id = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")) -- ID da missão no jogo
+        row.id:SetPoint("TOPLEFT", 310, y)
+        row.id:SetWidth(64)
+        row.id:SetJustifyH("LEFT")
+        row.zone:SetPoint("TOPLEFT", 380, y)
+        row.zone:SetWidth(132)
         row.zone:SetJustifyH("LEFT")
         row.when = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
         row.when:SetPoint("TOPRIGHT", -30, y)
         row.when:SetWidth(90)
         row.when:SetJustifyH("RIGHT")
-        for _, fs in ipairs({ row.level, row.name, row.zone, row.when }) do
+        for _, fs in ipairs({ row.level, row.name, row.id, row.zone, row.when }) do
             if fs.SetWordWrap then fs:SetWordWrap(false) end
         end
         frame.rows[i] = row
@@ -601,11 +612,12 @@ RefreshWindow = function()
         if entry then
             row.level:SetText(entry.l and (ns.C.warn .. "[" .. entry.l .. "]|r") or "")
             row.name:SetText(entry.n)
+            row.id:SetText(entry.i and ("#" .. entry.i) or T("qd_no_id"))
             row.zone:SetText(entry.z or "")
             row.when:SetText(ns.FormatWhen(entry.t))
-            row.level:Show(); row.name:Show(); row.zone:Show(); row.when:Show()
+            row.level:Show(); row.name:Show(); row.id:Show(); row.zone:Show(); row.when:Show()
         else
-            row.level:Hide(); row.name:Hide(); row.zone:Hide(); row.when:Hide()
+            row.level:Hide(); row.name:Hide(); row.id:Hide(); row.zone:Hide(); row.when:Hide()
         end
     end
     if #list == 0 then

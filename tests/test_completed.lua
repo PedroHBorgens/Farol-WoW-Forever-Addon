@@ -85,6 +85,7 @@ return {
         T.eq(H:text(H.env.FarolCompletedChar), "Garrosh — este")
         T.has(H:text(W.totalText), "Total no jogo: 412"); T.eq(H:text(W.recorded), "Registradas: 1")
         T.eq(H:text(W.rows[1].name), "Minha missão")
+        T.eq(H:text(W.rows[1].id), "--", "no ID saved: shows --")
         -- Outro personagem pelo menu.
         H:click(H.env.FarolCompletedChar)
         local entries = {}
@@ -93,11 +94,17 @@ return {
         H:click(H.env.FarolCompletedCharEntry2)
         T.eq(H:text(H.env.FarolCompletedChar), "Mira"); T.has(H:text(W.totalText), "468")
         T.eq(H:text(W.rows[1].name), "Lobos 30", "newest first"); T.eq(H:text(W.scrollInfo), "1–12 de 30")
+        T.eq(H:text(W.rows[1].id), "#2030", "the game's quest ID is shown")
         W._scripts.OnMouseWheel(W, -1); T.eq(H:text(W.rows[1].name), "Ervas 27"); T.eq(H:text(W.scrollInfo), "4–15 de 30")
         H.env.FarolCompletedSearch:SetText("lobos"); H.env.FarolCompletedSearch._scripts.OnTextChanged(H.env.FarolCompletedSearch)
         T.eq(H:text(W.scrollInfo), "1–12 de 15"); T.eq(H:text(W.rows[1].name), "Lobos 30")
+        -- Busca pelo ID da missão ("2015" ou "#2015").
+        H.env.FarolCompletedSearch:SetText("2015"); H.env.FarolCompletedSearch._scripts.OnTextChanged(H.env.FarolCompletedSearch)
+        T.eq(H:text(W.scrollInfo), "1–1 de 1"); T.eq(H:text(W.rows[1].name), "Ervas 15"); T.eq(H:text(W.rows[1].id), "#2015")
+        H.env.FarolCompletedSearch:SetText("#2030"); H.env.FarolCompletedSearch._scripts.OnTextChanged(H.env.FarolCompletedSearch)
+        T.eq(H:text(W.rows[1].name), "Lobos 30")
         H.env.FarolCompletedSearch:SetText("nada assim"); H.env.FarolCompletedSearch._scripts.OnTextChanged(H.env.FarolCompletedSearch)
-        T.eq(H:text(W.empty), "Nenhuma missão com esse nome."); T.ok(not W.rows[1].name:IsShown())
+        T.eq(H:text(W.empty), "Nenhuma missão com esse nome ou ID."); T.ok(not W.rows[1].name:IsShown())
         H:check(H.env.FarolCompletedRecord, false); T.eq(H.env.FarolDB.questRecord, false)
         local E = Mock.new({ locale = "ptBR" }); E:login(); E:slash("concluidas")
         T.has(E:text(E.env.FarolCompleted.empty), "Marque \"Registrar missões entregues\"")

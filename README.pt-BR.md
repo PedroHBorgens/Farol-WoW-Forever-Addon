@@ -336,8 +336,9 @@ compartilha missões, e não abre categorias fechadas do diário. `/farol aviso 
 ## Missões concluídas
 
 A janela **Missões concluídas** (Menu > Ferramentas, ou `/farol concluidas`) mostra as missões que cada um dos **seus**
-personagens entregou: `[32] Entrega na Baía do Farol — Vale Norte — Hoje 21:40`, da mais nova para a mais antiga, com
-**busca pelo nome** e rolagem com a roda do mouse. No alto, escolha o personagem (só os seus, do mesmo reino).
+personagens entregou: `[32] Entrega na Baía do Farol — #4127 — Vale Norte — Hoje 21:40`, da mais nova para a mais
+antiga, com **busca pelo nome ou pelo ID** e rolagem com a roda do mouse. O **ID** (`#4127`) é o número único que o jogo
+dá a cada missão, útil para procurar a missão em guias e sites. No alto, escolha o personagem (só os seus, do mesmo reino).
 
 - **O registro vem desligado.** Marque **"Registrar missões entregues"** na janela (ou `/farol concluidas registrar on`)
   e, a partir daí, cada missão entregue é guardada com nome, nível, zona e data (até 2.000 por personagem, as mais

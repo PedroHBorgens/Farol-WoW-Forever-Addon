@@ -1814,6 +1814,10 @@ local function PrintStatus()
         Print(string.format(T("quests_status"), (okQ and data) and (data.count .. "/" .. data.max) or "--",
             (okQ and data) and #data.ready or 0, ns.Quests.Source()))
     end
+    if ns.Completed then
+        local okC, line = pcall(ns.Completed.StatusLine)
+        if okC then Print(line) end
+    end
     local ok, outdated = pcall(FindOutdatedSpells)
     outdated = ok and outdated or {}
     Print(string.format(T("warn_status_ranks"), #outdated))

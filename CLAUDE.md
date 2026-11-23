@@ -102,6 +102,12 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   `Profiles.packBackup` (pacotes; `name` some ao mexer num item), `Tasks.lastRemoved` / `Farm.lastRemoved` (cópias,
   nunca a tabela salva; posição inválida → fim da lista; respeita o limite de 10). Botão escondido quando não há o
   que desfazer.
+- Missões concluídas (3.14): entrega por `QUEST_TURNED_IN(id)`; nome/nível capturados no `QUEST_COMPLETE` (janela de
+  recompensa: `GetQuestID`/`GetTitleText` + diário) ou `C_QuestLog.GetTitleForQuestID`; clientes antigos (sem
+  `C_QuestLog`) pela mensagem do sistema `ERR_QUEST_COMPLETE_S`. Total: `C_QuestLog.GetAllCompletedQuestIDs` (moderno) ou
+  `GetQuestsCompleted` (antigo; 0 = não informado, porque no 3.3.5a precisa de `QueryQuestsCompleted`, um pedido ao
+  servidor que **não** fazemos). Nomes de missões antigas exigiriam pedir ao servidor: não pedimos. Nada é gravado com
+  `questRecord` desligado (regra 8); o total ao vivo aparece na barra mesmo assim (só leitura).
 - **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
   lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 
@@ -110,8 +116,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Goals, Farm, Quests, Hearth, Runs, MinimapButton
-  Core.lua          barras (até 3, grade de células), 28 itens, tooltip, menu de opções, comandos /farol, dados salvos
+                    Appearance, Order, Tasks, Goals, Farm, Quests, Hearth, Runs, Completed, MinimapButton
+  Core.lua          barras (até 3, grade de células), 29 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água, tarefas),
@@ -127,6 +133,8 @@ Farol/
   Hearth.lua        Pedra de Regresso (item "hearth": lugar + recarga; aviso hearthReady em Warnings.lua; lugar dos
                     personagens em chars[...].bind, gravado pelo Core)
   Runs.lua          registro de masmorras/raides (corrida atual no item "run", resumo ao sair, 10 últimas, /farol masmorra)
+  Completed.lua     missões concluídas por personagem (janela com busca, item "qdone", registro desligado até o
+                    jogador ligar, total do jogo; /farol concluidas)
   MinimapButton.lua botão próprio no minimapa (sem bibliotecas) + entrada AddonCompartment do .toc (/farol minimapa)
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
   Media/Farol.tga   ícone original (64×64)
@@ -176,7 +184,9 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   e nível dos **próprios** personagens por reino — `chars[reino][nome] = { gold, level, t, rest?, max?, inn?, locks?, bind? }`
   (bind = onde a Pedra de Regresso estava vinculada, texto limpo até 40 letras)
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle
-  e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores) e
+  e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores), `questRecord` (registro de
+  missões, desligado), `completed[reino][nome] = { t = total do jogo, tt = quando, list = { {i, n ≤ 60, l, z ≤ 40, t} } }`
+  (máx. 2000 por personagem, 20 reinos × 60 nomes; só os próprios personagens; `ns.KeepLast`/`ns.KeepRecent`) e
   `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `runs` = `{ list (máx. 10), cur }` corridas
   em masmorras/raides `{ n, k = "party"/"raid", t, s ≥ 60, x, g, l, r, e, d, u (só cur) }` — o `/reload` continua a
   corrida, mais de 15 min fora fecha no último momento visto; saques contados via `Runs.OnLoot` chamado pelo
@@ -277,6 +287,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Tarefas (janela, item, aviso) | 10 |
 | Metas, metas de farm e diário de missões (item e tooltip de progresso) | 08 (e 02/03 pela contagem de itens) |
 | Masmorras e raides (item, resumo, janela) | 11 (e 02/03 pela contagem de itens) |
+| Missões concluídas (janela, item, tooltip) | 12 (e 02/03 pela contagem de itens) |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

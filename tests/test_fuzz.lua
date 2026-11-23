@@ -6,7 +6,7 @@ local ALPHA = { "a", "0", "9", " ", ":", "%", "|", "c", "H", "T", "\n", "\0", "Ã
                 "%s", "%d", "%1$s", "|cff", "|H", "|T", "|A", "|r" }
 local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", "durab", "bolsas", "talentos",
                 "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "municao", "reagentes", "400", "5000", "15", "240", "2",
-                "graus", "som", "status", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
+                "graus", "som", "status", "concluidas", "completed", "registrar", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
                 "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "undo", "voltar", "pacote", "Garrosh", "tarefa", "task", "feita", "apagar", "semanal", "diaria", "meta", "goal", "nivel", "limpar", "item", "farm", "remover", "missoes", "prontas", "aviso", "quests", "19", "regresso", "hearth", "pedra", "|cffffffff|Hitem:4306::|h[Seda]|h|r", "[Seda]", "|Hitem:abc|h", "40", "1000000", "masmorra", "dungeon", "resumo", "minimapa", "minimap", "travar", "on", "off", "07:30", "25:99", "-1", "99999" }
 local BAD = { "x", 1e309, -1e309, 0 / 0, true, false, {}, { 1, 2 }, -5, 3.7, "" }
@@ -50,7 +50,7 @@ return {
     { "tampered saved data with wrong types never breaks any window", function(T, Mock)
         local KEYS = { "x", "y", "point", "lang", "scale", "bgAlpha", "fontSize", "iconSize", "barWidth", "items",
                        "alarms", "loot", "warnings", "order", "snoozeMinutes", "shown", "locked", "icons", "vertical",
-                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind" }
+                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind", "questRecord", "completed" }
         for i = 1, 60 do
             local db = {}
             for _, key in ipairs(KEYS) do if random(3) > 1 then db[key] = pick(BAD) end end
@@ -64,6 +64,9 @@ return {
             end
             if random(3) == 1 then -- personagens: lugar da Pedra de Regresso adulterado
                 db.chars = { Azralon = { Mira = { gold = 100, level = 20, t = 1700000000, bind = pick(BAD) }, [pick({ "x", 1 })] = pick(BAD) } }
+                db.completed = random(3) == 1 and pick(BAD) or { Azralon = { Garrosh = { t = pick(BAD), tt = pick(BAD),
+                    list = { { i = pick(BAD), n = pick(BAD), l = pick(BAD), z = pick(BAD), t = pick(BAD) }, pick(BAD) } },
+                    [pick({ "x", 1 })] = pick(BAD) }, [pick({ "y", 2 })] = pick(BAD) }
             end
             if random(2) == 1 then -- perfis da 3.x: estrutura e cada campo da barra adulterados
                 local bar = {}

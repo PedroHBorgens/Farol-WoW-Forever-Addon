@@ -4,7 +4,7 @@
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
 **FPS · latency · memory · coordinates · zone · speed · Hearthstone · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · gold/level goals · farm goals (items) · quest log · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (28 items).
+reputation · professions · gold/level goals · farm goals (items) · quest log · completed quests · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (29 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -15,7 +15,7 @@ add-on never turns anything on by itself (an automated test checks this).
 
 | On the first time | Everything else starts off |
 |---|---|
-| The bar with the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (7 of 28 items) | The other 21 bar items and bars 2 and 3 |
+| The bar with the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (7 of 29 items) | The other 22 bar items and bars 2 and 3 |
 | Warnings for durability, bags, unspent talents, lower-rank spells and professions (with sound) | Ammo, reagents, break, water, tasks, goals, quests, rested XP of your characters |
 | Session summary at login and when leaving a dungeon — only in **your** chat | Full tooltip, server time, gold of all characters, hide in combat |
 | Minimap button | Per-character profiles, alarms, tasks, goals |
@@ -64,6 +64,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol goal item`  | Farm goals: `/farol goal item [link] 40` (shift-click the item) or by name; `remove`, `clear` |
 | `/farol minimap`    | Show/hide or lock the minimap button (`on`, `off`, `lock`, `unlock`) |
 | `/farol dungeon`    | Your last 10 dungeons and raids: time, XP, gold, loot, deaths (`/farol run`) |
+| `/farol completed`  | Completed quests of each character (list with search and total); `record on\|off` |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
 | `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
 | `/farol bar 2 show` | Turn on bar 2 (or 3) and pick it for the menu, Appearance and Order (`/farol bar` lists the bars) |
@@ -105,7 +106,7 @@ The menu has **four tabs**:
   "Remind in", test, history). At the top, **Recommended only** and **Turn all off** (`/farol warn recommended` /
   `/farol warn none`); at the bottom, the explanation of the hovered warning. `/farol warn` opens the menu on this
   tab.
-- **Tools** — one button per window, with what it does: Alarms, Tasks, Loot, History and **Summary now**.
+- **Tools** — one button per window, with what it does: Alarms, Tasks, Goals, Dungeons, **Completed quests**, Loot, History and **Summary now**.
 - **General** — what applies to all your characters: language (Auto / Português / English), server time, session
   summary at login, gold of all characters, full tooltip, the quick buttons next to bar 1, the **minimap button**
   (show / lock); **Restore**: bar position, reset session, forget characters; and **Profiles (advanced)**: the same
@@ -327,6 +328,25 @@ more"). Two optional warnings (off) in the **Warnings** tab: **quest log almost 
 (`/farol warn ready on`; at most every 5 minutes). Farol only **reads** the quest log: it never accepts, turns in,
 abandons or shares quests, and never opens collapsed categories. `/farol warn status` shows what it read.
 
+## Completed quests
+
+The **Completed quests** window (Menu > Tools, or `/farol completed`) shows the quests each of **your** characters has
+turned in: `[32] Delivery to Lighthouse Bay — #4127 — North Vale — Today 21:40`, newest first, with a **search by name
+or ID** and mouse wheel scrolling. The **ID** (`#4127`) is the unique number the game gives each quest, handy to look the
+quest up in guides and websites. At the top, pick the character (only yours, on the same realm).
+
+- **Recording starts off.** Tick **"Record turned-in quests"** in the window (or `/farol completed record on`) and from
+  then on each quest you turn in is saved with name, level, zone and date (up to 2,000 per character, the most recent).
+- **Total in game:** how many quests the game says the character has completed, **including those from before
+  recording**. Their names are not shown: the game only reports them if the add-on asks the server, and Farol does not
+  make that request. The total includes some internal markers of the game, so it may be a little higher than the real
+  number. If the client does not report it, it shows `--` (the recorded list still works).
+- Optional bar item (off): `Completed 412`, with each character's total, how many you turned in today and the latest
+  ones in the tooltip.
+- Everything stays on your computer (`FarolDB`); nothing is sent. **Forget characters** also deletes their lists.
+  `/farol warn status` shows which game function reported the total. Farol only **reads**: it never accepts, turns in
+  or abandons quests.
+
 ## Dungeon and raid runs
 
 When you enter a **dungeon or raid**, Farol starts a "run" on its own: time inside, **XP**, **gold** (net, so repairs
@@ -418,6 +438,7 @@ in the menu, or `/farol session reset`, to restart them (e.g. when you move to a
 | XP per hour     | XP/h and time to next level (after 1 min of session)   | `xph`        | off     |
 | Reputation      | Watched faction: standing (game colors), progress %, rep/hour | `rep`        | off     |
 | Professions     | Main professions with level/training limit (yellow near, red at the limit) | `prof` | off |
+| Completed quests | How many quests this character has completed (each character's list in the window) | `completed` | off |
 | Clock           | Local time, or server time (menu option)               | `clock`      | off     |
 | Resets          | Time until the daily and weekly reset                  | `reset`      | off     |
 | Session time    | How long you've been playing since login / `/reload`   | `playtime`   | off     |

@@ -530,6 +530,11 @@ O WoW Forever roda no cliente moderno (Midnight) e herda as restrições de comb
 Toda leitura do Farol é protegida: se o jogo esconder ou bloquear um valor (por exemplo, em combate), o painel
 mostra `--` em vez de dar erro.
 
+O WoW Forever **não informa o reino** e os personagens têm **nome e sobrenome**. O Farol identifica cada personagem
+pelo nome + sobrenome (ex.: "Oxis Raknash") e agrupa todos num reino de reserva, mostrado como "este reino". Isso vale
+para o ouro e o descanso dos seus personagens, as instâncias salvas, os perfis por personagem e as missões concluídas.
+`/farol aviso status` mostra como o personagem foi identificado.
+
 ## Segurança
 
 Segurança da informação é a primeira regra deste projeto:

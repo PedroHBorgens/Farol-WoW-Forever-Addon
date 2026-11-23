@@ -2,6 +2,14 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.15.1 — Characters on WoW Forever (no realm, name + surname)
+- Fixed: WoW Forever returns an empty realm, so Farol could not identify the character and the completed quests list,
+  the gold/rested XP of your characters, saved instances of alts and per-character profiles stayed empty. A fixed
+  fallback realm is now used (shown as "this realm").
+- WoW Forever characters have a surname: `UnitName("player")` returns ("Name", "Surname"). The character is now
+  identified as "Name Surname", so characters with the same first name are not mixed up.
+- `/farol warn status` shows the identified character and realm. New `tests/test_realm.lua`.
+
 ## 3.15.0 — Earlier completed quests by ID
 - Completed quests window: new option **"Show quests from before recording (ID only)"** (off by default). It lists, after
   the recorded quests, the IDs the game reports as completed (`#3210 (before recording)`), highest first, searchable by ID.

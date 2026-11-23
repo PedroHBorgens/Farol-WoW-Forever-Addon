@@ -24,6 +24,9 @@ local function tip(H)
 end
 
 return {
+    -- Os casos usam um reino e um nome fixos nos dados salvos; na passada "Forever real" eles seguem com essa
+    -- identidade (o resto do comportamento real, como o ouro 0 ao sair, continua valendo). Ver test_forever_real.lua.
+    fixedIdentity = true,
     { "logout saves the rested XP, the level's XP and whether you are in an inn/city", function(T, Mock)
         local H = Mock.new():login(); H.resting = true; H:update(1)
         H:event("PLAYER_LOGOUT")

@@ -65,6 +65,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol minimap`    | Show/hide or lock the minimap button (`on`, `off`, `lock`, `unlock`) |
 | `/farol dungeon`    | Your last 10 dungeons and raids: time, XP, gold, loot, deaths (`/farol run`) |
 | `/farol completed`  | Completed quests of each character (list with search and total); `record on\|off` |
+| `/farol diag`       | Shows in your own chat how the game answered (character, realm, gold, last logout, events); read-only |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
 | `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
 | `/farol bar 2 show` | Turn on bar 2 (or 3) and pick it for the menu, Appearance and Order (`/farol bar` lists the bars) |
@@ -531,7 +532,14 @@ WoW Forever **does not report the realm** and characters have a **first name and
 character by name + surname (e.g. "Oxis Raknash") and groups them all under a fallback realm, shown as "this realm".
 This applies to your characters' gold and rested XP, saved instances, per-character profiles and completed quests.
 `/farol warn status` shows how the character was identified. When you log out, WoW Forever reports 0 gold, so Farol
-saves the gold from the last reading made while you were playing.
+saves the gold from the last reading made while you were playing; other readings that fail at that moment (rested
+XP, saved instances, Hearthstone place) never erase what was already saved.
+
+`/farol diag` (since 3.18) shows **in your own chat** how the game answered: character name and surname, the realm as
+the game reported it, current gold, whether the game reported 0 gold at your last logout (and Farol kept the right
+value), server time and resets, completed quests, and how many times some game events happened this session (quest
+turn-in, reward window, quest accepted, gold changed). It only reads: nothing is sent or requested from the server,
+and the counts live only in memory. A screenshot of it helps a lot when you report a problem.
 ## Security
 
 Information security is this project's first rule:
@@ -543,7 +551,7 @@ Information security is this project's first rule:
   items and their order, appearance, alarms (time, clock type, on/off, a cleaned-up name and the snooze time),
   loot window and warning settings (since 3.0 the bar settings are grouped in a profile), and the gold and level of **your own** characters per realm (for the account
   total). `FarolCharDB` (per character) stores only your loot history (validated item
-  links), the last 10 warnings and the last session's summary (numbers only). Everything is checked on load — a corrupted or tampered file falls back to defaults.
+  links), the last 10 warnings, the last session's summary (numbers only) and whether the game reported 0 gold at the last logout (yes/no and when, for `/farol diag`). Everything is checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official sources** (this repository or the CurseForge page). Addons are plain Lua text:
   you can read all of it in the `Farol` folder.
 
@@ -558,7 +566,9 @@ uses), against a small mock of the WoW API (`tests/wow_mock.lua`). They cover th
 water reminders and the grouped window), appearance, reputation, resets, the session summary, the `.toc` files, a
 scan that fails if the code ever uses automation, messaging or dynamic-code APIs, a check that the add-on creates no
 generic global names (only `Farol…`), and fuzzing with random and malicious commands, chat messages and tampered
-saved data. The suite runs on Lua 5.1 and is also checked on Lua 5.4.
+saved data. The suite runs on Lua 5.1 and is also checked on Lua 5.4. It runs **twice**: once with a "textbook" mock
+and once ("forever-real") the way WoW Forever really answers — empty realm, a surname in the character name and
+0 gold at logout — plus a test where every game reading returns 0 or empty at logout and nothing saved may be lost.
 
 ```
 lua5.1 tests/run.lua

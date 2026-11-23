@@ -113,7 +113,7 @@ local function Read(fn, ...)
     return a, b, c
 end
 
-local function Money() return ns.Money and Num(ns.Money()) or Num((Read(GetMoney))) end -- leitura segura (0 ao sair)
+local function Money() return Num(ns.Money()) end -- leitura segura (0 ao sair)
 local function Level() return Num((Read(UnitLevel, "player"))) end
 local function MaxLevel()
     local max = Num((Read(GetMaxPlayerLevel)))

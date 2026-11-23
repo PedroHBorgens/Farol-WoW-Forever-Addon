@@ -65,6 +65,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol minimapa`   | Mostra/esconde ou trava o botão do minimapa (`on`, `off`, `travar`, `destravar`) |
 | `/farol masmorra`   | Suas 10 últimas masmorras e raides: tempo, XP, ouro, saques, mortes |
 | `/farol concluidas` | Missões concluídas de cada personagem (lista com busca e total); `registrar on\|off` |
+| `/farol diagnostico` | Mostra no seu próprio chat como o jogo respondeu (personagem, reino, ouro, último logout, eventos); só leitura |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
 | `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
 | `/farol barra 2 mostrar` | Liga a barra 2 (ou 3) e escolhe ela para o menu, a Aparência e a Ordem (`/farol barra` lista as barras) |
@@ -540,7 +541,14 @@ O WoW Forever **não informa o reino** e os personagens têm **nome e sobrenome*
 pelo nome + sobrenome (ex.: "Oxis Raknash") e agrupa todos num reino de reserva, mostrado como "este reino". Isso vale
 para o ouro e o descanso dos seus personagens, as instâncias salvas, os perfis por personagem e as missões concluídas.
 `/farol aviso status` mostra como o personagem foi identificado. No momento de sair do jogo, o WoW Forever informa
-0 de ouro; por isso o Farol grava o ouro da última leitura feita durante o jogo.
+0 de ouro; por isso o Farol grava o ouro da última leitura feita durante o jogo, e outras leituras que falharem nessa
+hora (XP descansado, instâncias salvas, lugar da Pedra de Regresso) nunca apagam o que já estava salvo.
+
+`/farol diagnostico` (desde a 3.18) mostra **no seu próprio chat** como o jogo respondeu: nome e sobrenome do
+personagem, o reino como o jogo informou, o ouro atual, se o jogo informou 0 de ouro no seu último logout (e o Farol
+manteve o valor certo), hora do servidor e resets, missões concluídas e quantas vezes alguns eventos do jogo aconteceram
+nesta sessão (entrega de missão, janela de recompensa, missão aceita, ouro mudou). Só lê: nada é enviado nem pedido ao
+servidor, e as contagens ficam só na memória. Um print dele ajuda muito ao relatar um problema.
 
 ## Segurança
 
@@ -553,7 +561,7 @@ Segurança da informação é a primeira regra deste projeto:
   itens visíveis e a ordem deles, aparência, alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o
   tempo da soneca), ajustes da janela de saques e dos avisos (desde a 3.0 os ajustes da barra ficam agrupados num perfil), e o ouro e o nível dos **seus próprios** personagens
   por reino (para o total da conta). `FarolCharDB` (por personagem) guarda só o histórico
-  de saques (links de item validados), os 10 últimos avisos e o resumo da última sessão (só números). Tudo é verificado ao carregar — um arquivo corrompido
+  de saques (links de item validados), os 10 últimos avisos, o resumo da última sessão (só números) e se o jogo informou 0 de ouro no último logout (sim/não e quando, para o `/farol diagnostico`). Tudo é verificado ao carregar — um arquivo corrompido
   ou adulterado volta para os valores padrão.
 - **Baixe só das fontes oficiais** (este repositório ou a página do CurseForge). Addons são texto Lua: você pode ler
   todo o código na pasta `Farol`.
@@ -570,7 +578,9 @@ os avisos (inclusive os lembretes de pausa e água e a janela agrupada), a apar�
 da sessão, os arquivos `.toc`, uma varredura que falha se o código algum dia usar APIs de automação, de mensagens ou
 de execução de código, uma checagem de que o addon não cria nomes globais genéricos (só `Farol…`), e um fuzzing com
 comandos, mensagens de chat e dados salvos aleatórios e maliciosos. A suíte roda em Lua 5.1 e também é conferida em
-Lua 5.4.
+Lua 5.4. Ela roda **duas vezes**: uma com um simulador "de livro" e outra ("forever-real") do jeito que o WoW Forever
+responde de verdade — reino vazio, sobrenome no nome do personagem e ouro 0 ao sair —, além de um teste em que todas
+as leituras do jogo voltam 0 ou vazio no logout e nada salvo pode se perder.
 
 ```
 lua5.1 tests/run.lua

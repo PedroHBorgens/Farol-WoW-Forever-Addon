@@ -238,7 +238,7 @@ local function Sample(run)
     end
     -- Ouro pela leitura segura do Core: o WoW Forever devolve 0 ao sair do jogo (sair dentro da masmorra não pode
     -- virar "perdeu todo o ouro").
-    local money = ns.Money and Num(ns.Money()) or Num((Read(GetMoney)))
+    local money = Num(ns.Money())
     if money then
         if baseMoney then run.g = math.max(-1e11, math.min(1e11, run.g + math.floor(money - baseMoney))) end
         baseMoney = money

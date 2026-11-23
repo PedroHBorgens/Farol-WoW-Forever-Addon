@@ -79,27 +79,40 @@ local SUITES = {
     "test_menu",
     "test_goals",
     "test_runs",
-    "test_minimap", "test_farm", "test_quests", "test_defaults", "test_hearth", "test_menu2", "test_a11y", "test_undo", "test_copy", "test_hardening", "test_completed", "test_realm",
+    "test_minimap", "test_farm", "test_quests", "test_defaults", "test_hearth", "test_menu2", "test_a11y", "test_undo", "test_copy", "test_hardening", "test_completed", "test_realm", "test_forever_real",
     "test_globals",
 }
 
 local passed, failed = 0, 0
 local failures = {}
 
-for _, suiteName in ipairs(SUITES) do
-    local suite = require(suiteName)
-    print("== " .. suiteName)
-    for _, case in ipairs(suite) do
-        local ok, err = pcall(case[2], T, Mock)
-        if ok then
-            passed = passed + 1
-            print("  ok    " .. case[1])
-        else
-            failed = failed + 1
-            print("  FAIL  " .. case[1])
-            print("        " .. tostring(err))
-            table.insert(failures, suiteName .. " / " .. case[1])
+-- Duas passadas: a 1ª com o simulador "de livro" (reino com nome, nome sem sobrenome); a 2ª, "forever-real", como o
+-- WoW Forever responde de verdade (reino vazio e sobrenome). Ouro 0 ao sair vale nas duas. Suítes com
+-- fixedIdentity = true usam um reino e um nome fixos nos dados salvos e mantêm essa identidade na 2ª passada.
+-- FAROL_PASS=1 ou FAROL_PASS=2 roda só uma delas.
+local onlyPass = tonumber(os.getenv and os.getenv("FAROL_PASS") or nil)
+for pass = 1, 2 do
+    if not onlyPass or onlyPass == pass then
+        local label = pass == 1 and "" or " [forever-real]"
+        if pass == 2 then print("\n######## forever-real: reino vazio + sobrenome ########") end
+        for _, suiteName in ipairs(SUITES) do
+            local suite = require(suiteName)
+            Mock.REAL = pass == 2 and not suite.fixedIdentity
+            print("== " .. suiteName .. label)
+            for _, case in ipairs(suite) do
+                local ok, err = pcall(case[2], T, Mock)
+                if ok then
+                    passed = passed + 1
+                    print("  ok    " .. case[1])
+                else
+                    failed = failed + 1
+                    print("  FAIL  " .. case[1])
+                    print("        " .. tostring(err))
+                    table.insert(failures, suiteName .. label .. " / " .. case[1])
+                end
+            end
         end
+        Mock.REAL = false
     end
 end
 

@@ -22,6 +22,9 @@ local function turnIn(H, id, title)
 end
 
 return {
+    -- Os casos usam um reino e um nome fixos nos dados salvos; na passada "Forever real" eles seguem com essa
+    -- identidade (o resto do comportamento real, como o ouro 0 ao sair, continua valendo). Ver test_forever_real.lua.
+    fixedIdentity = true,
     { "off by default: nothing is recorded or saved until the player turns recording on", function(T, Mock)
         local H = Mock.new({ locale = "ptBR" }); H.completedIDs = ids(412)
         H:login()

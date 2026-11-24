@@ -45,6 +45,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · **Hearthstone: where
 ### Session summary
 - `/farol summary` shows what you did this session **in your own chat**: gold (and per hour), XP and levels, reputation (standing before → after), loot (rares, epics, legendaries) and warnings.
 - The last session's summary is shown **the next time you log in** (option in the menu; not after `/reload`).
+- **Farol messages in a chat tab of their own:** create a tab named "Farol" and pick it in Menu > General (or `/farol chat Farol`); by default they stay in the main chat. Farol only writes in your own chat — nothing is sent.
 - **Optional:** where the session's XP and gold come from — quests, monsters, loot, merchant sales and purchases/repairs — in the XP and gold tooltips and in the summary (Menu > General, starts off).
 - `/farol diag` shows in your own chat **how the game answered** (character, realm, gold, last logout, quest events) — read-only, handy to include in a bug report.
 
@@ -105,6 +106,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · **Pedra de 
 ### Resumo da sessão
 - `/farol resumo` mostra **no seu chat** o que você fez na sessão: ouro (e por hora), XP e níveis, reputação (nível antes → depois), saques (raros, épicos, lendários) e avisos.
 - O resumo da última sessão aparece **na próxima vez que você entrar** (opção no menu; não aparece depois de `/reload`).
+- **Mensagens do Farol numa aba de chat própria:** crie uma aba chamada "Farol" e escolha em Menu > Geral (ou `/farol chat Farol`); por padrão continuam no chat principal. O Farol só escreve no seu chat — nada é enviado.
 - **Opcional:** de onde vem o XP e o ouro da sessão — missões, monstros, saque, vendas e compras/consertos no comerciante — nos tooltips do XP e do ouro e no resumo (Menu > Geral, vem desligado).
 - `/farol diagnostico` mostra no seu chat **como o jogo respondeu** (personagem, reino, ouro, último logout, eventos de missão) — só leitura, útil para relatar um problema.
 

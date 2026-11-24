@@ -71,6 +71,10 @@ return {
             "AcceptQuest", "CompleteQuest", "GetQuestReward", "AbandonQuest", "SetAbandonQuest", "QuestLogPushQuest",
             "AddQuestWatch", "RemoveQuestWatch", "ExpandQuestHeader", "CollapseQuestHeader", "SelectQuestLogEntry",
             "C_QuestLog.AbandonQuest", "C_QuestLog.SetAbandonQuest", "C_QuestLog.AddQuestWatch",
+            -- janelas de chat (3.20): só escrever na aba que o jogador já tem; nunca criar, renomear ou configurar abas
+            "FCF_OpenNewWindow", "FCF_SetWindowName", "FCF_Close", "FCF_DockFrame", "SetChatWindowName",
+            "ChatFrame_AddMessageGroup", "ChatFrame_RemoveMessageGroup", "ChatFrame_AddChannel", "JoinChannelByName",
+            "SetChatWindowShown", "AddChatWindowMessages", "RemoveChatWindowMessages",
             -- Pedra de Regresso: nunca usar itens nem vincular em outro lugar
             "UseInventoryItem", "ConfirmBinder", "C_PlayerInteractionManager", "UseToy", "C_Container.UseContainerItem",
         }

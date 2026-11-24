@@ -2,6 +2,16 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.20.0 — Farol messages in a chat tab of their own
+- New option in Menu > General, **"Farol messages in"** (and `/farol chat Name`): choose which of your chat windows
+  Farol writes to, for example a tab named "Farol" that you create (right-click a chat tab → New Window). Default:
+  the main chat, as before. `/farol chat` lists your chat windows; `/farol chat main` goes back.
+- Farol only writes (`AddMessage`) in a window you already have; it never creates, renames or configures chat tabs
+  (new forbidden-API entries in `test_toc.lua`). If the tab disappears, is renamed or fails, messages go to the main
+  chat. Saved name validated (`FarolDB.chatWindow`, at most 48 bytes, no `|` or control characters).
+- CLAUDE.md: confirmed in game that WoW Forever reports the quest XP and gold rewards on turn-in.
+- 714 tests (2 passes).
+
 ## 3.19.0 — Where the XP and gold come from
 - New option (off by default) **"Show where the XP and gold come from"** (Menu > General, `/farol source on|off`):
   the XP and gold tooltips and the session summary split the session by source — XP from quests (with how many were

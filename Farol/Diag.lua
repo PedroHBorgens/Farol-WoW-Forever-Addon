@@ -176,6 +176,7 @@ function Diag.Report()
             return string.format(T(counts[CHAT_DONE] > 0 and "dg_turnin_chat" or "dg_turnin_none"), C.warn)
         end)
     end
+    if ns.Sources then Line(ns.Sources.DiagLine) end
     Line(function()
         local list = ns.RealmCharacters()
         return string.format(T("dg_saved"), list and #list or 0)

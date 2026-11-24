@@ -2,6 +2,18 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.19.0 — Where the XP and gold come from
+- New option (off by default) **"Show where the XP and gold come from"** (Menu > General, `/farol source on|off`):
+  the XP and gold tooltips and the session summary split the session by source — XP from quests (with how many were
+  turned in), monsters (in combat or up to 3 s after) and other; gold from quest rewards, monster loot (loot window
+  open), merchant sales, merchant purchases and repairs, and other (mail, auction, trade, trainers, flights).
+- Quests use the XP and gold reported by `QUEST_TURNED_IN`; when the game does not report them, the change within 2 s
+  of the turn-in counts. "Other" = session total minus the other sources, so the sum always matches.
+- `/farol diag` shows the reward of the last turn-in (or "not reported"). The saved summary keeps only numbers
+  (`lastSession.src`, validated on load); the counting itself lives only in memory. Nothing is sent.
+- CLAUDE.md: confirmed in game that WoW Forever reports 0 gold only on a real logout, not on `/reload`.
+- Image 09 (session summary) updated. 700 tests (2 passes).
+
 ## 3.18.0 — Diagnostics and tests that answer like WoW Forever
 - New command **`/farol diag`** (`/farol diagnostico`): shows in your own chat how the game answered — name and
   surname, the realm as reported (WoW Forever: empty), current gold, whether the game reported 0 gold at your last

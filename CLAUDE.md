@@ -39,6 +39,12 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   ouro), o último logout (`FarolCharDB.diag = { lz = o jogo deu 0 de ouro, t }`, validado) e contagens de eventos só
   na memória (`QUEST_TURNED_IN`, `QUEST_COMPLETE`, `QUEST_ACCEPTED`, mensagem `ERR_QUEST_COMPLETE_S`, `PLAYER_MONEY`).
   Ao descobrir outro comportamento estranho do jogo, acrescente uma linha ao diagnóstico.
+- **De onde vem o XP e o ouro (Sources.lua, 3.19):** XP de missão = `xpReward` do `QUEST_TURNED_IN(id, xp, ouro)`;
+  monstros = XP em luta ou até 3 s depois (`PLAYER_REGEN_*`); ouro de saque = com `LOOT_OPENED` aberto (+1 s);
+  comerciante = entre `MERCHANT_SHOW`/`MERCHANT_CLOSED` (+ vendas, − compras/consertos). Sem valor na entrega, conta a
+  mudança até 2 s antes/depois. "Outros" = total da sessão − as outras (a soma sempre bate). O XP chega pelo
+  `SampleXP` do Core (`Sources.OnXP`); `ResetSession` chama `Sources.Reset`. Sem "por hora" por origem (o jogo não
+  diz o tempo de cada atividade). Resumo salvo: `lastSession.src = { qx, mx, ox, qn, qg, lg, sg, bg, og }` (validado).
 - O cliente lê **`Farol_Mainline.toc`** (não o `Farol.toc`). `Farol_Camelot.toc` é reserva. Ao mudar a versão do
   cliente, atualize a linha `## Interface:` (versão `1.60.1` → `16001`).
 - Pasta de addons: `World of Warcraft/_forever_/Interface/AddOns/`.
@@ -46,7 +52,9 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   ("Oxis", "Raknash"). `CurrentCharacter` usa nome + sobrenome ("Oxis Raknash") e o reino de reserva
   `Profiles.REALM_FALLBACK` ("-", mostrado como "este reino" por `Profiles.RealmLabel`). Nunca mostre o "-" cru: use
   `ns.RealmLabel`. `/farol aviso status` mostra como o personagem foi identificado.
-- **Ouro ao sair (3.17.1):** no `PLAYER_LOGOUT` o WoW Forever devolve `GetMoney() == 0`. Leia o ouro só por
+- **Ouro ao sair (3.17.1):** no `PLAYER_LOGOUT` o WoW Forever devolve `GetMoney() == 0` — confirmado com o
+  `/farol diagnostico` (3.18): acontece na **saída de verdade** (voltar à seleção de personagens/sair do jogo); no
+  `/reload` o ouro vem certo. O simulador dá 0 nos dois casos (mais rígido, de propósito). Leia o ouro só por
   `Profiles.Money()` (guarda `Profiles.lastMoney` durante o jogo e no `PLAYER_MONEY`; com `Profiles.loggingOut` devolve
   a última leitura). Nunca chame `GetMoney` direto no que roda ao sair (ouro dos personagens, resumo da sessão).
 - **"Secret values"** (restrições do Midnight): em combate alguns valores ficam bloqueados. Toda leitura passa por
@@ -143,7 +151,7 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Goals, Farm, Quests, Hearth, Runs, Completed, Diag, MinimapButton
+                    Appearance, Order, Tasks, Goals, Farm, Quests, Hearth, Runs, Completed, Sources, Diag, MinimapButton
   Core.lua          barras (até 3, grade de células), 29 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
@@ -162,6 +170,7 @@ Farol/
   Runs.lua          registro de masmorras/raides (corrida atual no item "run", resumo ao sair, 10 últimas, /farol masmorra)
   Completed.lua     missões concluídas por personagem (janela com busca, item "qdone", registro desligado até o
                     jogador ligar, total do jogo; /farol concluidas)
+  Sources.lua       de onde vem o XP e o ouro (opção "sources", desligada; tooltips XP/ouro, resumo, /farol origem)
   Diag.lua          /farol diagnostico: leituras cruas do jogo, último logout e contagem de eventos (só leitura)
   MinimapButton.lua botão próprio no minimapa (sem bibliotecas) + entrada AddonCompartment do .toc (/farol minimapa)
   Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)

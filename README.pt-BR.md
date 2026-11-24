@@ -65,6 +65,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol minimapa`   | Mostra/esconde ou trava o botão do minimapa (`on`, `off`, `travar`, `destravar`) |
 | `/farol masmorra`   | Suas 10 últimas masmorras e raides: tempo, XP, ouro, saques, mortes |
 | `/farol concluidas` | Missões concluídas de cada personagem (lista com busca e total); `registrar on\|off` |
+| `/farol origem on\|off` | Mostra de onde vem o XP e o ouro da sessão (missões, monstros, saque, comerciante) |
 | `/farol diagnostico` | Mostra no seu próprio chat como o jogo respondeu (personagem, reino, ouro, último logout, eventos); só leitura |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
 | `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
@@ -410,6 +411,21 @@ Farol:   Saques: 46 (3 raros, 1 épico) · Avisos: 2
 - Usa os mesmos números da barra (ouro da sessão, XP/h, reputação por hora) e os históricos de saques e de avisos.
   Nada é enviado a ninguém.
 
+### De onde vem o XP e o ouro (opcional, desde a 3.19)
+
+Ligue **"Mostrar de onde vem o XP e o ouro"** (Menu > Geral, ou `/farol origem on`) e os tooltips do XP e do ouro,
+além do resumo da sessão, dividem a sessão por origem:
+
+- **XP:** missões (com quantas você entregou), monstros (XP ganho em luta ou até 3 s depois) e outros (descobrir
+  lugares, profissões).
+- **Ouro:** recompensas de missão, saque de monstros (com a janela de saque aberta), vendas ao comerciante, compras
+  e consertos no comerciante, e outros (correio, leilão, troca, treinadores, voos...).
+- Missões usam o XP e o ouro que o jogo informa na entrega; se o jogo não informar, conta a mudança que chega junto
+  da entrega (até 2 s). "Outros" é sempre o total da sessão menos as outras origens, então a soma bate com o ouro e o
+  XP da sessão. O `/farol diagnostico` mostra se o jogo informou a recompensa.
+- As porcentagens são da sessão inteira (o jogo não informa quanto tempo você passou em cada atividade, então não há
+  "por hora" de cada origem). Vem desligado; só lê eventos que o jogo já manda; nada é enviado.
+
 ## Janela de últimos saques
 
 Uma janela separada que lista os itens que **você** saqueou ou recebeu, do mais novo para o mais antigo.
@@ -561,7 +577,7 @@ Segurança da informação é a primeira regra deste projeto:
   itens visíveis e a ordem deles, aparência, alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o
   tempo da soneca), ajustes da janela de saques e dos avisos (desde a 3.0 os ajustes da barra ficam agrupados num perfil), e o ouro e o nível dos **seus próprios** personagens
   por reino (para o total da conta). `FarolCharDB` (por personagem) guarda só o histórico
-  de saques (links de item validados), os 10 últimos avisos, o resumo da última sessão (só números) e se o jogo informou 0 de ouro no último logout (sim/não e quando, para o `/farol diagnostico`). Tudo é verificado ao carregar — um arquivo corrompido
+  de saques (links de item validados), os 10 últimos avisos, o resumo da última sessão (só números, inclusive o XP/ouro por origem quando essa opção está ligada) e se o jogo informou 0 de ouro no último logout (sim/não e quando, para o `/farol diagnostico`). Tudo é verificado ao carregar — um arquivo corrompido
   ou adulterado volta para os valores padrão.
 - **Baixe só das fontes oficiais** (este repositório ou a página do CurseForge). Addons são texto Lua: você pode ler
   todo o código na pasta `Farol`.

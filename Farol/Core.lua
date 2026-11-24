@@ -80,6 +80,7 @@ local DEFAULTS = {
     runSummary = true,  -- resumo no chat ao sair de uma masmorra ou raide (Runs.lua)
     questRecord = false, -- registrar missões entregues (Completed.lua): regra 8, só o jogador liga
     questShowOld = false, -- janela de missões concluídas: mostrar também as de antes do registro (só o ID)
+    sources = false,    -- de onde vem o XP e o ouro (Sources.lua): regra 8, só o jogador liga
     colorblind = false, -- cores para daltonismo: azul / amarelo / laranja no lugar de verde / amarelo / vermelho
     newsSeen = 0,       -- quantas novidades (NEWS) o jogador já viu; boas-vindas/novidades aparecem uma vez
     snoozeMinutes = 5,  -- duração da soneca dos alarmes (1 a 60)
@@ -1199,11 +1200,13 @@ local function SampleXP()
     local cur, max = UnitXP("player"), UnitXPMax("player")
     if type(cur) ~= "number" or type(max) ~= "number" or IsSecret(cur) or IsSecret(max) then return end
     if session.lastXP then
+        local before = session.xpGained
         if level > session.lastLevel then
             session.xpGained = session.xpGained + math.max(0, session.lastMax - session.lastXP) + cur
         elseif cur > session.lastXP then
             session.xpGained = session.xpGained + (cur - session.lastXP)
         end
+        if session.xpGained > before and ns.Sources then pcall(ns.Sources.OnXP, session.xpGained - before) end
     end
     session.lastXP, session.lastMax, session.lastLevel = cur, max, level
 end
@@ -1389,6 +1392,7 @@ local function ResetSession()
     session.lastXP = nil
     session.repID = nil -- recomeça a contagem de reputação
     session.profStart = nil -- e a das profissões
+    if ns.Sources then pcall(ns.Sources.Reset) end -- e a de onde vem o XP e o ouro
     pcall(SampleXP)
     pcall(SampleRep)
     pcall(SampleProfs)
@@ -2278,6 +2282,7 @@ local function FormatBig(n)
     if n >= 1000 then return string.format("%.1fk", n / 1000) end
     return tostring(math.floor(n + 0.5))
 end
+ns.FormatBig, ns.FormatMoneyDelta = FormatBig, FormatMoneyDelta -- Sources.lua
 
 -- XP por hora e segundos até o próximo nível (nil enquanto não há dados suficientes).
 local function GetXPRate()
@@ -2362,6 +2367,7 @@ local function BuildSummary()
         epic = CountSince(char.items, since, function(q) return q == 4 end),
         legend = CountSince(char.items, since, function(q) return q >= 5 end),
         warns = CountSince(char.warnHistory, since),
+        src = db.sources and ns.Sources and ns.Sources.Snapshot() or nil, -- só números, só com a opção ligada
     }
 end
 
@@ -2392,6 +2398,7 @@ local function SanitizeSummary(saved)
     if type(saved.repName) == "string" and #saved.repName > 0 and #saved.repName <= 100 then
         clean.repName = saved.repName
     end
+    clean.src = ns.Sources and ns.Sources.SanitizeSnap(saved.src) or nil
     return clean
 end
 ns.SanitizeSummary = SanitizeSummary
@@ -2427,6 +2434,9 @@ local function SummaryLines(s, last)
         parts[#parts + 1] = xp
     end
     lines[#lines + 1] = "  " .. table.concat(parts, " · ")
+    if s.src and ns.Sources then
+        for _, line in ipairs(ns.Sources.SummaryLines(s.src)) do lines[#lines + 1] = "  " .. line end
+    end
     if s.rep > 0 and s.repName then
         local text = string.format(T("sum_rep"), FormatBig(s.rep), FactionName(s.repName))
         if s.repFrom and s.repTo then
@@ -2483,7 +2493,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2500,7 +2510,7 @@ Profiles.NEWS_ITEM = { news_rep = "rep", news_reset = "reset", news_prof = "prof
                        news_tasks = "tasks", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests",
                        news_hearth = "hearth" }
 Profiles.NEWS_WARN = { news_breaks = "pause" }
-Profiles.NEWS_OPTION = { news_colors = "colorblind" } -- opções da aba Geral
+Profiles.NEWS_OPTION = { news_colors = "colorblind", news_sources = "sources" } -- opções da aba Geral
 function Profiles.NewsLine(key)
     local item, warn = Profiles.NEWS_ITEM[key], Profiles.NEWS_WARN[key]
     if item and not db.items[item] then return T(key) .. T("news_off_bar") end
@@ -3066,6 +3076,7 @@ TIP.gold = function()
     else
         AddPair(T("tt_goldh"), T("tt_rate_wait"))
     end
+    if ns.Sources then pcall(ns.Sources.TipGold) end -- de onde veio o ouro (opção, desligada)
     local chars, charsTotal, realm = Safe(RealmCharacters)
     if chars and #chars > 1 then
         AddPair(string.format(T("tt_gold_total"), realm == Profiles.REALM_FALLBACK and T("realm_this") or FactionName(realm)), FormatMoneyShort(charsTotal))
@@ -3159,6 +3170,7 @@ TIP.xp = function()
     else
         AddPair(T("tt_xph"), T("tt_rate_wait"))
     end
+    if ns.Sources then pcall(ns.Sources.TipXP, AddPair) end -- de onde veio o XP (opção, desligada)
 end
 
 TIP.rep = function()
@@ -3750,15 +3762,16 @@ local function BuildControls(parent, top)
     set.minimap = CreateCheck(page, 20, -234, function(value) ns.MinimapButton.SetShown(value) end)
     set.minimapLock = CreateCheck(page, 20, -260, function(value) ns.MinimapButton.SetLocked(value) end)
     set.colorblind = CreateCheck(page, 20, -286, function(value) Profiles.SetColorblind(value) end)
-    set.restoreHeader = CreateHeader(page, -322)
+    set.sources = CreateCheck(page, 20, -312, function(value) ns.Sources.SetEnabled(value) end)
+    set.restoreHeader = CreateHeader(page, -348)
     set.reset = CreateButton(page, 170, function() ResetPosition() end)
-    set.reset:SetPoint("TOPLEFT", 20, -342)
+    set.reset:SetPoint("TOPLEFT", 20, -368)
     set.sessionReset = CreateButton(page, 170, function()
         ResetSession()
         UpdateText()
         Print(T("session_reset"))
     end)
-    set.sessionReset:SetPoint("TOPLEFT", 196, -342)
+    set.sessionReset:SetPoint("TOPLEFT", 196, -368)
     -- "Esquecer personagens": pede um segundo clique (em até 5 s) para confirmar.
     set.forget = CreateButton(page, 190, nil)
     set.forget:SetScript("OnClick", function(self)
@@ -3774,18 +3787,18 @@ local function BuildControls(parent, top)
         end
         RefreshOptions()
     end)
-    set.forget:SetPoint("TOPLEFT", 372, -342)
+    set.forget:SetPoint("TOPLEFT", 372, -368)
     -- Perfis (avançado): as mesmas barras em todos os personagens ou só neste, e "Copiar de...".
-    set.profileHeader = CreateHeader(page, -378)
+    set.profileHeader = CreateHeader(page, -398)
     set.profileLabel = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    set.profileLabel:SetPoint("TOPLEFT", 20, -404)
+    set.profileLabel:SetPoint("TOPLEFT", 20, -424)
     set.profile = ns.CreateDropdown(page, "FarolProfile" .. index, 170, function()
         return {
             { text = T("pfl_account_all"), checked = Profiles.mode ~= "char", onClick = function() Profiles.SetMode("account") end },
             { text = T("pfl_char_only"), checked = Profiles.mode == "char", onClick = function() Profiles.SetMode("char") end },
         }
     end)
-    set.profile:SetPoint("TOPLEFT", 90, -400)
+    set.profile:SetPoint("TOPLEFT", 90, -420)
     set.copy = ns.CreateDropdown(page, "FarolProfileCopy" .. index, 130, function()
         local items = {}
         for _, source in ipairs(Profiles.Sources()) do
@@ -3794,7 +3807,7 @@ local function BuildControls(parent, top)
         if #items == 0 then items[1] = { text = T("pfl_none"), r = .6, g = .6, b = .6, onClick = function() end } end
         return items
     end)
-    set.copy:SetPoint("TOPLEFT", 270, -400)
+    set.copy:SetPoint("TOPLEFT", 270, -420)
 
     -- Aba "Avisos": os controles do módulo de avisos (os do menu do Farol têm os nomes "FarolWarn...").
     if ns.Warnings and ns.Warnings.BuildControls then
@@ -3890,6 +3903,8 @@ RefreshOptions = function()
         set.minimapLock:SetChecked(db.minimap and db.minimap.locked or false)
         set.colorblind.label:SetText(T("opt_colorblind"))
         set.colorblind:SetChecked(db.colorblind)
+        set.sources.label:SetText(T("opt_sources"))
+        set.sources:SetChecked(db.sources)
         set.forget.confirmAt = nil
         set.forget:SetText(T("opt_forget"))
         for lang, button in pairs(set.langs) do
@@ -4325,7 +4340,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_diag", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_diag", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -4438,6 +4453,8 @@ SlashCmdList["FAROL"] = function(msg)
                 Print("  " .. FactionName(a.name) .. " (" .. a.level .. "): " .. table.concat(a.locks, ", "))
             end
         end
+    elseif cmd == "origem" or cmd == "origens" or cmd == "source" or cmd == "sources" then
+        ns.Sources.HandleCommand(rest)
     elseif cmd == "diagnostico" or cmd == "diag" or cmd == "diagnostic" or cmd == "diagnose" then
         ns.Diag.Report()
     elseif cmd == "novidades" or cmd == "news" then

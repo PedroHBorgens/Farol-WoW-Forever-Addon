@@ -65,6 +65,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol minimap`    | Show/hide or lock the minimap button (`on`, `off`, `lock`, `unlock`) |
 | `/farol dungeon`    | Your last 10 dungeons and raids: time, XP, gold, loot, deaths (`/farol run`) |
 | `/farol completed`  | Completed quests of each character (list with search and total); `record on\|off` |
+| `/farol chat Name`  | Which chat window Farol writes to (e.g. a tab named "Farol"); `/farol chat main` goes back |
 | `/farol source on\|off` | Show where the session's XP and gold come from (quests, monsters, loot, merchant) |
 | `/farol diag`       | Shows in your own chat how the game answered (character, realm, gold, last logout, events); read-only |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
@@ -404,6 +405,17 @@ Farol:   Loot: 46 (3 rares, 1 epic) · Warnings: 2
 - Turn it off with **Session summary at login** in the options menu or `/farol summary off`.
 - It uses the same numbers as the bar (session gold, XP/h, reputation per hour) and the loot and warning
   histories. Nothing is sent to anyone.
+
+### Farol messages in a chat tab of their own (since 3.20)
+
+Farol only writes in **your own** chat (nothing is ever sent). By default that is the main chat; to keep it apart:
+
+1. Right-click a chat tab → **New Window** and name it **Farol** (once; Farol never creates or renames tabs).
+2. Choose it in Menu > General > **"Farol messages in"**, or type `/farol chat Farol`.
+
+Everything Farol writes goes there: session summary, warnings in chat, diagnostics, command answers, news. The
+alarm and warning pop-ups stay on screen as before. If the tab is closed or renamed, messages go back to the main
+chat, so nothing is lost. `/farol chat` lists your chat windows; `/farol chat main` goes back to the default.
 
 ### Where the XP and gold come from (optional, since 3.19)
 

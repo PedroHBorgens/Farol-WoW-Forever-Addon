@@ -47,6 +47,11 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   diz o tempo de cada atividade). Resumo salvo: `lastSession.src = { qx, mx, ox, qn, qg, lg, sg, bg, og }` (validado).
   Confirmado no jogo (3.19): o WoW Forever informa o XP e o ouro da recompensa no `QUEST_TURNED_IN` (ex.: XP 3131,
   18s); missão sem moedas vem com ouro 0.
+- **Janela de chat (3.20):** todo texto do Farol passa por `Print` (Core), que escreve com `AddMessage` na janela
+  escolhida (`FarolDB.chatWindow` = nome de uma aba do jogador; "" = chat principal; `Profiles.ChatWindows` lê
+  `GetChatWindowInfo(i)` + `ChatFrame<i>`, só abas mostradas/encaixadas). Aba que sumiu ou deu erro = chat principal.
+  O Farol **nunca** cria/renomeia/configura abas (`FCF_*`, `SetChatWindow*`, grupos de mensagens: proibidos no
+  `test_toc.lua`). Módulo novo: use `ns.Print`, nunca `DEFAULT_CHAT_FRAME:AddMessage` direto.
 - O cliente lê **`Farol_Mainline.toc`** (não o `Farol.toc`). `Farol_Camelot.toc` é reserva. Ao mudar a versão do
   cliente, atualize a linha `## Interface:` (versão `1.60.1` → `16001`).
 - Pasta de addons: `World of Warcraft/_forever_/Interface/AddOns/`.
@@ -266,7 +271,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 ## Testes
 
 ```
-lua5.1 tests/run.lua        # ~690 testes (2 passadas); deve terminar com "0 failed"
+lua5.1 tests/run.lua        # ~710 testes (2 passadas); deve terminar com "0 failed"
 ```
 
 - **Duas passadas (3.18):** a 1ª com o simulador "de livro"; a 2ª, **forever-real** (`Mock.REAL`), com reino `""` e

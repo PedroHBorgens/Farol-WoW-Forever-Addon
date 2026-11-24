@@ -65,6 +65,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol minimapa`   | Mostra/esconde ou trava o botão do minimapa (`on`, `off`, `travar`, `destravar`) |
 | `/farol masmorra`   | Suas 10 últimas masmorras e raides: tempo, XP, ouro, saques, mortes |
 | `/farol concluidas` | Missões concluídas de cada personagem (lista com busca e total); `registrar on\|off` |
+| `/farol chat Nome`  | Em qual janela de chat o Farol escreve (ex.: uma aba "Farol"); `/farol chat principal` volta ao padrão |
 | `/farol origem on\|off` | Mostra de onde vem o XP e o ouro da sessão (missões, monstros, saque, comerciante) |
 | `/farol diagnostico` | Mostra no seu próprio chat como o jogo respondeu (personagem, reino, ouro, último logout, eventos); só leitura |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
@@ -410,6 +411,19 @@ Farol:   Saques: 46 (3 raros, 1 épico) · Avisos: 2
 - Para desligar: **Resumo da sessão ao entrar** no menu de opções, ou `/farol resumo off`.
 - Usa os mesmos números da barra (ouro da sessão, XP/h, reputação por hora) e os históricos de saques e de avisos.
   Nada é enviado a ninguém.
+
+### Mensagens do Farol numa aba de chat própria (desde a 3.20)
+
+O Farol só escreve no **seu** chat (nada é enviado). Por padrão, no chat principal; para separar:
+
+1. Clique direito numa aba do chat → **Nova janela** e dê o nome **Farol** (uma vez; o Farol nunca cria nem renomeia
+   abas).
+2. Escolha em Menu > Geral > **"Mensagens do Farol em"**, ou digite `/farol chat Farol`.
+
+Tudo o que o Farol escreve vai para lá: resumo da sessão, avisos no chat, diagnóstico, respostas dos comandos,
+novidades. As janelinhas de alarme e de aviso continuam na tela, como antes. Se a aba for fechada ou renomeada, as
+mensagens voltam ao chat principal, para nada se perder. `/farol chat` lista as suas janelas de chat;
+`/farol chat principal` volta ao padrão.
 
 ### De onde vem o XP e o ouro (opcional, desde a 3.19)
 

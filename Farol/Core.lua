@@ -80,6 +80,7 @@ local DEFAULTS = {
     runSummary = true,  -- resumo no chat ao sair de uma masmorra ou raide (Runs.lua)
     questRecord = false, -- registrar missões entregues (Completed.lua): regra 8, só o jogador liga
     questShowOld = false, -- janela de missões concluídas: mostrar também as de antes do registro (só o ID)
+    chatWindow = "",    -- janela de chat das mensagens do Farol ("" = chat principal; nome de uma aba do jogador)
     sources = false,    -- de onde vem o XP e o ouro (Sources.lua): regra 8, só o jogador liga
     colorblind = false, -- cores para daltonismo: azul / amarelo / laranja no lugar de verde / amarelo / vermelho
     newsSeen = 0,       -- quantas novidades (NEWS) o jogador já viu; boas-vindas/novidades aparecem uma vez
@@ -336,6 +337,17 @@ local STRINGS = {
         news_off_general = " — desligado (ligue em Menu > Geral)",
         news_colors  = "cores para daltonismo (azul, amarelo e laranja) e janelas mais legíveis",
         opt_colorblind = "Cores para daltonismo (azul · amarelo · laranja)",
+        opt_chat     = "Mensagens do Farol em:",
+        chat_main    = "Chat principal (padrão)",
+        chat_hint    = "(nova aba: clique direito no chat)",
+        chat_missing = "%s (não encontrada)",
+        chat_set     = "mensagens do Farol agora em: %s.",
+        chat_set_main = "mensagens do Farol agora no chat principal.",
+        chat_now     = "mensagens do Farol em: %s. Janelas de chat: %s.",
+        chat_gone    = "a janela de chat \"%s\" não existe agora: as mensagens vão para o chat principal.",
+        chat_unknown = "janela de chat não encontrada: %s. Crie uma aba com esse nome (clique direito numa aba do chat → Nova janela) ou use /farol chat principal.",
+        help_chat    = "  /farol chat Nome     - em qual janela de chat o Farol escreve (ex.: uma aba \"Farol\"); /farol chat principal volta ao padrão",
+        news_chat    = "escolha em qual janela de chat o Farol escreve, por exemplo uma aba só dele (Menu > Geral ou /farol chat)",
         cb_on        = "cores para daltonismo: ligadas (bom = azul, atenção = amarelo, ruim = laranja).",
         cb_off       = "cores para daltonismo: desligadas (bom = verde, atenção = amarelo, ruim = vermelho).",
         cb_usage     = "uso: /farol cores daltonismo || /farol cores padrao",
@@ -678,6 +690,17 @@ local STRINGS = {
         news_off_general = " — off (turn it on in Menu > General)",
         news_colors  = "colorblind-friendly colors (blue, yellow and orange) and easier-to-read windows",
         opt_colorblind = "Colorblind-friendly colors (blue · yellow · orange)",
+        opt_chat     = "Farol messages in:",
+        chat_main    = "Main chat (default)",
+        chat_hint    = "(new tab: right-click the chat)",
+        chat_missing = "%s (not found)",
+        chat_set     = "Farol messages now in: %s.",
+        chat_set_main = "Farol messages now in the main chat.",
+        chat_now     = "Farol messages in: %s. Chat windows: %s.",
+        chat_gone    = "the chat window \"%s\" does not exist right now: messages go to the main chat.",
+        chat_unknown = "chat window not found: %s. Create a tab with that name (right-click a chat tab → New Window) or use /farol chat main.",
+        help_chat    = "  /farol chat Name     - which chat window Farol writes to (e.g. a \"Farol\" tab); /farol chat main goes back to the default",
+        news_chat    = "choose which chat window Farol writes to, for example a tab of its own (Menu > General or /farol chat)",
         cb_on        = "colorblind-friendly colors: on (good = blue, warning = yellow, bad = orange).",
         cb_off       = "colorblind-friendly colors: off (good = green, warning = yellow, bad = red).",
         cb_usage     = "usage: /farol colors colorblind || /farol colors default",
@@ -805,8 +828,17 @@ local db -- configurações validadas (preenchida em ADDON_LOADED)
 -- Utilidades
 ---------------------------------------------------------------------------
 
+-- Só na janela de chat do PRÓPRIO jogador (AddMessage local, nada é enviado): a escolhida em "Mensagens do Farol em"
+-- (ns.ChatTarget) ou, se ela não existir mais, o chat principal.
 local function Print(msg)
-    DEFAULT_CHAT_FRAME:AddMessage(PREFIX .. tostring(msg))
+    local target = DEFAULT_CHAT_FRAME
+    if ns.ChatTarget then
+        local ok, frame = pcall(ns.ChatTarget)
+        if ok and frame then target = frame end
+    end
+    if not pcall(target.AddMessage, target, PREFIX .. tostring(msg)) and target ~= DEFAULT_CHAT_FRAME then
+        DEFAULT_CHAT_FRAME:AddMessage(PREFIX .. tostring(msg))
+    end
 end
 
 -- Idioma ativo: escolha do usuário, ou o idioma do cliente quando "auto".
@@ -2493,7 +2525,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2510,7 +2542,99 @@ Profiles.NEWS_ITEM = { news_rep = "rep", news_reset = "reset", news_prof = "prof
                        news_tasks = "tasks", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests",
                        news_hearth = "hearth" }
 Profiles.NEWS_WARN = { news_breaks = "pause" }
-Profiles.NEWS_OPTION = { news_colors = "colorblind", news_sources = "sources" } -- opções da aba Geral
+Profiles.NEWS_OPTION = { news_colors = "colorblind", news_sources = "sources" }
+
+-- Janela de chat das mensagens do Farol (3.20). O Farol só ESCREVE (AddMessage local) numa janela que o jogador já
+-- tem; nunca cria, renomeia ou configura abas (isso mudaria as configurações de chat do jogo). Nome salvo em
+-- db.chatWindow ("" = chat principal), validado; janela que sumiu = chat principal.
+function Profiles.CleanChatName(name)
+    if type(name) ~= "string" or IsSecret(name) or #name > 1024 then return "" end
+    name = ns.Trim(name)
+    if #name > 48 or string.find(name, "[%c|]") then return "" end
+    return name
+end
+
+-- Janelas de chat que existem agora: { { i, name, frame } } (no máx. 20; nomes válidos, sem repetir).
+function Profiles.ChatWindows()
+    local list, seen = {}, {}
+    local count = tonumber(NUM_CHAT_WINDOWS) or 10
+    if count ~= count or count < 1 then count = 10 end
+    if type(GetChatWindowInfo) ~= "function" then return list end
+    for i = 1, math.min(20, math.floor(count)) do
+        local ok, name, _, _, _, _, _, shown, _, docked = pcall(GetChatWindowInfo, i)
+        local frame = _G["ChatFrame" .. i]
+        if ok and type(name) == "string" and not IsSecret(name) and (shown or docked or i == 1)
+                and type(frame) == "table" and type(frame.AddMessage) == "function" then
+            local clean = Profiles.CleanChatName(name)
+            if clean ~= "" and not seen[string.lower(clean)] then
+                seen[string.lower(clean)] = true
+                list[#list + 1] = { i = i, name = clean, frame = frame }
+            end
+        end
+    end
+    return list
+end
+
+function Profiles.FindChat(name)
+    if type(name) ~= "string" or name == "" then return nil end
+    local lower = string.lower(name)
+    for _, w in ipairs(Profiles.ChatWindows()) do
+        if string.lower(w.name) == lower then return w end
+    end
+    return nil
+end
+
+ns.ChatTarget = function()
+    local name = db and db.chatWindow
+    if type(name) ~= "string" or name == "" then return nil end
+    local w = Profiles.FindChat(name)
+    return w and w.frame or nil
+end
+
+function Profiles.SetChat(name)
+    local w = Profiles.FindChat(name)
+    db.chatWindow = (w and w.i ~= 1) and w.name or "" -- a janela 1 é o próprio chat principal
+    if db.chatWindow == "" then Print(T("chat_set_main")) else Print(string.format(T("chat_set"), db.chatWindow)) end
+    if ns.RefreshOptions then ns.RefreshOptions() end
+end
+
+function Profiles.ChatLabel()
+    local name = db and db.chatWindow or ""
+    if name == "" then return T("chat_main") end
+    if Profiles.FindChat(name) then return name end
+    return string.format(T("chat_missing"), name)
+end
+
+local CHAT_MAIN_WORDS = { principal = true, main = true, padrao = true, ["padrão"] = true, default = true }
+function Profiles.ChatCommand(rest)
+    local name = Profiles.CleanChatName(string.sub(rest or "", 1, 255))
+    if name == "" then
+        local names = {}
+        for _, w in ipairs(Profiles.ChatWindows()) do names[#names + 1] = w.name end
+        Print(string.format(T("chat_now"), Profiles.ChatLabel(), #names > 0 and table.concat(names, ", ") or "--"))
+        if db.chatWindow ~= "" and not Profiles.FindChat(db.chatWindow) then
+            Print(string.format(T("chat_gone"), db.chatWindow))
+        end
+    elseif CHAT_MAIN_WORDS[string.lower(name)] then
+        Profiles.SetChat("")
+    elseif Profiles.FindChat(name) then
+        Profiles.SetChat(name)
+    else
+        Print(string.format(T("chat_unknown"), name))
+    end
+end
+
+function Profiles.ChatItems()
+    local items = { { text = T("chat_main"), checked = db.chatWindow == "", onClick = function() Profiles.SetChat("") end } }
+    for _, w in ipairs(Profiles.ChatWindows()) do
+        if w.i ~= 1 then
+            items[#items + 1] = { text = w.name, checked = string.lower(w.name) == string.lower(db.chatWindow),
+                                  onClick = function() Profiles.SetChat(w.name) end }
+        end
+    end
+    items[#items + 1] = { text = T("chat_hint"), r = .6, g = .6, b = .6, onClick = function() end }
+    return items
+end -- opções da aba Geral
 function Profiles.NewsLine(key)
     local item, warn = Profiles.NEWS_ITEM[key], Profiles.NEWS_WARN[key]
     if item and not db.items[item] then return T(key) .. T("news_off_bar") end
@@ -3539,7 +3663,7 @@ Profiles.GROUPS = {
     { "grp_time", { "clock", "reset", "tasks", "playtime", "run", "friends", "guild" } },
 }
 ns.ITEM_GROUPS = Profiles.GROUPS
-Profiles.MENU_W, Profiles.PAGE_H = 660, 460 -- 8 itens no grupo Progresso (3.14)
+Profiles.MENU_W, Profiles.PAGE_H = 660, 494 -- aba Geral com a janela de chat (3.20)
 
 -- Opções de aparência que valem para todos (ficam na aba Geral; também na janela Aparência).
 function Profiles.SetGlobalToggle(key, value)
@@ -3763,15 +3887,19 @@ local function BuildControls(parent, top)
     set.minimapLock = CreateCheck(page, 20, -260, function(value) ns.MinimapButton.SetLocked(value) end)
     set.colorblind = CreateCheck(page, 20, -286, function(value) Profiles.SetColorblind(value) end)
     set.sources = CreateCheck(page, 20, -312, function(value) ns.Sources.SetEnabled(value) end)
-    set.restoreHeader = CreateHeader(page, -348)
+    set.chatLabel = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    set.chatLabel:SetPoint("TOPLEFT", 24, -346)
+    set.chat = ns.CreateDropdown(page, "FarolChatWindow" .. index, 240, function() return Profiles.ChatItems() end)
+    set.chat:SetPoint("TOPLEFT", 200, -342)
+    set.restoreHeader = CreateHeader(page, -382)
     set.reset = CreateButton(page, 170, function() ResetPosition() end)
-    set.reset:SetPoint("TOPLEFT", 20, -368)
+    set.reset:SetPoint("TOPLEFT", 20, -402)
     set.sessionReset = CreateButton(page, 170, function()
         ResetSession()
         UpdateText()
         Print(T("session_reset"))
     end)
-    set.sessionReset:SetPoint("TOPLEFT", 196, -368)
+    set.sessionReset:SetPoint("TOPLEFT", 196, -402)
     -- "Esquecer personagens": pede um segundo clique (em até 5 s) para confirmar.
     set.forget = CreateButton(page, 190, nil)
     set.forget:SetScript("OnClick", function(self)
@@ -3787,18 +3915,18 @@ local function BuildControls(parent, top)
         end
         RefreshOptions()
     end)
-    set.forget:SetPoint("TOPLEFT", 372, -368)
+    set.forget:SetPoint("TOPLEFT", 372, -402)
     -- Perfis (avançado): as mesmas barras em todos os personagens ou só neste, e "Copiar de...".
-    set.profileHeader = CreateHeader(page, -398)
+    set.profileHeader = CreateHeader(page, -432)
     set.profileLabel = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    set.profileLabel:SetPoint("TOPLEFT", 20, -424)
+    set.profileLabel:SetPoint("TOPLEFT", 20, -458)
     set.profile = ns.CreateDropdown(page, "FarolProfile" .. index, 170, function()
         return {
             { text = T("pfl_account_all"), checked = Profiles.mode ~= "char", onClick = function() Profiles.SetMode("account") end },
             { text = T("pfl_char_only"), checked = Profiles.mode == "char", onClick = function() Profiles.SetMode("char") end },
         }
     end)
-    set.profile:SetPoint("TOPLEFT", 90, -420)
+    set.profile:SetPoint("TOPLEFT", 90, -454)
     set.copy = ns.CreateDropdown(page, "FarolProfileCopy" .. index, 130, function()
         local items = {}
         for _, source in ipairs(Profiles.Sources()) do
@@ -3807,7 +3935,7 @@ local function BuildControls(parent, top)
         if #items == 0 then items[1] = { text = T("pfl_none"), r = .6, g = .6, b = .6, onClick = function() end } end
         return items
     end)
-    set.copy:SetPoint("TOPLEFT", 270, -420)
+    set.copy:SetPoint("TOPLEFT", 270, -454)
 
     -- Aba "Avisos": os controles do módulo de avisos (os do menu do Farol têm os nomes "FarolWarn...").
     if ns.Warnings and ns.Warnings.BuildControls then
@@ -3905,6 +4033,8 @@ RefreshOptions = function()
         set.colorblind:SetChecked(db.colorblind)
         set.sources.label:SetText(T("opt_sources"))
         set.sources:SetChecked(db.sources)
+        set.chatLabel:SetText(T("opt_chat"))
+        set.chat:SetText(Profiles.ChatLabel())
         set.forget.confirmAt = nil
         set.forget:SetText(T("opt_forget"))
         for lang, button in pairs(set.langs) do
@@ -4244,6 +4374,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         db.chars = SanitizeChars(type(saved) == "table" and saved.chars or nil)
         db.completed = ns.Completed.Sanitize(type(saved) == "table" and saved.completed or nil) -- missões concluídas
         db.questNames = ns.Completed.SanitizeNames(type(saved) == "table" and saved.questNames or nil) -- nomes aprendidos
+        db.chatWindow = Profiles.CleanChatName(db.chatWindow) -- janela de chat das mensagens (3.20)
         local extra = {} -- barras 2 e 3, validadas do mesmo jeito
         for n = 2, Profiles.MAX_BARS do extra[n] = Profiles.SanitizeBar(FarolDB, n) end
         db.minimap = ns.MinimapButton.Sanitize(type(saved) == "table" and saved.minimap or nil) -- botão do minimapa
@@ -4340,7 +4471,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_diag", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_chat", "help_diag", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -4453,6 +4584,8 @@ SlashCmdList["FAROL"] = function(msg)
                 Print("  " .. FactionName(a.name) .. " (" .. a.level .. "): " .. table.concat(a.locks, ", "))
             end
         end
+    elseif cmd == "chat" or cmd == "bate-papo" then
+        Profiles.ChatCommand(rest)
     elseif cmd == "origem" or cmd == "origens" or cmd == "source" or cmd == "sources" then
         ns.Sources.HandleCommand(rest)
     elseif cmd == "diagnostico" or cmd == "diag" or cmd == "diagnostic" or cmd == "diagnose" then

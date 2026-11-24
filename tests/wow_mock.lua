@@ -134,6 +134,23 @@ function Mock.new(opts)
 
     -- Chat e frames
     env.DEFAULT_CHAT_FRAME = { AddMessage = function(_, msg) table.insert(H.msgs, msg) end }
+    -- Janelas de chat do jogador (3.20): H.chatWindows[i] = { name, shown?, docked? }; a 1 é o chat principal
+    -- (DEFAULT_CHAT_FRAME, mensagens em H.msgs); as outras guardam em H.chatMsgs[i].
+    H.chatWindows = { { "Geral", shown = true }, { "Registro de combate", docked = true } }
+    H.chatMsgs = {}
+    env.NUM_CHAT_WINDOWS = 10
+    env.ChatFrame1 = env.DEFAULT_CHAT_FRAME
+    for i = 2, 10 do
+        env["ChatFrame" .. i] = { AddMessage = function(_, msg)
+            H.chatMsgs[i] = H.chatMsgs[i] or {}
+            table.insert(H.chatMsgs[i], msg)
+        end }
+    end
+    env.GetChatWindowInfo = function(i)
+        local w = H.chatWindows[i]
+        if not w then return "", 14, 1, 1, 1, 1, false, false, false, false end
+        return w[1], 14, 1, 1, 1, 1, w.shown or false, false, w.docked or false, false
+    end
     env.UIParent = NewObject(env, "Frame", "UIParent")
     env.CreateFrame = function(kind, name, parent, template)
         local frame = NewObject(env, kind, name)

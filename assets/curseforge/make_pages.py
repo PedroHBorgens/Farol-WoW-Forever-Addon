@@ -332,7 +332,7 @@ qrows = "".join(f'<div class="qrow"><span class="y">[{l}]</span><span>{n}</span>
 qwin = ('<div class="win" style="width:640px"><div class="x">×</div><div class="t">Completed quests</div>'
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span>Character: <span class="btn" style="padding:2px 10px;color:#fff">Aldric — this one ▾</span></span>'
     '<span style="background:#000;border:1px solid #777;padding:3px 8px;width:200px;color:#888;font-size:13px">search by name or ID...</span></div>'
-    '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Recorded: <b>8</b></span><span>Total in game: <b>412</b> <span class="dim">(includes internal markers)</span></span></div>'
+    '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Recorded: <b>8</b></span><span>Known names: <b>37</b> of 412</span><span>Total in game: <b>412</b> <span class="dim">(includes internal markers)</span></span></div>'
     + qrows +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span class="ck" style="margin:0"><span class="box">✓</span>Record turned-in quests (on this computer only; nothing is sent)</span><span class="dim" style="font-size:12px">1–8 of 8</span></div>'
     '<div class="ck" style="margin-top:4px"><span class="box"></span>Show quests from before recording (ID only)</div>'
@@ -346,5 +346,91 @@ qtip = ('<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
     '<div class="dim" style="margin-top:6px">Latest: Delivery to Lighthouse Bay · Wolves of the Gray Hill</div></div>')
 QD_CSS = """.qrow{display:grid;grid-template-columns:40px 230px 56px 120px 106px;gap:6px;font-size:13px;padding:3px 0;border-bottom:1px solid #ffffff10}"""
 page("farol-12-completed-quests", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{QD_BAR}{qtip}</div>{qwin}',
-     "Completed quests of each character, with search and Wowhead links", "Missões concluídas de cada personagem, com busca e link do Wowhead", QD_CSS)
+     "Completed quests per character, with Wowhead links", "Missões concluídas de cada personagem, com busca e link do Wowhead", QD_CSS)
+
+# 13. Up to 3 bars + per-character profiles
+B1 = hbar([("🔭",'<span class="g">60</span> fps'),("⚡",'<span class="g">42</span> ms'),("🌍",'<span class="zone">Harbor Guild</span>'),("💰",'123<span class="gold">g</span> 45<span class="silver">s</span>')], "font-size:14px")
+B2 = ('<div class="bar" style="font-size:14px">' + "".join(item(e, h) for e, h in [("📖",'XP 46%'),("⏳",'XP/h 18.4k · 42m'),("📜",'Quests <span class="g">12/20</span>')]) + '</div>')
+B3 = ('<div class="vbar" style="font-size:14px">' + "".join(item(e, h) for e, h in [("⏰",'21:05'),("📜",'Daily 5h 12m'),("📋",'Tasks <span class="y">3/5</span>'),("🎒",'Bags <span class="y">8</span>/80')]) + '</div>')
+bars = (f'<div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start"><div class="dim">Bar 1 · top</div>{B1}'
+        f'<div class="dim">Bar 2 · above the action bars</div>{B2}<div style="display:flex;gap:16px;align-items:flex-start"><div><div class="dim">Bar 3 · one column</div>{B3}</div></div></div>')
+gen = f"""<div class="win menu3" style="width:520px"><div class="x">×</div><div class="t">Farol</div>{tabs("General")}
+<div class="line"><span class="k" style="width:auto">Editing:</span><span class="btn" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn hl" style="padding:2px 10px;color:#fff">Bar 3</span></div>
+<div class="h">Profile</div>
+<div class="line"><span>Profile:</span><span class="btn" style="padding:2px 10px;color:#fff">This character only ▾</span><span class="btn" style="padding:2px 10px">Copy from... ▾</span></div>
+<div class="tip" style="margin:6px 0 0 150px;width:230px;font-size:13px;line-height:1.7"><div class="k">Copy from...</div><div>Account bars</div><div>Mira (34)</div><div>Tor (12)</div></div>
+<div class="g" style="font-size:12px;margin-top:8px">Bars copied from Mira. Changed your mind? /farol profile undo</div></div>"""
+page("farol-13-multiple-bars-profiles", bars + gen, "Up to 3 bars and a profile per character", "Até 3 barras e perfil por personagem — copiar de outro e desfazer", TAB_CSS)
+
+# 14. Your characters: gold, rested XP, Hearthstone, saved instances
+HB = hbar([("💰",'123<span class="gold">g</span> 45<span class="silver">s</span> <span class="dim">(Total 1482g)</span>'),("🏠",'Riverside Inn · <span class="g">ready</span>'),("📜",'Daily 5h 12m')], "font-size:14px")
+ctip = """<div class="tip" style="width:560px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol</div>
+<div class="row"><span class="k">Gold on this account (this realm)</span><span>1482g 10s</span></div>
+<div class="row"><span>&nbsp; Aldric (60)</span><span>1020g 50s <span class="dim">Today · Riverside Inn</span></span></div>
+<div class="row"><span>&nbsp; Mira (34)</span><span>338g 15s <span class="dim">Yesterday · Harbor Town</span></span></div>
+<div class="row"><span>&nbsp; Lia (22) <span class="dim">— this one</span></span><span>123g 45s <span class="dim">Riverside Inn</span></span></div>
+<div style="height:6px"></div>
+<div class="k">Rested XP of your characters (estimate)</div>
+<div class="row"><span>&nbsp; Mira (34)</span><span>150% <span class="g">full</span> <span class="dim">inn/city</span></span></div>
+<div class="row"><span>&nbsp; Tor (12)</span><span>84% full in ~2d 1h <span class="dim">outside</span></span></div>
+<div style="height:6px"></div>
+<div class="row"><span class="k">Hearthstone</span><span>Riverside Inn · ready</span></div>
+<div style="height:6px"></div>
+<div class="k">Saved instances</div>
+<div class="row"><span>&nbsp; Cinder Caverns</span><span>7/10 bosses · reset in 2d 4h</span></div>
+<div class="row"><span>&nbsp; Aldric: Sunken Vault</span><span>reset in 4d 9h</span></div></div>"""
+page("farol-14-your-characters-hearthstone", f'<div style="display:flex;flex-direction:column;gap:16px;align-items:center">{HB}{ctip}</div>',
+     "Your characters: gold, rest, Hearthstone, lockouts", "Seus personagens: ouro, descanso, Pedra de Regresso e instâncias")
+
+# 15. Where the XP and gold come from (optional)
+def srow(a, b): return f'<div class="row"><span>&nbsp;&nbsp; {a}</span><span>{b}</span></div>'
+sxp = ('<div class="tip" style="width:440px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol · Experience</div>'
+       '<div class="row"><span class="k">XP per hour</span><span>6.6k · next level in 1h 12m</span></div>'
+       '<div class="row"><span class="k">Where the XP came from (session)</span><span>8.1k</span></div>'
+       '<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin:4px 0"><i style="width:72%;background:#4da6ff"></i><i style="width:25%;background:#c07ad8"></i><i style="width:3%;background:#999"></i></div>'
+       + srow("Quests (9 turned in)", "5.9k · 72%") + srow("Monsters", "2.0k · 25%") + srow("Other (places, professions)", "240 · 3%") + '</div>')
+mg = lambda sign, g, sv: f'<span class="{"g" if sign == "+" else "r"}">{sign}</span>{g}{sv}'
+sgold = ('<div class="tip" style="width:440px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol · Gold</div>'
+         '<div class="row"><span class="k">Gold this session</span><span><span class="g">+</span>1<span class="gold">g</span> 12<span class="silver">s</span></span></div>'
+         '<div class="k">Where the gold came from (session)</div>'
+         + srow("Quest rewards", '<span class="g">+</span>84<span class="silver">s</span>') + srow("Monster loot", '<span class="g">+</span>31<span class="silver">s</span>')
+         + srow("Merchant: sales", '<span class="g">+</span>42<span class="silver">s</span>') + srow("Merchant: purchases and repairs", '<span class="r">-</span>45<span class="silver">s</span>')
+         + srow("Other (mail, auction, trade)", '0<span class="copper">c</span>') + '</div>')
+snote = ('<div class="tip" style="width:440px;font-size:13px;background:#0b1424e8;border-color:#c9a24a88">Off by default — turn it on in Menu &gt; General or <b>/farol source on</b>. '
+         'Only events the game already sends; nothing is sent. The sum always matches the session.</div>')
+page("farol-15-xp-gold-by-source", f'{sxp}<div style="display:flex;flex-direction:column;gap:16px">{sgold}{snote}</div>',
+     "Where your XP and gold come from (optional)", "De onde vem o seu XP e o seu ouro (opcional)")
+
+# 16. Messages in a chat tab of their own + diagnostics
+CHAT_CSS = """.ctabs{display:flex;gap:3px}.ctabs span{background:#1a1a22d0;border:1px solid #ffffff33;border-bottom:none;border-radius:6px 6px 0 0;padding:3px 12px;font-size:13px;color:#ccc}
+.ctabs span.on{background:#3a3a46;color:#fff}.cwin{background:#000a;border:1px solid #ffffff22;border-radius:0 6px 6px 6px;padding:10px 14px;font-size:13.5px;line-height:1.6}"""
+diag = ["<span class=\"y\">Diagnostics</span> <span class=\"dim\">(read-only: nothing is sent or requested from the server)</span>",
+        'Character: Lia Rivers · game realm: "" (empty) → saved as this realm',
+        'Name from the game: "Lia" + "Rivers" · name used: "Lia Rivers"',
+        'Gold now: 123<span class="gold">g</span> 45<span class="silver">s</span> 67<span class="copper">c</span>',
+        'Last logout: the game reported 0 gold → the previous value was kept <span class="g">(protection active)</span>',
+        "Events this session: quest turn-in 3 · reward window 3 · quest accepted 4 · gold changed 11",
+        'Quest turn-in: the game reports it normally <span class="g">(ok)</span>',
+        "Reward of the last turn-in: XP 3131 · gold 0g 18s 0c"]
+cwin = ('<div style="width:700px"><div class="ctabs"><span>General</span><span>Combat Log</span><span class="on">Farol</span></div>'
+        '<div class="cwin">' + "".join(chatline(l) for l in diag) + '</div></div>')
+cmenu = f"""<div class="win menu3" style="width:440px"><div class="x">×</div><div class="t">Farol</div>{tabs("General")}
+<div class="line"><span>Farol messages in:</span><span class="btn" style="padding:2px 10px;color:#fff">Farol ▾</span></div>
+<div class="tip" style="margin:4px 0 0 140px;width:250px;font-size:13px;line-height:1.7"><div>Main chat (default)</div><div>Combat Log</div><div><span class="k">✓</span> Farol</div><div class="dim">(new tab: right-click the chat)</div></div>
+<div class="dim" style="font-size:12px;margin-top:8px">Farol only writes in your own chat; it never creates or changes your chat tabs.</div></div>"""
+page("farol-16-chat-tab-diagnostics", f'{cwin}{cmenu}', "A chat tab of its own + /farol diag", "Mensagens numa aba de chat própria e /farol diagnostico", TAB_CSS + CHAT_CSS)
+
+# 17. Minimap button + colorblind-friendly colors
+mm = """<div style="position:relative;width:250px;height:250px">
+<div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 40% 40%,#6b5a3a,#2f2618 70%);border:6px solid #8a7444;box-shadow:0 10px 30px #000"></div>
+<div style="position:absolute;right:-6px;top:36px;width:40px;height:40px;border-radius:50%;background:#111;border:3px solid #c9a24a;display:flex;align-items:center;justify-content:center;overflow:hidden">
+<img src="data:image/png;base64,LOGO" style="width:30px;height:30px;border-radius:5px"></div></div>""".replace("LOGO", logo)
+mtip = ('<div class="tip" style="width:330px;font-size:13px"><div style="color:#33ccff;font-weight:bold">Farol</div>'
+        '<div>Left-click: show/hide the bar</div><div>Right-click: hide all bars (this session)</div><div>Drag: move around the minimap</div>'
+        '<div class="dim">/farol minimap off · lock</div></div>')
+CB = lambda good, warn, bad: hbar([("🔭",f'<span style="color:{good}">60</span> fps'),("⚡",f'<span style="color:{warn}">172</span> ms'),("🔨",f'Dur <span style="color:{bad}">18%</span>'),("🎒",f'Bags <span style="color:{warn}">8</span>/80')], "font-size:14px")
+cbs = (f'<div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start"><div class="dim">Default: good · attention · alert</div>{CB("#40ff40","#ffff3a","#ff6666")}'
+       f'<div class="dim">Colorblind-friendly (Menu &gt; General): blue · yellow · orange</div>{CB("#66b3ff","#ffff3a","#ff8a33")}</div>')
+page("farol-17-minimap-colorblind", f'<div style="display:flex;flex-direction:column;gap:14px;align-items:center">{mm}{mtip}</div>{cbs}',
+     "Minimap button and colorblind-friendly colors", "Botão no minimapa e cores para daltonismo")
 print("pages ok")

@@ -7,19 +7,25 @@ They are faithful drawings of the add-on's windows, not in-game screenshots, so 
 **Ilustrações** de divulgação das funções do Farol (1280×720, legendas em inglês e português). São desenhos
 fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o selo "Illustration · Ilustração".
 
-| File | Caption |
-|---|---|
-| `farol-01-overview-info-bar.png` | Your info bar for WoW Forever |
-| `farol-02-bar-items-layout-tooltip.png` | 25 items, each with its own short tooltip (Shift: all) |
-| `farol-03-options-menu-bar-order.png` | Tabbed menu: items in groups — and choose the order |
-| `farol-04-clock-alarms-snooze.png` | Clock alarms with snooze — local or server time |
-| `farol-05-recent-loot-window.png` | Recent loot: when you got it, with quality filter |
-| `farol-06-warnings-break-water-reminders.png` | Warnings + break & water reminders, remind in 2–30 min |
-| `farol-07-appearance-settings.png` | Make it yours: shape, size, background, hide in combat |
-| `farol-08-progress-xp-reputation-professions.png` | Progress: XP, reputation, professions, goals |
-| `farol-09-session-summary-chat.png` | Session summary: gold, XP, reputation, loot |
-| `farol-10-daily-weekly-tasks.png` | Daily & weekly tasks that reset on their own |
-| `farol-11-dungeon-raid-runs.png` | Dungeon & raid log: time, XP, gold, loot, deaths |
+| File | Caption (EN) | Legenda (PT) |
+|---|---|---|
+| `farol-01-overview-info-bar.png` | Your info bar for WoW Forever | Sua barra de informações para o WoW Forever |
+| `farol-02-bar-items-layout-tooltip.png` | 29 items, each with its own short tooltip (Shift: all) | 29 informações, cada uma com o seu tooltip curto (Shift: tudo) |
+| `farol-03-options-menu-bar-order.png` | Menu: presets with Undo, items in groups, a gear each | Menu: pacotes prontos com Desfazer, itens em grupos e engrenagem |
+| `farol-04-clock-alarms-snooze.png` | Clock alarms with snooze — local or server time | Alarmes do relógio com soneca — hora local ou do servidor |
+| `farol-05-recent-loot-window.png` | Recent loot: when you got it, quality filter, + Goal to track | Últimos saques: quando você pegou, filtro de qualidade e + Meta |
+| `farol-06-warnings-break-water-reminders.png` | Warnings + break & water reminders, remind in 2–30 min | Avisos + lembretes de pausa e água — lembrar em 2 a 30 min |
+| `farol-07-appearance-settings.png` | Make it yours: shape, size, background, hide in combat | Do seu jeito: formato, tamanho, fundo, esconder em combate |
+| `farol-08-progress-xp-reputation-professions.png` | Progress: XP, reputation, professions, goals, farm, quests | Seu progresso: XP, reputação, profissões, metas, farm e missões |
+| `farol-09-session-summary-chat.png` | Session summary: gold & XP by source, rep, loot | Resumo da sessão: ouro e XP por origem, reputação e saques |
+| `farol-10-daily-weekly-tasks.png` | Daily & weekly tasks that reset on their own | Tarefas diárias e semanais que zeram sozinhas no reset |
+| `farol-11-dungeon-raid-runs.png` | Dungeon & raid log: time, XP, gold, loot, deaths | Registro de masmorras e raides: tempo, XP, ouro, saques e mortes |
+| `farol-12-completed-quests.png` | Completed quests per character, with Wowhead links | Missões concluídas de cada personagem, com busca e link do Wowhead |
+| `farol-13-multiple-bars-profiles.png` | Up to 3 bars and a profile per character | Até 3 barras e perfil por personagem — copiar de outro e desfazer |
+| `farol-14-your-characters-hearthstone.png` | Your characters: gold, rest, Hearthstone, lockouts | Seus personagens: ouro, descanso, Pedra de Regresso e instâncias |
+| `farol-15-xp-gold-by-source.png` | Where your XP and gold come from (optional) | De onde vem o seu XP e o seu ouro (opcional) |
+| `farol-16-chat-tab-diagnostics.png` | A chat tab of its own + /farol diag | Mensagens numa aba de chat própria e /farol diagnostico |
+| `farol-17-minimap-colorblind.png` | Minimap button and colorblind-friendly colors | Botão no minimapa e cores para daltonismo |
 
 ## Regenerate / Gerar de novo
 

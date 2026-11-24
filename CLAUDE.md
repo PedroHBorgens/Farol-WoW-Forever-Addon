@@ -339,6 +339,11 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Metas, metas de farm e diário de missões (item e tooltip de progresso) | 08 (e 02/03 pela contagem de itens) |
 | Masmorras e raides (item, resumo, janela) | 11 (e 02/03 pela contagem de itens) |
 | Missões concluídas (janela, item, tooltip) | 12 (e 02/03 pela contagem de itens) |
+| Várias barras e perfis por personagem | 13 |
+| Ouro/descanso dos personagens, Pedra de Regresso, instâncias salvas | 14 |
+| De onde vem o XP e o ouro (tooltips) | 15 (e 09 pelo resumo) |
+| Janela de chat do Farol e `/farol diagnostico` | 16 |
+| Botão do minimapa e cores para daltonismo | 17 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

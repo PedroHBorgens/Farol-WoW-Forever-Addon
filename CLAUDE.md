@@ -45,6 +45,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   mudança até 2 s antes/depois. "Outros" = total da sessão − as outras (a soma sempre bate). O XP chega pelo
   `SampleXP` do Core (`Sources.OnXP`); `ResetSession` chama `Sources.Reset`. Sem "por hora" por origem (o jogo não
   diz o tempo de cada atividade). Resumo salvo: `lastSession.src = { qx, mx, ox, qn, qg, lg, sg, bg, og }` (validado).
+  Confirmado no jogo (3.19): o WoW Forever informa o XP e o ouro da recompensa no `QUEST_TURNED_IN` (ex.: XP 3131,
+  18s); missão sem moedas vem com ouro 0.
 - O cliente lê **`Farol_Mainline.toc`** (não o `Farol.toc`). `Farol_Camelot.toc` é reserva. Ao mudar a versão do
   cliente, atualize a linha `## Interface:` (versão `1.60.1` → `16001`).
 - Pasta de addons: `World of Warcraft/_forever_/Interface/AddOns/`.

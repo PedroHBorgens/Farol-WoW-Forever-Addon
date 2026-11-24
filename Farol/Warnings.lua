@@ -44,6 +44,7 @@ local DEFAULTS = {
     questFull = false, questMin = 19,                        -- diário de missões quase cheio (a partir de N)
     questReady = false,                                      -- missões prontas ao entrar numa cidade/estalagem
     hearthReady = false,                                     -- Pedra de Regresso pronta (fim da recarga)
+    popupW = 0,                                              -- largura da janela de avisos (0 = padrão; alça ◢)
 }
 local QUEST_MIN, QUEST_MAX = 1, 100
 local MAX_ACTION_SLOT = 180 -- barras de ação (clientes modernos têm até 180 espaços)
@@ -86,6 +87,10 @@ local STRINGS = {
         warn_minutes    = "%d min",
         warn_group_title = "Avisos (%d)",
         warn_silence_all = "Silenciar todos",
+        warn_tip_title  = "Aviso do Farol",
+        warn_tip_where  = "Desligar ou ajustar: Menu > Avisos.",
+        warn_grip_tip   = "Arraste para mudar a largura da janela (fica salva).",
+        warn_grip_reset = "Clique direito: largura padrão.",
         warn_remind_all = "Lembrar todos em %d min",
         warn_silenced   = "aviso silenciado: só volta se a situação mudar.",
         warn_silenced_session = "lembrete silenciado até o fim da sessão.",
@@ -237,6 +242,10 @@ local STRINGS = {
         warn_minutes    = "%d min",
         warn_group_title = "Warnings (%d)",
         warn_silence_all = "Silence all",
+        warn_tip_title  = "Farol warning",
+        warn_tip_where  = "Turn off or adjust: Menu > Warnings.",
+        warn_grip_tip   = "Drag to change the window width (saved).",
+        warn_grip_reset = "Right-click: default width.",
         warn_remind_all = "Remind all in %d min",
         warn_silenced   = "warning silenced: it only comes back if the situation changes.",
         warn_silenced_session = "reminder silenced until the end of the session.",
@@ -401,6 +410,9 @@ function Warnings.Sanitize(saved)
         end
         clean[pair[1] .. "Yellow"], clean[pair[1] .. "Red"] = y, r
     end
+    -- Largura escolhida com a alça da janela de avisos: 0 (padrão) ou de POPUP_MIN a POPUP_MAX pixels.
+    clean.popupW = type(saved.popupW) == "number" and InRange(saved.popupW, 0, 1400) or 0
+    if clean.popupW > 0 and clean.popupW < 520 then clean.popupW = 0 end
     clean.remindMin = DEFAULTS.remindMin
     for _, minutes in ipairs(REMIND_CHOICES) do
         if saved.remindMin == minutes then clean.remindMin = minutes end
@@ -479,22 +491,65 @@ local function NewButton(parent, name, width, onClick)
 end
 
 local ROW_HEIGHT = 28
-local GROUP_WIDTH, SINGLE_WIDTH = 640, 400
+local GROUP_WIDTH, SINGLE_WIDTH = 640, 400   -- larguras padrão (a alça ◢ muda; Settings().popupW)
+local POPUP_MIN, POPUP_MAX = 520, 1400        -- faixa da largura escolhida (modo "vários avisos")
+local BUTTONS_WIDTH = 296                     -- Silenciar + Lembrar + ▾ à direita de cada aviso
+local MAX_LINES, LINE_HEIGHT = 3, 13          -- cada aviso usa até 3 linhas (nada de "…")
+
+-- Larguras atuais: a escolhida pelo jogador (ou a padrão); a de um aviso só acompanha.
+local function GroupWidth()
+    local w = Settings().popupW
+    if type(w) ~= "number" or w < POPUP_MIN then return GROUP_WIDTH end
+    return math.min(w, POPUP_MAX)
+end
+local function SingleWidth() return math.max(SINGLE_WIDTH, math.min(GroupWidth() - 240, POPUP_MAX - 240)) end
+
+-- Altura do texto já quebrado em linhas (no máx. MAX_LINES). Cliente sem GetStringHeight: estimativa.
+local function TextHeight(fs, text, width)
+    local ok, h = pcall(function() return fs.GetStringHeight and fs:GetStringHeight() end)
+    if not ok or type(h) ~= "number" or h ~= h or h <= 0 then
+        local lines = math.ceil(#(text or "") * 6.2 / math.max(width, 50))
+        h = math.max(1, lines) * LINE_HEIGHT
+    end
+    return math.max(LINE_HEIGHT, math.min(h, MAX_LINES * LINE_HEIGHT + 2))
+end
+
+local function WrapText(fs, width)
+    fs:SetWidth(width)
+    if fs.SetWordWrap then fs:SetWordWrap(true) end
+    if fs.SetMaxLines then pcall(fs.SetMaxLines, fs, MAX_LINES) end
+    fs:SetJustifyV("TOP")
+end
+
+-- Tooltip com o aviso inteiro, a explicação daquele aviso e onde ajustar.
+local function ShowTip(owner, entry)
+    if not entry or not GameTooltip then return end
+    GameTooltip:SetOwner(owner, "ANCHOR_TOP")
+    GameTooltip:AddLine(T("warn_tip_title"), 1, 0.82, 0)
+    GameTooltip:AddLine(entry.text, 1, 1, 1, true)
+    local descKey = "warn_desc_" .. tostring(entry.key)
+    local desc = T(descKey)
+    if desc ~= descKey then GameTooltip:AddLine(desc, 0.8, 0.8, 0.8, true) end
+    GameTooltip:AddLine(T("warn_tip_where"), 0.6, 0.6, 0.6, true)
+    GameTooltip:Show()
+end
+Warnings.ShowTip = ShowTip
 
 local function CreateRow(frame, index)
-    local row = CreateFrame("Frame", nil, frame)
+    local row = CreateFrame("Frame", "FarolWarnRow" .. index .. "Line", frame)
     row:SetSize(GROUP_WIDTH - 40, ROW_HEIGHT - 4)
-    row:SetPoint("TOPLEFT", 20, -44 - (index - 1) * ROW_HEIGHT)
+    row:EnableMouse(true)
+    row:SetScript("OnEnter", function(self) ShowTip(self, self.entry) end)
+    row:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
     row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    row.text:SetPoint("LEFT", 0, 0)
-    row.text:SetWidth(300)
+    row.text:SetPoint("TOPLEFT", 0, -4)
     row.text:SetJustifyH("LEFT")
-    if row.text.SetWordWrap then row.text:SetWordWrap(false) end
+    WrapText(row.text, GROUP_WIDTH - 40 - BUTTONS_WIDTH - 10)
     local prefix = "FarolWarnRow" .. index
     row.time = ns.CreateDropdown(row, prefix .. "Time", 34, MinuteItems(
         function() return row.entry and row.entry.minutes end,
         function(minutes) if row.entry then row.entry.minutes = minutes end end))
-    row.time:SetPoint("RIGHT", 0, 0)
+    row.time:SetPoint("TOPRIGHT", 0, 0)
     row.remind = NewButton(row, prefix .. "Remind", 144, function()
         if row.entry then Warnings.Respond(true, row.entry.key, row.entry.minutes) end
     end)
@@ -505,6 +560,41 @@ local function CreateRow(frame, index)
     row.silence:SetPoint("RIGHT", row.remind, "LEFT", -6, 0)
     row:Hide()
     return row
+end
+
+-- Alça ◢: arrastar muda a largura (salva em Settings().popupW); clique direito volta ao padrão.
+local function CreateGrip(frame)
+    pcall(frame.SetResizable, frame, true)
+    if frame.SetResizeBounds then pcall(frame.SetResizeBounds, frame, SINGLE_WIDTH, 100, POPUP_MAX, 900)
+    elseif frame.SetMinResize then pcall(frame.SetMinResize, frame, SINGLE_WIDTH, 100) end
+    local grip = CreateFrame("Button", "FarolWarnPopupGrip", frame)
+    grip:SetSize(16, 16)
+    grip:SetPoint("BOTTOMRIGHT", -8, 8)
+    grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    grip:SetScript("OnMouseDown", function(_, button)
+        if button == "LeftButton" then frame.farolSizing = true; pcall(frame.StartSizing, frame, "RIGHT") end
+    end)
+    grip:SetScript("OnMouseUp", function(_, button)
+        if button == "RightButton" then Warnings.SetPopupWidth(0) return end
+        if not frame.farolSizing then return end
+        frame.farolSizing = nil
+        pcall(frame.StopMovingOrSizing, frame)
+        local ok, w = pcall(frame.GetWidth, frame)
+        if ok and type(w) == "number" and w == w then
+            if not frame.farolGroup then w = w + 240 end -- um aviso só: a largura salva é a do modo "vários"
+            Warnings.SetPopupWidth(w)
+        end
+    end)
+    grip:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine(T("warn_grip_tip"))
+        GameTooltip:AddLine(T("warn_grip_reset"), 0.8, 0.8, 0.8)
+        GameTooltip:Show()
+    end)
+    grip:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    frame.grip = grip
 end
 
 local function CreatePopup()
@@ -518,6 +608,9 @@ local function CreatePopup()
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+    -- Um aviso só: passar o mouse mostra o texto inteiro (vários: cada linha tem o seu).
+    frame:SetScript("OnEnter", function(self) if #queue == 1 then ShowTip(self, queue[1]) end end)
+    frame:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
     if frame.SetBackdrop then
         frame:SetBackdrop({
             bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -530,7 +623,8 @@ local function CreatePopup()
     frame.title:SetPoint("TOP", 0, -16)
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.text:SetPoint("TOP", frame.title, "BOTTOM", 0, -6)
-    frame.text:SetWidth(SINGLE_WIDTH - 40)
+    frame.text:SetJustifyH("CENTER")
+    WrapText(frame.text, SINGLE_WIDTH - 40)
     -- Botões de baixo: um aviso = Silenciar / Lembrar; vários = Silenciar todos / Lembrar todos.
     frame.silence = NewButton(frame, "FarolWarnSilence", 124, function()
         if #queue == 1 then Warnings.Respond(false, queue[1].key) else Warnings.Respond(false) end
@@ -544,7 +638,7 @@ local function CreatePopup()
         function(minutes)
             if #queue == 1 then queue[1].minutes = minutes else groupMinutes = minutes end
         end))
-    frame.time:SetPoint("BOTTOMRIGHT", -22, 16)
+    frame.time:SetPoint("BOTTOMRIGHT", -26, 16)
     frame.remind = NewButton(frame, "FarolWarnRemind", 190, function() -- cabe "Lembrar todos em 30 min"
         if #queue == 1 then
             Warnings.Respond(true, queue[1].key, queue[1].minutes)
@@ -554,6 +648,7 @@ local function CreatePopup()
     end)
     frame.remind:SetPoint("RIGHT", frame.time, "LEFT", -2, 0)
     frame.rows = {}
+    CreateGrip(frame)
     ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
@@ -567,34 +662,54 @@ Render = function()
     end
     popup = popup or CreatePopup()
     local group = #queue > 1
+    popup.farolGroup = group
     for i, row in ipairs(popup.rows) do
         if not (group and queue[i]) then row.entry = nil; row:Hide() end
     end
     if group then
-        popup:SetSize(GROUP_WIDTH, 100 + #queue * ROW_HEIGHT)
+        local width = GroupWidth()
+        local textWidth = width - 40 - BUTTONS_WIDTH - 10
         popup.title:SetText(string.format(T("warn_group_title"), #queue))
         popup.text:SetText("")
         popup.text:Hide()
+        local y = 44
         for i, entry in ipairs(queue) do
             local row = popup.rows[i] or CreateRow(popup, i)
             popup.rows[i] = row
             row.entry = entry
+            row.text:SetWidth(textWidth)
             row.text:SetText(entry.text)
+            local height = math.max(ROW_HEIGHT - 4, TextHeight(row.text, entry.text, textWidth) + 8)
+            row:SetSize(width - 40, height)
+            row:ClearAllPoints()
+            row:SetPoint("TOPLEFT", 20, -y)
+            y = y + height + 4
             row.silence:SetText(T("warn_silence_btn"))
             row.remind:SetText(string.format(T("warn_remind_btn"), entry.minutes))
             row:Show()
         end
+        popup:SetSize(width, y + 56)
         popup.silence:SetText(T("warn_silence_all"))
         popup.remind:SetText(string.format(T("warn_remind_all"), groupMinutes or DefaultMinutes()))
     else
-        popup:SetSize(SINGLE_WIDTH, 118)
+        local width = SingleWidth()
         popup.title:SetText(T("warn_popup_title"))
+        popup.text:SetWidth(width - 40)
         popup.text:SetText(queue[1].text)
         popup.text:Show()
+        popup:SetSize(width, math.max(118, 104 + TextHeight(popup.text, queue[1].text, width - 40)))
         popup.silence:SetText(T("warn_silence_btn"))
         popup.remind:SetText(string.format(T("warn_remind_btn"), queue[1].minutes))
     end
     popup:Show()
+end
+
+-- Largura escolhida com a alça (0 = padrão). Salva só valores válidos e redesenha a janela.
+function Warnings.SetPopupWidth(w)
+    w = tonumber(w)
+    if not w or w ~= w or w < POPUP_MIN then w = 0 end
+    Settings().popupW = math.floor(math.min(w, POPUP_MAX))
+    Render()
 end
 local ShowNext = Render -- nome antigo, usado abaixo
 

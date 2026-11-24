@@ -14,7 +14,7 @@ fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o sel
 | `farol-03-options-menu-bar-order.png` | Menu: presets with Undo, items in groups, a gear each | Menu: pacotes prontos com Desfazer, itens em grupos e engrenagem |
 | `farol-04-clock-alarms-snooze.png` | Clock alarms with snooze — local or server time | Alarmes do relógio com soneca — hora local ou do servidor |
 | `farol-05-recent-loot-window.png` | Recent loot: when you got it, quality filter, + Goal to track | Últimos saques: quando você pegou, filtro de qualidade e + Meta |
-| `farol-06-warnings-break-water-reminders.png` | Warnings + break & water reminders, remind in 2–30 min | Avisos + lembretes de pausa e água — lembrar em 2 a 30 min |
+| `farol-06-warnings-break-water-reminders.png` | Warnings: nothing cut, remind in 2–30 min | Avisos inteiros (quebra de linha e tooltip), lembretes de pausa e água, lembrar em 2 a 30 min |
 | `farol-07-appearance-settings.png` | Make it yours: shape, size, background, hide in combat | Do seu jeito: formato, tamanho, fundo, esconder em combate |
 | `farol-08-progress-xp-reputation-professions.png` | Progress: XP, reputation, professions, goals, farm, quests | Seu progresso: XP, reputação, profissões, metas, farm e missões |
 | `farol-09-session-summary-chat.png` | Session summary: gold & XP by source, rep, loot | Resumo da sessão: ouro e XP por origem, reputação e saques |

@@ -40,6 +40,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · **Hearthstone: where
 - **Ammo and reagents running low**, with the warning/critical limits you choose (off by default; Farol never buys anything).
 - Each warning lets you **Silence** it or get a **reminder in 2, 5, 10, 15 or 30 minutes** (your choice). Several warnings at once appear together in one window.
 - Optional **break** and **drink water** reminders (off by default): you choose how often (15–240 min) and whether they can show during fights, raids and dungeons.
+- Long warnings are never cut: they wrap onto up to 3 lines, hovering shows the whole text, and the warning window can be made wider with the ◢ grip.
 - **History of the last 10 warnings**: button next to the bar (with unread counter), key binding or `/farol history`.
 
 ### Session summary
@@ -101,6 +102,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · **Pedra de 
 - **Munição e reagentes acabando**, com os limites de atenção/crítico que você escolhe (desligado por padrão; o Farol nunca compra nada).
 - Cada aviso deixa você **Silenciar** ou ser **lembrado em 2, 5, 10, 15 ou 30 minutos** (você escolhe). Vários avisos ao mesmo tempo aparecem juntos numa janela só.
 - Lembretes opcionais de **pausa** e de **beber água** (desligados por padrão): você escolhe de quanto em quanto tempo (15–240 min) e se podem aparecer em lutas, raides e masmorras.
+- Avisos longos nunca ficam cortados: quebram em até 3 linhas, passar o mouse mostra o texto inteiro e a janela de avisos pode ficar mais larga com a alça ◢.
 - **Histórico dos 10 últimos avisos**: botão ao lado da barra (com contador de novos), atalho de teclado ou `/farol historico`.
 
 ### Resumo da sessão

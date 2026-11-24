@@ -172,7 +172,7 @@ page("farol-05-recent-loot-window", loot, "Recent loot: when you got it, quality
 
 # 6. Warnings: grouped window with remind-time dropdowns + history
 def wrow(text):
-    return (f'<div style="display:flex;align-items:center;gap:8px;margin:7px 0"><span style="flex:1;font-size:14px;white-space:nowrap">{text}</span>'
+    return (f'<div style="display:flex;align-items:flex-start;gap:8px;margin:7px 0"><span style="flex:1;font-size:14px;line-height:1.35">{text}</span>'
             '<span class="btn" style="padding:3px 10px;font-size:13px">Silence</span>'
             '<span class="btn" style="padding:3px 10px;font-size:13px">Remind in 10 min</span>'
             '<span class="btn" style="padding:3px 7px;font-size:13px">▾</span></div>')
@@ -180,10 +180,12 @@ dd6 = """<div class="tip" style="position:absolute;right:20px;top:104px;width:96
 <div>&nbsp;&nbsp;&nbsp;2 min</div><div>&nbsp;&nbsp;&nbsp;5 min</div><div><span class="k">✓</span> 10 min</div><div>&nbsp;&nbsp;&nbsp;15 min</div><div>&nbsp;&nbsp;&nbsp;30 min</div></div>"""
 warnpop = f"""<div class="win" style="width:740px"><div class="t">Warnings (3)</div>{dd6}
 {wrow("Low durability: 18% — time to repair!")}
-{wrow("You've been playing for 2h 00m — time for a break?")}
+{wrow("Cooking 150/150 at the training limit — find a trainer to keep leveling.")}
 {wrow("Time to drink some water!")}
 <div style="display:flex;justify-content:space-between;margin-top:14px"><span class="btn">Silence all</span>
-<span><span class="btn">Remind all in 10 min</span> <span class="btn" style="padding:5px 8px">▾</span></span></div></div>"""
+<span><span class="btn">Remind all in 10 min</span> <span class="btn" style="padding:5px 8px">▾</span></span></div>
+<div style="position:absolute;right:6px;bottom:2px;color:#ddd;font-size:15px">◢</div>
+<div class="tip" style="position:absolute;left:-292px;top:70px;width:270px;font-size:12.5px;line-height:1.45;z-index:3"><div class="k">Farol warning</div><div>Cooking 150/150 at the training limit — find a trainer to keep leveling.</div><div class="dim">Turn off or adjust: Menu &gt; Warnings.</div></div></div>"""
 hist = """<div class="win" style="width:520px"><div class="x">×</div><div class="t">Recent warnings</div>
 <div style="font-size:14px;line-height:1.9"><div><span class="dim">11/11 21:40</span>&nbsp; Time to drink some water!</div>
 <div><span class="dim">11/11 21:40</span>&nbsp; You've been playing for 2h 00m — time for a break?</div>
@@ -191,7 +193,7 @@ hist = """<div class="win" style="width:520px"><div class="x">×</div><div class
 <div><span class="dim">11/11 20:31</span>&nbsp; Low durability: 18% — time to repair!</div></div>
 <div style="text-align:right;margin-top:10px"><span class="btn">Clear</span></div></div>"""
 page("farol-06-warnings-break-water-reminders", f'<div style="display:flex;flex-direction:column;gap:18px;align-items:center;transform:scale(.92)">{warnpop}{hist}</div>',
-     "Warnings + break & water reminders, remind in 2–30 min", "Avisos + lembretes de pausa e água — lembrar em 2 a 30 min, vários numa janela só")
+     "Warnings: nothing cut, remind in 2–30 min", "Avisos inteiros (quebra de linha e tooltip), lembretes de pausa e água, lembrar em 2 a 30 min")
 
 # 7. Appearance
 def stepper(label, value): return f'<div style="display:flex;align-items:center;gap:10px;margin:7px 0"><span class="k" style="width:110px">{label}</span><span class="btn" style="padding:2px 9px">-</span><span style="width:52px;text-align:center">{value}</span><span class="btn" style="padding:2px 9px">+</span></div>'

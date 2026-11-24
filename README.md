@@ -262,6 +262,9 @@ Every warning opens a small window with two choices:
 - One reminder per warning type: reminding again replaces the previous time. A reminder whose problem is
   already solved (you repaired, spent the points…) is dropped. Reminders end with `/reload` or logout.
 - Chat: `/farol warn silence` and `/farol warn remind [minutes]` (all open warnings), `/farol warn default 10`.
+- **Nothing is cut (since 3.21):** a long warning wraps onto up to 3 lines and the window grows taller; hover a
+  warning to see the whole text, what it is about and where to adjust it. Drag the **◢ grip** in the corner to make
+  the window wider or narrower (saved; right-click the grip or **Reset position** goes back to the default width).
 
 ### Warning history
 

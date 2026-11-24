@@ -3589,6 +3589,7 @@ end
 local function ResetPosition()
     db.point, db.relPoint, db.x, db.y = DEFAULTS.point, DEFAULTS.relPoint, DEFAULTS.x, Profiles.DefaultY(Profiles.cur)
     ApplyPosition()
+    if ns.Warnings and ns.Warnings.SetPopupWidth then pcall(ns.Warnings.SetPopupWidth, 0) end -- janela de avisos: largura padrão
 end
 
 local function SetLang(lang)

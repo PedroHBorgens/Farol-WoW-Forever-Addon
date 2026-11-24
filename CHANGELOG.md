@@ -2,6 +2,15 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.21.0 — Warnings window: nothing cut
+- Long warnings no longer end in "…": each one wraps onto up to 3 lines and the window grows taller (one warning or
+  several); the Silence / Remind buttons stay at the right of each warning.
+- Hovering a warning shows a tooltip with the whole text, what that warning is about and where to adjust it
+  (Menu > Warnings).
+- New **◢ grip** in the corner of the warnings window: drag to make it wider or narrower (520–1400 px, saved in
+  `warnings.popupW`, validated on load); right-click the grip, or **Reset position**, goes back to the default width.
+- Image 06 updated. 722 tests (2 passes).
+
 ## 3.20.0 — Farol messages in a chat tab of their own
 - New option in Menu > General, **"Farol messages in"** (and `/farol chat Name`): choose which of your chat windows
   Farol writes to, for example a tab named "Farol" that you create (right-click a chat tab → New Window). Default:

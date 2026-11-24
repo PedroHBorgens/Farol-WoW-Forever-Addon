@@ -255,20 +255,21 @@ G = lambda g, sv: f'<span class="g">+</span>{g}<span class="gold">g</span> {sv}<
 summary_lines = [
     "session summary (2h 14m):",
     f"&nbsp;&nbsp;Gold: {G(38, 12)} ({G(17, 6)}/h) · XP: +84.2k (1 level, 37.6k/h)",
+    "XP by source: quests 64% · monsters 33% · other 3% <span class=\"dim\">(optional)</span>",
+    f"Gold by source: quests {G(21, 40)} · loot {G(9, 15)} · sales {G(12, 80)} · purchases and repairs <span class=\"r\">-</span>5<span class=\"gold\">g</span> 23<span class=\"silver\">s</span>",
     'Reputation: +1.3k Harbor Guild (<span class="g">Honored</span> → <span style="color:#00b3ff">Revered</span>)',
     "Loot: 46 (3 rares, 1 epic) · Warnings: 2",
 ]
-summary_lines[2] = "&nbsp;&nbsp;" + summary_lines[2]
-summary_lines[3] = "&nbsp;&nbsp;" + summary_lines[3]
+for i in range(2, len(summary_lines)): summary_lines[i] = "&nbsp;&nbsp;" + summary_lines[i]
 def chatbox(title, lines, width=760):
     return (f'<div style="width:{width}px"><div class="dim" style="margin:0 0 6px 4px;font-size:14px">{title}</div>'
             '<div class="tip" style="font-size:15px;line-height:1.7;background:#000a;border-color:#3a3f55">'
             + "".join(chatline(l) for l in lines) + '</div></div>')
 last_lines = ["last session (Yesterday 23:41, 2h 14m):"] + summary_lines[1:]
 page("farol-09-session-summary-chat", f'''<div style="display:flex;flex-direction:column;gap:26px;align-items:center">
-{chatbox("/farol summary — any time, only in your own chat", summary_lines)}
-{chatbox("Next login — the last session (not after /reload)", last_lines)}</div>''',
-     "Session summary: gold, XP, reputation, loot", "Resumo da sessão: ouro, XP, reputação e saques — só no seu chat")
+{chatbox("/farol summary — any time, only in your own chat", summary_lines, 940)}
+{chatbox("Next login — the last session (not after /reload)", last_lines, 940)}</div>''',
+     "Session summary: gold & XP by source, rep, loot", "Resumo da sessão: ouro e XP por origem, reputação e saques — só no seu chat")
 
 # 10. Tasks: daily and weekly checklist that resets on its own
 TASK_BAR = hbar([("🔭",'<span class="g">60</span> fps'),("🌍",'<span class="zone">Lighthouse Bay</span>'),("📜",'Tasks <span class="y">3/5</span>'),

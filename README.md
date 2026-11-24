@@ -65,6 +65,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol minimap`    | Show/hide or lock the minimap button (`on`, `off`, `lock`, `unlock`) |
 | `/farol dungeon`    | Your last 10 dungeons and raids: time, XP, gold, loot, deaths (`/farol run`) |
 | `/farol completed`  | Completed quests of each character (list with search and total); `record on\|off` |
+| `/farol source on\|off` | Show where the session's XP and gold come from (quests, monsters, loot, merchant) |
 | `/farol diag`       | Shows in your own chat how the game answered (character, realm, gold, last logout, events); read-only |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
 | `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
@@ -404,6 +405,21 @@ Farol:   Loot: 46 (3 rares, 1 epic) · Warnings: 2
 - It uses the same numbers as the bar (session gold, XP/h, reputation per hour) and the loot and warning
   histories. Nothing is sent to anyone.
 
+### Where the XP and gold come from (optional, since 3.19)
+
+Turn on **"Show where the XP and gold come from"** (Menu > General, or `/farol source on`) and the XP and gold
+tooltips, plus the session summary, split the session by source:
+
+- **XP:** quests (with how many you turned in), monsters (XP gained in combat or up to 3 s after it) and other
+  (discovering places, professions).
+- **Gold:** quest rewards, monster loot (with the loot window open), merchant sales, merchant purchases and repairs,
+  and other (mail, auction house, trade, trainers, flights...).
+- Quests use the XP and gold the game reports when you turn one in; if the game does not report them, the change
+  that arrives together with the turn-in (up to 2 s) counts. "Other" is always the session total minus the other
+  sources, so the sum matches the session gold and XP. `/farol diag` shows whether the game reported the reward.
+- The percentages cover the whole session (the game does not say how long you spent on each activity, so there is
+  no "per hour" for each source). Off by default; only events the game already sends are read; nothing is sent.
+
 ## Recent loot window
 
 A separate window listing the items **you** looted or received, newest first.
@@ -551,7 +567,7 @@ Information security is this project's first rule:
   items and their order, appearance, alarms (time, clock type, on/off, a cleaned-up name and the snooze time),
   loot window and warning settings (since 3.0 the bar settings are grouped in a profile), and the gold and level of **your own** characters per realm (for the account
   total). `FarolCharDB` (per character) stores only your loot history (validated item
-  links), the last 10 warnings, the last session's summary (numbers only) and whether the game reported 0 gold at the last logout (yes/no and when, for `/farol diag`). Everything is checked on load — a corrupted or tampered file falls back to defaults.
+  links), the last 10 warnings, the last session's summary (numbers only, including the XP/gold by source when that option is on) and whether the game reported 0 gold at the last logout (yes/no and when, for `/farol diag`). Everything is checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official sources** (this repository or the CurseForge page). Addons are plain Lua text:
   you can read all of it in the `Farol` folder.
 

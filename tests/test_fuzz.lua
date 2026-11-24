@@ -6,7 +6,7 @@ local ALPHA = { "a", "0", "9", " ", ":", "%", "|", "c", "H", "T", "\n", "\0", "Ã
                 "%s", "%d", "%1$s", "|cff", "|H", "|T", "|A", "|r" }
 local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", "durab", "bolsas", "talentos",
                 "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "municao", "reagentes", "400", "5000", "15", "240", "2",
-                "graus", "som", "status", "concluidas", "completed", "registrar", "diagnostico", "diag", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
+                "graus", "som", "status", "concluidas", "completed", "registrar", "diagnostico", "diag", "origem", "source", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
                 "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "undo", "voltar", "pacote", "Garrosh", "tarefa", "task", "feita", "apagar", "semanal", "diaria", "meta", "goal", "nivel", "limpar", "item", "farm", "remover", "missoes", "prontas", "aviso", "quests", "19", "regresso", "hearth", "pedra", "|cffffffff|Hitem:4306::|h[Seda]|h|r", "[Seda]", "|Hitem:abc|h", "40", "1000000", "masmorra", "dungeon", "resumo", "minimapa", "minimap", "travar", "on", "off", "07:30", "25:99", "-1", "99999" }
 local BAD = { "x", 1e309, -1e309, 0 / 0, true, false, {}, { 1, 2 }, -5, 3.7, "" }
@@ -99,6 +99,7 @@ return {
                     t = random(2) == 1 and pick(BAD) or 1e9, secs = pick(BAD), money = pick(BAD), xp = pick(BAD),
                     levels = pick(BAD), rep = pick(BAD), repName = pick(BAD), repFrom = pick(BAD), repTo = pick(BAD),
                     loot = pick(BAD), rare = pick(BAD), epic = pick(BAD), legend = pick(BAD), warns = pick(BAD),
+                    src = random(2) == 1 and pick(BAD) or { qx = pick(BAD), mx = pick(BAD), ox = pick(BAD), qn = pick(BAD), qg = pick(BAD), lg = pick(BAD), sg = pick(BAD), bg = pick(BAD), og = pick(BAD) },
                 },
             }
             local ok, err = pcall(function()

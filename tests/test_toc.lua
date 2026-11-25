@@ -78,7 +78,7 @@ return {
             -- Pedra de Regresso: nunca usar itens nem vincular em outro lugar
             "UseInventoryItem", "ConfirmBinder", "C_PlayerInteractionManager", "UseToy", "C_Container.UseContainerItem",
         }
-        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "MinimapButton.lua" }) do
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "MinimapButton.lua" }) do
             local code = read("Farol/" .. file)
             code = string.gsub(code, "%-%-%[%[.-%]%]", "") -- comentários de bloco
             code = string.gsub(code, "%-%-[^\n]*", "")     -- comentários de linha
@@ -90,7 +90,7 @@ return {
 
     { "command alias tables have no duplicate names (a repeated name silently overrides the first)", function(T)
         local tables = { { "Core.lua", "local ITEM_ALIASES = {" }, { "Warnings.lua", "local KEYS = {" },
-                         { "Appearance.lua", "local WORDS = {" }, { "Tasks.lua", "local WORDS = {" }, { "Goals.lua", "local WORDS = {" }, { "Runs.lua", "local WORDS = {" }, { "MinimapButton.lua", "local WORDS = {" } }
+                         { "Appearance.lua", "local WORDS = {" }, { "Tasks.lua", "local WORDS = {" }, { "Notes.lua", "local WORDS = {" }, { "Goals.lua", "local WORDS = {" }, { "Runs.lua", "local WORDS = {" }, { "MinimapButton.lua", "local WORDS = {" } }
         for _, entry in ipairs(tables) do
             local code = read("Farol/" .. entry[1])
             local start = string.find(code, entry[2], 1, true)
@@ -113,7 +113,7 @@ return {
         local files = { "README.md", "README.pt-BR.md", "assets/curseforge-description.md", "assets/curseforge/make_pages.py",
                         "assets/video/make_video.py", "assets/video/timeline.js", "assets/video/youtube.py",
                         "assets/video/youtube.js", "assets/video/youtube_script.txt" }
-        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua",
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua",
                                 "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "MinimapButton.lua" }) do
             files[#files + 1] = "Farol/" .. file
         end

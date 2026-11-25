@@ -20,7 +20,7 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
     "fps", "ms", "mem", "coords", "zone", "speed", "hearth", "durab", "bags", "junk", "ammo",
-    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "farm", "quests", "qdone", "clock", "reset", "tasks", "playtime", "run", "friends", "guild",
+    "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "farm", "quests", "qdone", "clock", "reset", "tasks", "notes", "playtime", "run", "friends", "guild",
 }
 
 -- Visível por padrão? Os itens originais vêm ligados; os novos, desligados (ative no menu).
@@ -29,7 +29,7 @@ local ITEM_DEFAULTS = {
     hearth = true, -- aprovado pelo dono (3.10): só em instalação nova; quem já usa recebe desligado
     mem = false, speed = false, bags = false, session = false, xp = false,
     goldh = false, xph = false, rep = false, prof = false, goals = false, farm = false, quests = false, qdone = false, junk = false, ammo = false,
-    clock = false, reset = false, tasks = false, playtime = false, run = false, friends = false, guild = false,
+    clock = false, reset = false, tasks = false, notes = false, playtime = false, run = false, friends = false, guild = false,
 }
 
 -- Nomes aceitos nos comandos /farol show|hide (português e inglês).
@@ -55,6 +55,7 @@ local ITEM_ALIASES = {
     hora = "clock", horario = "clock", relogio = "clock", clock = "clock", time = "clock",
     reset = "reset", resets = "reset", reinicio = "reset",
     tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks", todo = "tasks",
+    notas = "notes", nota = "notes", notes = "notes", note = "notes", anotacoes = "notes", bloco = "notes",
     metas = "goals", meta = "goals", goals = "goals", goal = "goals", objetivo = "goals",
     farm = "farm", farmar = "farm", coleta = "farm",
     missoes = "quests", missao = "quests", quests = "quests", quest = "quests", diario = "quests",
@@ -2525,7 +2526,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2539,7 +2540,7 @@ end
 -- Novidade ligada a um item da barra ou a um aviso: se estiver desligada, a linha diz onde ligar (regra 8: o que é
 -- novo vem desligado; o jogador decide).
 Profiles.NEWS_ITEM = { news_rep = "rep", news_reset = "reset", news_prof = "prof", news_junk = "junk", news_supply = "ammo",
-                       news_tasks = "tasks", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests",
+                       news_tasks = "tasks", news_notes = "notes", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests",
                        news_hearth = "hearth" }
 Profiles.NEWS_WARN = { news_breaks = "pause" }
 Profiles.NEWS_OPTION = { news_colors = "colorblind", news_sources = "sources" }
@@ -2835,6 +2836,10 @@ local ITEM_TEXT = {
         if not ns.Tasks then return nil end
         return ns.Tasks.BarText()
     end,
+    notes = function() -- bloco de notas (Notes.lua)
+        if not ns.Notes then return nil end
+        return ns.Notes.BarText()
+    end,
     playtime = function()
         local seconds = GetSessionSeconds()
         if not seconds then return nil end
@@ -3018,7 +3023,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  quests = "INV_Misc_Book_09",  qdone = "INV_Misc_Book_08",  hearth = "INV_Misc_Rune_01",  run = "INV_Misc_Key_03",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  notes = "INV_Misc_Note_02",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  quests = "INV_Misc_Book_09",  qdone = "INV_Misc_Book_08",  hearth = "INV_Misc_Rune_01",  run = "INV_Misc_Key_03",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
@@ -3361,6 +3366,7 @@ TIP.reset = function()
 end
 
 TIP.tasks = function() if ns.Tasks then ns.Tasks.Tooltip() end end
+TIP.notes = function() if ns.Notes then ns.Notes.Tooltip() end end
 TIP.goals = function() if ns.Goals then ns.Goals.Tooltip() end end
 TIP.run = function() if ns.Runs then ns.Runs.Tooltip() end end
 TIP.farm = function() if ns.Farm then ns.Farm.Tooltip() end end
@@ -3387,15 +3393,15 @@ local TIP_SECTIONS = {
     durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
     xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" }, farm = { "farm" }, quests = { "quests" }, qdone = { "qdone" },
-    clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, playtime = { "playtime" }, run = { "run" },
+    clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, notes = { "notes" }, playtime = { "playtime" }, run = { "run" },
     friends = { "social" }, guild = { "social" },
 }
 ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
 local TIP_ORDER = { "perf", "place", "hearth", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
-                    "rep", "junk", "supply", "prof", "goals", "farm", "quests", "qdone", "reset", "tasks", "playtime", "run", "social" }
-local TIP_NEEDS_ITEM = { hearth = "hearth", rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", goals = "goals", farm = "farm", quests = "quests", qdone = "qdone", run = "run" }
+                    "rep", "junk", "supply", "prof", "goals", "farm", "quests", "qdone", "reset", "tasks", "notes", "playtime", "run", "social" }
+local TIP_NEEDS_ITEM = { hearth = "hearth", rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", notes = "notes", goals = "goals", farm = "farm", quests = "quests", qdone = "qdone", run = "run" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -3661,7 +3667,7 @@ Profiles.GROUPS = {
     { "grp_gear", { "durab", "bags", "junk", "ammo" } },
     { "grp_gold", { "gold", "session", "goldh" } },
     { "grp_progress", { "xp", "xph", "rep", "prof", "goals", "farm", "quests", "qdone" } },
-    { "grp_time", { "clock", "reset", "tasks", "playtime", "run", "friends", "guild" } },
+    { "grp_time", { "clock", "reset", "tasks", "notes", "playtime", "run", "friends", "guild" } },
 }
 ns.ITEM_GROUPS = Profiles.GROUPS
 Profiles.MENU_W, Profiles.PAGE_H = 660, 494 -- aba Geral com a janela de chat (3.20)
@@ -3740,6 +3746,7 @@ Profiles.GEARS = {
     hearth = "warnings", ammo = "warnings", quests = "warnings",
     goals = function() ns.Goals.ToggleWindow() end, farm = function() ns.Goals.ToggleWindow() end,
     clock = function() ns.Alarm.ToggleWindow() end, tasks = function() ns.Tasks.ToggleWindow() end,
+    notes = function() ns.Notes.ToggleWindow() end,
     run = function() ns.Runs.ToggleWindow() end, qdone = function() ns.Completed.ToggleWindow() end,
 }
 function Profiles.AddGear(set, page, check, key)
@@ -3948,6 +3955,7 @@ local function BuildControls(parent, top)
     local tools = {
         { "alarms", function() ns.Alarm.ToggleWindow() end },
         { "tasks", function() ns.Tasks.ToggleWindow() end },
+        { "notes", function() ns.Notes.ToggleWindow() end },
         { "goals", function() ns.Goals.ToggleWindow() end },
         { "runs", function() ns.Runs.ToggleWindow() end },
         { "qdone", function() ns.Completed.ToggleWindow() end },
@@ -4376,6 +4384,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         db.completed = ns.Completed.Sanitize(type(saved) == "table" and saved.completed or nil) -- missões concluídas
         db.questNames = ns.Completed.SanitizeNames(type(saved) == "table" and saved.questNames or nil) -- nomes aprendidos
         db.chatWindow = Profiles.CleanChatName(db.chatWindow) -- janela de chat das mensagens (3.20)
+        db.notes = ns.Notes.Sanitize(type(saved) == "table" and saved.notes or nil) -- bloco de notas da conta (3.22)
         local extra = {} -- barras 2 e 3, validadas do mesmo jeito
         for n = 2, Profiles.MAX_BARS do extra[n] = Profiles.SanitizeBar(FarolDB, n) end
         db.minimap = ns.MinimapButton.Sanitize(type(saved) == "table" and saved.minimap or nil) -- botão do minimapa
@@ -4472,7 +4481,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_chat", "help_diag", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_notes", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_chat", "help_diag", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -4553,6 +4562,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Farm.HandleCommand(rest)
     elseif cmd == "concluidas" or cmd == "concluida" or cmd == "completed" or cmd == "completas" then
         ns.Completed.HandleCommand(rest)
+    elseif cmd == "notas" or cmd == "nota" or cmd == "notes" or cmd == "note" or cmd == "anotacoes" then
+        ns.Notes.HandleCommand(rest)
     elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then
         ns.Tasks.HandleCommand(rest)
     elseif cmd == "perfil" or cmd == "perfis" or cmd == "profile" or cmd == "profiles" then

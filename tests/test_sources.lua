@@ -63,6 +63,17 @@ return {
         T.eq(z.qx + z.mx + z.ox + z.qn + z.qg + z.lg + z.sg + z.bg, 0)
     end },
 
+    { "sources that had nothing are not shown (no '+0c' or '0%' lines)", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H.money = 100000; H:login({ sources = true }); H:update(1)
+        H:event("PLAYER_REGEN_DISABLED"); xp(H, 850); H:event("PLAYER_REGEN_ENABLED"); H:update(10); xp(H, 150)
+        H:event("LOOT_OPENED"); money(H, 303); H:event("LOOT_CLOSED")
+        H.msgs = {}; H:slash("resumo")
+        T.has(chat(H), "XP por origem: monstros 85% · outros 15%"); T.has(chat(H), "Ouro por origem: saque +3s 3c")
+        T.hasnt(chat(H), "missões"); T.hasnt(chat(H), "+0c")
+        local text = tip(H)
+        T.has(text, "Monstros = 850 · 85%"); T.hasnt(text, "Missões ("); T.hasnt(text, "Comerciante")
+    end },
+
     { "turn-in without reward values (WoW Forever may not send them): the change next to it counts", function(T, Mock)
         local H = Mock.new({ locale = "ptBR" }); H.money = 0; H:login({ sources = true }); H:update(1)
         money(H, 300); H:update(1); H:event("QUEST_TURNED_IN", 7)  -- ouro 1 s antes
@@ -84,7 +95,7 @@ return {
         H:check(set.sources, true); T.eq(H.env.FarolDB.sources, true); T.has(H:lastMsg(), "where the XP and gold come from: on")
         H:slash("source off"); T.eq(H.env.FarolDB.sources, false); T.eq(set.sources._checked, false, "menu synced")
         H:slash("source maybe"); T.has(H:lastMsg(), "usage: /farol source on|off")
-        local U = Mock.new({ locale = "ptBR" }); U:login({ items = { fps = true }, newsSeen = #H.ns.NEWS - 2 })
+        local U = Mock.new({ locale = "ptBR" }); U:login({ items = { fps = true }, newsSeen = #H.ns.NEWS - 3 })
         T.has(chat(U), "de onde vem o XP e o ouro da sessão: missões, monstros, saque e comerciante (tooltip e resumo) — desligado (ligue em Menu > Geral)")
     end },
 

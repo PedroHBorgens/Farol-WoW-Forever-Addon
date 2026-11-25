@@ -2,6 +2,17 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.22.0 — Notepad
+- New **notepad** for the whole account (`/farol notes`, Menu > Tools > Notes...): up to 10 notes, each with a title
+  (up to 40 letters) and a multi-line text (up to 500 letters), saved as you type, with a **done** checkbox. Done
+  notes go below, in grey, and stay until deleted. **Delete** and **Clear done** ask first and have **Undo**.
+- New bar item **Notes** (off by default): pending of total, with the pending ones in the tooltip. 30 bar items.
+- Saved in `FarolDB.notes` and validated on load (no `|` or control characters except line breaks, size limits, at
+  most 10; a huge tampered file loads fast).
+- XP/gold by source: sources that had nothing are no longer shown (no more "+0c" or "quests 0%" in the summary and the
+  tooltips).
+- Images 02 and 03 updated (30 items) and new image 18 (notepad). 734 tests (2 passes).
+
 ## 3.21.0 — Warnings window: nothing cut
 - Long warnings no longer end in "…": each one wraps onto up to 3 lines and the window grows taller (one warning or
   several); the Silence / Remind buttons stay at the right of each warning.

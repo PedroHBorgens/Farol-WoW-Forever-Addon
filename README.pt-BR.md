@@ -4,7 +4,7 @@
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · Pedra de Regresso · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · diário de missões · missões concluídas · horário · resets diário/semanal · tarefas · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (29 itens).
+XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · diário de missões · missões concluídas · horário · resets diário/semanal · tarefas · anotações · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (30 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -15,7 +15,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 
 | Vem ligado na primeira vez | Todo o resto vem desligado |
 |---|---|
-| Barra com o básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (7 de 29 itens) | Os outros 22 itens da barra e a 2ª e 3ª barras |
+| Barra com o básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (7 de 30 itens) | Os outros 23 itens da barra e a 2ª e 3ª barras |
 | Avisos de durabilidade, bolsas, talentos não gastos, magias de grau antigo e profissões (com som) | Munição, reagentes, pausa, água, tarefas, metas, missões, descanso dos personagens |
 | Resumo da sessão ao entrar e ao sair de masmorra — só no **seu** chat | Tooltip completo, horário do servidor, ouro de todos os personagens, esconder em combate |
 | Botão no minimapa | Perfis por personagem, alarmes, tarefas, metas |
@@ -68,6 +68,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol chat Nome`  | Em qual janela de chat o Farol escreve (ex.: uma aba "Farol"); `/farol chat principal` volta ao padrão |
 | `/farol origem on\|off` | Mostra de onde vem o XP e o ouro da sessão (missões, monstros, saque, comerciante) |
 | `/farol diagnostico` | Mostra no seu próprio chat como o jogo respondeu (personagem, reino, ouro, último logout, eventos); só leitura |
+| `/farol notas`      | Bloco de notas da conta: até 10 anotações com caixinha de concluída (`nova Título`, `lista`, `desfazer`) |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
 | `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
 | `/farol barra 2 mostrar` | Liga a barra 2 (ou 3) e escolhe ela para o menu, a Aparência e a Ordem (`/farol barra` lista as barras) |
@@ -397,6 +398,22 @@ O Farol não confere nada no jogo — quem marca as tarefas é você. Comandos: 
 Na janela, **Tipo: Diária / Semanal** escolhe o tipo da nova tarefa; apagou uma sem querer (X)? Aparece
 **Tarefa apagada: ... [Desfazer]**, que a devolve ao mesmo lugar (só nesta sessão).
 
+## Anotações (bloco de notas)
+
+Desde a 3.22, o Farol tem um bloco de notas da **conta inteira** (as mesmas anotações em todos os personagens): até
+**10 anotações**, cada uma com um título curto (até 40 letras) e um texto de várias linhas (até 500 letras), salvos ao
+digitar. Abra com `/farol notas` ou **Anotações...** em Menu > Ferramentas.
+
+- À esquerda, a lista com uma caixinha para cada anotação: marque quando concluir. As concluídas vão para baixo, em
+  cinza, e ficam até você apagar (nada zera sozinho).
+- À direita, o título e o texto da anotação escolhida; **✓ Concluída / Reabrir** e **Apagar**.
+- **Apagar** e **Limpar concluídas** perguntam antes (clique de novo para confirmar) e mostram **Desfazer** (só nesta
+  sessão).
+- Item opcional na barra **Anotações** (desligado): `Notas 2/5` = 2 pendentes de 5; passe o mouse para ver as pendentes.
+- Comandos: `/farol notas nova Título`, `/farol notas lista`, `/farol notas desfazer`.
+- As anotações ficam só no seu computador; nada é enviado. O texto salvo é conferido ao carregar (tamanhos máximos,
+  sem códigos do chat).
+
 ## Resumo da sessão
 
 `/farol resumo` mostra, **só no seu chat**, o que você fez nesta sessão:
@@ -493,6 +510,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | Missões concluídas | Total de missões concluídas deste personagem (lista de cada personagem na janela) | `concluidas` | desligado |
 | Horário          | Hora local, ou do servidor (opção no menu)                | `hora`          | desligado  |
 | Resets           | Tempo até o reset diário e o semanal                      | `reset`         | desligado  |
+| Anotações        | Anotações pendentes do bloco de notas (`Notas 2/5`)        | `notas`         | desligado  |
 | Tempo de sessão  | Quanto tempo está jogando desde que entrou / `/reload`    | `tempo`         | desligado  |
 | Amigos online    | Quantidade de amigos online (WoW + Battle.net)            | `amigos`        | desligado  |
 | Guilda online    | Quantidade de membros da guilda online (some sem guilda)  | `guilda`        | desligado  |
@@ -592,7 +610,7 @@ Segurança da informação é a primeira regra deste projeto:
 - **Sem automação.** Ele só lê e exibe informações; não joga por você (o que violaria as regras do servidor).
 - **Dados salvos são validados.** `FarolDB` guarda só as suas configurações: posição e estado do painel, idioma,
   itens visíveis e a ordem deles, aparência, alarmes (hora, tipo de relógio, ligado/desligado, um nome já limpo e o
-  tempo da soneca), ajustes da janela de saques e dos avisos (desde a 3.0 os ajustes da barra ficam agrupados num perfil), e o ouro e o nível dos **seus próprios** personagens
+  tempo da soneca), ajustes da janela de saques e dos avisos (desde a 3.0 os ajustes da barra ficam agrupados num perfil), as suas anotações (bloco de notas, títulos e textos conferidos ao carregar) e o ouro e o nível dos **seus próprios** personagens
   por reino (para o total da conta). `FarolCharDB` (por personagem) guarda só o histórico
   de saques (links de item validados), os 10 últimos avisos, o resumo da última sessão (só números, inclusive o XP/ouro por origem quando essa opção está ligada) e se o jogo informou 0 de ouro no último logout (sim/não e quando, para o `/farol diagnostico`). Tudo é verificado ao carregar — um arquivo corrompido
   ou adulterado volta para os valores padrão.

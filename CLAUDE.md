@@ -158,8 +158,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Goals, Farm, Quests, Hearth, Runs, Completed, Sources, Diag, MinimapButton
-  Core.lua          barras (até 3, grade de células), 29 itens, tooltip, menu de opções, comandos /farol, dados salvos
+                    Appearance, Order, Tasks, Notes, Goals, Farm, Quests, Hearth, Runs, Completed, Sources, Diag, MinimapButton
+  Core.lua          barras (até 3, grade de células), 30 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água, tarefas),
@@ -169,6 +169,8 @@ Farol/
                     mostrar/esconder os botões rápidos 📝 👜
   Order.lua         ordem dos itens na barra
   Tasks.lua         lista de tarefas diárias/semanais (janela, item "tasks" da barra, tooltip, /farol tarefa)
+  Notes.lua         bloco de notas da conta (até 10 anotações: título + texto + concluída; janela, item "notes",
+                    tooltip, /farol notas; apagar com confirmação e Desfazer)
   Goals.lua         metas de ouro e de nível (janela, item "goals" da barra, tooltip, estimativa pelo ritmo, /farol meta)
   Farm.lua          metas de farm/itens (item "farm", tooltip com ritmo, linhas na janela de Metas, "+ Meta" nos saques,
                     /farol meta item, /farol farm)
@@ -231,7 +233,8 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   (descanso: XP descansado, XP do nível e se estava em estalagem/cidade, gravados ao sair), nomes sem `|`/controle
   e até 48 bytes, no máximo 20 reinos × 60 personagens; nunca nomes de outros jogadores), `questRecord` (registro de
   missões, desligado), `questShowOld` (mostrar as de antes do registro, desligado), `questNames` (dicionário ID → nome
-  aprendido com o jogo, máx. 5000), `completed[reino][nome] = { t = total
+  aprendido com o jogo, máx. 5000), `notes` (bloco de notas da conta: `{ {t ≤ 40, x ≤ 500 com quebras de linha, d, m} }`,
+  máx. 10, sem `|`/controle), `completed[reino][nome] = { t = total
   do jogo, tt = quando, a = { IDs concluídos, máx. 15000 }, list = { {i, n ≤ 60, l, z ≤ 40, t} } }`
   (máx. 2000 por personagem, 20 reinos × 60 nomes; só os próprios personagens; `ns.KeepLast`/`ns.KeepRecent`) e
   `FarolCharDB` (personagem: `items` = histórico de saques, `warnHistory`, `runs` = `{ list (máx. 10), cur }` corridas
@@ -272,7 +275,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 ## Testes
 
 ```
-lua5.1 tests/run.lua        # ~720 testes (2 passadas); deve terminar com "0 failed"
+lua5.1 tests/run.lua        # ~730 testes (2 passadas); deve terminar com "0 failed"
 ```
 
 - **Duas passadas (3.18):** a 1ª com o simulador "de livro"; a 2ª, **forever-real** (`Mock.REAL`), com reino `""` e
@@ -345,6 +348,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | De onde vem o XP e o ouro (tooltips) | 15 (e 09 pelo resumo) |
 | Janela de chat do Farol e `/farol diagnostico` | 16 |
 | Botão do minimapa e cores para daltonismo | 17 |
+| Bloco de notas (janela, item, tooltip) | 18 (e 02/03 pela contagem de itens) |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

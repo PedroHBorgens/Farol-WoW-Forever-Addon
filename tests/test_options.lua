@@ -1,7 +1,7 @@
 -- Menu de opções: abrir/fechar, caixinhas sincronizadas, idioma, horário do servidor.
 -- Options menu: open/close, synced checkboxes, language, server time.
 
-local ITEM_COUNT, GENERAL_COUNT = 29, 30 -- 29 itens + mostrar/travar (Barra) + 9 da aba Geral + 18 da aba Avisos
+local ITEM_COUNT, GENERAL_COUNT = 30, 30 -- 30 itens + mostrar/travar (Barra) + 9 da aba Geral + 18 da aba Avisos
 
 local function openMenu(H)
     H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
@@ -44,10 +44,11 @@ return {
         T.eq(H:text(window[21].label), "Missões (diário)")
         T.eq(H:text(window[22].label), "Missões concluídas")
         T.eq(H:text(window[25].label), "Tarefas (diárias/semanais)")
-        T.eq(H:text(window[27].label), "Masmorra / raide atual")
-        T.eq(H:text(window[30].label), "Mostrar")
-        T.eq(H:text(window[32].label), "Horário do servidor")
-        T.eq(H:text(panel[31].label), "Travar")
+        T.eq(H:text(window[26].label), "Anotações (bloco de notas)")
+        T.eq(H:text(window[28].label), "Masmorra / raide atual")
+        T.eq(H:text(window[31].label), "Mostrar")
+        T.eq(H:text(window[33].label), "Horário do servidor")
+        T.eq(H:text(panel[32].label), "Travar")
     end },
 
     { "ticking a box updates the bar, the saved settings and the other menu", function(T, Mock)
@@ -64,10 +65,10 @@ return {
     { "show panel, lock and server time options", function(T, Mock)
         local H = Mock.new():login()
         local _, window = openMenu(H)
-        H:check(window[31], true); T.eq(H.env.FarolDB.locked, true)
-        H:check(window[30], false)
+        H:check(window[32], true); T.eq(H.env.FarolDB.locked, true)
+        H:check(window[31], false)
         T.eq(H.env.FarolDB.shown, false); T.ok(not H.env.FarolFrame:IsShown(), "panel hidden")
-        H:check(window[32], true); T.eq(H.env.FarolDB.serverTime, true)
+        H:check(window[33], true); T.eq(H.env.FarolDB.serverTime, true)
         H:slash(""); T.ok(H.env.FarolFrame:IsShown(), "/farol shows it again")
         H:slash("show hora"); H:update(1)
         T.has(H:bar(), "21:05", "clock uses server time")

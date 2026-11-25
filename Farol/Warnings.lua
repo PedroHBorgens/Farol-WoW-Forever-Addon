@@ -44,6 +44,8 @@ local DEFAULTS = {
     questFull = false, questMin = 19,                        -- diário de missões quase cheio (a partir de N)
     questReady = false,                                      -- missões prontas ao entrar numa cidade/estalagem
     hearthReady = false,                                     -- Pedra de Regresso pronta (fim da recarga)
+    questValue = false,                                      -- XP e ouro das missões prontas (barra e tooltip)
+    questLevel = false,                                      -- avisar quando entregar as prontas sobe de nível
     popupW = 0,                                              -- largura da janela de avisos (0 = padrão; alça ◢)
 }
 local QUEST_MIN, QUEST_MAX = 1, 100
@@ -138,6 +140,14 @@ local STRINGS = {
         warn_questFull_full = "Diário de missões cheio: %d/%d!",
         warn_opt_questReady = "Missões prontas (cidade/estalagem)",
         warn_opt_hearthReady = "Pedra de Regresso pronta",
+        warn_opt_questValue = "XP e ouro das prontas",
+        warn_name_questValue = "XP e ouro das missões prontas",
+        warn_opt_questLevel = "Prontas que sobem de nível",
+        warn_name_questLevel = "entregar as prontas sobe de nível",
+        warn_questLevel = "Entregue as %d missões prontas: você sobe para o nível %d.",
+        warn_questLevel_1 = "Entregue a %d missão pronta: você sobe para o nível %d.",
+        warn_desc_questValue = "mostra na barra e no tooltip do item Missões quanto XP e ouro as prontas vão dar e se entregar todas sobe você de nível.",
+        warn_desc_questLevel = "avisa uma vez por nível quando entregar as missões prontas já faz você subir de nível.",
         warn_name_hearthReady = "Pedra de Regresso pronta",
         warn_hearthReady = "Pedra de Regresso pronta (%s).",
         warn_hearthReady_noplace = "Pedra de Regresso pronta.",
@@ -293,6 +303,14 @@ local STRINGS = {
         warn_questFull_full = "Quest log full: %d/%d!",
         warn_opt_questReady = "Quests ready in a city or inn",
         warn_opt_hearthReady = "Hearthstone ready",
+        warn_opt_questValue = "XP and gold of ready ones",
+        warn_name_questValue = "XP and gold of ready quests",
+        warn_opt_questLevel = "Ready ones level you up",
+        warn_name_questLevel = "turning in the ready quests levels you up",
+        warn_questLevel = "Turn in the %d ready quests: you reach level %d.",
+        warn_questLevel_1 = "Turn in the %d ready quest: you reach level %d.",
+        warn_desc_questValue = "shows on the bar and in the Quests tooltip how much XP and gold the ready quests give and whether turning them all in levels you up.",
+        warn_desc_questLevel = "warns once per level when turning in your ready quests is already enough to level up.",
         warn_name_hearthReady = "Hearthstone ready",
         warn_hearthReady = "Hearthstone ready (%s).",
         warn_hearthReady_noplace = "Hearthstone ready.",
@@ -393,7 +411,7 @@ function Warnings.Sanitize(saved)
     local clean = {}
     if type(saved) ~= "table" then saved = {} end
     for _, key in ipairs({ "durab", "bags", "sound", "talents", "ranks", "prof", "restFull", "ammo", "reag", "pause", "pauseAnywhere",
-                           "water", "waterAnywhere", "tasks", "goals", "questFull", "questReady", "hearthReady" }) do
+                           "water", "waterAnywhere", "tasks", "goals", "questFull", "questReady", "hearthReady", "questValue", "questLevel" }) do
         if type(saved[key]) == "boolean" then clean[key] = saved[key] else clean[key] = DEFAULTS[key] end
     end
     clean.durabPct = InRange(saved.durabPct, DURAB_MIN, DURAB_MAX) or DEFAULTS.durabPct
@@ -439,6 +457,7 @@ local state = {
     goals = {},                                         -- metas: o "já avisada" fica salvo (FarolCharDB.goals)
     questFull = { armed = true, lastAt = nil, full = false }, -- diário quase cheio (como as bolsas)
     questReady = { wasResting = nil, lastAt = nil },    -- prontas: ao passar a descansar (cidade/estalagem)
+    questLevel = { warned = nil },                      -- nível já avisado (entregar as prontas sobe de nível)
     hearthReady = { cooling = false },                  -- viu a pedra em recarga: avisa quando ficar pronta
 }
 
@@ -1316,6 +1335,20 @@ local function CheckQuestReady(now)
     Announce(ready == 1 and T("warn_questReady_one") or string.format(T("warn_questReady"), ready), "questReady")
 end
 
+-- Entregar as prontas sobe de nível: avisa uma vez por nível (o "Lembrar em" avisa de novo se ainda valer).
+local function CheckQuestLevel(now)
+    local entry = state.questLevel
+    if not Settings().questLevel or not ns.Quests or not ns.Quests.Value then return end
+    local data = ns.Quests.Read()
+    local v = data and ns.Quests.Value(data)
+    if not v or not v.next then return end
+    local reminding = ReminderDue(entry, now)
+    if entry.warned == v.level and not reminding then return end
+    if reminding then entry.remindAt = nil end
+    entry.warned = v.level
+    Announce(string.format(ns.TN("warn_questLevel", #data.ready), #data.ready, v.next), "questLevel")
+end
+
 -- Pedra de Regresso: avisa uma vez quando a recarga termina (só se a viu em recarga nesta sessão; ao entrar com
 -- ela já pronta, não avisa). Espera a luta e a masmorra acabarem, como os lembretes.
 local Busy -- definida abaixo
@@ -1402,6 +1435,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
         pcall(CheckGoals)
         pcall(CheckQuestFull, now)
         pcall(CheckQuestReady, now)
+        pcall(CheckQuestLevel, now)
         pcall(CheckHearth, now)
     end
 end)
@@ -1431,6 +1465,8 @@ local function SetEnabled(key, value, quiet)
     elseif key == "questReady" then state.questReady.wasResting, state.questReady.lastAt = nil, nil
     elseif key == "questFull" then state.questFull.armed, state.questFull.full = true, false
     elseif key == "hearthReady" then state.hearthReady.cooling, state.hearthReady.remindAt = false, nil
+    elseif key == "questLevel" then state.questLevel.warned, state.questLevel.remindAt = nil, nil
+    elseif key == "questValue" then if ns.UpdateText then ns.UpdateText() end
     elseif state[key] then state[key].armed = true end
     if not quiet then Print(string.format(value and T("warn_on") or T("warn_off"), T("warn_name_" .. key))) end
     if RefreshWindow then RefreshWindow() end
@@ -1439,7 +1475,7 @@ end
 -- Botões do topo da aba Avisos: "Só os recomendados" (os padrões aprovados) e "Desligar todos". O som e as opções
 -- "também em lutas" ficam como estão.
 local TOGGLE_KEYS = { "durab", "bags", "ammo", "reag", "talents", "ranks", "prof", "restFull", "goals",
-                      "questFull", "questReady", "hearthReady", "tasks", "pause", "water" }
+                      "questFull", "questReady", "questLevel", "hearthReady", "tasks", "pause", "water" }
 function Warnings.SetAll(recommended)
     for _, key in ipairs(TOGGLE_KEYS) do
         local value = recommended and DEFAULTS[key] or false
@@ -1584,7 +1620,7 @@ function Warnings.BuildControls(parent, prefix)
     set.topHint = ns.Dim(parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     set.topHint:SetPoint("LEFT", set.allOff, "RIGHT", 10, 0)
     set.info = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    set.info:SetPoint("TOPLEFT", 16, -392)
+    set.info:SetPoint("TOPLEFT", 16, -444) -- abaixo da coluna 2 (3.23: + XP e ouro das prontas)
     set.info:SetWidth(620)
     set.info:SetJustifyH("LEFT")
     local function Explain(check, key)
@@ -1638,7 +1674,9 @@ function Warnings.BuildControls(parent, prefix)
     set.questReady = Explain(Check("QuestReady", x, y - 43, "questReady"), "questReady")
     set.hearthReady = Explain(Check("HearthReady", x, y - 68, "hearthReady"), "hearthReady")
     set.tasks = Explain(Check("Tasks", x, y - 93, "tasks"), "tasks")
-    y = y - 123
+    set.questValue = Explain(Check("QuestValue", x, y - 118, "questValue"), "questValue")
+    set.questLevel = Explain(Check("QuestLevel", x, y - 143, "questLevel"), "questLevel")
+    y = y - 173
     set.breaksHeader = Header(x, y)
     y = y - 18
     for _, key in ipairs(BREAK_KEYS) do
@@ -1701,7 +1739,7 @@ local function RefreshSet(set)
     set.topHint:SetText(T("warn_top_hint"))
     Warnings.ShowInfo(set, set.infoKey)
     set.howHeader:SetText(T("warn_sec_how"))
-    for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "goals", "questFull", "questReady", "hearthReady", "sound" }) do
+    for _, key in ipairs({ "durab", "bags", "talents", "ranks", "prof", "restFull", "tasks", "goals", "questFull", "questReady", "hearthReady", "questValue", "questLevel", "sound" }) do
         set[key].label:SetText(T("warn_opt_" .. key))
         set[key]:SetChecked(settings[key])
     end

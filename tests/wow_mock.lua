@@ -258,6 +258,9 @@ function Mock.new(opts)
             GetTitleForQuestID = function(id) return H.questTitles[id] end,
             GetLogIndexForQuestID = function(id) local i = id - 1000; return H.quests[i] and i or nil end,
         }
+        -- Recompensa de cada missão do diário (confirmado no WoW Forever 3.22): q.xp e q.money (cobre).
+        env.GetQuestLogRewardXP = function(id) local q = H.quests[id - 1000]; return q and q.xp or 0 end
+        env.GetQuestLogRewardMoney = function(id) local q = H.quests[id - 1000]; return q and q.money or 0 end
         env.GetQuestDifficultyColor = function(level)
             local d = level - (H.xp.level or 1)
             if d >= 5 then return { r = 1, g = 0.1, b = 0.1 } end

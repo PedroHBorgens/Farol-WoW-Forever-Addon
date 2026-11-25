@@ -2,6 +2,16 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.23.0 — Value of the ready quests
+- New option **XP and gold of ready ones** (Warnings tab, off by default): the Quests bar item shows the XP of the
+  quests ready to turn in (`5 ready (+7.4k XP)`) and its tooltip shows the total XP and gold, each ready quest with
+  its reward (most XP first), whether turning them all in levels you up ("level 23 → 24 (6.5k XP left over)", or how
+  much is missing) and the XP of the quests in progress.
+- New optional warning **Ready ones level you up** (off by default): once per level.
+- Rewards read with `GetQuestLogRewardXP` / `GetQuestLogRewardMoney` for each quest of the log (modern clients),
+  confirmed in WoW Forever with a `/run` in game. Read-only; nothing is sent. No level-up line at max level.
+- Warnings tab: the help strip moved down to make room. Image 08 updated. 744 tests (2 passes).
+
 ## 3.22.0 — Notepad
 - New **notepad** for the whole account (`/farol notes`, Menu > Tools > Notes...): up to 10 notes, each with a title
   (up to 40 letters) and a multi-line text (up to 500 letters), saved as you type, with a **done** checkbox. Done

@@ -340,6 +340,13 @@ cheio). O tooltip lista primeiro as **prontas para entregar** e depois as **em a
 (`/farol aviso prontas on`; no máximo a cada 5 minutos). O Farol só **lê** o diário: nunca aceita, entrega, abandona ou
 compartilha missões, e não abre categorias fechadas do diário. `/farol aviso status` mostra o que foi lido.
 
+**Quanto valem as missões prontas (desde a 3.23, desligado):** marque **XP e ouro das prontas** na aba Avisos e a barra
+mostra `Missões 8/40 · 5 prontas (+7.4k XP)`; o tooltip ganha o total de XP e ouro das prontas, cada pronta com a sua
+recompensa (as que mais dão XP primeiro), **"Entregando todas: nível 23 → 24 (sobram 6.5k XP)"** (ou quanto XP ainda
+falta) e o XP das missões em andamento. As recompensas vêm do próprio jogo, para cada missão do diário (clientes
+modernos). Aviso opcional **Prontas que sobem de nível** (desligado): uma vez por nível, quando entregar as prontas já
+basta para subir de nível.
+
 ## Missões concluídas
 
 A janela **Missões concluídas** (Menu > Ferramentas, ou `/farol concluidas`) mostra as missões que cada um dos **seus**

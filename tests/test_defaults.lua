@@ -78,7 +78,7 @@ return {
         local hint = H:text(H.env.FarolOptions.controls.hint)
         T.has(hint, "tudo é opcional")
         -- Quem atualiza vê as novidades com "desligado" e onde ligar.
-        local saved = { newsSeen = #H.ns.NEWS - 13, items = { fps = true } }
+        local saved = { newsSeen = #H.ns.NEWS - 14, items = { fps = true } }
         H = Mock.new():login(saved)
         local text = H.strip(table.concat(H.msgs, "\n"))
         T.has(text, "metas de farm"); T.has(text, "desligado (ligue em Menu > Barra)")

@@ -15,6 +15,29 @@ local function withNotes(Mock, notes, opts)
 end
 
 return {
+    { "3.24: title box hint, undo strip with background; a client without HookScript gets no hint", function(T, Mock)
+        local H = withNotes(Mock, { { t = "Rota", x = "a" }, { t = "Comprar", x = "b" } })
+        H:slash("notas"); H:click(H.env.FarolNotePick1)
+        local W, box = H.env.FarolNotes, H.env.FarolNoteTitle
+        T.ok(W:IsShown(), "window open")
+        T.eq(H:text(box.farolHint), "Título da anotação"); T.ok(not box.farolHint:IsShown(), "title filled: no hint")
+        T.ok(not W.undoBack:IsShown(), "no undo strip yet")
+        H:click(H.env.FarolNoteDelete); H:click(H.env.FarolNoteDelete)
+        T.ok(W.undoBack:IsShown(), "undo strip after deleting"); T.has(H:text(W.undoText), "Apagada:")
+        H:click(W.undo); T.ok(not W.undoBack:IsShown(), "strip hides after undo")
+        -- old client: no HookScript on the box → no hint at all (it could not hide while typing)
+        local E = Mock.new({ locale = "enUS" })
+        E.env.FAROL_FRAME_CLASS = nil
+        local saved = E.env.CreateFrame
+        E.env.CreateFrame = function(kind, name, ...)
+            local f = saved(kind, name, ...)
+            if kind == "EditBox" then f.HookScript = false end
+            return f
+        end
+        E:login(); E:slash("task")
+        T.eq(E.env.FarolTaskName.farolHint, nil, "no placeholder without HookScript")
+    end },
+
     { "off by default; /farol notas opens the window; a new note is typed and saved in the account", function(T, Mock)
         local H = Mock.new({ locale = "ptBR" }):login()
         T.eq(H.env.FarolDB.items.notes, false, "bar item off")

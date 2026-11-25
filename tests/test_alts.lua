@@ -69,11 +69,11 @@ return {
         H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
         local forget
         for _, b in ipairs(H:framesOf("Button")) do
-            if b._text == "Esquecer personagens" and b:IsShown() and H.env.FarolOptions then forget = b end
+            if string.find(H.strip(b._text), "Esquecer personagens", 1, true) and b:IsShown() and H.env.FarolOptions then forget = b end
         end
         T.ok(forget, "button in the options")
         H:click(forget)
-        T.eq(forget._text, "Clique de novo para confirmar"); T.ok(H.env.FarolDB.chars.Azralon.Thrall, "not yet")
+        T.eq(H.strip(forget._text), "Clique de novo para confirmar"); T.ok(H.env.FarolDB.chars.Azralon.Thrall, "not yet")
         H:click(forget)
         T.eq(H.env.FarolDB.chars.Azralon.Thrall, nil, "forgotten after confirming")
         T.ok(H.env.FarolDB.chars.Azralon.Garrosh, "current character stays")
@@ -85,7 +85,7 @@ return {
         local H = Mock.new():login(savedWithAlts(os.time())); H:update(1)
         H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
         local forget
-        for _, b in ipairs(H:framesOf("Button")) do if b._text == "Esquecer personagens" then forget = b end end
+        for _, b in ipairs(H:framesOf("Button")) do if string.find(H.strip(b._text), "Esquecer personagens", 1, true) then forget = b end end
         H:click(forget); H:update(6); H:click(forget)
         T.ok(H.env.FarolDB.chars.Azralon.Thrall, "6 s later counts as a new first click")
     end },

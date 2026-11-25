@@ -1,7 +1,7 @@
 -- Menu de opções: abrir/fechar, caixinhas sincronizadas, idioma, horário do servidor.
 -- Options menu: open/close, synced checkboxes, language, server time.
 
-local ITEM_COUNT, GENERAL_COUNT = 30, 32 -- 30 itens + mostrar/travar (Barra) + 9 da aba Geral + 20 da aba Avisos
+local ITEM_COUNT, GENERAL_COUNT = 30, 29 -- 30 itens + mostrar/travar (Barra) + 7 da aba Geral + 20 da aba Avisos
 
 local function openMenu(H)
     H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")

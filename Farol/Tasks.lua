@@ -36,7 +36,8 @@ local STRINGS = {
         tt_tasks_reset = "zeram em",
         task_title    = "Tarefas",
         task_hint     = "Marque o que já fez. Diárias zeram no reset diário; semanais, no semanal.",
-        task_empty    = "Nenhuma tarefa ainda: escreva abaixo e clique em Adicionar.",
+        task_empty    = "Nenhuma tarefa ainda: escreva acima e clique em Adicionar.",
+        task_placeholder = "Nova tarefa...",
         task_daily    = "Diária",
         task_weekly   = "Semanal",
         task_add      = "Adicionar",
@@ -73,7 +74,8 @@ local STRINGS = {
         tt_tasks_reset = "reset in",
         task_title    = "Tasks",
         task_hint     = "Tick what you have done. Daily tasks reset at the daily reset; weekly, at the weekly one.",
-        task_empty    = "No tasks yet: type one below and click Add.",
+        task_empty    = "No tasks yet: type one above and click Add.",
+        task_placeholder = "New task...",
         task_daily    = "Daily",
         task_weekly   = "Weekly",
         task_add      = "Add",
@@ -338,11 +340,11 @@ local function CreateWindow()
     frame.hint:SetWidth(416)
     frame.hint:SetJustifyH("LEFT")
     frame.empty = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
-    frame.empty:SetPoint("TOPLEFT", 26, -80)
+    frame.empty:SetPoint("TOPLEFT", 26, -108)
 
     frame.rows = {}
     for i = 1, MAX_TASKS do
-        local y = -70 - (i - 1) * ROW_HEIGHT
+        local y = -98 - (i - 1) * ROW_HEIGHT -- 3.24: a linha de criar vem antes da lista
         local row = {}
         row.check = CreateFrame("CheckButton", "FarolTaskDone" .. i, frame, "UICheckButtonTemplate")
         row.check:SetSize(24, 24)
@@ -362,10 +364,10 @@ local function CreateWindow()
         frame.rows[i] = row
     end
 
-    local addY = -70 - MAX_TASKS * ROW_HEIGHT - 10
+    -- Padrão das janelas (3.24): criar no topo, lista no meio, Desfazer no rodapé.
     frame.name = CreateFrame("EditBox", "FarolTaskName", frame, "InputBoxTemplate")
     frame.name:SetSize(180, 20)
-    frame.name:SetPoint("TOPLEFT", 30, addY)
+    frame.name:SetPoint("TOPLEFT", 30, -68)
     frame.name:SetAutoFocus(false)
     frame.name:SetMaxLetters(MAX_NAME_CHARS)
     frame.kind = CreateFrame("Button", "FarolTaskKind", frame, "UIPanelButtonTemplate")
@@ -382,11 +384,13 @@ local function CreateWindow()
     frame.add:SetScript("OnClick", AddFromBox)
     frame.name:SetScript("OnEnterPressed", AddFromBox)
     frame.name:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    ns.Placeholder(frame.name, "task_placeholder")
+    local addY = -98 - MAX_TASKS * ROW_HEIGHT + 20 -- o que vem depois da lista (aviso, resets, Desfazer)
 
     frame.warn = CreateFrame("CheckButton", "FarolTaskWarn", frame, "UICheckButtonTemplate")
     frame.warn:SetSize(24, 24)
     frame.warn:SetPoint("TOPLEFT", 20, addY - 30)
-    frame.warn.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    frame.warn.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.warn.label:SetPoint("LEFT", frame.warn, "RIGHT", 4, 0)
     frame.warn:SetScript("OnClick", function(self) SetWarning(self:GetChecked() and true or false) end)
     frame.resets = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
@@ -401,6 +405,7 @@ local function CreateWindow()
     frame.undo:SetSize(96, 22)
     frame.undo:SetPoint("TOPRIGHT", -26, addY - 82)
     frame.undo:SetScript("OnClick", function() Tasks.Undo() end)
+    ns.UndoBar(frame)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolTasks") -- ESC fecha
@@ -431,14 +436,9 @@ RefreshWindow = function()
     end
     window.kind:SetText(string.format(T("task_kind"), newWeekly and T("task_weekly") or T("task_daily")))
     local undo = Tasks.lastRemoved
-    if undo then
-        window.undoText:SetText(string.format(T("task_undo_line"), undo.task.n))
-        window.undo:SetText(T("task_undo"))
-        window.undoText:Show(); window.undo:Show()
-    else
-        window.undoText:Hide(); window.undo:Hide()
-    end
+    ns.ShowUndo(window, undo and string.format(T("task_undo_line"), undo.task.n), T("task_undo"))
     window.add:SetText(T("task_add"))
+    ns.UpdatePlaceholder(window.name)
     local settings = ns.GetDB() and ns.GetDB().warnings
     window.warn:SetChecked(settings and settings.tasks or false)
     window.warn.label:SetText(T("task_warn"))

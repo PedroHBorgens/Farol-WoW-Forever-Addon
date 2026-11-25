@@ -58,6 +58,7 @@ local STRINGS = {
         note_nothing_undo = "nada para desfazer.",
         note_undo     = "Desfazer",
         note_undo_line = "Apagada: %s",
+        note_ph_title = "Título da anotação",
         note_marked   = "anotação %s: %s.",
         note_done_word = "concluída",
         note_open_word = "pendente",
@@ -103,6 +104,7 @@ local STRINGS = {
         note_nothing_undo = "nothing to undo.",
         note_undo     = "Undo",
         note_undo_line = "Deleted: %s",
+        note_ph_title = "Note title",
         note_marked   = "note %s: %s.",
         note_done_word = "done",
         note_open_word = "pending",
@@ -449,6 +451,7 @@ local function CreateWindow()
     end)
     frame.titleBox:SetScript("OnEnterPressed", function() frame.textBox:SetFocus() end)
     frame.titleBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    ns.Placeholder(frame.titleBox, "note_ph_title")
 
     frame.textBack = CreateFrame("Frame", nil, frame, ns.backdropTemplate)
     frame.textBack:SetSize(496, 232)
@@ -492,6 +495,7 @@ local function CreateWindow()
     if frame.undoText.SetWordWrap then frame.undoText:SetWordWrap(false) end
     frame.undo = Button(frame, "FarolNoteUndo", 96, nil, function() Notes.Undo() end)
     frame.undo:SetPoint("BOTTOMRIGHT", -26, 18)
+    ns.UndoBar(frame)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
     tinsert(UISpecialFrames, "FarolNotes") -- ESC fecha
@@ -563,14 +567,9 @@ RefreshWindow = function(typing)
         window.done:Hide(); window.delete:Hide()
     end
     local undo = Notes.lastRemoved
-    if undo then
-        local label = #undo == 1 and Title(undo[1].note) or string.format(ns.TN("note_restored_n", #undo), #undo)
-        window.undoText:SetText(string.format(T("note_undo_line"), label))
-        window.undo:SetText(T("note_undo"))
-        window.undoText:Show(); window.undo:Show()
-    else
-        window.undoText:Hide(); window.undo:Hide()
-    end
+    local label = undo and (#undo == 1 and Title(undo[1].note) or string.format(ns.TN("note_restored_n", #undo), #undo))
+    ns.ShowUndo(window, label and string.format(T("note_undo_line"), label), T("note_undo"))
+    ns.UpdatePlaceholder(window.titleBox)
 end
 
 function Notes.ToggleWindow()

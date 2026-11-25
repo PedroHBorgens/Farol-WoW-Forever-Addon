@@ -111,10 +111,12 @@ O menu tem **quatro abas**:
   (`/farol aviso recomendados` / `/farol aviso nenhum`); embaixo, a explicação do aviso sob o mouse. `/farol aviso`
   abre o menu nesta aba.
 - **Ferramentas** — um botão para cada janela, com o que ela faz: Alarmes, Tarefas, Metas, Masmorras, **Missões concluídas**, Saques, Histórico e **Resumo agora**.
-- **Geral** — o que vale para todos os seus personagens: idioma (Auto / Português / English), hora do servidor, resumo
-  da sessão ao entrar, ouro de todos os personagens, tooltip completo, os botões rápidos ao lado da barra 1, o **botão
-  do minimapa** (mostrar / travar); **Restaurar**: posição da barra, zerar sessão, esquecer personagens; e
-  **Perfis (avançado)**: as mesmas barras em todos os personagens ou só neste, e **Copiar de...**.
+- **Geral** — o que vale para todos os seus personagens, em seções: **Idioma** (Auto / Português / English);
+  **Chat e mensagens** (qual aba do chat, resumo da sessão ao entrar, de onde vem o XP e o ouro); **Barra e relógio**
+  (hora do servidor, ouro de todos os personagens e o botão **Aparência...** para tooltip completo, botões rápidos,
+  tamanho e fundo); **Minimapa e acessibilidade** (botão do minimapa mostrar / travar, cores para daltonismo);
+  **Perfis (avançado)**: as mesmas barras em todos os personagens ou só neste, e **Copiar de...**; e, separado em
+  vermelho, **Restaurar e apagar**: posição da barra, zerar sessão e **esquecer personagens** (pede um segundo clique).
 
 **Botão no minimapa:** clique = menu, **clique direito = esconde/mostra todas as barras de uma vez** (só nesta sessão —
 bom para prints; `/farol` também traz de volta), Shift + clique = aba Avisos. Arraste em volta do minimapa (se não

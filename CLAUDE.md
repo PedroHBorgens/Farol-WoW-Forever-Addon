@@ -163,7 +163,8 @@ Farol/
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água, tarefas),
-                    "Silenciar / Lembrar em N min" (2–30), janela agrupada para vários avisos, histórico 📝, controles da aba Avisos
+                    "Silenciar / Lembrar em N min" (2–30), janela agrupada para vários avisos (texto quebra em até 3 linhas,
+                    tooltip com o aviso inteiro, alça ◢ de largura em `warnings.popupW`), histórico 📝, controles da aba Avisos
   Appearance.lua    escala, fundo, tamanhos de texto/ícone, formato (uma linha / uma coluna), esconder em combate,
                     mostrar/esconder os botões rápidos 📝 👜
   Order.lua         ordem dos itens na barra
@@ -271,7 +272,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 ## Testes
 
 ```
-lua5.1 tests/run.lua        # ~710 testes (2 passadas); deve terminar com "0 failed"
+lua5.1 tests/run.lua        # ~720 testes (2 passadas); deve terminar com "0 failed"
 ```
 
 - **Duas passadas (3.18):** a 1ª com o simulador "de livro"; a 2ª, **forever-real** (`Mock.REAL`), com reino `""` e

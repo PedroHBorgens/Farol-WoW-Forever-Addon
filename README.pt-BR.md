@@ -265,6 +265,9 @@ Cada aviso abre uma janelinha com duas opções:
 - Um lembrete por tipo de aviso: lembrar de novo troca o horário anterior. Lembrete de um problema que já foi
   resolvido (você reparou, gastou os pontos…) é descartado. Os lembretes acabam no `/reload` ou ao sair do jogo.
 - No chat: `/farol aviso silenciar` e `/farol aviso lembrar [minutos]` (todos os avisos abertos), `/farol aviso padrao 10`.
+- **Nada fica cortado (desde a 3.21):** um aviso longo quebra em até 3 linhas e a janela cresce na altura; passe o
+  mouse num aviso para ver o texto inteiro, do que ele trata e onde ajustar. Arraste a **alça ◢** no canto para deixar
+  a janela mais larga ou mais estreita (fica salvo; clique direito na alça ou **Posição padrão** volta à largura padrão).
 
 ### Histórico de avisos
 

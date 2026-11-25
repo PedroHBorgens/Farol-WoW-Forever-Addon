@@ -183,7 +183,7 @@ Open **Appearance...** in the options menu (or `/farol appearance`):
   Items rearrange into **left-aligned columns** that fit: wide = one line, narrow = one item per line, anything in
   between = 2, 3, 4… columns. The height adjusts automatically. Shortcuts: **One line** / **One column**. Locking the
   bar (`/farol lock`) hides the grip.
-- **Show border** on/off, **show icons on the bar** (one per item) and **show the warning history button**, **show the loot button** and **full tooltip** (all information on every item).
+- **Show border** on/off, **show icons on the bar** (one per item) and **show the warning history button**, **show the loot button**, **show the notes button** (off by default) and **full tooltip** (all information on every item).
 - **Hide in combat** (comes back when the fight ends) and **hide in dungeons, raids, arenas and battlegrounds**.
   Alarms and warnings keep working while the bar is hidden.
 - **Restore defaults** puts everything back.
@@ -412,7 +412,11 @@ with `/farol notes` or **Notes...** in Menu > Tools.
 - On the right, the title and the text of the selected note; **✓ Done / Reopen** and **Delete**.
 - **Delete** and **Clear done** ask first (click again to confirm) and show an **Undo** line (this session only).
 - Optional bar item **Notes** (off by default): `Notes 2/5` = 2 pending of 5; hover it for the pending ones.
-- Commands: `/farol notes new Title`, `/farol notes list`, `/farol notes undo`.
+- **Notes button** next to the bar (since 3.25, off by default; Menu > General > **Appearance...** > "Show the notes
+  button", or `/farol notes button on`): the number shows the pending notes; click opens/closes the window,
+  **Shift-click** opens it with a new note, hovering lists the pending ones.
+- **Key binding** of your choice: Esc → Options → Keybindings → AddOns → Farol → "Notes" (Farol sets no key).
+- Commands: `/farol notes new Title`, `/farol notes list`, `/farol notes undo`, `/farol notes button on|off`.
 - The notes stay on your computer; nothing is sent. Saved text is checked on load (size limits, no chat codes).
 
 ## Session summary

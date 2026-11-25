@@ -185,7 +185,7 @@ Abra **Aparência...** no menu de opções (ou `/farol aparencia`):
   largura. As informações se reorganizam em **colunas alinhadas à esquerda** que caibam: larga = uma linha, estreita =
   uma informação por linha, e no meio = 2, 3, 4… colunas. A altura se ajusta sozinha. Atalhos: **Uma linha** / **Uma
   coluna**. Travar a barra (`/farol lock`) esconde a alça.
-- **Mostrar borda**, **mostrar ícones na barra** (um por item) e **mostrar o botão do histórico de avisos**, **mostrar o botão de saques** e **tooltip completo** (todas as informações em qualquer item).
+- **Mostrar borda**, **mostrar ícones na barra** (um por item) e **mostrar o botão do histórico de avisos**, **mostrar o botão de saques**, **mostrar o botão das anotações** (desligado) e **tooltip completo** (todas as informações em qualquer item).
 - **Esconder em combate** (volta quando a luta acaba) e **esconder em masmorras, raides, arenas e campos de batalha**.
   Os alarmes e os avisos continuam funcionando com a barra escondida.
 - **Restaurar padrão** volta tudo ao normal.
@@ -419,7 +419,12 @@ digitar. Abra com `/farol notas` ou **Anotações...** em Menu > Ferramentas.
 - **Apagar** e **Limpar concluídas** perguntam antes (clique de novo para confirmar) e mostram **Desfazer** (só nesta
   sessão).
 - Item opcional na barra **Anotações** (desligado): `Notas 2/5` = 2 pendentes de 5; passe o mouse para ver as pendentes.
-- Comandos: `/farol notas nova Título`, `/farol notas lista`, `/farol notas desfazer`.
+- **Botão das anotações** ao lado da barra (desde a 3.25, desligado; Menu > Geral > **Aparência...** > "Mostrar botão
+  das anotações", ou `/farol notas botao on`): o número mostra as pendentes; clique abre/fecha a janela,
+  **Shift + clique** abre com uma anotação nova e passar o mouse lista as pendentes.
+- **Tecla de atalho** à sua escolha: Esc → Opções → Teclas de atalho → AddOns → Farol → "Anotações" (o Farol não define
+  nenhuma tecla).
+- Comandos: `/farol notas nova Título`, `/farol notas lista`, `/farol notas desfazer`, `/farol notas botao on|off`.
 - As anotações ficam só no seu computador; nada é enviado. O texto salvo é conferido ao carregar (tamanhos máximos,
   sem códigos do chat).
 

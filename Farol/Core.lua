@@ -96,6 +96,7 @@ local DEFAULTS = {
     icons = true,           -- ícone antes de cada informação da barra
     warnButton = true,      -- botão do histórico de avisos ao lado da barra
     lootButton = true,      -- botão da janela de saques ao lado da barra
+    notesButton = false,    -- botão das anotações ao lado da barra (3.25, desligado: regra 8)
     fontSize = 11,          -- tamanho do texto da barra (8 a 24)
     iconSize = 14,          -- tamanho dos ícones da barra e dos botões ao lado (10 a 32)
 }
@@ -2577,7 +2578,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes", "news_questvalue" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes", "news_questvalue", "news_notesbutton" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -3188,6 +3189,7 @@ end
 local function ApplyAppearance()
     if ns.Warnings and ns.Warnings.UpdateButton then ns.Warnings.UpdateButton() end
     if ns.Loot and ns.Loot.UpdateButton then ns.Loot.UpdateButton() end
+    if ns.Notes and ns.Notes.UpdateButton then ns.Notes.UpdateButton() end
     Profiles.Each(Profiles.Appearance)
 end
 
@@ -3634,6 +3636,7 @@ function Profiles.SetColorblind(value)
     -- Os números dos botões 📝 👜 trocam de cor na hora (não só no próximo aviso/saque).
     if ns.Warnings and ns.Warnings.UpdateButton then pcall(ns.Warnings.UpdateButton) end
     if ns.Loot and ns.Loot.UpdateButton then pcall(ns.Loot.UpdateButton) end
+    if ns.Notes and ns.Notes.UpdateButton then pcall(ns.Notes.UpdateButton) end
     Print(db.colorblind and T("cb_on") or T("cb_off"))
 end
 

@@ -15,6 +15,49 @@ local function withNotes(Mock, notes, opts)
 end
 
 return {
+    { "3.25 notes button: off by default; on by command or Appearance; badge, tooltip, click and Shift-click", function(T, Mock)
+        local H = withNotes(Mock, { { t = "Rota", x = "" }, { t = "Comprar", x = "" }, { t = "Ferreiro", x = "", d = true } })
+        T.eq(H.env.FarolDB.notesButton, false, "rule 8: off by default"); T.eq(H.env.FarolNotesButton, nil, "not created")
+        H:slash("notas botao"); T.eq(H.env.FarolDB.notesButton, true); T.has(H:lastMsg(), "botão das anotações ligado")
+        local B = H.env.FarolNotesButton
+        T.ok(B and B:IsShown(), "button shown")
+        T.eq(B._anchor, H.env.FarolLootButton, "after the loot button")
+        T.eq(H.strip(H:text(B.badge)), "2", "badge = pending notes"); T.has(B.badge._text, H.ns.C.warn, "palette color")
+        H.env.GameTooltip.lines = {}; B._scripts.OnEnter(B)
+        local tip = H.strip(table.concat(H.env.GameTooltip.lines, " / "))
+        T.has(tip, "2 pendentes de 3"); T.has(tip, "Rota"); T.has(tip, "Shift + clique: nova anotação"); T.hasnt(tip, "Ferreiro")
+        H:click(B); T.ok(H.env.FarolNotes:IsShown(), "click opens"); H:click(B); T.ok(not H.env.FarolNotes:IsShown(), "click again closes")
+        H.shift = true; H:click(B); H.shift = false
+        T.eq(#H.env.FarolDB.notes, 4, "Shift-click: new note"); T.ok(H.env.FarolNotes:IsShown(), "and the window opens")
+        T.eq(H.strip(H:text(B.badge)), "3", "badge follows")
+        H:slash("notas botao off"); T.ok(not B:IsShown(), "off hides it"); T.eq(H.env.FarolDB.notesButton, false)
+        H:slash("aparencia"); local check = H.env.FarolApp_notesButton
+        T.eq(H:text(check.label), "Mostrar botão das anotações"); T.eq(check._checked, false)
+        H:check(check, true); T.ok(B:IsShown(), "Appearance checkbox turns it on")
+        H:slash("aparencia botaonotas"); T.ok(not B:IsShown(), "Appearance command toggles it")
+        H:slash("aparencia padrao"); T.eq(H.env.FarolDB.notesButton, false, "restore defaults: off")
+        H:slash("notas botao talvez"); T.has(H:lastMsg(), "uso: /farol notas")
+        for _, bad in ipairs({ "sim", 1, 0 / 0, {} }) do
+            local X = Mock.new():login({ notesButton = bad })
+            T.eq(X.env.FarolDB.notesButton, false, "tampered value goes back to off: " .. tostring(bad))
+        end
+        local Y = Mock.new():login({ notesButton = true }); T.ok(Y.env.FarolNotesButton and Y.env.FarolNotesButton:IsShown(), "saved on: shown at login")
+    end },
+
+    { "3.25 key binding: opens/closes the notes window; no key set by Farol; palette repaint; English", function(T, Mock)
+        local H = withNotes(Mock, { { t = "A", x = "" } })
+        T.eq(H.env.BINDING_NAME_FAROL_NOTES, "Anotações / Notes")
+        H.env.Farol_ToggleNotes(); T.ok(H.env.FarolNotes:IsShown()); H.env.Farol_ToggleNotes(); T.ok(not H.env.FarolNotes:IsShown())
+        local f = io.open("Farol/Bindings.xml", "r"); local xml = f:read("*a"); f:close()
+        T.has(xml, 'name="FAROL_NOTES"'); T.has(xml, "Farol_ToggleNotes()"); T.hasnt(xml, "key=", "Farol sets no key")
+        H:slash("notas botao on"); H:slash("cores daltonismo")
+        T.has(H.env.FarolNotesButton.badge._text, H.ns.C.warn, "repainted with the colorblind palette")
+        local E = withNotes(Mock, { { t = "A", x = "" } }, { locale = "enUS" })
+        E:slash("notes button on"); T.has(E:lastMsg(), "notes button on")
+        E.env.GameTooltip.lines = {}; E.env.FarolNotesButton._scripts.OnEnter(E.env.FarolNotesButton)
+        T.has(E.strip(table.concat(E.env.GameTooltip.lines, " / ")), "Shift-click: new note")
+    end },
+
     { "3.24: title box hint, undo strip with background; a client without HookScript gets no hint", function(T, Mock)
         local H = withNotes(Mock, { { t = "Rota", x = "a" }, { t = "Comprar", x = "b" } })
         H:slash("notas"); H:click(H.env.FarolNotePick1)

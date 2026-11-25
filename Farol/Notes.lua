@@ -31,6 +31,10 @@ local STRINGS = {
         tt_notes_pending = "%d pendentes de %d",
         tt_notes_none = "nenhuma anotação (/farol notas)",
         tt_notes_click = "Abrir: /farol notas ou Menu > Ferramentas (⚙)",
+        tt_notes_button = "Clique: abrir/fechar · Shift + clique: nova anotação",
+        note_button_on = "botão das anotações ligado (ao lado da barra).",
+        note_button_off = "botão das anotações desligado.",
+        news_notesbutton = "botão das anotações ao lado da barra e tecla de atalho (Esc > Opções > Teclas de atalho > Farol); ligue o botão em Menu > Geral > Aparência...",
         note_title    = "Anotações",
         note_title_n  = "Anotações (%d/%d pendentes)",
         note_empty    = "Nenhuma anotação ainda: clique em + Nova nota.",
@@ -65,7 +69,7 @@ local STRINGS = {
         note_open_word = "pendente",
         note_list     = "Farol — anotações (%d pendentes de %d):",
         note_line     = "  %d. %s%s",
-        note_usage    = "uso: /farol notas || /farol notas nova Título || /farol notas lista || /farol notas desfazer",
+        note_usage    = "uso: /farol notas || /farol notas nova Título || /farol notas lista || /farol notas desfazer || /farol notas botao on||off",
         help_notes    = "  /farol notas         - bloco de notas da conta: até 10 anotações com caixinha de concluída",
         tool_notes    = "Anotações...",    tool_notes_desc = "bloco de notas da conta, com caixinhas",
         news_notes    = "bloco de notas da conta: até 10 anotações com caixinha de concluída (/farol notas)",
@@ -78,6 +82,10 @@ local STRINGS = {
         tt_notes_pending = "%d pending of %d",
         tt_notes_none = "no notes (/farol notes)",
         tt_notes_click = "Open: /farol notes or Menu > Tools (⚙)",
+        tt_notes_button = "Click: open/close · Shift-click: new note",
+        note_button_on = "notes button on (next to the bar).",
+        note_button_off = "notes button off.",
+        news_notesbutton = "notes button next to the bar and a key binding (Esc > Options > Keybindings > Farol); turn the button on in Menu > General > Appearance...",
         note_title    = "Notes",
         note_title_n  = "Notes (%d/%d pending)",
         note_empty    = "No notes yet: click + New note.",
@@ -112,7 +120,7 @@ local STRINGS = {
         note_open_word = "pending",
         note_list     = "Farol — notes (%d pending of %d):",
         note_line     = "  %d. %s%s",
-        note_usage    = "usage: /farol notes || /farol notes new Title || /farol notes list || /farol notes undo",
+        note_usage    = "usage: /farol notes || /farol notes new Title || /farol notes list || /farol notes undo || /farol notes button on||off",
         help_notes    = "  /farol notes         - account notepad: up to 10 notes with a done checkbox",
         tool_notes    = "Notes...",        tool_notes_desc = "account notepad, with checkboxes",
         news_notes    = "account notepad: up to 10 notes with a done checkbox (/farol notes)",
@@ -126,6 +134,7 @@ end
 
 local function T(key) return ns.T(key) end
 local function Print(msg) ns.Print(msg) end
+local function DB() return ns.GetDB and ns.GetDB() end
 
 -- Lista salva (na conta). Sem dados carregados: lista vazia de mentira (nada é gravado).
 local function List()
@@ -234,7 +243,7 @@ function Notes.BarText()
     return string.format("%s %s%d|r/%d", T("label_notes"), color, pending, total)
 end
 
-function Notes.Tooltip()
+function Notes.Tooltip(fromButton)
     local pending, total = Notes.Counts()
     GameTooltip:AddDoubleLine(T("tt_notes"), total > 0 and string.format(T("tt_notes_pending"), pending, total) or "--",
         1, 0.82, 0, 1, 1, 1)
@@ -251,7 +260,7 @@ function Notes.Tooltip()
         end
         if shown > 5 then GameTooltip:AddLine("   " .. string.format(T("tt_more"), shown - 5), 0.6, 0.6, 0.6) end
     end
-    GameTooltip:AddLine(T("tt_notes_click"), 0.6, 0.6, 0.6)
+    GameTooltip:AddLine(T(fromButton and "tt_notes_button" or "tt_notes_click"), 0.6, 0.6, 0.6)
 end
 
 ---------------------------------------------------------------------------
@@ -264,6 +273,55 @@ local selected      -- índice (na lista salva) da anotação aberta na janela
 local function Changed()
     if ns.UpdateText then ns.UpdateText() end
     if RefreshWindow then RefreshWindow() end
+    if Notes.UpdateButton then Notes.UpdateButton() end
+end
+
+---------------------------------------------------------------------------
+-- Botão rápido ao lado da barra 1 (3.25): abre/fecha a janela; Shift + clique = nova anotação.
+-- Desligado por padrão (db.notesButton); o selo mostra as pendentes na cor de "atenção" da paleta.
+---------------------------------------------------------------------------
+
+local NOTES_ICON = "Interface\\Icons\\INV_Misc_Note_02"
+local notesButton
+
+function Notes.ButtonClick()
+    if IsShiftKeyDown and IsShiftKeyDown() then
+        if Notes.Add("") then Notes.OpenWindow() end
+    else
+        Notes.ToggleWindow()
+    end
+end
+
+function Notes.UpdateButton()
+    local db = DB()
+    if not db or not ns.frame or not ns.quickButtons then return end
+    if not db.notesButton then
+        if notesButton then notesButton:Hide(); ns.LayoutQuickButtons() end
+        return
+    end
+    if not notesButton then
+        notesButton = CreateFrame("Button", "FarolNotesButton", ns.frame)
+        notesButton:SetSize(18, 18)
+        notesButton.icon = notesButton:CreateTexture(nil, "ARTWORK")
+        notesButton.icon:SetAllPoints()
+        notesButton.icon:SetTexture(NOTES_ICON)
+        notesButton.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        notesButton.badge = notesButton:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        notesButton.badge:SetPoint("BOTTOMRIGHT", 4, -2)
+        notesButton:RegisterForClicks("LeftButtonUp")
+        notesButton:SetScript("OnClick", function() Notes.ButtonClick() end)
+        notesButton:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            Notes.Tooltip(true)
+            GameTooltip:Show()
+        end)
+        notesButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        table.insert(ns.quickButtons, notesButton)
+    end
+    local pending = Notes.Counts()
+    notesButton.badge:SetText(pending > 0 and (ns.C.warn .. tostring(pending) .. "|r") or "")
+    notesButton:Show()
+    ns.LayoutQuickButtons()
 end
 
 function Notes.Add(title)
@@ -594,6 +652,17 @@ function Notes.ToggleWindow()
     end
 end
 
+function Notes.OpenWindow()
+    window = window or CreateWindow()
+    if window:IsShown() then RefreshWindow() else window:Show() end
+end
+
+-- Usada pelo atalho de teclado definido em Bindings.xml (o jogador escolhe a tecla; o Farol não define nenhuma).
+function Farol_ToggleNotes()
+    if DB() then Notes.ToggleWindow() end
+end
+BINDING_NAME_FAROL_NOTES = "Anotações / Notes"
+
 function Notes.Select(index) selected = index; Changed() end
 function Notes.Refresh() if RefreshWindow then RefreshWindow() end end
 
@@ -605,7 +674,18 @@ local WORDS = {
     nova = "new", novo = "new", new = "new", add = "new", adicionar = "new",
     lista = "list", listar = "list", list = "list",
     desfazer = "undo", undo = "undo", voltar = "undo",
+    botao = "button", button = "button",
 }
+local SWITCH = { on = true, ligar = true, ligado = true, sim = true, off = false, desligar = false, desligado = false, nao = false }
+
+function Notes.SetButton(value)
+    local db = DB()
+    if not db then return end
+    db.notesButton = value and true or false
+    if ns.ApplyAppearance then ns.ApplyAppearance() end
+    if ns.Appearance and ns.Appearance.Refresh then ns.Appearance.Refresh() end
+    Print(T(db.notesButton and "note_button_on" or "note_button_off"))
+end
 
 function Notes.HandleCommand(rest)
     local word, tail = string.match(rest or "", "^%s*(%a*)%s*(.-)%s*$")
@@ -628,6 +708,10 @@ function Notes.HandleCommand(rest)
         end
     elseif action == "undo" and tail == "" then
         Notes.Undo()
+    elseif action == "button" then
+        local value = SWITCH[string.lower(tail or "")]
+        if tail == "" then value = not DB().notesButton end
+        if value == nil then Print(T("note_usage")) else Notes.SetButton(value) end
     else
         Print(T("note_usage"))
     end

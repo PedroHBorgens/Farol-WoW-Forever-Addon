@@ -189,7 +189,7 @@ Farol/
   Sources.lua       de onde vem o XP e o ouro (opção "sources", desligada; tooltips XP/ouro, resumo, /farol origem)
   Diag.lua          /farol diagnostico: leituras cruas do jogo, último logout e contagem de eventos (só leitura)
   MinimapButton.lua botão próprio no minimapa (sem bibliotecas) + entrada AddonCompartment do .toc (/farol minimapa)
-  Bindings.xml      atalho de teclado oficial (só abre o histórico de avisos)
+  Bindings.xml      atalhos de teclado oficiais (só abrem janelas: histórico de avisos e anotações; nenhuma tecla definida)
   Media/Farol.tga   ícone original (64×64)
 tests/              suíte de testes em Lua 5.1 com simulador da API do WoW
 assets/             ícones, texto do CurseForge, imagens de divulgação (assets/curseforge/ + gerador), vídeo (assets/video/)
@@ -206,7 +206,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   "Ontem" / "08/11"; longo = "domingo, 08/11/2026 às 21:12"; inválido = "--").
 - Cada módulo adiciona seus textos em `ns.STRINGS.pt` / `ns.STRINGS.en` e usa `T("chave")`.
 - **Globais:** só nomes começando com `Farol` (janelas/botões), `FarolDB`, `FarolCharDB`, `SLASH_FAROL1`,
-  `Farol_ToggleWarnHistory`, `Farol_OnAddonCompartmentClick/Enter/Leave` (citadas no `.toc`), `BINDING_*`. Nada de
+  `Farol_ToggleWarnHistory`, `Farol_ToggleNotes` (3.25), `Farol_OnAddonCompartmentClick/Enter/Leave` (citadas no `.toc`), `BINDING_*`. Nada de
   globais genéricos. O `test_globals` lê **todos** os `.lua` (lista `FILES`): arquivo novo entra nela.
 - **Perfis (3.x):** no disco, os campos de cada barra (`ns.BAR_KEYS`: posição, aparência, `items`, `order`…) ficam
   em `FarolDB.profiles.account.bars[N]`; `activeBar` e `dataVersion = 3` ao lado. No código, `db.items`, `db.scale`
@@ -257,7 +257,9 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   Shift, a opção `tooltipFull` ou o fundo da barra mostram tudo (`TIP_ORDER`). Listas: no máximo `LIST_MAX` (5).
 - **Barra:** cada informação é uma **célula** (FontString) numa grade de **colunas alinhadas à esquerda**. O número
   de colunas é o máximo que cabe em `db.barWidth` (0 = uma linha, 1 = uma coluna, N = pixels escolhidos pela alça).
-  A altura segue as linhas. Botões rápidos (📝 👜) via `ns.quickButtons` + `ns.LayoutQuickButtons()`.
+  A altura segue as linhas. Botões rápidos (📝 👜 e, desde a 3.25, 📓 das anotações) via `ns.quickButtons` +
+  `ns.LayoutQuickButtons()`; cada módulo tem seu `UpdateButton` (chamado por `ApplyAppearance` e `SetColorblind`).
+  O das anotações (`Notes.UpdateButton`, `db.notesButton`, desligado) também é atualizado a cada mudança das notas.
 - **Janelas:** todas chamam `ns.MakeToplevel(frame)` (abrem na frente; clique traz para a frente) e entram em
   `UISpecialFrames` (Esc fecha).
 - **Menu de opções (3.4):** abas `Profiles.TABS` = Barra / Avisos / Ferramentas / Geral (`BuildControls` no Core, um

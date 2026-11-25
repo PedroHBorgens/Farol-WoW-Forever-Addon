@@ -206,6 +206,7 @@ app = f"""<div class="win" style="width:470px"><div class="x">×</div><div class
 <div class="ck"><span class="box"></span>Hide in dungeons, raids, arenas and battlegrounds</div>
 <div class="ck"><span class="box">✓</span>Show the warning history button 📝</div>
 <div class="ck"><span class="box">✓</span>Show the loot button 👜</div>
+<div class="ck"><span class="box">✓</span>Show the notes button 📓</div>
 <div class="ck"><span class="box"></span>Full tooltip (all information on every item)</div>
 <div style="text-align:right;margin-top:8px"><span class="btn">Restore defaults</span></div></div>"""
 small = hbar(BAR_ITEMS[:4], "font-size:12px;transform:scale(.9)")
@@ -461,10 +462,12 @@ nwin = ('<div class="win" style="width:760px"><div class="x">×</div><div class=
         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12.5px"><span>Deleted: Old list</span><span class="btn" style="padding:2px 10px">Undo</span></div>'
         + '</div></div></div>')
 NB = hbar([("📒",'Notes <span class="y">3</span>/5'),("⏰",'21:05')], "font-size:14px")
+NB = NB[:-len('</div>')] + '<span class="qb" style="box-shadow:0 0 0 2px #ffd75a">📓<span class="badge" style="color:#ffff3a">3</span></span></div>'
 ntip = ('<div class="tip" style="width:300px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol · Notes</div>'
         '<div class="row"><span class="k">Notes</span><span>3 pending of 5</span></div>'
         '<div>&nbsp;&nbsp; Leather farming route</div><div>&nbsp;&nbsp; Buy at the auction house</div><div>&nbsp;&nbsp; Friday group at 21:00</div>'
-        '<div class="dim" style="margin-top:4px">Open: /farol notes or Menu &gt; Tools</div></div>')
+        '<div class="dim" style="margin-top:4px">📓 button: click opens/closes · Shift-click: new note</div></div>'
+        '<div class="tip" style="width:300px;font-size:13px;background:#0b1424e8;border-color:#c9a24a88">Key binding of your choice: Esc &gt; Options &gt; Keybindings &gt; AddOns &gt; Farol &gt; <b>Notes</b></div>')
 page("farol-18-notepad", f'<div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">{NB}{ntip}</div>{nwin}',
-     "Notepad: 10 notes you can tick off", "Bloco de notas: 10 anotações da conta com caixinha de concluída", NCSS)
+     "Notepad: 10 notes, one click away", "Bloco de notas: 10 anotações da conta, a um clique (botão 📓 e tecla de atalho)", NCSS)
 print("pages ok")

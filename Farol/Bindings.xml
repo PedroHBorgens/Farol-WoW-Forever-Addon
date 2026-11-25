@@ -4,4 +4,8 @@
 	<Binding name="FAROL_WARN_HISTORY" header="FAROL" category="ADDONS">
 		Farol_ToggleWarnHistory()
 	</Binding>
+	<!-- 3.25: abre/fecha a janela de anotações. Nenhuma tecla vem definida: o jogador escolhe. -->
+	<Binding name="FAROL_NOTES" category="ADDONS">
+		Farol_ToggleNotes()
+	</Binding>
 </Bindings>

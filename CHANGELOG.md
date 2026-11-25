@@ -2,6 +2,15 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.25.0 — Notes button and key binding
+- New **notes button** next to bar 1, after the warning history and loot buttons (off by default; Menu > General >
+  Appearance... > "Show the notes button", `/farol notes button on|off` or `/farol appearance notesbutton`). Its number
+  is the count of pending notes (palette "attention" color, hidden when none). Click opens/closes the Notes window,
+  Shift-click opens it with a new note, hovering lists the pending notes.
+- New **key binding** "Notes" (Esc > Options > Keybindings > AddOns > Farol): opens/closes the window. Farol sets no
+  key; you choose it.
+- Saved: `notesButton` (account, checked on load). Nothing is sent. Images 07 and 18 updated. 754 tests (2 passes).
+
 ## 3.24.1 — Notes: the description box takes clicks again
 - Fix: in game, the description box of a note only took clicks on a thin strip the height of its text (empty = one
   line) and could stay under its background, so only the title could be typed. Now a click anywhere on the dark area

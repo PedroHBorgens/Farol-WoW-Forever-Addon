@@ -43,6 +43,7 @@ FPS · Latency · Memory · Coordinates · Zone · Speed · **Hearthstone: where
 - Optional **break** and **drink water** reminders (off by default): you choose how often (15–240 min) and whether they can show during fights, raids and dungeons.
 - Long warnings are never cut: they wrap onto up to 3 lines, hovering shows the whole text, and the warning window can be made wider with the ◢ grip.
 - **History of the last 10 warnings**: button next to the bar (with unread counter), key binding or `/farol history`.
+- **Notes one click away** (off by default): a notes button next to the bar with the number of pending notes (Shift-click = new note) and a key binding of your choice.
 
 ### Session summary
 - `/farol summary` shows what you did this session **in your own chat**: gold (and per hour), XP and levels, reputation (standing before → after), loot (rares, epics, legendaries) and warnings.
@@ -106,6 +107,7 @@ FPS · Latência · Memória · Coordenadas · Zona · Velocidade · **Pedra de 
 - Lembretes opcionais de **pausa** e de **beber água** (desligados por padrão): você escolhe de quanto em quanto tempo (15–240 min) e se podem aparecer em lutas, raides e masmorras.
 - Avisos longos nunca ficam cortados: quebram em até 3 linhas, passar o mouse mostra o texto inteiro e a janela de avisos pode ficar mais larga com a alça ◢.
 - **Histórico dos 10 últimos avisos**: botão ao lado da barra (com contador de novos), atalho de teclado ou `/farol historico`.
+- **Anotações a um clique** (desligado por padrão): botão das anotações ao lado da barra com o número de pendentes (Shift + clique = anotação nova) e tecla de atalho à sua escolha.
 
 ### Resumo da sessão
 - `/farol resumo` mostra **no seu chat** o que você fez na sessão: ouro (e por hora), XP e níveis, reputação (nível antes → depois), saques (raros, épicos, lendários) e avisos.

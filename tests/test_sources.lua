@@ -95,7 +95,7 @@ return {
         H:check(set.sources, true); T.eq(H.env.FarolDB.sources, true); T.has(H:lastMsg(), "where the XP and gold come from: on")
         H:slash("source off"); T.eq(H.env.FarolDB.sources, false); T.eq(set.sources._checked, false, "menu synced")
         H:slash("source maybe"); T.has(H:lastMsg(), "usage: /farol source on|off")
-        local U = Mock.new({ locale = "ptBR" }); U:login({ items = { fps = true }, newsSeen = #H.ns.NEWS - 4 })
+        local U = Mock.new({ locale = "ptBR" }); U:login({ items = { fps = true }, newsSeen = #H.ns.NEWS - 5 })
         T.has(chat(U), "de onde vem o XP e o ouro da sessão: missões, monstros, saque e comerciante (tooltip e resumo) — desligado (ligue em Menu > Geral)")
     end },
 

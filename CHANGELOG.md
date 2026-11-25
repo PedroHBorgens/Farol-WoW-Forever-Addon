@@ -2,6 +2,12 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.24.1 — Notes: the description box takes clicks again
+- Fix: in game, the description box of a note only took clicks on a thin strip the height of its text (empty = one
+  line) and could stay under its background, so only the title could be typed. Now a click anywhere on the dark area
+  puts the cursor in the description, the box is always drawn above its background, and an empty description shows a
+  grey hint ("Write the description here..."). Enter in the title still jumps to the description. 750 tests.
+
 ## 3.24.0 — Clearer menu, consistent windows
 - Menu tabs look like tabs: the open one is highlighted, with white text and a gold line under it.
 - **General tab in sections:** Language · Chat and messages · Bar and clock · Minimap and accessibility · Profiles

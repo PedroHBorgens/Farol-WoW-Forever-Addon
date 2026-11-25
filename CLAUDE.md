@@ -283,6 +283,9 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   com `frame.undoText`/`frame.undo`); caixas vazias com texto-guia `ns.Placeholder(caixa, chave)` (usa `HookScript`,
   mantém os scripts da caixa; `ns.UpdatePlaceholder` ao trocar o idioma); janela vazia com a ação (Missões concluídas:
   "Ligar registro"). Rótulos de opções na fonte normal; a pequena é para dicas (exceção: a grade dos 30 itens).
+- **Caixa de várias linhas (3.24.1):** um `EditBox` com `SetMultiLine(true)` fora de um ScrollFrame só aceita clique
+  na altura do texto (vazio = uma linha fina) e pode ficar por baixo de um fundo com backdrop. Faça a caixa **filha**
+  do fundo (fica por cima) e deixe o fundo com `EnableMouse(true)` + `OnMouseDown` → `caixa:SetFocus()` (Notes.lua).
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 

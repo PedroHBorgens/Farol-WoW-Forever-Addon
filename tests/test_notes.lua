@@ -25,6 +25,16 @@ return {
         H:click(H.env.FarolNoteDelete); H:click(H.env.FarolNoteDelete)
         T.ok(W.undoBack:IsShown(), "undo strip after deleting"); T.has(H:text(W.undoText), "Apagada:")
         H:click(W.undo); T.ok(not W.undoBack:IsShown(), "strip hides after undo")
+        -- 3.24.1: the description box — clicking anywhere on its background puts the cursor in it
+        H:click(H.env.FarolNotePick1)
+        local text, back = H.env.FarolNoteText, W.textBack
+        T.eq(text:GetParent(), back, "box is a child of the background (always drawn and clicked above it)")
+        T.ok(back._mouse, "background takes clicks"); T.ok(not text:HasFocus())
+        back._scripts.OnMouseDown(back, "LeftButton"); T.ok(text:HasFocus(), "click on the background focuses the description")
+        T.eq(H:text(text.farolHint), "Escreva aqui a descrição (clique para digitar; Enter = nova linha)")
+        T.ok(not text.farolHint:IsShown(), "note has text: no hint")
+        text:SetText("Começar pelo rio\nDepois a colina"); text._scripts.OnTextChanged(text, true)
+        T.eq(H.env.FarolDB.notes[1].x, "Começar pelo rio\nDepois a colina", "description saved with the line break")
         -- old client: no HookScript on the box → no hint at all (it could not hide while typing)
         local E = Mock.new({ locale = "enUS" })
         E.env.FAROL_FRAME_CLASS = nil

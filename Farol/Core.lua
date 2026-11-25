@@ -2526,7 +2526,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes", "news_questvalue" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2542,7 +2542,7 @@ end
 Profiles.NEWS_ITEM = { news_rep = "rep", news_reset = "reset", news_prof = "prof", news_junk = "junk", news_supply = "ammo",
                        news_tasks = "tasks", news_notes = "notes", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests",
                        news_hearth = "hearth" }
-Profiles.NEWS_WARN = { news_breaks = "pause" }
+Profiles.NEWS_WARN = { news_breaks = "pause", news_questvalue = "questValue" }
 Profiles.NEWS_OPTION = { news_colors = "colorblind", news_sources = "sources" }
 
 -- Janela de chat das mensagens do Farol (3.20). O Farol só ESCREVE (AddMessage local) numa janela que o jogador já

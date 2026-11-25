@@ -60,7 +60,7 @@ return {
                 db.warnings = {}
                 for _, key in ipairs({ "durab", "durabPct", "bags", "bagSlots", "sound", "talents", "ranks", "prof", "restFull", "remindMin",
                                        "ammo", "ammoYellow", "ammoRed", "reag", "reagYellow", "reagRed",
-                                       "pause", "pauseMin", "pauseAnywhere", "water", "waterMin", "waterAnywhere", "tasks", "goals", "questFull", "questMin", "questReady", "hearthReady", "popupW" }) do
+                                       "pause", "pauseMin", "pauseAnywhere", "water", "waterMin", "waterAnywhere", "tasks", "goals", "questFull", "questMin", "questReady", "hearthReady", "popupW", "questValue", "questLevel" }) do
                     db.warnings[key] = pick(BAD)
                 end
             end

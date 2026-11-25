@@ -335,6 +335,13 @@ more"). Two optional warnings (off) in the **Warnings** tab: **quest log almost 
 (`/farol warn ready on`; at most every 5 minutes). Farol only **reads** the quest log: it never accepts, turns in,
 abandons or shares quests, and never opens collapsed categories. `/farol warn status` shows what it read.
 
+**Value of the ready quests (since 3.23, off by default):** tick **XP and gold of ready ones** in the Warnings tab and
+the bar shows `Quests 8/40 · 5 ready (+7.4k XP)`; the tooltip adds the total XP and gold of the ready quests, each
+ready quest with its own reward (most XP first), **"Turning them all in: level 23 → 24 (6.5k XP left over)"** (or how
+much XP is still missing) and the XP of the quests still in progress. The rewards come from the game itself for each
+quest in your log (modern clients). Optional warning **Ready ones level you up** (off): once per level, when turning
+in the ready quests is already enough to level up.
+
 ## Completed quests
 
 The **Completed quests** window (Menu > Tools, or `/farol completed`) shows the quests each of **your** characters has

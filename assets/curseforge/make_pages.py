@@ -238,6 +238,8 @@ ptip = """<div class="tip" style="width:470px"><div style="color:#33ccff;font-we
 <div class="row dim"><span>&nbsp;&nbsp;&nbsp; +18 this session (~24/h) · ~32m left</span><span></span></div>
 <div class="row"><span>&nbsp; Iron Ore</span><span class="g">20/20</span></div>
 <div class="k">Quests — 17 / 20</div>
+<div class="row"><span>&nbsp; Value of the ready ones</span><span>+7.4k XP · +18s</span></div>
+<div class="row"><span>&nbsp; <span class="g">Turning them all in: level 35 → 36 (6.5k XP left over)</span></span><span></span></div>
 <div class="row"><span>&nbsp; <span class="g">Ready to turn in (3)</span></span><span></span></div>
 <div class="row"><span>&nbsp; <span style="color:#ff8040">[35]</span> The Echo Cavern</span><span class="dim">3/8</span></div>
 <div style="height:6px"></div>

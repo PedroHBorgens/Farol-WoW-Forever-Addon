@@ -6,6 +6,9 @@
   missões prontas ao entrar numa cidade ou estalagem.
   Só lê: nunca aceita, entrega, abandona, compartilha nem acompanha missões, e não abre grupos fechados do diário.
   Nada é salvo (a informação vem do jogo na hora) e nada é enviado.
+  3.23 (opção warnings.questValue, desligada): XP e ouro da recompensa de cada missão (GetQuestLogRewardXP /
+  GetQuestLogRewardMoney pelo ID, só clientes modernos; confirmado no WoW Forever), a soma das prontas e se entregar
+  todas sobe de nível.
   Clientes modernos: C_QuestLog (GetNumQuestLogEntries, GetInfo, IsComplete, IsFailed, GetQuestObjectives,
   GetMaxNumQuestsCanAccept). Antigos: GetNumQuestLogEntries, GetQuestLogTitle (a ordem dos valores muda entre
   versões), GetNumQuestLeaderBoards / GetQuestLogLeaderBoard e MAX_QUESTLOGQUESTS.
@@ -45,6 +48,12 @@ local STRINGS = {
         tt_quests_colors = "cor do nível = dificuldade, como no jogo",
         news_quests   = "diário de missões na barra: quantas cabem, as prontas para entregar e avisos opcionais",
         quests_status = "missões: %s, %d pronta(s) — fonte: %s",
+        quests_xp     = "(+%s XP)",
+        news_questvalue = "missões prontas: quanto XP e ouro vão dar e se entregar todas sobe você de nível (barra e tooltip)",
+        tt_quests_value = "Valor das prontas",
+        tt_quests_levelup = "Entregando todas: nível %d → %d (sobram %s XP)",
+        tt_quests_tolevel = "Entregando todas: faltam %s XP para o nível %d",
+        tt_quests_active_xp = "Em andamento: +%s XP ao concluir",
     },
     en = {
         name_quests   = "Quests (quest log)", cmd_quests = "quests",
@@ -64,6 +73,12 @@ local STRINGS = {
         tt_quests_colors = "level color = difficulty, as in the game",
         news_quests   = "quest log on the bar: how many fit, the ones ready to turn in and optional warnings",
         quests_status = "quests: %s, %d ready — source: %s",
+        quests_xp     = "(+%s XP)",
+        news_questvalue = "ready quests: how much XP and gold they give and whether turning them all in levels you up (bar and tooltip)",
+        tt_quests_value = "Value of the ready ones",
+        tt_quests_levelup = "Turning them all in: level %d → %d (%s XP left over)",
+        tt_quests_tolevel = "Turning them all in: %s XP short of level %d",
+        tt_quests_active_xp = "In progress: +%s XP when done",
     },
 }
 for lang, entries in pairs(STRINGS) do
@@ -157,6 +172,11 @@ local function ModernEntry(i)
         local okFail, failed = Call(C_QuestLog.IsFailed, id)
         entry.failed = okFail and Truthy(failed)
         if not entry.done then entry.objective = ModernObjective(id) end
+        -- Recompensa (só leitura). Valor estranho = nada (não entra na soma).
+        local okXP, xp = Call(GetQuestLogRewardXP, id)
+        entry.xp = okXP and Int(xp, 0, 10000000) or nil
+        local okMoney, money = Call(GetQuestLogRewardMoney, id)
+        entry.money = okMoney and Int(money, 0, 1e10) or nil
     end
     return entry
 end
@@ -235,6 +255,40 @@ function Quests.Read()
     return data
 end
 
+-- XP e ouro das prontas, XP das em andamento e se entregar todas sobe de nível.
+-- { readyXP, readyMoney, activeXP, level, next = nível depois, over = XP que sobra, short = XP que falta, known }
+function Quests.Value(data)
+    data = data or Quests.Read()
+    if not data then return nil end
+    local v = { readyXP = 0, readyMoney = 0, activeXP = 0, known = false }
+    for _, e in ipairs(data.ready) do
+        if e.xp then v.readyXP = v.readyXP + e.xp; v.known = true end
+        if e.money then v.readyMoney = v.readyMoney + e.money; v.known = true end
+    end
+    for _, e in ipairs(data.active) do if e.xp then v.activeXP = v.activeXP + e.xp end end
+    -- Nível: XP atual e do nível (no máximo, nada de "sobe de nível").
+    local okL, level = Call(UnitLevel, "player")
+    local okC, cur = Call(UnitXP, "player")
+    local okM, max = Call(UnitXPMax, "player")
+    level, cur, max = okL and Int(level, 1, 200), okC and Int(cur, 0, 1e9), okM and Int(max, 1, 1e9)
+    local okMax, maxed = Call(IsPlayerAtEffectiveMaxLevel)
+    if okMax and maxed == true then level = nil end
+    local okCap, cap = Call(GetMaxPlayerLevel)
+    cap = okCap and Int(cap, 1, 200)
+    if level and cap and level >= cap then level = nil end
+    if level and cur and max and cur <= max and v.readyXP > 0 then
+        v.level = level
+        local need = max - cur
+        if v.readyXP >= need then v.next, v.over = level + 1, v.readyXP - need else v.short = need - v.readyXP end
+    end
+    return v
+end
+
+local function ShowValue()
+    local db = ns.GetDB and ns.GetDB()
+    return db and db.warnings and db.warnings.questValue == true or false
+end
+
 -- Cor do nível pela dificuldade: a do jogo (GetQuestDifficultyColor) ou a conta do estilo clássico.
 local function LevelColor(level, playerLevel)
     if not level then return "ffffff" end
@@ -274,13 +328,25 @@ function Quests.BarText()
     local ready = #data.ready
     if ready > 0 then
         text = text .. " · " .. ns.C.good .. (ready == 1 and T("quests_ready_1") or string.format(T("quests_ready_n"), ready)) .. "|r"
+        if ShowValue() then
+            local v = Quests.Value(data)
+            if v and v.readyXP > 0 then text = text .. " " .. ns.C.dim .. string.format(T("quests_xp"), ns.FormatBig(v.readyXP)) .. "|r" end
+        end
     end
     return text
+end
+
+local function Reward(entry)
+    local parts = {}
+    if entry.xp and entry.xp > 0 then parts[#parts + 1] = "+" .. ns.FormatBig(entry.xp) .. " XP" end
+    if entry.money and entry.money > 0 then parts[#parts + 1] = "+" .. ns.FormatMoney(entry.money) end
+    return table.concat(parts, " · ")
 end
 
 local function Line(entry, playerLevel)
     local level = entry.level and string.format("|cff%s[%d]|r ", LevelColor(entry.level, playerLevel), entry.level) or ""
     local right = entry.failed and (ns.C.bad .. T("tt_quests_failed") .. "|r") or (entry.objective or "")
+    if entry.done and ShowValue() then right = Reward(entry) end
     GameTooltip:AddDoubleLine("      " .. level .. entry.title, right, 0.9, 0.9, 0.9, 0.7, 0.7, 0.7)
 end
 
@@ -304,8 +370,28 @@ function Quests.Tooltip()
         GameTooltip:AddLine("   " .. T("tt_quests_none"), 0.7, 0.7, 0.7)
         return
     end
+    local v = ShowValue() and Quests.Value(data) or nil
+    if v and v.known then
+        -- As que mais dão XP primeiro.
+        table.sort(data.ready, function(a, b)
+            if (a.xp or 0) ~= (b.xp or 0) then return (a.xp or 0) > (b.xp or 0) end
+            return a.title < b.title
+        end)
+        local total = {}
+        if v.readyXP > 0 then total[#total + 1] = "+" .. ns.FormatBig(v.readyXP) .. " XP" end
+        if v.readyMoney > 0 then total[#total + 1] = "+" .. ns.FormatMoney(v.readyMoney) end
+        if #total > 0 then GameTooltip:AddDoubleLine("   " .. T("tt_quests_value"), table.concat(total, " · "), 1, 0.82, 0, 1, 1, 1) end
+        if v.next then
+            GameTooltip:AddLine("   " .. string.format(T("tt_quests_levelup"), v.level, v.next, ns.FormatBig(v.over)), 0.25, 1, 0.25)
+        elseif v.short then
+            GameTooltip:AddLine("   " .. string.format(T("tt_quests_tolevel"), ns.FormatBig(v.short), v.level + 1), 0.8, 0.8, 0.8)
+        end
+    end
     List(T("tt_quests_ready"), data.ready, 0.25, 1, 0.25, data.level)
     List(T("tt_quests_active"), data.active, 1, 0.82, 0, data.level)
+    if v and v.activeXP > 0 then
+        GameTooltip:AddLine("   " .. string.format(T("tt_quests_active_xp"), ns.FormatBig(v.activeXP)), 0.6, 0.6, 0.6)
+    end
     if data.high > 0 and data.level then
         GameTooltip:AddLine("   " .. string.format(ns.TN("tt_quests_high", data.high), data.high, data.level + HIGH_LEVELS), 1, 0.4, 0.4, true)
     end

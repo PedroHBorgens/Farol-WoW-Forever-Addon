@@ -111,6 +111,12 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   `GetQuestObjectives`, `GetMaxNumQuestsCanAccept`); antigos `GetQuestLogTitle` — a ordem muda: quando o 4º valor é
   número (grupo sugerido do 3.3.5a), categoria/fechada/completa andam uma posição; completa = 1 (pronta) ou -1 (falhou).
   Limite: `GetMaxNumQuestsCanAccept` → `MAX_QUESTLOGQUESTS` → 20. Nunca abrir categorias fechadas (só avisar no tooltip).
+- **Valor das missões prontas (3.23):** `GetQuestLogRewardXP(id)` / `GetQuestLogRewardMoney(id)` (cobre) pelo ID de cada
+  missão do diário — confirmado no WoW Forever com `/run` (ex.: 5350 XP, 1800 cobre; sem moedas = 0). `Quests.Value`
+  soma as prontas e compara com `UnitXPMax − UnitXP` ("nível 23 → 24 (sobram X XP)"; o XP do nível seguinte o jogo não
+  informa, então não mostramos %). Opções `warnings.questValue` (barra/tooltip) e `warnings.questLevel` (aviso 1x por
+  nível), ambas desligadas. Clientes antigos: sem recompensa por ID (pedir a recompensa exigiria selecionar a missão
+  no diário, `SelectQuestLogEntry`, proibido).
 - Pedra de Regresso: item 6948; lugar com `GetBindLocation`; recarga com `C_Container.GetItemCooldown` (modernos) ou
   `GetItemCooldown` (antigos) — duração ≤ 1,5 s é a recarga global e não conta. Sem lugar informado, o item some da barra.
 - Item da barra **ausente** nos dados salvos (item novo para quem já usa) vem **desligado**; o padrão de `ITEM_DEFAULTS`
@@ -275,7 +281,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 ## Testes
 
 ```
-lua5.1 tests/run.lua        # ~730 testes (2 passadas); deve terminar com "0 failed"
+lua5.1 tests/run.lua        # ~740 testes (2 passadas); deve terminar com "0 failed"
 ```
 
 - **Duas passadas (3.18):** a 1ª com o simulador "de livro"; a 2ª, **forever-real** (`Mock.REAL`), com reino `""` e

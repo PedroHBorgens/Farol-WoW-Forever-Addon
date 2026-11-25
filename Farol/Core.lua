@@ -966,10 +966,10 @@ function ns.UpdatePlaceholder(box)
     local focused = box.HasFocus and box:HasFocus()
     if (box:GetText() or "") == "" and not focused then hint:Show() else hint:Hide() end
 end
-function ns.Placeholder(box, key)
+function ns.Placeholder(box, key, anchor)
     if not box.HookScript then return end -- sem HookScript (cliente antigo) a frase não saberia sumir: fica sem ela
     local hint = ns.Dim(box:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
-    hint:SetPoint("LEFT", box, "LEFT", 2, 0)
+    hint:SetPoint(anchor or "LEFT", box, anchor or "LEFT", 2, 0) -- caixa de várias linhas: "TOPLEFT"
     box.farolHint, box.farolHintKey = hint, key
     local function Update() ns.UpdatePlaceholder(box) end
     box:HookScript("OnTextChanged", Update)

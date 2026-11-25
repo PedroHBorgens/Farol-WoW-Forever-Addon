@@ -61,7 +61,10 @@ function Frame:SetChecked(value) self._checked = value and true or false end
 function Frame:GetChecked() return self._checked and 1 or nil end -- como o 3.3.5a: 1/nil
 function Frame:LockHighlight() self._highlight = true end
 function Frame:UnlockHighlight() self._highlight = false end
-function Frame:HasFocus() return false end
+function Frame:HasFocus() return self._focused == true end
+function Frame:SetFocus() self._focused = true end
+function Frame:ClearFocus() self._focused = false end
+function Frame:EnableMouse(value) self._mouse = value end
 function Frame:SetTexture(texture) self._texture = texture end
 function Frame:SetScale(scale) self._scale = scale end
 -- Camadas: Raise() registra a ordem em que a janela veio para a frente (maior = mais na frente).

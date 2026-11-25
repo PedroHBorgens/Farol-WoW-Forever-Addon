@@ -59,6 +59,7 @@ local STRINGS = {
         note_undo     = "Desfazer",
         note_undo_line = "Apagada: %s",
         note_ph_title = "Título da anotação",
+        note_ph_text  = "Escreva aqui a descrição (clique para digitar; Enter = nova linha)",
         note_marked   = "anotação %s: %s.",
         note_done_word = "concluída",
         note_open_word = "pendente",
@@ -105,6 +106,7 @@ local STRINGS = {
         note_undo     = "Undo",
         note_undo_line = "Deleted: %s",
         note_ph_title = "Note title",
+        note_ph_text  = "Write the description here (click to type; Enter = new line)",
         note_marked   = "note %s: %s.",
         note_done_word = "done",
         note_open_word = "pending",
@@ -462,11 +464,20 @@ local function CreateWindow()
             insets = { left = 3, right = 3, top = 3, bottom = 3 } })
         frame.textBack:SetBackdropColor(0, 0, 0, 0.9)
     end
-    frame.textBox = CreateFrame("EditBox", "FarolNoteText", frame)
+    -- 3.24.1: no jogo, a caixa de várias linhas só aceita clique na altura do texto (vazia = uma linha fina) e podia
+    -- ficar por baixo do fundo. Agora ela é filha do fundo (sempre por cima) e clicar em qualquer ponto do fundo
+    -- põe o cursor na caixa.
+    frame.textBack:EnableMouse(true)
+    frame.textBack:SetScript("OnMouseDown", function() if frame.textBox:IsShown() then frame.textBox:SetFocus() end end)
+    frame.textBox = CreateFrame("EditBox", "FarolNoteText", frame.textBack)
     frame.textBox:SetMultiLine(true)
     frame.textBox:SetFontObject("GameFontHighlight")
     frame.textBox:SetSize(476, 216)
     frame.textBox:SetPoint("TOPLEFT", frame.textBack, "TOPLEFT", 10, -8)
+    if frame.textBox.SetFrameLevel and frame.textBack.GetFrameLevel then
+        frame.textBox:SetFrameLevel(frame.textBack:GetFrameLevel() + 2)
+    end
+    frame.textBox:EnableMouse(true)
     frame.textBox:SetAutoFocus(false)
     frame.textBox:SetMaxLetters(MAX_TEXT)
     frame.textBox:SetScript("OnTextChanged", function(self, userInput)
@@ -477,6 +488,7 @@ local function CreateWindow()
         if RefreshWindow then RefreshWindow(true) end
     end)
     frame.textBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    ns.Placeholder(frame.textBox, "note_ph_text", "TOPLEFT")
     frame.counter = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.counter:SetPoint("TOPLEFT", frame.textBack, "BOTTOMLEFT", 2, -8)
     frame.delete = Button(frame, "FarolNoteDelete", 96, nil, function(self)
@@ -569,7 +581,7 @@ RefreshWindow = function(typing)
     local undo = Notes.lastRemoved
     local label = undo and (#undo == 1 and Title(undo[1].note) or string.format(ns.TN("note_restored_n", #undo), #undo))
     ns.ShowUndo(window, label and string.format(T("note_undo_line"), label), T("note_undo"))
-    ns.UpdatePlaceholder(window.titleBox)
+    ns.UpdatePlaceholder(window.titleBox); ns.UpdatePlaceholder(window.textBox)
 end
 
 function Notes.ToggleWindow()

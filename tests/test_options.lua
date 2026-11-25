@@ -1,7 +1,7 @@
 -- Menu de opções: abrir/fechar, caixinhas sincronizadas, idioma, horário do servidor.
 -- Options menu: open/close, synced checkboxes, language, server time.
 
-local ITEM_COUNT, GENERAL_COUNT = 30, 29 -- 30 itens + mostrar/travar (Barra) + 7 da aba Geral + 20 da aba Avisos
+local ITEM_COUNT, GENERAL_COUNT = 31, 29 -- 31 itens + mostrar/travar (Barra) + 7 da aba Geral + 20 da aba Avisos
 
 local function openMenu(H)
     H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
@@ -35,40 +35,40 @@ return {
         T.eq(H:text(window[5].label), "Zona")
         T.eq(H:text(window[10].label), "Lixo nas bolsas")
         T.eq(H:text(window[11].label), "Munição e reagentes")
-        T.eq(H:text(window[14].label), "Ouro por hora")
-        T.eq(H:text(window[16].label), "XP por hora")
-        T.eq(H:text(window[17].label), "Reputação")
-        T.eq(H:text(window[18].label), "Profissões")
-        T.eq(H:text(window[19].label), "Metas (ouro/nível)")
-        T.eq(H:text(window[20].label), "Farm (metas de itens)")
-        T.eq(H:text(window[21].label), "Missões (diário)")
-        T.eq(H:text(window[22].label), "Missões concluídas")
-        T.eq(H:text(window[25].label), "Tarefas (diárias/semanais)")
-        T.eq(H:text(window[26].label), "Anotações (bloco de notas)")
-        T.eq(H:text(window[28].label), "Masmorra / raide atual")
-        T.eq(H:text(window[31].label), "Mostrar")
-        T.eq(H:text(window[33].label), "Horário do servidor")
-        T.eq(H:text(panel[32].label), "Travar")
+        T.eq(H:text(window[15].label), "Ouro por hora")
+        T.eq(H:text(window[17].label), "XP por hora")
+        T.eq(H:text(window[18].label), "Reputação")
+        T.eq(H:text(window[19].label), "Profissões")
+        T.eq(H:text(window[20].label), "Metas (ouro/nível)")
+        T.eq(H:text(window[21].label), "Farm (metas de itens)")
+        T.eq(H:text(window[22].label), "Missões (diário)")
+        T.eq(H:text(window[23].label), "Missões concluídas")
+        T.eq(H:text(window[26].label), "Tarefas (diárias/semanais)")
+        T.eq(H:text(window[27].label), "Anotações (bloco de notas)")
+        T.eq(H:text(window[29].label), "Masmorra / raide atual")
+        T.eq(H:text(window[32].label), "Mostrar")
+        T.eq(H:text(window[34].label), "Horário do servidor")
+        T.eq(H:text(panel[33].label), "Travar")
     end },
 
     { "ticking a box updates the bar, the saved settings and the other menu", function(T, Mock)
         local H = Mock.new():login()
         local panel, window = openMenu(H)
-        H:check(window[12], false) -- ouro
+        H:check(window[13], false) -- ouro
         T.eq(H.env.FarolDB.items.gold, false)
         T.hasnt(H:bar(), "123g")
-        T.eq(panel[12]._checked, false, "settings panel synced")
+        T.eq(panel[13]._checked, false, "settings panel synced")
         H:slash("show ouro")
-        T.eq(window[12]._checked, true, "command syncs the checkbox")
+        T.eq(window[13]._checked, true, "command syncs the checkbox")
     end },
 
     { "show panel, lock and server time options", function(T, Mock)
         local H = Mock.new():login()
         local _, window = openMenu(H)
-        H:check(window[32], true); T.eq(H.env.FarolDB.locked, true)
-        H:check(window[31], false)
+        H:check(window[33], true); T.eq(H.env.FarolDB.locked, true)
+        H:check(window[32], false)
         T.eq(H.env.FarolDB.shown, false); T.ok(not H.env.FarolFrame:IsShown(), "panel hidden")
-        H:check(window[33], true); T.eq(H.env.FarolDB.serverTime, true)
+        H:check(window[34], true); T.eq(H.env.FarolDB.serverTime, true)
         H:slash(""); T.ok(H.env.FarolFrame:IsShown(), "/farol shows it again")
         H:slash("show hora"); H:update(1)
         T.has(H:bar(), "21:05", "clock uses server time")

@@ -6,7 +6,7 @@ local ALPHA = { "a", "0", "9", " ", ":", "%", "|", "c", "H", "T", "\n", "\0", "√
                 "%s", "%d", "%1$s", "|cff", "|H", "|T", "|A", "|r" }
 local WORDS = { "alarme", "add", "soneca", "parar", "saque", "limpar", "aviso", "durab", "bolsas", "talentos",
                 "pausa", "agua", "lutas", "padrao", "lembrar", "resumo", "profissoes", "prof", "lixo", "junk", "ouro", "gold", "esquecer", "forget", "total", "descansado", "rested", "novidades", "news", "instancias", "lockouts", "tooltip", "dica", "municao", "reagentes", "400", "5000", "15", "240", "2",
-                "graus", "som", "status", "concluidas", "completed", "registrar", "diagnostico", "diag", "origem", "source", "chat", "notas", "nova", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
+                "graus", "som", "status", "concluidas", "completed", "registrar", "diagnostico", "diag", "origem", "source", "chat", "notas", "nova", "guardar", "tirar", "comerciante", "hora", "tooltip", "silenciar", "lembrar", "aparencia", "escala", "fundo", "texto", "icones",
                 "largura", "coluna", "linha", "ordem", "padrao", "show", "hide", "lang", "menu", "lock", "reset",
                 "sessao", "zerar", "historico", "barra", "bar", "1", "3", "mostrar", "esconder", "perfil", "profile", "personagem", "conta", "copiar", "desfazer", "undo", "voltar", "pacote", "Garrosh", "tarefa", "task", "feita", "apagar", "semanal", "diaria", "meta", "goal", "nivel", "limpar", "item", "farm", "remover", "missoes", "prontas", "aviso", "quests", "19", "regresso", "hearth", "pedra", "|cffffffff|Hitem:4306::|h[Seda]|h|r", "[Seda]", "|Hitem:abc|h", "40", "1000000", "masmorra", "dungeon", "resumo", "minimapa", "minimap", "travar", "on", "off", "07:30", "25:99", "-1", "99999" }
 local BAD = { "x", 1e309, -1e309, 0 / 0, true, false, {}, { 1, 2 }, -5, 3.7, "" }
@@ -50,7 +50,7 @@ return {
     { "tampered saved data with wrong types never breaks any window", function(T, Mock)
         local KEYS = { "x", "y", "point", "lang", "scale", "bgAlpha", "fontSize", "iconSize", "barWidth", "items",
                        "alarms", "loot", "warnings", "order", "snoozeMinutes", "shown", "locked", "icons", "vertical",
-                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind", "questRecord", "questShowOld", "completed", "questNames", "notesButton" }
+                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind", "questRecord", "questShowOld", "completed", "questNames", "notesButton", "keep", "keepMerchant", "keepReady", "keepTooltip" }
         for i = 1, 60 do
             local db = {}
             for _, key in ipairs(KEYS) do if random(3) > 1 then db[key] = pick(BAD) end end
@@ -80,6 +80,8 @@ return {
                     or shape == 4 and { account = { bars = { pick(BAD), bar } } }
                     or { account = { bars = { bar } }, [pick({ "x", 1, true })] = pick(BAD) }
                 db.activeBar, db.dataVersion = pick(BAD), pick(BAD)
+                db.keep = random(3) == 1 and pick(BAD) or { { id = pick(BAD), n = pick(BAD), r = pick(BAD), k = pick({ "l", "p", pick(BAD) }),
+                    v = pick(BAD), p = pick(BAD) }, pick(BAD), { id = 7001, n = "Ok", k = "p", v = 10, p = pick(BAD) } }
                 if type(db.profiles) == "table" then -- perfis por personagem (3.2) adulterados
                     db.profiles.chars = random(3) == 1 and pick(BAD) or { Azralon = { Garrosh = random(2) == 1 and pick(BAD) or { bars = { bar, pick(BAD) } },
                         [pick({ "x", 1, true })] = pick(BAD) }, [pick({ "y", 2, false })] = pick(BAD) }
@@ -87,6 +89,7 @@ return {
             end
             local char = {
                 profile = pick({ "char", "account", 5, true, "evil" }),
+                keepSeen = random(2) == 1 and pick(BAD) or { [pick({ "x", 1, true, -5, 3.7 })] = pick(BAD), [7001] = true },
                 runs = random(3) == 1 and pick(BAD) or { list = { { n = pick(BAD), k = pick({ "party", "raid", pick(BAD) }), t = pick(BAD), s = pick(BAD),
                     x = pick(BAD), g = pick(BAD), l = pick(BAD), r = pick(BAD), e = pick(BAD), d = pick(BAD) }, pick(BAD) },
                     cur = random(2) == 1 and pick(BAD) or { n = "Ok", k = "party", t = pick(BAD), u = pick(BAD), x = pick(BAD) } },
@@ -108,7 +111,7 @@ return {
                 local H = Mock.new():login(db, char)
                 H:event("PLAYER_ENTERING_WORLD", true, false) -- mostra o resumo salvo (se ficou v√°lido)
                 H:update(1)
-                for _, cmd in ipairs({ "menu", "saque", "historico", "ordem", "alarme", "aviso", "aparencia", "resumo", "meta", "farm", "diagnostico", "chat", "notas" }) do
+                for _, cmd in ipairs({ "menu", "saque", "historico", "ordem", "alarme", "aviso", "aparencia", "resumo", "meta", "farm", "diagnostico", "chat", "notas", "guardar" }) do
                     H:slash(cmd)
                 end
             end)

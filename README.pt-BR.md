@@ -4,7 +4,7 @@
 
 **Farol** é um addon **gratuito, de código aberto e não oficial** para WoW Forever: mostra um painel pequeno e arrastável com
 **FPS · latência · memória · coordenadas · zona · velocidade · Pedra de Regresso · durabilidade · bolsas · valor do lixo · munição e reagentes · ouro · ouro da sessão · ouro/hora · XP ·
-XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · diário de missões · missões concluídas · horário · resets diário/semanal · tarefas · anotações · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (30 itens).
+XP/hora · reputação · profissões · metas de ouro/nível · metas de farm (itens) · diário de missões · missões concluídas · horário · resets diário/semanal · tarefas · anotações · itens guardados · tempo de sessão · masmorra atual · amigos · guilda** — você escolhe o que aparece (31 itens).
 Passe o mouse no painel para ver um tooltip com detalhes. Também tem **alarmes do relógio**, **janela de últimos
 saques** e **avisos** (durabilidade, bolsas, talentos não gastos, magias de grau antigo).
 
@@ -15,7 +15,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 
 | Vem ligado na primeira vez | Todo o resto vem desligado |
 |---|---|
-| Barra com o básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (7 de 30 itens) | Os outros 23 itens da barra e a 2ª e 3ª barras |
+| Barra com o básico: FPS, latência, coordenadas, zona, Pedra de Regresso, durabilidade e ouro (7 de 31 itens) | Os outros 24 itens da barra e a 2ª e 3ª barras |
 | Avisos de durabilidade, bolsas, talentos não gastos, magias de grau antigo e profissões (com som) | Munição, reagentes, pausa, água, tarefas, metas, missões, descanso dos personagens |
 | Resumo da sessão ao entrar e ao sair de masmorra — só no **seu** chat | Tooltip completo, horário do servidor, ouro de todos os personagens, esconder em combate |
 | Botão no minimapa | Perfis por personagem, alarmes, tarefas, metas |
@@ -68,6 +68,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol chat Nome`  | Em qual janela de chat o Farol escreve (ex.: uma aba "Farol"); `/farol chat principal` volta ao padrão |
 | `/farol origem on\|off` | Mostra de onde vem o XP e o ouro da sessão (missões, monstros, saque, comerciante) |
 | `/farol diagnostico` | Mostra no seu próprio chat como o jogo respondeu (personagem, reino, ouro, último logout, eventos); só leitura |
+| `/farol guardar`    | Itens guardados para depois: motivo, quando ficam úteis, lembretes (`[item]: motivo`, `lista`, `tirar N`, `desfazer`) |
 | `/farol notas`      | Bloco de notas da conta: até 10 anotações com caixinha de concluída (`nova Título`, `lista`, `desfazer`) |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
 | `/farol perfil`     | Perfil da conta ou só deste personagem; copiar de outro (`/farol perfil copiar Nome`) |
@@ -428,6 +429,25 @@ digitar. Abra com `/farol notas` ou **Anotações...** em Menu > Ferramentas.
 - As anotações ficam só no seu computador; nada é enviado. O texto salvo é conferido ao carregar (tamanhos máximos,
   sem códigos do chat).
 
+## Itens guardados (para depois)
+
+Desde a 3.26, dá para ter uma lista de itens que você quer guardar — por exemplo um material de uma receita que só
+aprende num nível mais alto. Abra com `/farol guardar` ou **Guardados...** em Menu > Ferramentas. A lista é da
+**conta inteira** (até 30 itens).
+
+- No topo: o item (digite o nome, ou use `/farol guardar` e Shift + clique no item), um **motivo** opcional e
+  **quando** ele fica útil: sem prazo, num **nível do personagem** ou num **nível de profissão** (das suas profissões).
+  Clique numa linha para trazê-la de volta ao formulário e mudar.
+- Cada linha mostra quantos você tem (e quantos estão no banco, quando o jogo informa), o motivo e o estado:
+  "nível 35 — faltam 7", "já pode" ou "sem prazo". **X** tira da lista, com **Desfazer** no rodapé.
+- Itens guardados não entram no **Lixo nas bolsas**.
+- Lembretes opcionais (desligados, na janela ou por comando):
+  - **no comerciante** (`/farol guardar comerciante on`): quais guardados estão nas bolsas, com o motivo;
+  - **na hora certa** (`/farol guardar hora on`): uma vez por personagem, ao chegar no nível ou na profissão;
+  - **no tooltip do item** (`/farol guardar tooltip on`): uma linha "Farol: guardado — motivo".
+- Item opcional na barra **Itens guardados** (desligado): `Guardados 4 · 1` = 4 guardados, 1 já pode.
+- O Farol nunca vende, move nem trava itens: só lembra. Nada é enviado; a lista é conferida ao carregar.
+
 ## Resumo da sessão
 
 `/farol resumo` mostra, **só no seu chat**, o que você fez nesta sessão:
@@ -525,6 +545,7 @@ Use **Zerar sessão** no menu, ou `/farol sessao zerar`, para recomeçar (por ex
 | Horário          | Hora local, ou do servidor (opção no menu)                | `hora`          | desligado  |
 | Resets           | Tempo até o reset diário e o semanal                      | `reset`         | desligado  |
 | Anotações        | Anotações pendentes do bloco de notas (`Notas 2/5`)        | `notas`         | desligado  |
+| Itens guardados  | Itens guardados para depois e quantos já podem ser usados (`Guardados 4 · 1`) | `guardados` | desligado |
 | Tempo de sessão  | Quanto tempo está jogando desde que entrou / `/reload`    | `tempo`         | desligado  |
 | Amigos online    | Quantidade de amigos online (WoW + Battle.net)            | `amigos`        | desligado  |
 | Guilda online    | Quantidade de membros da guilda online (some sem guilda)  | `guilda`        | desligado  |

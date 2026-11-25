@@ -87,6 +87,25 @@ return {
         H:check(H.env.FarolTaskWarn, false); T.eq(H.env.FarolDB.warnings.tasks, false)
     end },
 
+    { "3.24 window pattern: create at the top with a placeholder, undo strip at the bottom", function(T, Mock)
+        local H = setup(Mock)
+        H:slash("tarefa")
+        local W, box = H.env.FarolTasks, H.env.FarolTaskName
+        T.ok(box.farolHint:IsShown(), "placeholder shown in the empty box"); T.eq(H:text(box.farolHint), "Nova tarefa...")
+        box:SetText("Pescar"); box._scripts.OnTextChanged(box, true)
+        T.ok(not box.farolHint:IsShown(), "placeholder hides while there is text")
+        box._scripts.OnEditFocusGained(box); box:SetText(""); box._scripts.OnEditFocusLost(box)
+        T.ok(box.farolHint:IsShown(), "back when the box is empty again")
+        T.ok(box._y > W.rows[1].check._y, "the box comes before the list")
+        T.ok(W.undo._y < W.rows[10].check._y, "Undo below the list")
+        T.ok(not W.undoBack:IsShown(), "no undo strip yet")
+        H:slash("tarefa add Pescar"); H:click(H.env.FarolTaskRemove1)
+        T.ok(W.undoBack:IsShown() and W.undo:IsShown(), "undo strip after removing"); T.eq(H:text(W.undoText), "Tarefa apagada: Pescar")
+        H:click(W.undo); T.ok(not W.undoBack:IsShown(), "strip hides after undoing")
+        local E = Mock.new({ locale = "enUS" }); E:login(); E:slash("task")
+        T.eq(E:text(E.env.FarolTaskName.farolHint), "New task...")
+    end },
+
     { "names are cleaned and limited; at most 10 tasks", function(T, Mock)
         local H = setup(Mock)
         H:slash("tarefa add |cffff0000Vermelho|r")

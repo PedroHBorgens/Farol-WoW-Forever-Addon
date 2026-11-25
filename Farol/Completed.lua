@@ -56,7 +56,8 @@ local STRINGS = {
         qd_link_label = "Wowhead (Ctrl+C):",
         qd_link_tip   = "Clique para copiar o link do Wowhead desta missão",
         qd_wowhead_url = "https://www.wowhead.com/forever/pt/quest=%d/",
-        qd_empty_off  = "Nenhuma missão registrada. Marque \"Registrar missões entregues\" abaixo e entregue uma missão.",
+        qd_empty_off  = "O registro está desligado: nenhuma missão foi guardada ainda. Fica só neste computador; nada é enviado.",
+        qd_turn_on    = "Ligar registro",
         qd_empty_on   = "Nenhuma missão registrada ainda: entregue uma missão.",
         qd_no_match   = "Nenhuma missão com esse nome ou ID.",
         qd_scroll     = "%d–%d de %d",
@@ -100,7 +101,8 @@ local STRINGS = {
         qd_link_label = "Wowhead (Ctrl+C):",
         qd_link_tip   = "Click to copy this quest's Wowhead link",
         qd_wowhead_url = "https://www.wowhead.com/forever/quest=%d",
-        qd_empty_off  = "No quests recorded. Tick \"Record turned-in quests\" below and turn in a quest.",
+        qd_empty_off  = "Recording is off: no quests saved yet. It stays on this computer; nothing is sent.",
+        qd_turn_on    = "Turn on recording",
         qd_empty_on   = "No quests recorded yet: turn in a quest.",
         qd_no_match   = "No quest with that name or ID.",
         qd_scroll     = "%d–%d of %d",
@@ -762,6 +764,12 @@ local function CreateWindow()
     frame.empty:SetPoint("TOPLEFT", 26, -110)
     frame.empty:SetWidth(580)
     frame.empty:SetJustifyH("LEFT")
+    -- Janela vazia com a ação na mão (3.24): registro desligado = botão para ligar ali mesmo.
+    frame.turnOn = CreateFrame("Button", "FarolCompletedTurnOn", frame, "UIPanelButtonTemplate")
+    frame.turnOn:SetSize(160, 22)
+    frame.turnOn:SetPoint("TOPLEFT", frame.empty, "BOTTOMLEFT", 0, -10)
+    frame.turnOn:SetScript("OnClick", function() SetRecording(true); RefreshWindow() end)
+    frame.turnOn:Hide()
     frame:EnableMouseWheel(true)
     frame:SetScript("OnMouseWheel", function(_, delta)
         offset = math.max(0, offset - (delta or 0) * 3)
@@ -772,7 +780,7 @@ local function CreateWindow()
     frame.record = CreateFrame("CheckButton", "FarolCompletedRecord", frame, "UICheckButtonTemplate")
     frame.record:SetSize(24, 24)
     frame.record:SetPoint("TOPLEFT", 20, bottom)
-    frame.record.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    frame.record.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.record.label:SetPoint("LEFT", frame.record, "RIGHT", 4, 0)
     frame.record:SetScript("OnClick", function(self) SetRecording(self:GetChecked() and true or false) end)
     frame.scrollInfo = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
@@ -781,7 +789,7 @@ local function CreateWindow()
     frame.old = CreateFrame("CheckButton", "FarolCompletedOld", frame, "UICheckButtonTemplate")
     frame.old:SetSize(24, 24)
     frame.old:SetPoint("TOPLEFT", 20, bottom - 24)
-    frame.old.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    frame.old.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.old.label:SetPoint("LEFT", frame.old, "RIGHT", 4, 0)
     frame.old:SetScript("OnClick", function(self)
         local db = DB()
@@ -861,8 +869,10 @@ RefreshWindow = function()
     if #list == 0 then
         local key = (info and (#info.list > 0 or (ShowOld() and info.a))) and "qd_no_match" or (Recording() and "qd_empty_on" or "qd_empty_off")
         window.empty:SetText(T(key)); window.empty:Show()
+        window.turnOn:SetText(T("qd_turn_on"))
+        if key == "qd_empty_off" then window.turnOn:Show() else window.turnOn:Hide() end
     else
-        window.empty:Hide()
+        window.empty:Hide(); window.turnOn:Hide()
     end
     window.scrollInfo:SetText(#list > 0 and string.format(T("qd_scroll"), offset + 1, math.min(offset + ROWS, #list), #list) or "")
     window.record:SetChecked(Recording())

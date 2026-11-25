@@ -93,16 +93,35 @@ return {
         H:click(set.tools[9]); T.has(H.strip(table.concat(H.msgs, "\n")), "resumo da sessão")
     end },
 
-    { "General tab: options for every character, synced with the Appearance window", function(T, Mock)
+    { "General tab: sections, Appearance-only options, danger area apart (3.24)", function(T, Mock)
         local H = Mock.new({ locale = "ptBR" }):login()
         local _, set = open(H); H:click(set.tabs.general)
-        T.eq(H:text(set.allHeader), "Para todos os personagens"); T.eq(H:text(set.restoreHeader), "Restaurar")
-        H:check(set.tooltipFull, true); T.eq(H.env.FarolDB.tooltipFull, true)
-        H:check(set.warnButton, false); T.eq(H.env.FarolDB.warnButton, false)
-        T.ok(not H.env.FarolWarnHistoryButton:IsShown(), "history button hidden")
-        H:slash("aparencia botao"); T.eq(set.warnButton._checked, true, "Appearance command syncs the checkbox")
-        H:check(set.lootButton, false); T.eq(H.env.FarolDB.lootButton, false)
-        T.eq(rawget(H.env.FarolDB, "tooltipFull"), true, "account-wide setting (not per bar)")
+        T.eq(H:text(set.langHeader), "Idioma"); T.eq(H:text(set.chatHeader), "Chat e mensagens")
+        T.eq(H:text(set.barHeader), "Barra e relógio"); T.eq(H:text(set.accessHeader), "Minimapa e acessibilidade")
+        T.eq(H:text(set.restoreHeader), "Restaurar e apagar"); T.eq(H:text(set.profileHeader), "Perfis (avançado)")
+        T.eq(set.tooltipFull, nil, "full tooltip only in the Appearance window")
+        T.eq(set.warnButton, nil); T.eq(set.lootButton, nil)
+        T.has(H:text(set.appearanceHint), "tooltip completo"); T.has(H:text(set.forgetHint), "segundo clique")
+        H:click(set.appearanceAll); T.ok(H.env.FarolAppearance and H.env.FarolAppearance:IsShown(), "Appearance... opens the window")
+        T.has(set.forget._text, "|T", "danger button has the alert icon")
+        T.has(set.forget._text, H.env.FarolDB.colorblind and "ff8a33" or "ff6666", "danger color from the palette")
+        -- Sections in order, from top to bottom, without overlapping.
+        local order = { set.langHeader, set.chatHeader, set.barHeader, set.accessHeader, set.profileHeader, set.restoreHeader }
+        for i = 2, #order do
+            T.ok(order[i - 1].farolTop - order[i - 1].farolHeight >= order[i].farolTop, "section " .. i .. " below the previous one")
+        end
+        local last = order[#order]
+        T.ok(-(last.farolTop - last.farolHeight) <= 494, "fits in the page"); T.ok(last.farolDanger, "danger section")
+    end },
+
+    { "tabs look like tabs: only the open one is marked (3.24)", function(T, Mock)
+        local H = Mock.new({ locale = "enUS" }):login()
+        local _, set = open(H)
+        T.ok(set.tabs.bar.farolMark:IsShown(), "Bar open"); T.ok(not set.tabs.general.farolMark:IsShown())
+        H:click(set.tabs.general)
+        T.ok(set.tabs.general.farolMark:IsShown()); T.ok(not set.tabs.bar.farolMark:IsShown(), "only one marked")
+        T.ok(set.tabLine, "line under the tabs")
+        H:slash("aparencia botao"); T.eq(H.env.FarolDB.warnButton, false, "quick buttons still change by command")
     end },
 
     { "English tabs, groups and warning sections", function(T, Mock)

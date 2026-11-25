@@ -275,6 +275,14 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   `Warnings.SetAll(true/false)` ("Só os recomendados" = padrões de `DEFAULTS`; o som e "também em lutas" não mudam) e a
   faixa `Warnings.ShowInfo` (`warn_desc_<chave>`, um teste confere PT/EN). A ordem de criação das caixinhas não mudou
   (os testes contam por posição): itens, Mostrar, Travar, aba Geral, avisos. Coluna 2 da aba Avisos: rótulos curtos.
+- **Padrão visual (3.24):** aba Geral em seções (`Profiles.Section(página, topo, altura, perigo)`: fundo leve + filete
+  + título; `perigo` = fundo avermelhado, só para "Restaurar e apagar"); abas marcadas por `Profiles.MarkTab` (filete
+  dourado `farolMark` + texto branco). Tooltip completo e botões rápidos ficam **só** na janela Aparência (a aba Geral
+  tem o botão "Aparência..."). Ação de perigo: `Profiles.ALERT_ICON` + `ns.C.bad`, numa seção à parte, com 2º clique.
+  Janelas: criar no topo, lista no meio, Desfazer no rodapé (`ns.UndoBar(frame)` + `ns.ShowUndo(frame, texto, botão)`,
+  com `frame.undoText`/`frame.undo`); caixas vazias com texto-guia `ns.Placeholder(caixa, chave)` (usa `HookScript`,
+  mantém os scripts da caixa; `ns.UpdatePlaceholder` ao trocar o idioma); janela vazia com a ação (Missões concluídas:
+  "Ligar registro"). Rótulos de opções na fonte normal; a pequena é para dicas (exceção: a grade dos 30 itens).
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 

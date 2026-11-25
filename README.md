@@ -111,10 +111,12 @@ The menu has **four tabs**:
   `/farol warn none`); at the bottom, the explanation of the hovered warning. `/farol warn` opens the menu on this
   tab.
 - **Tools** — one button per window, with what it does: Alarms, Tasks, Goals, Dungeons, **Completed quests**, Loot, History and **Summary now**.
-- **General** — what applies to all your characters: language (Auto / Português / English), server time, session
-  summary at login, gold of all characters, full tooltip, the quick buttons next to bar 1, the **minimap button**
-  (show / lock); **Restore**: bar position, reset session, forget characters; and **Profiles (advanced)**: the same
-  bars on every character or just this one, and **Copy from...**.
+- **General** — what applies to all your characters, in sections: **Language** (Auto / Português / English);
+  **Chat and messages** (which chat tab, session summary at login, where XP and gold come from); **Bar and clock**
+  (server time, gold of all characters, and an **Appearance...** button for the full tooltip, quick buttons, size and
+  background); **Minimap and accessibility** (minimap button show / lock, colorblind-friendly colors); **Profiles
+  (advanced)**: the same bars on every character or just this one, and **Copy from...**; and, set apart in red,
+  **Restore and delete**: bar position, reset session and **forget characters** (asks for a second click).
 
 **Minimap button:** click = menu, **right-click = hide/show every bar at once** (this session only — handy for
 screenshots; `/farol` also brings them back), Shift-click = Warnings tab. Drag it around the minimap (unless locked).

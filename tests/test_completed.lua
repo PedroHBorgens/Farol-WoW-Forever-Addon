@@ -110,8 +110,14 @@ return {
         T.eq(H:text(W.empty), "Nenhuma missão com esse nome ou ID."); T.ok(not W.rows[1].name:IsShown())
         H:check(H.env.FarolCompletedRecord, false); T.eq(H.env.FarolDB.questRecord, false)
         local E = Mock.new({ locale = "ptBR" }); E:login(); E:slash("concluidas")
-        T.has(E:text(E.env.FarolCompleted.empty), "Marque \"Registrar missões entregues\"")
+        T.has(E:text(E.env.FarolCompleted.empty), "O registro está desligado")
+        -- 3.24: a janela vazia traz o botão para ligar o registro ali mesmo (regra 8: só com o clique).
+        local turnOn = E.env.FarolCompletedTurnOn
+        T.ok(turnOn:IsShown(), "turn-on button in the empty state"); T.eq(E:text(turnOn), "Ligar registro")
+        T.eq(E.env.FarolDB.questRecord, false, "still off until clicked")
         T.eq(E:text(E.env.FarolCompleted.totalText):match("Total no jogo: %-%-") ~= nil, true, "no total: --")
+        E:click(turnOn); T.eq(E.env.FarolDB.questRecord, true, "one click turns it on")
+        T.ok(not turnOn:IsShown(), "button hides when recording is on"); T.has(E:text(E.env.FarolCompleted.empty), "entregue uma missão")
     end },
 
     { "tooltip: totals of each character, today's count and the latest quests", function(T, Mock)

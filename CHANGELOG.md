@@ -2,6 +2,20 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.24.0 — Clearer menu, consistent windows
+- Menu tabs look like tabs: the open one is highlighted, with white text and a gold line under it.
+- **General tab in sections:** Language · Chat and messages · Bar and clock · Minimap and accessibility · Profiles
+  (advanced) · **Restore and delete**. Full tooltip and the quick buttons are now only in the Appearance window (they
+  were in both places); an **Appearance...** button in the General tab opens it and says what is there.
+- **Forget characters** is a danger action: alert icon and alert color, in its own reddish section; it still asks
+  for a second click.
+- Same pattern in the windows: **Tasks** creates at the top (box, type, Add) with the list below; the empty boxes show
+  a grey hint ("New task...", "Note title") that disappears when you click or type; the **Undo** strip at the bottom
+  has the same light background in Tasks and Notes.
+- **Completed quests** with recording off: the empty window explains it and has a **Turn on recording** button
+  (still off until you click). Option labels in Tasks and Completed quests use the normal font.
+- No feature changed; nothing turns on by itself. Images 10, 13 and 16 updated. 750 tests (2 passes).
+
 ## 3.23.0 — Value of the ready quests
 - New option **XP and gold of ready ones** (Warnings tab, off by default): the Quests bar item shows the XP of the
   quests ready to turn in (`5 ready (+7.4k XP)`) and its tooltip shows the total XP and gold, each ready quest with

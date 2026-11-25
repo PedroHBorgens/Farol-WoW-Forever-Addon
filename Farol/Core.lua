@@ -319,8 +319,13 @@ local STRINGS = {
         grp_gold     = "Ouro",
         grp_progress = "Progresso",
         grp_time     = "Tempo e social",
-        opt_all_chars = "Para todos os personagens",
-        opt_restore  = "Restaurar",
+        opt_sec_chat = "Chat e mensagens",
+        opt_sec_bar  = "Barra e relógio",
+        opt_sec_access = "Minimapa e acessibilidade",
+        opt_restore  = "Restaurar e apagar",
+        opt_app_more = "Aparência...",
+        opt_app_hint = "tooltip completo, botões rápidos, tamanho, fundo",
+        opt_forget_hint = "\"Esquecer personagens\" pede um segundo clique para confirmar.",
         tool_alarms  = "Alarmes...",       tool_alarms_desc = "até 10 alarmes, hora local ou do servidor",
         tool_tasks   = "Tarefas...",       tool_tasks_desc = "diárias e semanais, zeram sozinhas no reset",
         tool_loot    = "Saques...",        tool_loot_desc = "últimos itens, com horário e filtro de qualidade",
@@ -672,8 +677,13 @@ local STRINGS = {
         grp_gold     = "Gold",
         grp_progress = "Progress",
         grp_time     = "Time and social",
-        opt_all_chars = "For all characters",
-        opt_restore  = "Restore",
+        opt_sec_chat = "Chat and messages",
+        opt_sec_bar  = "Bar and clock",
+        opt_sec_access = "Minimap and accessibility",
+        opt_restore  = "Restore and delete",
+        opt_app_more = "Appearance...",
+        opt_app_hint = "full tooltip, quick buttons, size, background",
+        opt_forget_hint = "\"Forget characters\" asks for a second click to confirm.",
         tool_alarms  = "Alarms...",        tool_alarms_desc = "up to 10 alarms, local or server time",
         tool_tasks   = "Tasks...",         tool_tasks_desc = "daily and weekly, reset on their own",
         tool_loot    = "Loot...",          tool_loot_desc = "recent items, with time and quality filter",
@@ -945,6 +955,47 @@ function ns.TabChain(list)
             local nextBox = list[i % #list + 1]
             if nextBox and nextBox.SetFocus and nextBox:IsShown() then nextBox:SetFocus() end
         end)
+    end
+end
+-- Texto-guia (3.24): frase cinza dentro da caixa vazia ("Nova tarefa..."); some ao clicar ou digitar.
+-- Os scripts que a caixa já tem continuam valendo (HookScript chama os dois).
+function ns.UpdatePlaceholder(box)
+    local hint = box and box.farolHint
+    if not hint then return end
+    hint:SetText(T(box.farolHintKey))
+    local focused = box.HasFocus and box:HasFocus()
+    if (box:GetText() or "") == "" and not focused then hint:Show() else hint:Hide() end
+end
+function ns.Placeholder(box, key)
+    if not box.HookScript then return end -- sem HookScript (cliente antigo) a frase não saberia sumir: fica sem ela
+    local hint = ns.Dim(box:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
+    hint:SetPoint("LEFT", box, "LEFT", 2, 0)
+    box.farolHint, box.farolHintKey = hint, key
+    local function Update() ns.UpdatePlaceholder(box) end
+    box:HookScript("OnTextChanged", Update)
+    box:HookScript("OnEditFocusGained", function() hint:Hide() end)
+    box:HookScript("OnEditFocusLost", Update)
+    Update()
+    return hint
+end
+-- Faixa "Apagada: X [Desfazer]" (3.24): o mesmo rodapé em todas as janelas, com fundo dourado bem leve.
+-- ns.UndoBar cria o fundo; ns.ShowUndo(frame, texto) mostra a faixa (texto = nil esconde tudo).
+function ns.UndoBar(frame)
+    local back = frame:CreateTexture(nil, "BORDER")
+    back:SetPoint("TOPLEFT", frame.undoText, "TOPLEFT", -6, 9)
+    back:SetPoint("BOTTOMRIGHT", frame.undo, "BOTTOMRIGHT", 4, -4)
+    if back.SetColorTexture then back:SetColorTexture(1, 0.84, 0.35, 0.08) else back:SetTexture(1, 0.84, 0.35, 0.08) end
+    frame.undoBack = back
+    back:Hide()
+end
+function ns.ShowUndo(frame, text, buttonText)
+    if text then
+        frame.undoText:SetText(text); frame.undo:SetText(buttonText)
+        frame.undoText:Show(); frame.undo:Show()
+        if frame.undoBack then frame.undoBack:Show() end
+    else
+        frame.undoText:Hide(); frame.undo:Hide()
+        if frame.undoBack then frame.undoBack:Hide() end
     end
 end
 ns.Print = Print
@@ -3680,11 +3731,45 @@ function Profiles.SetGlobalToggle(key, value)
     RefreshOptions()
 end
 
+-- Seção da aba Geral (3.24): fundo levemente mais claro com borda fina e o título dourado no topo.
+-- danger = ações que apagam (fundo avermelhado; o título vem na cor de alerta da paleta).
+Profiles.ALERT_ICON = "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:14:14|t "
+function Profiles.Fill(texture, r, g, b, a)
+    if texture.SetColorTexture then texture:SetColorTexture(r, g, b, a) else texture:SetTexture(r, g, b, a) end
+end
+function Profiles.Section(page, top, height, danger)
+    local box = page:CreateTexture(nil, "BACKGROUND")
+    box:SetPoint("TOPLEFT", 12, top + 4)
+    box:SetSize(Profiles.MENU_W - 24, height)
+    if danger then Profiles.Fill(box, 1, 0.3, 0.3, 0.08) else Profiles.Fill(box, 1, 1, 1, 0.04) end
+    local line = page:CreateTexture(nil, "BORDER") -- filete dourado em cima de cada seção
+    line:SetPoint("TOPLEFT", 12, top + 4)
+    line:SetSize(Profiles.MENU_W - 24, 1)
+    if danger then Profiles.Fill(line, 1, 0.4, 0.4, 0.5) else Profiles.Fill(line, 0.8, 0.65, 0.3, 0.5) end
+    local header = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    header:SetPoint("TOPLEFT", 20, top - 2)
+    header.farolDanger, header.farolTop, header.farolHeight = danger, top, height
+    return header
+end
+
+-- Abas com cara de aba (3.24): a aberta fica destacada, com texto branco e um filete dourado embaixo.
+function Profiles.MarkTab(button, active)
+    if not button.farolMark then
+        button.farolMark = button:CreateTexture(nil, "OVERLAY")
+        button.farolMark:SetPoint("BOTTOMLEFT", 6, 1)
+        button.farolMark:SetPoint("BOTTOMRIGHT", -6, 1)
+        button.farolMark:SetHeight(3)
+        Profiles.Fill(button.farolMark, 1, 0.82, 0, 1)
+    end
+    if active then button:LockHighlight(); button.farolMark:Show() else button:UnlockHighlight(); button.farolMark:Hide() end
+    if button.SetNormalFontObject then button:SetNormalFontObject(active and "GameFontHighlight" or "GameFontNormal") end
+end
+
 function Profiles.SelectTab(set, tab)
     set.tab = tab
     for _, key in ipairs(Profiles.TABS) do
-        if key == tab then set.pages[key]:Show(); set.tabs[key]:LockHighlight()
-        else set.pages[key]:Hide(); set.tabs[key]:UnlockHighlight() end
+        if key == tab then set.pages[key]:Show() else set.pages[key]:Hide() end
+        Profiles.MarkTab(set.tabs[key], key == tab)
     end
     if tab == "warnings" and ns.Warnings and ns.Warnings.RefreshControls then ns.Warnings.RefreshControls() end
 end
@@ -3795,6 +3880,10 @@ local function BuildControls(parent, top)
         page:SetSize(Profiles.MENU_W, Profiles.PAGE_H)
         set.pages[key] = page
     end
+    set.tabLine = parent:CreateTexture(nil, "BORDER") -- linha embaixo das abas: as abas "pousam" nela
+    set.tabLine:SetPoint("TOPLEFT", 16, top - 25)
+    set.tabLine:SetSize(4 * 124 - 4, 2)
+    Profiles.Fill(set.tabLine, 0.8, 0.65, 0.3, 0.6)
 
     -- Aba "Barra": qual barra + mostrar/travar, pacotes prontos, itens em grupos (⚙ = configurar o item),
     -- faixa de explicação do item sob o mouse, Aparência e Ordem desta barra.
@@ -3824,7 +3913,7 @@ local function BuildControls(parent, top)
         set.groups[g] = header
         for i, key in ipairs(group[2]) do
             local check = CreateCheck(page, x, y - 16 - (i - 1) * 22, function(value) SetItemVisible(key, value) end)
-            check.label:SetFontObject("GameFontHighlightSmall")
+            check.label:SetFontObject("GameFontHighlightSmall") -- grade densa de 30 itens: a única lista de opções em letra pequena
             -- Passar o mouse: o que este item mostra (tooltip e faixa de explicação embaixo).
             check:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -3872,69 +3961,50 @@ local function BuildControls(parent, top)
     set.order = CreateButton(page, 200, function() ns.Order.ToggleWindow() end)
     set.order:SetPoint("TOPLEFT", 226, -432)
 
-    -- Aba "Geral": o que vale para todos os personagens.
+    -- Aba "Geral" (3.24): o que vale para todos, em seções. Tooltip completo e botões rápidos ficam só na
+    -- janela Aparência (antes apareciam nos dois lugares). A ordem de criação das caixinhas não mudou.
     page = set.pages.general
-    set.langHeader = CreateHeader(page, 0)
+    set.langHeader = Profiles.Section(page, 0, 52)
     local x = 20
     for _, entry in ipairs({ { "auto", "Auto" }, { "pt", "Português" }, { "en", "English" } }) do
         local lang, label = entry[1], entry[2]
         local button = CreateButton(page, 100, function() SetLang(lang) end)
-        button:SetPoint("TOPLEFT", x, -20)
+        button:SetPoint("TOPLEFT", x, -22)
         button:SetText(label)
         set.langs[lang] = button
         x = x + 106
     end
-    set.allHeader = CreateHeader(page, -58)
-    set.serverTime = CreateCheck(page, 20, -78, SetServerTime)
+    set.chatHeader = Profiles.Section(page, -58, 96)
+    set.barHeader = Profiles.Section(page, -160, 98)
+    set.accessHeader = Profiles.Section(page, -264, 74)
+    set.serverTime = CreateCheck(page, 20, -180, SetServerTime)
     set.summary = CreateCheck(page, 20, -104, SetSummary)
-    set.goldTotal = CreateCheck(page, 20, -130, SetGoldTotal)
-    set.tooltipFull = CreateCheck(page, 20, -156, function(value) Profiles.SetGlobalToggle("tooltipFull", value) end)
-    set.warnButton = CreateCheck(page, 20, -182, function(value) Profiles.SetGlobalToggle("warnButton", value) end)
-    set.lootButton = CreateCheck(page, 20, -208, function(value) Profiles.SetGlobalToggle("lootButton", value) end)
-    set.minimap = CreateCheck(page, 20, -234, function(value) ns.MinimapButton.SetShown(value) end)
-    set.minimapLock = CreateCheck(page, 20, -260, function(value) ns.MinimapButton.SetLocked(value) end)
-    set.colorblind = CreateCheck(page, 20, -286, function(value) Profiles.SetColorblind(value) end)
-    set.sources = CreateCheck(page, 20, -312, function(value) ns.Sources.SetEnabled(value) end)
+    set.goldTotal = CreateCheck(page, 20, -204, SetGoldTotal)
+    set.minimap = CreateCheck(page, 20, -284, function(value) ns.MinimapButton.SetShown(value) end)
+    set.minimapLock = CreateCheck(page, 330, -284, function(value) ns.MinimapButton.SetLocked(value) end)
+    set.colorblind = CreateCheck(page, 20, -308, function(value) Profiles.SetColorblind(value) end)
+    set.sources = CreateCheck(page, 20, -128, function(value) ns.Sources.SetEnabled(value) end)
     set.chatLabel = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    set.chatLabel:SetPoint("TOPLEFT", 24, -346)
+    set.chatLabel:SetPoint("TOPLEFT", 24, -82)
     set.chat = ns.CreateDropdown(page, "FarolChatWindow" .. index, 240, function() return Profiles.ChatItems() end)
-    set.chat:SetPoint("TOPLEFT", 200, -342)
-    set.restoreHeader = CreateHeader(page, -382)
-    set.reset = CreateButton(page, 170, function() ResetPosition() end)
-    set.reset:SetPoint("TOPLEFT", 20, -402)
-    set.sessionReset = CreateButton(page, 170, function()
-        ResetSession()
-        UpdateText()
-        Print(T("session_reset"))
-    end)
-    set.sessionReset:SetPoint("TOPLEFT", 196, -402)
-    -- "Esquecer personagens": pede um segundo clique (em até 5 s) para confirmar.
-    set.forget = CreateButton(page, 190, nil)
-    set.forget:SetScript("OnClick", function(self)
-        local now = GetTime()
-        if self.confirmAt and now - self.confirmAt <= 5 then
-            self.confirmAt = nil
-            ForgetCharacters(nil)
-            UpdateText()
-        else
-            self.confirmAt = now
-            self:SetText(T("opt_forget_confirm"))
-            return
-        end
-        RefreshOptions()
-    end)
-    set.forget:SetPoint("TOPLEFT", 372, -402)
+    set.chat:SetPoint("TOPLEFT", 200, -78)
+    set.appearanceAll = CreateButton(page, 140, function() ns.Appearance.ToggleWindow() end)
+    set.appearanceAll:SetPoint("TOPLEFT", 22, -232)
+    set.appearanceHint = ns.Dim(page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
+    set.appearanceHint:SetPoint("LEFT", set.appearanceAll, "RIGHT", 10, 0)
+    set.appearanceHint:SetWidth(Profiles.MENU_W - 210)
+    set.appearanceHint:SetJustifyH("LEFT")
     -- Perfis (avançado): as mesmas barras em todos os personagens ou só neste, e "Copiar de...".
-    set.profileHeader = CreateHeader(page, -432)
+    set.profileHeader = Profiles.Section(page, -344, 54)
     set.profileLabel = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    set.profileLabel:SetPoint("TOPLEFT", 20, -458)
+    set.profileLabel:SetPoint("TOPLEFT", 24, -370)
     set.profile = ns.CreateDropdown(page, "FarolProfile" .. index, 170, function()
         return {
             { text = T("pfl_account_all"), checked = Profiles.mode ~= "char", onClick = function() Profiles.SetMode("account") end },
             { text = T("pfl_char_only"), checked = Profiles.mode == "char", onClick = function() Profiles.SetMode("char") end },
         }
     end)
-    set.profile:SetPoint("TOPLEFT", 90, -454)
+    set.profile:SetPoint("TOPLEFT", 94, -366)
     set.copy = ns.CreateDropdown(page, "FarolProfileCopy" .. index, 130, function()
         local items = {}
         for _, source in ipairs(Profiles.Sources()) do
@@ -3943,7 +4013,35 @@ local function BuildControls(parent, top)
         if #items == 0 then items[1] = { text = T("pfl_none"), r = .6, g = .6, b = .6, onClick = function() end } end
         return items
     end)
-    set.copy:SetPoint("TOPLEFT", 270, -454)
+    set.copy:SetPoint("TOPLEFT", 274, -366)
+    -- Restaurar e apagar: separado do resto, com fundo avermelhado; "Esquecer" é a ação de perigo.
+    set.restoreHeader = Profiles.Section(page, -404, 84, true)
+    set.reset = CreateButton(page, 170, function() ResetPosition() end)
+    set.reset:SetPoint("TOPLEFT", 22, -428)
+    set.sessionReset = CreateButton(page, 170, function()
+        ResetSession()
+        UpdateText()
+        Print(T("session_reset"))
+    end)
+    set.sessionReset:SetPoint("TOPLEFT", 198, -428)
+    -- "Esquecer personagens": pede um segundo clique (em até 5 s) para confirmar.
+    set.forget = CreateButton(page, 200, nil)
+    set.forget:SetScript("OnClick", function(self)
+        local now = GetTime()
+        if self.confirmAt and now - self.confirmAt <= 5 then
+            self.confirmAt = nil
+            ForgetCharacters(nil)
+            UpdateText()
+        else
+            self.confirmAt = now
+            self:SetText(ns.C.bad .. T("opt_forget_confirm") .. "|r")
+            return
+        end
+        RefreshOptions()
+    end)
+    set.forget:SetPoint("TOPLEFT", 420, -428)
+    set.forgetHint = ns.Dim(page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
+    set.forgetHint:SetPoint("TOPLEFT", 24, -458)
 
     -- Aba "Avisos": os controles do módulo de avisos (os do menu do Farol têm os nomes "FarolWarn...").
     if ns.Warnings and ns.Warnings.BuildControls then
@@ -4005,8 +4103,10 @@ RefreshOptions = function()
         end
         for g, header in ipairs(set.groups) do header:SetText(T(Profiles.GROUPS[g][1])) end
         set.langHeader:SetText(T("opt_lang"))
-        set.allHeader:SetText(T("opt_all_chars"))
-        set.restoreHeader:SetText(T("opt_restore"))
+        set.chatHeader:SetText(T("opt_sec_chat"))
+        set.barHeader:SetText(T("opt_sec_bar"))
+        set.accessHeader:SetText(T("opt_sec_access"))
+        set.restoreHeader:SetText(ns.C.bad .. T("opt_restore") .. "|r")
         set.profileHeader:SetText(T("opt_profiles_header"))
         set.packLabel:SetText(T("pk_label"))
         for _, button in ipairs(set.packs) do button:SetText(T("pk_" .. button.key)) end
@@ -4028,12 +4128,6 @@ RefreshOptions = function()
         set.summary:SetChecked(db.summary)
         set.goldTotal.label:SetText(T("opt_goldtotal"))
         set.goldTotal:SetChecked(db.goldTotal)
-        set.tooltipFull.label:SetText(T("app_tooltipfull"))
-        set.tooltipFull:SetChecked(db.tooltipFull)
-        set.warnButton.label:SetText(T("app_warnbutton"))
-        set.warnButton:SetChecked(db.warnButton)
-        set.lootButton.label:SetText(T("app_lootbutton"))
-        set.lootButton:SetChecked(db.lootButton)
         set.minimap.label:SetText(T("opt_minimap"))
         set.minimap:SetChecked(db.minimap and db.minimap.show or false)
         set.minimapLock.label:SetText(T("opt_minimap_lock"))
@@ -4045,7 +4139,10 @@ RefreshOptions = function()
         set.chatLabel:SetText(T("opt_chat"))
         set.chat:SetText(Profiles.ChatLabel())
         set.forget.confirmAt = nil
-        set.forget:SetText(T("opt_forget"))
+        set.forget:SetText(Profiles.ALERT_ICON .. ns.C.bad .. T("opt_forget") .. "|r")
+        set.forgetHint:SetText(T("opt_forget_hint"))
+        set.appearanceAll:SetText(T("opt_app_more"))
+        set.appearanceHint:SetText(T("opt_app_hint"))
         for lang, button in pairs(set.langs) do
             if lang == db.lang then button:LockHighlight() else button:UnlockHighlight() end
         end

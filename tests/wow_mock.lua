@@ -81,6 +81,7 @@ end
 function Frame:SetPoint(point, relativeTo, relativePoint, x, y)
     self._anchor = type(relativeTo) == "table" and relativeTo or nil
     self._anchorPoint = point
+    if type(relativeTo) == "number" then x, y = relativeTo, relativePoint end -- SetPoint("TOPLEFT", x, y)
     self._x, self._y = x, y
 end
 function Frame:GetStringHeight() return self._stringHeight end -- os testes podem definir

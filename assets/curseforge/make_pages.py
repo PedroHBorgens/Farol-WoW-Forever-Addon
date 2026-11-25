@@ -293,13 +293,13 @@ def trow(name, kind, done):
             '<span class="btn" style="padding:1px 7px">X</span></span></div>')
 twin = ('<div class="win" style="width:470px"><div class="x">×</div><div class="t">Tasks</div>'
         '<div class="dim" style="font-size:12px;margin-bottom:6px">Tick what you have done. Daily tasks reset at the daily reset; weekly, at the weekly one.</div>'
+        + '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><span class="input" style="min-width:200px;text-align:left;color:#888;font-style:italic">New task...</span>'
+          '<span class="btn">Type: Daily</span><span class="btn">Add</span></div>'
         + trow("Fishing daily", "daily", True) + trow("Cooking daily", "daily", False) + trow("Sell on the auction house", "daily", True)
         + trow("Ember Depths", "weekly", False) + trow("Guild bank deposit", "weekly", True)
-        + '<div style="display:flex;gap:8px;align-items:center;margin-top:12px"><span class="input" style="min-width:200px;text-align:left;color:#aaa">new task…</span>'
-          '<span class="btn">Type: Daily</span><span class="btn">Add</span></div>'
         + '<div class="ck" style="margin-top:10px"><span class="box">✓</span>Warn 1 h before the daily reset if a daily task is left</div>'
         + '<div class="dim" style="font-size:12px;margin-top:4px">Daily reset in 5h 12m · weekly in 2d 4h</div>'
-        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12.5px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12.5px;padding:5px 8px;background:#ffd75a14;border:1px solid #ffd75a44;border-radius:4px">'
           '<span>Task removed: Old errand</span><span class="btn" style="padding:1px 10px">Undo</span></div></div>')
 twarn = ('<div class="tip" style="width:420px;font-size:13px"><span style="color:#33ccff">Farol:</span> <span style="color:#ff9900">'
          '1 daily task left and the daily reset is in 58m.</span> <span class="dim">(Silence / Remind in 10 min)</span></div>')
@@ -360,7 +360,7 @@ bars = (f'<div style="display:flex;flex-direction:column;gap:14px;align-items:fl
         f'<div class="dim">Bar 2 · above the action bars</div>{B2}<div style="display:flex;gap:16px;align-items:flex-start"><div><div class="dim">Bar 3 · one column</div>{B3}</div></div></div>')
 gen = f"""<div class="win menu3" style="width:520px"><div class="x">×</div><div class="t">Farol</div>{tabs("General")}
 <div class="line"><span class="k" style="width:auto">Editing:</span><span class="btn" style="padding:2px 10px">Bar 1</span><span class="btn" style="padding:2px 10px">Bar 2</span><span class="btn hl" style="padding:2px 10px;color:#fff">Bar 3</span></div>
-<div class="h">Profile</div>
+<div class="h">Profiles (advanced)</div>
 <div class="line"><span>Profile:</span><span class="btn" style="padding:2px 10px;color:#fff">This character only ▾</span><span class="btn" style="padding:2px 10px">Copy from... ▾</span></div>
 <div class="tip" style="margin:6px 0 0 150px;width:230px;font-size:13px;line-height:1.7"><div class="k">Copy from...</div><div>Account bars</div><div>Mira (34)</div><div>Tor (12)</div></div>
 <div class="g" style="font-size:12px;margin-top:8px">Bars copied from Mira. Changed your mind? /farol profile undo</div></div>"""
@@ -419,6 +419,7 @@ diag = ["<span class=\"y\">Diagnostics</span> <span class=\"dim\">(read-only: no
 cwin = ('<div style="width:700px"><div class="ctabs"><span>General</span><span>Combat Log</span><span class="on">Farol</span></div>'
         '<div class="cwin">' + "".join(chatline(l) for l in diag) + '</div></div>')
 cmenu = f"""<div class="win menu3" style="width:440px"><div class="x">×</div><div class="t">Farol</div>{tabs("General")}
+<div class="h">Chat and messages</div>
 <div class="line"><span>Farol messages in:</span><span class="btn" style="padding:2px 10px;color:#fff">Farol ▾</span></div>
 <div class="tip" style="margin:4px 0 0 140px;width:250px;font-size:13px;line-height:1.7"><div>Main chat (default)</div><div>Combat Log</div><div><span class="k">✓</span> Farol</div><div class="dim">(new tab: right-click the chat)</div></div>
 <div class="dim" style="font-size:12px;margin-top:8px">Farol only writes in your own chat; it never creates or changes your chat tabs.</div></div>"""

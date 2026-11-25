@@ -37,8 +37,10 @@ local STRINGS = {
         src_sell       = "Comerciante: vendas",
         src_buy        = "Comerciante: compras e consertos",
         src_other_gold = "Outros (correio, leilão, troca)",
-        src_sum_xp     = "XP por origem: missões %d%% · monstros %d%% · outros %d%%",
-        src_sum_gold   = "Ouro por origem: missões %s · saque %s · vendas %s · compras e consertos %s · outros %s",
+        src_sum_xp     = "XP por origem: %s",
+        src_sum_gold   = "Ouro por origem: %s",
+        src_p_quests   = "missões", src_p_mobs = "monstros", src_p_other = "outros",
+        src_p_loot     = "saque", src_p_sales = "vendas", src_p_buys = "compras e consertos",
         opt_sources    = "Mostrar de onde vem o XP e o ouro (tooltip e resumo)",
         src_on         = "de onde vem o XP e o ouro: ligado (tooltip do XP e do ouro, e resumo da sessão).",
         src_off        = "de onde vem o XP e o ouro: desligado.",
@@ -61,8 +63,10 @@ local STRINGS = {
         src_sell       = "Merchant: sales",
         src_buy        = "Merchant: purchases and repairs",
         src_other_gold = "Other (mail, auction, trade)",
-        src_sum_xp     = "XP by source: quests %d%% · monsters %d%% · other %d%%",
-        src_sum_gold   = "Gold by source: quests %s · loot %s · sales %s · purchases and repairs %s · other %s",
+        src_sum_xp     = "XP by source: %s",
+        src_sum_gold   = "Gold by source: %s",
+        src_p_quests   = "quests", src_p_mobs = "monsters", src_p_other = "other",
+        src_p_loot     = "loot", src_p_sales = "sales", src_p_buys = "purchases and repairs",
         opt_sources    = "Show where the XP and gold come from (tooltip and summary)",
         src_on         = "where the XP and gold come from: on (XP and gold tooltip, and session summary).",
         src_off        = "where the XP and gold come from: off.",
@@ -255,9 +259,11 @@ function Sources.TipXP(addPair)
     if total <= 0 then return end
     addPair(T("src_xp_title"), ns.FormatBig(total))
     local rows = { { string.format(ns.TN("src_quests", snap.qn), snap.qn), snap.qx }, { T("src_mobs"), snap.mx }, { T("src_other_xp"), snap.ox } }
-    for _, row in ipairs(rows) do
-        GameTooltip:AddDoubleLine("   " .. row[1], ns.FormatBig(row[2]) .. " · " .. Pct(row[2], total) .. "%",
-            0.8, 0.8, 0.8, 1, 1, 1)
+    for _, row in ipairs(rows) do -- só as origens que tiveram algo (nada de linhas zeradas)
+        if row[2] > 0 then
+            GameTooltip:AddDoubleLine("   " .. row[1], ns.FormatBig(row[2]) .. " · " .. Pct(row[2], total) .. "%",
+                0.8, 0.8, 0.8, 1, 1, 1)
+        end
     end
 end
 
@@ -269,7 +275,7 @@ function Sources.TipGold()
     local rows = { { "src_q_gold", snap.qg }, { "src_loot", snap.lg }, { "src_sell", snap.sg }, { "src_buy", -snap.bg },
                    { "src_other_gold", snap.og } }
     for _, row in ipairs(rows) do
-        GameTooltip:AddDoubleLine("   " .. T(row[1]), ns.FormatMoneyDelta(row[2]), 0.8, 0.8, 0.8, 1, 1, 1)
+        if row[2] ~= 0 then GameTooltip:AddDoubleLine("   " .. T(row[1]), ns.FormatMoneyDelta(row[2]), 0.8, 0.8, 0.8, 1, 1, 1) end
     end
 end
 
@@ -278,13 +284,20 @@ function Sources.SummaryLines(src)
     if not Sources.Enabled() or type(src) ~= "table" then return {} end
     local lines = {}
     local total = src.qx + src.mx + src.ox
+    -- Só as origens que tiveram algo: "XP por origem: monstros 85% · outros 15%".
     if total > 0 then
-        lines[#lines + 1] = string.format(T("src_sum_xp"), Pct(src.qx, total), Pct(src.mx, total), Pct(src.ox, total))
+        local parts = {}
+        for _, p in ipairs({ { "src_p_quests", src.qx }, { "src_p_mobs", src.mx }, { "src_p_other", src.ox } }) do
+            if p[2] > 0 then parts[#parts + 1] = T(p[1]) .. " " .. Pct(p[2], total) .. "%" end
+        end
+        lines[#lines + 1] = string.format(T("src_sum_xp"), table.concat(parts, " · "))
     end
-    if src.qg + src.lg + src.sg + src.bg ~= 0 or src.og ~= 0 then
-        local f = ns.FormatMoneyDelta
-        lines[#lines + 1] = string.format(T("src_sum_gold"), f(src.qg), f(src.lg), f(src.sg), f(-src.bg), f(src.og))
+    local parts, f = {}, ns.FormatMoneyDelta
+    for _, p in ipairs({ { "src_p_quests", src.qg }, { "src_p_loot", src.lg }, { "src_p_sales", src.sg }, { "src_p_buys", -src.bg },
+                         { "src_p_other", src.og } }) do
+        if p[2] ~= 0 then parts[#parts + 1] = T(p[1]) .. " " .. f(p[2]) end
     end
+    if #parts > 0 then lines[#lines + 1] = string.format(T("src_sum_gold"), table.concat(parts, " · ")) end
     return lines
 end
 

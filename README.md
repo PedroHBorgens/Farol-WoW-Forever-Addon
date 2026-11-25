@@ -4,7 +4,7 @@
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
 **FPS · latency · memory · coordinates · zone · speed · Hearthstone · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · gold/level goals · farm goals (items) · quest log · completed quests · clock · daily/weekly resets · tasks · session time · current dungeon run · friends · guild** — you pick what shows (29 items).
+reputation · professions · gold/level goals · farm goals (items) · quest log · completed quests · clock · daily/weekly resets · tasks · notes · session time · current dungeon run · friends · guild** — you pick what shows (30 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -15,7 +15,7 @@ add-on never turns anything on by itself (an automated test checks this).
 
 | On the first time | Everything else starts off |
 |---|---|
-| The bar with the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (7 of 29 items) | The other 22 bar items and bars 2 and 3 |
+| The bar with the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (7 of 30 items) | The other 23 bar items and bars 2 and 3 |
 | Warnings for durability, bags, unspent talents, lower-rank spells and professions (with sound) | Ammo, reagents, break, water, tasks, goals, quests, rested XP of your characters |
 | Session summary at login and when leaving a dungeon — only in **your** chat | Full tooltip, server time, gold of all characters, hide in combat |
 | Minimap button | Per-character profiles, alarms, tasks, goals |
@@ -68,6 +68,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol chat Name`  | Which chat window Farol writes to (e.g. a tab named "Farol"); `/farol chat main` goes back |
 | `/farol source on\|off` | Show where the session's XP and gold come from (quests, monsters, loot, merchant) |
 | `/farol diag`       | Shows in your own chat how the game answered (character, realm, gold, last logout, events); read-only |
+| `/farol notes`      | Account notepad: up to 10 notes with a done checkbox (`new Title`, `list`, `undo`) |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
 | `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
 | `/farol bar 2 show` | Turn on bar 2 (or 3) and pick it for the menu, Appearance and Order (`/farol bar` lists the bars) |
@@ -391,6 +392,20 @@ Farol does not check anything in the game — you tick the tasks yourself. Comma
 In the window, **Type: Daily / Weekly** picks the type of the new task; removed one by mistake (X)? A
 **Task removed: ... [Undo]** line appears and puts it back in the same place (this session only).
 
+## Notes (notepad)
+
+Since 3.22, Farol has a notepad for the **whole account** (the same notes on every character): up to **10 notes**,
+each with a short title (up to 40 letters) and a text of several lines (up to 500 letters), saved as you type. Open it
+with `/farol notes` or **Notes...** in Menu > Tools.
+
+- On the left, the list with a checkbox for each note: tick it when it is done. Done notes go below, in grey, and stay
+  until you delete them (nothing resets on its own).
+- On the right, the title and the text of the selected note; **✓ Done / Reopen** and **Delete**.
+- **Delete** and **Clear done** ask first (click again to confirm) and show an **Undo** line (this session only).
+- Optional bar item **Notes** (off by default): `Notes 2/5` = 2 pending of 5; hover it for the pending ones.
+- Commands: `/farol notes new Title`, `/farol notes list`, `/farol notes undo`.
+- The notes stay on your computer; nothing is sent. Saved text is checked on load (size limits, no chat codes).
+
 ## Session summary
 
 `/farol summary` shows, **only in your own chat**, what you did in this session:
@@ -485,6 +500,7 @@ in the menu, or `/farol session reset`, to restart them (e.g. when you move to a
 | Completed quests | How many quests this character has completed (each character's list in the window) | `completed` | off |
 | Clock           | Local time, or server time (menu option)               | `clock`      | off     |
 | Resets          | Time until the daily and weekly reset                  | `reset`      | off     |
+| Notes           | Pending notes of your notepad (`Notes 2/5`)            | `notes`      | off     |
 | Session time    | How long you've been playing since login / `/reload`   | `playtime`   | off     |
 | Friends online  | Count of online WoW + Battle.net friends               | `friends`    | off     |
 | Guild online    | Count of online guild members (hidden without a guild) | `guild`      | off     |
@@ -580,7 +596,7 @@ Information security is this project's first rule:
 - **No automation.** It only reads and displays information; it never plays for you (which would break server rules).
 - **Saved data is validated.** `FarolDB` only stores your settings: panel position and state, language, visible
   items and their order, appearance, alarms (time, clock type, on/off, a cleaned-up name and the snooze time),
-  loot window and warning settings (since 3.0 the bar settings are grouped in a profile), and the gold and level of **your own** characters per realm (for the account
+  loot window and warning settings (since 3.0 the bar settings are grouped in a profile), your notes (notepad, titles and texts checked on load), and the gold and level of **your own** characters per realm (for the account
   total). `FarolCharDB` (per character) stores only your loot history (validated item
   links), the last 10 warnings, the last session's summary (numbers only, including the XP/gold by source when that option is on) and whether the game reported 0 gold at the last logout (yes/no and when, for `/farol diag`). Everything is checked on load — a corrupted or tampered file falls back to defaults.
 - **Only download from the official sources** (this repository or the CurseForge page). Addons are plain Lua text:

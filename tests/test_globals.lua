@@ -11,7 +11,7 @@ local function allowed(name)
     return false
 end
 
-local FILES = { "Core", "Alarm", "Loot", "Warnings", "Appearance", "Order", "Tasks", "Goals", "Farm", "Quests", "Hearth", "Runs", "Completed", "Sources", "Diag", "MinimapButton" }
+local FILES = { "Core", "Alarm", "Loot", "Warnings", "Appearance", "Order", "Tasks", "Notes", "Goals", "Farm", "Quests", "Hearth", "Runs", "Completed", "Sources", "Diag", "MinimapButton" }
 
 return {
     { "using every feature creates no global outside the Farol names", function(T, Mock)

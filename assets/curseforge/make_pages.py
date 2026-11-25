@@ -86,7 +86,7 @@ gitems = [("🔭",'<span class="g">60</span> fps'),("⚡",'<span class="y">172</
           ("🪙",'Session <span class="g">+</span>5<span class="silver">s</span> 34<span class="copper">c</span>'),
           ("📈",'Gold/h <span class="g">+</span>1<span class="gold">g</span> 33<span class="silver">s</span>'),
           ("📖",'XP 46% <span class="blue">+0%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,PROF_ITEM,("⏰",'18:49'),
-          ("✅",'Completed 412'),RESET_ITEM,("⌛",'Played 1h 02m'),("👥",'Friends 4'),("🛡️",'Guild 12')]
+          ("✅",'Completed 412'),RESET_ITEM,("📒",'Notes <span class="y">2</span>/5'),("⌛",'Played 1h 02m'),("👥",'Friends 4'),("🛡️",'Guild 12')]
 grid = ('<div class="vbar" style="display:grid;grid-template-columns:repeat(3,auto);column-gap:14px;row-gap:6px;position:relative;padding-bottom:16px;font-size:12px;white-space:nowrap">'
         + "".join(item(e,h) for e,h in gitems)
         + '<span style="position:absolute;right:4px;bottom:0;color:#ccc;font-size:14px">◢</span></div>')
@@ -101,16 +101,16 @@ tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
 page("farol-02-bar-items-layout-tooltip", f"""
 <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
-     "29 items, each with its own short tooltip (Shift: all)", "29 informações, cada uma com o seu tooltip curto (Shift: tudo)")
+     "30 items, each with its own short tooltip (Shift: all)", "30 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Completed quests","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Session time","Dungeon / raid run","Friends online","Guild online"]
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Completed quests","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Notes (notepad)","Session time","Dungeon / raid run","Friends online","Guild online"]
 on = {0,1,3,4,6,7,8,9,10,11,13,15,16,17,18,19,20,23}
 half = 12
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
 GROUPS = [("Performance", [0, 1, 2]), ("Location", [3, 4, 5, 6]), ("Gear and bags", [7, 8, 9, 10]), ("Gold", [11, 12, 13]),
-          ("Progress", [14, 15, 16, 17, 18, 19, 20, 21]), ("Time and social", [22, 23, 24, 25, 26, 27, 28])]
-GEAR = {6, 10, 18, 19, 20, 21, 22, 24, 26}  # itens com ⚙ (configuração)
+          ("Progress", [14, 15, 16, 17, 18, 19, 20, 21]), ("Time and social", [22, 23, 24, 25, 26, 27, 28, 29])]
+GEAR = {6, 10, 18, 19, 20, 21, 22, 24, 25, 27}  # itens com ⚙ (configuração)
 grp = lambda title, idx: (f'<div class="grp"><div class="gh">{title}</div>'
                           + "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}{"<span class=gear>⚙</span>" if i in GEAR else ""}</div>' for i in idx) + '</div>')
 tabs = lambda active: '<div class="tabs">' + "".join(f'<span class="tab{" on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
@@ -435,4 +435,33 @@ cbs = (f'<div style="display:flex;flex-direction:column;gap:12px;align-items:fle
        f'<div class="dim">Colorblind-friendly (Menu &gt; General): blue · yellow · orange</div>{CB("#66b3ff","#ffff3a","#ff8a33")}</div>')
 page("farol-17-minimap-colorblind", f'<div style="display:flex;flex-direction:column;gap:14px;align-items:center">{mm}{mtip}</div>{cbs}',
      "Minimap button and colorblind-friendly colors", "Botão no minimapa e cores para daltonismo")
+
+# 18. Notepad (account-wide notes with a done checkbox)
+NCSS = """.ncols{display:grid;grid-template-columns:250px 1fr;gap:14px}
+.nlst{background:#0006;border:1px solid #6e5b2e66;border-radius:5px;padding:6px}
+.ni{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;font-size:14px}.ni.sel{background:#ffd10022;outline:1px solid #ffd10066}
+.ndone{color:#8c8c8c;text-decoration:line-through}
+.nsep{color:#9a9a9a;font-size:12px;margin:6px 6px 2px;border-top:1px solid #ffffff1a;padding-top:5px}
+.ned{background:#000;border:1px solid #777;border-radius:4px;padding:8px 10px;font-size:14px;line-height:1.5;min-height:190px}
+.nttl{background:#000;border:1px solid #c9a24a;border-radius:4px;padding:4px 10px;color:#ffd100;font-weight:bold;font-size:15px;margin-bottom:6px}"""
+def nrow(title, done=False, sel=False):
+    return (f'<div class="ni{" sel" if sel else ""}"><span class="box" style="width:16px;height:16px;font-size:12px">{"✓" if done else ""}</span>'
+            f'<span class="{"ndone" if done else ""}">{title}</span></div>')
+nwin = ('<div class="win" style="width:760px"><div class="x">×</div><div class="t">Notes (3/5 pending)</div><div class="ncols"><div class="nlst">'
+        + nrow("Leather farming route", sel=True) + nrow("Buy at the auction house") + nrow("Friday group at 21:00")
+        + '<div class="nsep">Done</div>' + nrow("Train Cooking", True) + nrow("Sell the cloth", True)
+        + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><span class="btn">+ New note</span><span class="btn">Clear done</span></div></div>'
+        + '<div><div class="nttl">Leather farming route</div><div class="ned">1. Start in the hills north of the camp<br>2. Follow the river to the old bridge<br>'
+          '3. Back by the road (passes the merchant)<br><br>Goal: 40 medium leather before the Friday group.</div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span class="dim" style="font-size:12px">164 / 500 · saved as you type</span>'
+          '<span><span class="btn">✓ Done</span> <span class="btn">Delete</span></span></div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12.5px"><span>Deleted: Old list</span><span class="btn" style="padding:2px 10px">Undo</span></div>'
+        + '</div></div></div>')
+NB = hbar([("📒",'Notes <span class="y">3</span>/5'),("⏰",'21:05')], "font-size:14px")
+ntip = ('<div class="tip" style="width:300px"><div style="color:#33ccff;font-weight:bold;margin-bottom:4px">Farol · Notes</div>'
+        '<div class="row"><span class="k">Notes</span><span>3 pending of 5</span></div>'
+        '<div>&nbsp;&nbsp; Leather farming route</div><div>&nbsp;&nbsp; Buy at the auction house</div><div>&nbsp;&nbsp; Friday group at 21:00</div>'
+        '<div class="dim" style="margin-top:4px">Open: /farol notes or Menu &gt; Tools</div></div>')
+page("farol-18-notepad", f'<div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">{NB}{ntip}</div>{nwin}',
+     "Notepad: 10 notes you can tick off", "Bloco de notas: 10 anotações da conta com caixinha de concluída", NCSS)
 print("pages ok")

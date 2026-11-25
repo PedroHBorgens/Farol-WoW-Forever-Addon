@@ -9,7 +9,7 @@ local ON_GENERAL = { shown = true, summary = true, runSummary = true, border = t
                      warnButton = true, lootButton = true }
 -- Padrões "ligado se não estiver salvo" (x ~= false) permitidos: arquivo → quantos.
 local DEFAULT_TRUE_PATTERNS = { ["Alarm.lua"] = 1, ["Loot.lua"] = 1, ["MinimapButton.lua"] = 1 }
-local FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua",
+local FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua",
                 "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "MinimapButton.lua" }
 
 local function read(path)
@@ -78,7 +78,7 @@ return {
         local hint = H:text(H.env.FarolOptions.controls.hint)
         T.has(hint, "tudo é opcional")
         -- Quem atualiza vê as novidades com "desligado" e onde ligar.
-        local saved = { newsSeen = #H.ns.NEWS - 12, items = { fps = true } }
+        local saved = { newsSeen = #H.ns.NEWS - 13, items = { fps = true } }
         H = Mock.new():login(saved)
         local text = H.strip(table.concat(H.msgs, "\n"))
         T.has(text, "metas de farm"); T.has(text, "desligado (ligue em Menu > Barra)")

@@ -586,8 +586,22 @@ local function CreateWindow()
             GameTooltip:Show()
         end)
         row.track:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        -- "Guardar" (3.26): guarda o item para depois (Keep.lua). Já guardado: ✓ (botão desativado).
+        row.keep = CreateFrame("Button", "FarolLootKeep" .. i, row, "UIPanelButtonTemplate")
+        row.keep:SetSize(64, 18)
+        row.keep:SetPoint("RIGHT", row.track, "LEFT", -4, 0)
+        row.keep:SetScript("OnClick", function()
+            if row.link and ns.Keep then ns.Keep.KeepLink(row.link) end
+            if RefreshWindow then RefreshWindow() end
+        end)
+        row.keep:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(T("loot_keep_tip"), 1, 1, 1)
+            GameTooltip:Show()
+        end)
+        row.keep:SetScript("OnLeave", function() GameTooltip:Hide() end)
         row.info = ns.Dim(row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
-        row.info:SetPoint("RIGHT", row.track, "LEFT", -6, 0)
+        row.info:SetPoint("RIGHT", row.keep, "LEFT", -6, 0)
         row.info:SetJustifyH("RIGHT")
         row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         row.text:SetPoint("LEFT", row.icon, "RIGHT", 6, 0)
@@ -696,6 +710,9 @@ RefreshWindow = function()
             if entry.count > 1 then info = "x" .. entry.count .. "   " .. info end
             row.info:SetText(info)
             row.track:SetText(T("loot_track"))
+            local kept = ns.Keep and ns.Farm and ns.Keep.Has((ns.Farm.ParseLink(entry.link)))
+            row.keep:SetText(kept and ns.Keep.CHECK or T("loot_keep"))
+            if kept then row.keep:Disable() else row.keep:Enable() end
             row:Show()
         else
             row.link = nil

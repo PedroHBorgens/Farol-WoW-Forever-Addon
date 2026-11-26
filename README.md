@@ -4,7 +4,7 @@
 
 **Farol** (Portuguese for *lighthouse*) is a **free and open-source**, unofficial addon for WoW Forever: a small, draggable on-screen panel showing
 **FPS · latency · memory · coordinates · zone · speed · Hearthstone · durability · bags · junk value · ammo & reagents · gold · session gold · gold/hour · XP · XP/hour ·
-reputation · professions · gold/level goals · farm goals (items) · quest log · completed quests · clock · daily/weekly resets · tasks · notes · session time · current dungeon run · friends · guild** — you pick what shows (30 items).
+reputation · professions · gold/level goals · farm goals (items) · quest log · completed quests · clock · daily/weekly resets · tasks · notes · kept items · session time · current dungeon run · friends · guild** — you pick what shows (31 items).
 Hover the panel for a detailed tooltip. It also has **clock alarms**, a **recent loot window** and **warnings**
 (durability, bags, unspent talents, lower-rank spells).
 
@@ -15,7 +15,7 @@ add-on never turns anything on by itself (an automated test checks this).
 
 | On the first time | Everything else starts off |
 |---|---|
-| The bar with the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (7 of 30 items) | The other 23 bar items and bars 2 and 3 |
+| The bar with the basics: FPS, latency, coordinates, zone, Hearthstone, durability and gold (7 of 31 items) | The other 24 bar items and bars 2 and 3 |
 | Warnings for durability, bags, unspent talents, lower-rank spells and professions (with sound) | Ammo, reagents, break, water, tasks, goals, quests, rested XP of your characters |
 | Session summary at login and when leaving a dungeon — only in **your** chat | Full tooltip, server time, gold of all characters, hide in combat |
 | Minimap button | Per-character profiles, alarms, tasks, goals |
@@ -68,6 +68,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol chat Name`  | Which chat window Farol writes to (e.g. a tab named "Farol"); `/farol chat main` goes back |
 | `/farol source on\|off` | Show where the session's XP and gold come from (quests, monsters, loot, merchant) |
 | `/farol diag`       | Shows in your own chat how the game answered (character, realm, gold, last logout, events); read-only |
+| `/farol keep`       | Items kept for later: reason, when they become useful, reminders (`[item]: reason`, `list`, `remove N`, `undo`) |
 | `/farol notes`      | Account notepad: up to 10 notes with a done checkbox (`new Title`, `list`, `undo`) |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
 | `/farol profile`    | Account profile or this character only; copy from another (`/farol profile copy Name`) |
@@ -419,6 +420,30 @@ with `/farol notes` or **Notes...** in Menu > Tools.
 - Commands: `/farol notes new Title`, `/farol notes list`, `/farol notes undo`, `/farol notes button on|off`.
 - The notes stay on your computer; nothing is sent. Saved text is checked on load (size limits, no chat codes).
 
+## Kept items (for later)
+
+Since 3.26, you can keep a list of items you want to hold on to — for example a material for a recipe you only learn
+at a higher level. Open it with `/farol keep` or **Kept items...** in Menu > Tools. The list is for the **whole
+account** (up to 50 items).
+
+- At the top: the item — **click the box to pick from a list of what you have** (bags, plus the bank as it was the
+  last time you opened it; typing filters, the mouse wheel scrolls, click or Enter picks), or use `/farol keep` and
+  Shift-click the item — an optional **reason** and
+  **when** it becomes useful: no deadline, a **character level** or a **profession level** (from your professions).
+  Click a row to load it back into the form and change it.
+- Each row shows how many you have (with how many are in the bank, when the game says), the reason and the state:
+  "level 35 — 7 to go", "ready", or "no deadline". **X** removes it, with **Undo** at the bottom.
+- Kept items are left out of **Junk in bags**. The **Loot** window has a **Keep** button on each item (a check when
+  it is already kept).
+- The game only shows the bank while it is open: when you open it, Farol notes which items are there (item number and
+  name, up to 1000, per character) just for this list. It never opens the bank or touches items.
+- Optional reminders (off by default, in the window or by command):
+  - **at a merchant** (`/farol keep merchant on`): which kept items are in your bags, with the reason;
+  - **when the time comes** (`/farol keep ready on`): once per character, when you reach the level or profession level;
+  - **in the item tooltip** (`/farol keep tooltip on`): a "Farol: kept — reason" line.
+- Optional bar item **Kept items** (off): `Kept 4 · 1` = 4 kept, 1 ready.
+- Farol never sells, moves or locks items: it only reminds you. Nothing is sent; the list is checked on load.
+
 ## Session summary
 
 `/farol summary` shows, **only in your own chat**, what you did in this session:
@@ -514,6 +539,7 @@ in the menu, or `/farol session reset`, to restart them (e.g. when you move to a
 | Clock           | Local time, or server time (menu option)               | `clock`      | off     |
 | Resets          | Time until the daily and weekly reset                  | `reset`      | off     |
 | Notes           | Pending notes of your notepad (`Notes 2/5`)            | `notes`      | off     |
+| Kept items      | Items kept for later and how many are ready (`Kept 4 · 1`) | `keep`   | off     |
 | Session time    | How long you've been playing since login / `/reload`   | `playtime`   | off     |
 | Friends online  | Count of online WoW + Battle.net friends               | `friends`    | off     |
 | Guild online    | Count of online guild members (hidden without a guild) | `guild`      | off     |

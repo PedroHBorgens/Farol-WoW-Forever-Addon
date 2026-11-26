@@ -198,6 +198,7 @@ Farm.ParseLink = ParseLink
 
 -- Procura um item pelo nome: informação do jogo, bolsas e histórico de saques. Só lê.
 local function FindByName(name)
+    if type(name) ~= "string" or #name > 400 then return nil end
     name = string.match(CleanName(name), "^%[?(.-)%]?$") or ""
     local wanted = string.lower(name)
     if wanted == "" then return nil end
@@ -244,6 +245,10 @@ local function FindByName(name)
     end
     return nil
 end
+
+---------------------------------------------------------------------------
+-- (Itens guardados usam a mesma busca.)
+Farm.FindByName = FindByName
 
 ---------------------------------------------------------------------------
 -- Progresso, sessão e estimativa

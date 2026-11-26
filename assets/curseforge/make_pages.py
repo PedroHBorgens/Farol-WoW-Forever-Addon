@@ -86,7 +86,7 @@ gitems = [("🔭",'<span class="g">60</span> fps'),("⚡",'<span class="y">172</
           ("🪙",'Session <span class="g">+</span>5<span class="silver">s</span> 34<span class="copper">c</span>'),
           ("📈",'Gold/h <span class="g">+</span>1<span class="gold">g</span> 33<span class="silver">s</span>'),
           ("📖",'XP 46% <span class="blue">+0%</span>'),("⏳",'XP/h 18.4k · 42m'),REP_ITEM,PROF_ITEM,("⏰",'18:49'),
-          ("✅",'Completed 412'),RESET_ITEM,("📒",'Notes <span class="y">2</span>/5'),("⌛",'Played 1h 02m'),("👥",'Friends 4'),("🛡️",'Guild 12')]
+          ("✅",'Completed 412'),RESET_ITEM,("📒",'Notes <span class="y">2</span>/5'),("📦",'Kept 4 · <span class="g">1</span>'),("⌛",'Played 1h 02m'),("👥",'Friends 4'),("🛡️",'Guild 12')]
 grid = ('<div class="vbar" style="display:grid;grid-template-columns:repeat(3,auto);column-gap:14px;row-gap:6px;position:relative;padding-bottom:16px;font-size:12px;white-space:nowrap">'
         + "".join(item(e,h) for e,h in gitems)
         + '<span style="position:absolute;right:4px;bottom:0;color:#ccc;font-size:14px">◢</span></div>')
@@ -101,16 +101,16 @@ tip = """<div class="tip" style="width:330px"><div style="color:#33ccff;font-wei
 page("farol-02-bar-items-layout-tooltip", f"""
 <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">{hbar(BAR_ITEMS[:4])}{tip}</div>
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="dim">Drag the corner ◢ — one line, one column or columns</div>{grid}</div>""",
-     "30 items, each with its own short tooltip (Shift: all)", "30 informações, cada uma com o seu tooltip curto (Shift: tudo)")
+     "31 items, each with its own short tooltip (Shift: all)", "31 informações, cada uma com o seu tooltip curto (Shift: tudo)")
 
 # 3. Options menu + order
-names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Completed quests","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Notes (notepad)","Session time","Dungeon / raid run","Friends online","Guild online"]
-on = {0,1,3,4,6,7,8,9,10,11,13,15,16,17,18,19,20,23}
+names = ["FPS","Latency","Memory","Coordinates","Zone","Speed","Hearthstone","Durability","Bags","Junk in bags","Ammo & reagents","Kept items","Gold","Session gold","Gold per hour","Experience (XP)","XP per hour","Reputation","Professions","Goals (gold/level)","Farm (item goals)","Quests (quest log)","Completed quests","Clock","Resets (daily/weekly)","Tasks (daily/weekly)","Notes (notepad)","Session time","Dungeon / raid run","Friends online","Guild online"]
+on = {0,1,3,4,6,7,8,9,10,12,14,16,17,18,19,20,21,24}
 half = 12
 col = lambda rng: "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}</div>' for i in rng)
-GROUPS = [("Performance", [0, 1, 2]), ("Location", [3, 4, 5, 6]), ("Gear and bags", [7, 8, 9, 10]), ("Gold", [11, 12, 13]),
-          ("Progress", [14, 15, 16, 17, 18, 19, 20, 21]), ("Time and social", [22, 23, 24, 25, 26, 27, 28, 29])]
-GEAR = {6, 10, 18, 19, 20, 21, 22, 24, 25, 27}  # itens com ⚙ (configuração)
+GROUPS = [("Performance", [0, 1, 2]), ("Location", [3, 4, 5, 6]), ("Gear and bags", [7, 8, 9, 10, 11]), ("Gold", [12, 13, 14]),
+          ("Progress", [15, 16, 17, 18, 19, 20, 21, 22]), ("Time and social", [23, 24, 25, 26, 27, 28, 29, 30])]
+GEAR = {6, 10, 19, 20, 21, 22, 23, 25, 26, 28, 11}  # itens com ⚙ (configuração)
 grp = lambda title, idx: (f'<div class="grp"><div class="gh">{title}</div>'
                           + "".join(f'<div class="ck"><span class="box">{"✓" if i in on else ""}</span>{names[i]}{"<span class=gear>⚙</span>" if i in GEAR else ""}</div>' for i in idx) + '</div>')
 tabs = lambda active: '<div class="tabs">' + "".join(f'<span class="tab{" on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
@@ -159,16 +159,16 @@ page("farol-04-clock-alarms-snooze", alarms + popup, "Clock alarms with snooze �
 # 5. Loot
 loot_items = [("q5","⚔️","[Stormcaller, Blade of the Tides]","","Today","21:42"),("q4","🛡️","[Helm of the Lighthouse]","","Today","21:38"),("q3","💍","[Band of the Tides]","","Today","09:30"),
               ("q2","🌿","[Meadow Bloom]","x6","Yesterday","22:27"),("q1","🧵","[Linen Cloth]","x12","Yesterday","21:20"),("q2","🗡️","[Harbor Cutlass]","","Nov 7","21:12")]
-rows = "".join(f'<div class="row" style="padding:3px 0;font-size:15px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{ic(e)} <span class="{q}">{n}</span></span><span style="white-space:nowrap"><span class="dim">{c}</span>&nbsp;&nbsp;<span style="color:#8c8c8c">{d}</span> <span style="color:#c8c8c8">{t}</span>&nbsp;&nbsp;<span class="btn" style="padding:0 7px;font-size:11px">+ Goal</span></span></div>' for q,e,n,c,d,t in loot_items)
+rows = "".join(f'<div class="row" style="padding:3px 0;font-size:15px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{ic(e)} <span class="{q}">{n}</span></span><span style="white-space:nowrap"><span class="dim">{c}</span>&nbsp;&nbsp;<span style="color:#8c8c8c">{d}</span> <span style="color:#c8c8c8">{t}</span>&nbsp;&nbsp;<span class="btn" style="padding:0 7px;font-size:11px;{'opacity:.6' if n == '[Meadow Bloom]' else ''}">{'✓' if n == '[Meadow Bloom]' else 'Keep'}</span> <span class="btn" style="padding:0 7px;font-size:11px">+ Goal</span></span></div>' for q,e,n,c,d,t in loot_items)
 dd = """<div class="tip" style="position:absolute;left:236px;top:92px;width:200px;font-size:14px;line-height:1.7;z-index:2;background:#0a0d1a">
 <div><span class="k">✓</span> <span class="q0">Poor</span></div><div>&nbsp;&nbsp;&nbsp;<span class="q1">Common</span></div><div><span class="k">✓</span> <span class="q2">Uncommon</span></div>
 <div><span class="k">✓</span> <span class="q3">Rare</span></div><div><span class="k">✓</span> <span class="q4">Epic</span></div><div><span class="k">✓</span> <span class="q5">Legendary+</span></div>
 <div class="dim">Check all</div><div class="dim">Uncheck all</div></div>"""
 loot = f"""<div class="win" style="width:720px;padding-bottom:26px"><div class="x">×</div><div class="t">Recent loot</div>
 <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px"><span class="k">Show:</span><span class="btn">10 ▾</span><span class="k" style="margin-left:14px">Quality:</span><span class="btn">5 selected ▾</span></div>
-{dd}{rows}<div class="dim" style="font-size:12px;margin-top:10px">Hover: details · Shift-click: link · Wheel: scroll · + Goal: track the item (farm goal)</div>
+{dd}{rows}<div class="dim" style="font-size:12px;margin-top:10px">Hover: details · Shift-click: link · Wheel: scroll · Keep: save it for later · + Goal: track the item (farm goal)</div>
 <div style="position:absolute;right:8px;bottom:6px;color:#aaa">◢</div></div>"""
-page("farol-05-recent-loot-window", loot, "Recent loot: when you got it, quality filter, + Goal to track", "Últimos saques: quando você pegou, filtro de qualidade e + Meta para acompanhar")
+page("farol-05-recent-loot-window", loot, "Recent loot: quality filter, Keep and + Goal", "Últimos saques: quando você pegou, filtro de qualidade, Guardar e + Meta")
 
 # 6. Warnings: grouped window with remind-time dropdowns + history
 def wrow(text):
@@ -470,4 +470,39 @@ ntip = ('<div class="tip" style="width:300px"><div style="color:#33ccff;font-wei
         '<div class="tip" style="width:300px;font-size:13px;background:#0b1424e8;border-color:#c9a24a88">Key binding of your choice: Esc &gt; Options &gt; Keybindings &gt; AddOns &gt; Farol &gt; <b>Notes</b></div>')
 page("farol-18-notepad", f'<div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">{NB}{ntip}</div>{nwin}',
      "Notepad: 10 notes, one click away", "Bloco de notas: 10 anotações da conta, a um clique (botão 📓 e tecla de atalho)", NCSS)
+
+# 19. Kept items (for later recipes)
+KCSS = """.kr{display:grid;grid-template-columns:26px 190px 110px 1fr 24px;gap:8px;align-items:center;padding:5px 2px;border-bottom:1px solid #ffffff10;font-size:14px}
+.khd{display:grid;grid-template-columns:26px 190px 110px 1fr 24px;gap:8px;color:#ffd100;font-size:12px;font-weight:bold;padding-bottom:3px;border-bottom:1px solid #6e5b2e;margin-top:8px}
+.kic{width:22px;height:22px;border:1px solid #b7a26b;border-radius:3px;background:#2a2418;display:flex;align-items:center;justify-content:center;font-family:'Noto Color Emoji';font-size:13px}
+.kin{background:#000;border:1px solid #777;border-radius:3px;padding:3px 8px;color:#888;font-style:italic;font-size:13px}"""
+def krow(icon, name, cls, have, why):
+    return (f'<div class="kr"><span class="kic">{icon}</span><span class="{cls}">{name}</span><span>{have}</span><span>{why}</span>'
+            '<span class="btn" style="padding:1px 6px">X</span></div>')
+kwin = ('<div class="win" style="width:680px"><div class="x">×</div><div class="t">Kept items (4)</div>'
+        '<div class="kin" style="margin-bottom:6px">Item name (or /farol keep + Shift-click the item)</div>'
+        '<div style="display:flex;gap:8px;align-items:center"><span class="kin" style="flex:1">Reason (optional): Alchemy recipe...</span>'
+        '<span class="btn">When: level ▾</span><span class="kin" style="width:34px;font-style:normal;color:#fff;text-align:center">35</span><span class="btn">+ Keep</span></div>'
+        '<div class="khd"><span></span><span>Item</span><span>Have</span><span>What for / when</span><span></span></div>'
+        + krow("🌿", "Moonleaf herb", "q2", '12 <span class="dim">(8 bank)</span>', 'Alchemy recipe · <span class="y">level 35 — 7 to go</span>')
+        + krow("✨", "Glimmer dust", "", '5', 'Enchanting · <span class="g">Enchanting 150 — ready</span>')
+        + krow("🦎", "Marsh leather", "", '20 <span class="dim">(20 bank)</span>', 'bag for my alt · <span class="dim">no deadline</span>')
+        + krow("🍖", "Old boar meat", "q0", '3', 'village quest · <span class="dim">no deadline</span>')
+        + '<div class="ck" style="margin-top:8px"><span class="box">✓</span>Remind me when I open a merchant (kept items in my bags)</div>'
+        + '<div class="ck"><span class="box">✓</span>Tell me when the time comes (once per character)</div>'
+        + '<div class="ck"><span class="box"></span>Show "kept" in the item tooltip</div>'
+        + '<div class="dim" style="font-size:12px;margin-top:4px">Kept items are left out of "Junk in bags". Farol never sells, moves or locks items.</div></div>')
+kchat = ('<div class="cwin" style="width:520px;font-size:13.5px;line-height:1.6">'
+         '<div><span style="color:#33ccff">Farol:</span> <span class="y">kept items in your bags: Moonleaf herb ×4 (Alchemy recipe), Old boar meat ×3 (village quest)</span></div>'
+         '<div><span style="color:#33ccff">Farol:</span> <span class="g">you reached level 35: you can now use Moonleaf herb ×12 (Alchemy recipe). 8 are in the bank.</span></div></div>')
+ktip = ('<div class="tip" style="width:300px"><div class="q2" style="font-weight:bold">Moonleaf herb</div><div>Trade goods</div>'
+        '<div style="color:#ffd75a;margin-top:4px">Farol: kept — Alchemy recipe (level 35)</div></div>')
+kpick = ('<div class="tip" style="width:420px;font-size:13.5px;line-height:1.5"><div class="dim" style="font-size:12px">Click the item box: 3 items with "moon" · wheel to scroll</div>'
+         '<div class="row"><span>🌿 <span class="q2">Moonleaf herb</span></span><span>×12 <span class="dim">bags + bank</span></span></div>'
+         '<div class="row"><span>🌙 Moonstone shard</span><span>×2 <span class="dim">bank</span></span></div>'
+         '<div class="row"><span>🐟 <span class="q1">Moon perch</span></span><span>×5 <span class="dim">bags</span></span></div>'
+         '<div class="dim" style="font-size:12px">bank noted: Today 07:40</div></div>')
+page("farol-19-kept-items", f'{kwin}<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{kpick}{kchat}{ktip}</div>',
+     "Kept items: save materials for later, get reminded", "Itens guardados: materiais para depois, com lembrete no comerciante e na hora certa",
+     KCSS + CHAT_CSS)
 print("pages ok")

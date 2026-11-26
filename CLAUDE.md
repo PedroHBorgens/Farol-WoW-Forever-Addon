@@ -156,6 +156,19 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   escolhe os mais recentes pelos números antes de limpar o texto) aprendido de `QUEST_DETAIL`, `QUEST_ACCEPTED`,
   `QUEST_LOG_UPDATE` (no máx. a cada 5 s), `QUEST_COMPLETE` e entregas; só com `questRecord` ligado. Nunca buscar nomes
   no Wowhead (termos de uso proíbem coleta) nem com pedido ao servidor sem autorização do dono.
+- **Itens guardados (3.26, Keep.lua):** `FarolDB.keep = { {id, n ≤ 40, r? ≤ 40, k = "l"|"p"|nil, v, p?} }` (máx. 50,
+  sem id repetido) + `FarolCharDB.keepSeen[id] = true` (aviso "já pode" dado uma vez por personagem). Contagem:
+  `GetItemCount(id, true)` (total) e `GetItemCount(id)` (bolsas); banco = diferença. Nível do evento
+  `PLAYER_LEVEL_UP(level)` vale mais que `UnitLevel` (que ainda pode estar no antigo). Profissão pelo nome em
+  `ns.ReadProfessions`. Junk (`GetJunk`) pula ids guardados. Linha no tooltip do item: `TooltipDataProcessor.
+  AddTooltipPostCall(Enum.TooltipDataType.Item, …)` (modernos) ou `GameTooltip:HookScript("OnTooltipSetItem")`
+  (antigos), registrada **só** quando o jogador liga `keepTooltip`, uma única vez, cada chamada em `pcall`, só
+  acrescenta uma linha no `GameTooltip`. Shift + clique de item só chega na caixa do chat: o fluxo é
+  `/farol guardar [link]: motivo` (a caixa da janela aceita o nome). Lista de escolha (`FarolKeepPick`): bolsas
+  (`ns.ReadBagSlot`) + `FarolCharDB.keepBank = { t, l = { {id, n, c, q} } }` (máx. 1000), anotado só com o banco
+  aberto (`BANKFRAME_OPENED`/`PLAYERBANKSLOTS_CHANGED`/`BAG_UPDATE` enquanto aberto; bolsas -1, `LastBag()+1..+NUM_BANKBAGSLOTS`
+  e `Enum.BagIndex.CharacterBankTab_N`); leitura sem espaços não apaga o anotado. "✓" não existe na fonte do jogo:
+  `Keep.CHECK` usa a textura `ReadyCheck-Ready`. Janela de saques: botão "Guardar" (`Keep.KeepLink`).
 - **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
   lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 
@@ -164,8 +177,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Notes, Goals, Farm, Quests, Hearth, Runs, Completed, Sources, Diag, MinimapButton
-  Core.lua          barras (até 3, grade de células), 30 itens, tooltip, menu de opções, comandos /farol, dados salvos
+                    Appearance, Order, Tasks, Notes, Goals, Farm, Keep, Quests, Hearth, Runs, Completed, Sources, Diag, MinimapButton
+  Core.lua          barras (até 3, grade de células), 31 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
   Warnings.lua      avisos (durabilidade, bolsas, talentos, graus, profissões, munição, reagentes, pausa, água, tarefas),
@@ -180,6 +193,8 @@ Farol/
   Goals.lua         metas de ouro e de nível (janela, item "goals" da barra, tooltip, estimativa pelo ritmo, /farol meta)
   Farm.lua          metas de farm/itens (item "farm", tooltip com ritmo, linhas na janela de Metas, "+ Meta" nos saques,
                     /farol meta item, /farol farm)
+  Keep.lua          itens guardados para depois (3.26: lista da conta com motivo e "quando", lembretes no comerciante
+                    e na hora certa, linha opcional no tooltip do item, fora do lixo; item "keep"; /farol guardar)
   Quests.lua        diário de missões (item "quests", tooltip; avisos questFull/questReady ficam em Warnings.lua)
   Hearth.lua        Pedra de Regresso (item "hearth": lugar + recarga; aviso hearthReady em Warnings.lua; lugar dos
                     personagens em chars[...].bind, gravado pelo Core)
@@ -284,7 +299,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   Janelas: criar no topo, lista no meio, Desfazer no rodapé (`ns.UndoBar(frame)` + `ns.ShowUndo(frame, texto, botão)`,
   com `frame.undoText`/`frame.undo`); caixas vazias com texto-guia `ns.Placeholder(caixa, chave)` (usa `HookScript`,
   mantém os scripts da caixa; `ns.UpdatePlaceholder` ao trocar o idioma); janela vazia com a ação (Missões concluídas:
-  "Ligar registro"). Rótulos de opções na fonte normal; a pequena é para dicas (exceção: a grade dos 30 itens).
+  "Ligar registro"). Rótulos de opções na fonte normal; a pequena é para dicas (exceção: a grade dos 31 itens).
 - **Caixa de várias linhas (3.24.1):** um `EditBox` com `SetMultiLine(true)` fora de um ScrollFrame só aceita clique
   na altura do texto (vazio = uma linha fina) e pode ficar por baixo de um fundo com backdrop. Faça a caixa **filha**
   do fundo (fica por cima) e deixe o fundo com `EnableMouse(true)` + `OnMouseDown` → `caixa:SetFocus()` (Notes.lua).
@@ -368,6 +383,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Janela de chat do Farol e `/farol diagnostico` | 16 |
 | Botão do minimapa e cores para daltonismo | 17 |
 | Bloco de notas (janela, item, tooltip) | 18 (e 02/03 pela contagem de itens) |
+| Itens guardados (janela, lembretes, tooltip do item) | 19 (e 02/03 pela contagem de itens) |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

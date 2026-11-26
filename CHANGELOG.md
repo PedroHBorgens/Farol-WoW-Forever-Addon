@@ -2,6 +2,23 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.26.0 — Kept items
+- New **Kept items** window (`/farol keep`, Menu > Tools > Kept items...): an account list (up to 50) of items you want
+  to hold on to, with an optional reason and **when** they become useful (no deadline, a character level or a
+  profession level). Rows show how many you have (and how many are in the bank), the reason and the state ("level 35 —
+  7 to go" / "ready"); click a row to edit it; X removes it, with Undo.
+- Optional reminders, all off by default: at a merchant (kept items in your bags), when the time comes (once per
+  character, on level up or profession skill up) and a "Farol: kept" line in the item tooltip (registered only when
+  turned on, each call protected).
+- **Pick from a list:** clicking the item box opens a list of what you have — bags, plus the bank as it was the last
+  time you opened it (the game only shows the bank while it is open; Farol notes item number and name, up to 1000 per
+  character, only for this list) — in alphabetical order with icon, count and where; typing filters, the wheel
+  scrolls, click or Enter picks. The **Loot** window gets a **Keep** button on each item.
+- Kept items are left out of **Junk in bags**. New bar item **Kept items** (off; 31 items; Gear and bags group).
+- Saved: `FarolDB.keep` (id, name, reason ≤ 40 letters, when), `keepMerchant`/`keepReady`/`keepTooltip` and
+  `FarolCharDB.keepSeen` and `FarolCharDB.keepBank`, all checked on load. Farol never sells, moves or locks items; nothing is sent.
+- Images 02, 03 (31 items) and 05 (Keep button) updated and new image 19 (kept items). 772 tests (2 passes).
+
 ## 3.25.0 — Notes button and key binding
 - New **notes button** next to bar 1, after the warning history and loot buttons (off by default; Menu > General >
   Appearance... > "Show the notes button", `/farol notes button on|off` or `/farol appearance notesbutton`). Its number

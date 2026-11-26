@@ -10,10 +10,10 @@ fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o sel
 | File | Caption (EN) | Legenda (PT) |
 |---|---|---|
 | `farol-01-overview-info-bar.png` | Your info bar for WoW Forever | Sua barra de informações para o WoW Forever |
-| `farol-02-bar-items-layout-tooltip.png` | 30 items, each with its own short tooltip (Shift: all) | 30 informações, cada uma com o seu tooltip curto (Shift: tudo) |
+| `farol-02-bar-items-layout-tooltip.png` | 31 items, each with its own short tooltip (Shift: all) | 31 informações, cada uma com o seu tooltip curto (Shift: tudo) |
 | `farol-03-options-menu-bar-order.png` | Menu: presets with Undo, items in groups, a gear each | Menu: pacotes prontos com Desfazer, itens em grupos e engrenagem |
 | `farol-04-clock-alarms-snooze.png` | Clock alarms with snooze — local or server time | Alarmes do relógio com soneca — hora local ou do servidor |
-| `farol-05-recent-loot-window.png` | Recent loot: when you got it, quality filter, + Goal to track | Últimos saques: quando você pegou, filtro de qualidade e + Meta |
+| `farol-05-recent-loot-window.png` | Recent loot: quality filter, Keep and + Goal | Últimos saques: quando você pegou, filtro de qualidade, Guardar e + Meta |
 | `farol-06-warnings-break-water-reminders.png` | Warnings: nothing cut, remind in 2–30 min | Avisos inteiros (quebra de linha e tooltip), lembretes de pausa e água, lembrar em 2 a 30 min |
 | `farol-07-appearance-settings.png` | Make it yours: shape, size, background, hide in combat | Do seu jeito: formato, tamanho, fundo, esconder em combate |
 | `farol-08-progress-xp-reputation-professions.png` | Progress: XP, reputation, professions, goals, farm, quests | Seu progresso: XP, reputação, profissões, metas, farm e missões |
@@ -26,7 +26,8 @@ fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o sel
 | `farol-15-xp-gold-by-source.png` | Where your XP and gold come from (optional) | De onde vem o seu XP e o seu ouro (opcional) |
 | `farol-16-chat-tab-diagnostics.png` | A chat tab of its own + /farol diag | Mensagens numa aba de chat própria e /farol diagnostico |
 | `farol-17-minimap-colorblind.png` | Minimap button and colorblind-friendly colors | Botão no minimapa e cores para daltonismo |
-| `farol-18-notepad.png` | Notepad: 10 notes you can tick off | Bloco de notas: 10 anotações da conta com caixinha de concluída |
+| `farol-18-notepad.png` | Notepad: 10 notes, one click away | Bloco de notas: 10 anotações da conta, a um clique (botão 📓 e tecla de atalho) |
+| `farol-19-kept-items.png` | Kept items: save materials for later, get reminded | Itens guardados: materiais para depois, com lembrete no comerciante e na hora certa |
 
 ## Regenerate / Gerar de novo
 

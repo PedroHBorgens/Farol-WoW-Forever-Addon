@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua", "Farm.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "MinimapButton.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "MinimapButton.lua" }
 
 local function noop() end
 
@@ -283,7 +283,7 @@ function Mock.new(opts)
     -- Classe e contagens: H.class ("WARRIOR" não usa reagentes), H.itemCounts[id], H.ammo (espaço da munição).
     H.class, H.itemCounts, H.ammo = "WARRIOR", {}, 0
     env.UnitClass = function() return "Classe", H.class, 1 end
-    env.GetItemCount = function(id) return H.itemCounts[id] or 0 end
+    env.GetItemCount = function(id, bank) return (H.itemCounts[id] or 0) + (bank and H.bankCounts and H.bankCounts[id] or 0) end
     env.GetInventoryItemCount = function(_, slot) if slot == 0 then return H.ammo end return 0 end
     -- Instâncias salvas: { nome, chefes mortos, total, segundos até o reset }. Só aparecem depois do RequestRaidInfo.
     H.lockouts = { { "Núcleo Derretido", 7, 10, 2 * 86400 + 4 * 3600 }, { "Covil de Onyxia", 1, 1, 2 * 86400 + 4 * 3600 } }
@@ -399,7 +399,7 @@ function Mock.new(opts)
         env.GetNetStats = function() return 1, 2, 87 end
         env.GetPlayerMapPosition = function() return 0.453, 0.611 end
         env.SetMapToCurrentZone = noop
-        env.GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end
+        env.GetContainerNumSlots = function(bag) return (bag >= 0 and bag <= 4) and 16 or (H.bankSlots and H.bankSlots[bag]) or 0 end
         env.GetContainerNumFreeSlots = function(bag) return H.bagFree[bag] or 0, 0 end
         env.GetItemInfo = itemInfo
         env.GetContainerItemInfo = function(bag, slot) -- 3.3.5a
@@ -466,7 +466,7 @@ function Mock.new(opts)
         }
         env.C_Container = {
             GetItemCooldown = function(id) return H.containerCooldown(id) end,
-            GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end,
+            GetContainerNumSlots = function(bag) return (bag >= 0 and bag <= 4) and 16 or (H.bankSlots and H.bankSlots[bag]) or 0 end,
             GetContainerNumFreeSlots = function(bag) return H.bagFree[bag] or 0, 0 end,
             GetContainerItemInfo = function(bag, slot) -- cliente moderno: tabela
                 local entry, item, link = bagItem(bag, slot)
@@ -477,7 +477,7 @@ function Mock.new(opts)
         }
         env.C_Item = {
             GetItemInfo = itemInfo,
-            GetItemCount = function(id) return H.itemCounts[id] or 0 end,
+            GetItemCount = function(id, bank) return (H.itemCounts[id] or 0) + (bank and H.bankCounts and H.bankCounts[id] or 0) end,
             GetItemQualityByID = function(link)
                 return H.itemQuality[tonumber(string.match(link, "Hitem:(%d+)"))]
             end,

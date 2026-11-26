@@ -19,7 +19,7 @@ local UPDATE_INTERVAL = 0.5 -- segundos entre atualizações do painel
 
 -- Itens da barra, na ordem em que aparecem.
 local ITEM_ORDER = {
-    "fps", "ms", "mem", "coords", "zone", "speed", "hearth", "durab", "bags", "junk", "ammo",
+    "fps", "ms", "mem", "coords", "zone", "speed", "hearth", "durab", "bags", "junk", "ammo", "keep",
     "gold", "session", "goldh", "xp", "xph", "rep", "prof", "goals", "farm", "quests", "qdone", "clock", "reset", "tasks", "notes", "playtime", "run", "friends", "guild",
 }
 
@@ -28,7 +28,7 @@ local ITEM_DEFAULTS = {
     fps = true, ms = true, coords = true, zone = true, durab = true, gold = true,
     hearth = true, -- aprovado pelo dono (3.10): só em instalação nova; quem já usa recebe desligado
     mem = false, speed = false, bags = false, session = false, xp = false,
-    goldh = false, xph = false, rep = false, prof = false, goals = false, farm = false, quests = false, qdone = false, junk = false, ammo = false,
+    goldh = false, xph = false, rep = false, prof = false, goals = false, farm = false, quests = false, qdone = false, junk = false, ammo = false, keep = false,
     clock = false, reset = false, tasks = false, notes = false, playtime = false, run = false, friends = false, guild = false,
 }
 
@@ -56,6 +56,7 @@ local ITEM_ALIASES = {
     reset = "reset", resets = "reset", reinicio = "reset",
     tarefas = "tasks", tarefa = "tasks", tasks = "tasks", task = "tasks", todo = "tasks",
     notas = "notes", nota = "notes", notes = "notes", note = "notes", anotacoes = "notes", bloco = "notes",
+    guardados = "keep", guardado = "keep", keep = "keep", kept = "keep",
     metas = "goals", meta = "goals", goals = "goals", goal = "goals", objetivo = "goals",
     farm = "farm", farmar = "farm", coleta = "farm",
     missoes = "quests", missao = "quests", quests = "quests", quest = "quests", diario = "quests",
@@ -97,6 +98,9 @@ local DEFAULTS = {
     warnButton = true,      -- botão do histórico de avisos ao lado da barra
     lootButton = true,      -- botão da janela de saques ao lado da barra
     notesButton = false,    -- botão das anotações ao lado da barra (3.25, desligado: regra 8)
+    keepMerchant = false,   -- itens guardados: lembrar ao abrir um comerciante (3.26, desligado)
+    keepReady = false,      -- itens guardados: avisar quando ficarem prontos (3.26, desligado)
+    keepTooltip = false,    -- itens guardados: linha "guardado" no tooltip do item (3.26, desligado)
     fontSize = 11,          -- tamanho do texto da barra (8 a 24)
     iconSize = 14,          -- tamanho dos ícones da barra e dos botões ao lado (10 a 32)
 }
@@ -2106,6 +2110,9 @@ local function GetJunk()
         count = (okSlots and ValidNumber(count, 200)) and count or 0
         for slot = 1, count do
             local item, stack, quality, noValue, from = ReadSlot(bag, slot)
+            -- Itens guardados (3.26) ficam fora da conta do lixo: o jogador quer guardar.
+            local itemID = type(item) == "number" and item or (type(item) == "string" and tonumber(string.match(item, "|Hitem:(%d+)")))
+            if itemID and ns.Keep and ns.Keep.Has(itemID) then item = nil end
             if item ~= nil then
                 source = source or from
                 local name, infoQuality, price = ItemPrice(item)
@@ -2578,7 +2585,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes", "news_questvalue", "news_notesbutton" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes", "news_questvalue", "news_notesbutton", "news_keep" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2593,7 +2600,7 @@ end
 -- novo vem desligado; o jogador decide).
 Profiles.NEWS_ITEM = { news_rep = "rep", news_reset = "reset", news_prof = "prof", news_junk = "junk", news_supply = "ammo",
                        news_tasks = "tasks", news_notes = "notes", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests",
-                       news_hearth = "hearth" }
+                       news_hearth = "hearth", news_keep = "keep" }
 Profiles.NEWS_WARN = { news_breaks = "pause", news_questvalue = "questValue" }
 Profiles.NEWS_OPTION = { news_colors = "colorblind", news_sources = "sources" }
 
@@ -2892,6 +2899,10 @@ local ITEM_TEXT = {
         if not ns.Notes then return nil end
         return ns.Notes.BarText()
     end,
+    keep = function() -- itens guardados (Keep.lua)
+        if not ns.Keep then return nil end
+        return ns.Keep.BarText()
+    end,
     playtime = function()
         local seconds = GetSessionSeconds()
         if not seconds then return nil end
@@ -3075,7 +3086,7 @@ local ITEM_ICONS = {
     gold = "INV_Misc_Coin_01",          session = "INV_Misc_Coin_02",
     goldh = "INV_Misc_Coin_04",         xp = "INV_Misc_Book_09",
     xph = "Spell_Holy_BorrowedTime",    clock = "INV_Misc_PocketWatch_01",
-    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  notes = "INV_Misc_Note_02",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  quests = "INV_Misc_Book_09",  qdone = "INV_Misc_Book_08",  hearth = "INV_Misc_Rune_01",  run = "INV_Misc_Key_03",
+    rep = "Achievement_Reputation_01",  reset = "INV_Misc_Note_06",  tasks = "INV_Scroll_03",  notes = "INV_Misc_Note_02",  keep = "INV_Box_01",  goals = "Ability_Hunter_SniperShot",  farm = "INV_Misc_Bag_09",  quests = "INV_Misc_Book_09",  qdone = "INV_Misc_Book_08",  hearth = "INV_Misc_Rune_01",  run = "INV_Misc_Key_03",
     prof = "Trade_Mining",              junk = "INV_Misc_Bone_HumanSkull_01",
     ammo = "INV_Ammo_Arrow_02",
     playtime = "INV_Misc_PocketWatch_02", friends = "Spell_Holy_PrayerOfFortitude",
@@ -3423,6 +3434,7 @@ TIP.notes = function() if ns.Notes then ns.Notes.Tooltip() end end
 TIP.goals = function() if ns.Goals then ns.Goals.Tooltip() end end
 TIP.run = function() if ns.Runs then ns.Runs.Tooltip() end end
 TIP.farm = function() if ns.Farm then ns.Farm.Tooltip() end end
+TIP.keep = function() if ns.Keep then ns.Keep.Tooltip() end end
 TIP.quests = function() if ns.Quests then ns.Quests.Tooltip() end end
 TIP.hearth = function() if ns.Hearth then ns.Hearth.Tooltip() end end
 TIP.qdone = function() if ns.Completed then ns.Completed.Tooltip() end end
@@ -3446,15 +3458,15 @@ local TIP_SECTIONS = {
     durab = { "durab" }, bags = { "bags", "junk" }, junk = { "junk", "bags" }, ammo = { "supply" },
     gold = { "gold", "alts" }, session = { "gold" }, goldh = { "gold" },
     xp = { "xp" }, xph = { "xp" }, rep = { "rep" }, prof = { "prof" }, goals = { "goals" }, farm = { "farm" }, quests = { "quests" }, qdone = { "qdone" },
-    clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, notes = { "notes" }, playtime = { "playtime" }, run = { "run" },
+    clock = { "clock" }, reset = { "reset" }, tasks = { "tasks" }, notes = { "notes" }, keep = { "keep" }, playtime = { "playtime" }, run = { "run" },
     friends = { "social" }, guild = { "social" },
 }
 ns.TIP_SECTIONS = TIP_SECTIONS
 
 -- Tooltip completo: tudo, na ordem de sempre (rep, lixo, profissões e resets só se estiverem ligados na barra).
 local TIP_ORDER = { "perf", "place", "hearth", " ", "durab", " ", "gold", "alts", "bags", "xp", " ", "clock",
-                    "rep", "junk", "supply", "prof", "goals", "farm", "quests", "qdone", "reset", "tasks", "notes", "playtime", "run", "social" }
-local TIP_NEEDS_ITEM = { hearth = "hearth", rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", notes = "notes", goals = "goals", farm = "farm", quests = "quests", qdone = "qdone", run = "run" }
+                    "rep", "junk", "supply", "prof", "goals", "farm", "quests", "qdone", "reset", "tasks", "notes", "keep", "playtime", "run", "social" }
+local TIP_NEEDS_ITEM = { hearth = "hearth", rep = "rep", junk = "junk", supply = "ammo", prof = "prof", reset = "reset", tasks = "tasks", notes = "notes", keep = "keep", goals = "goals", farm = "farm", quests = "quests", qdone = "qdone", run = "run" }
 
 local function FillTooltip(key, full)
     GameTooltip:AddLine(ICON .. " Farol", 0.2, 0.8, 1)
@@ -3718,7 +3730,7 @@ Profiles.TABS = { "bar", "warnings", "tools", "general" }
 Profiles.GROUPS = {
     { "grp_perf", { "fps", "ms", "mem" } },
     { "grp_place", { "coords", "zone", "speed", "hearth" } },
-    { "grp_gear", { "durab", "bags", "junk", "ammo" } },
+    { "grp_gear", { "durab", "bags", "junk", "ammo", "keep" } },
     { "grp_gold", { "gold", "session", "goldh" } },
     { "grp_progress", { "xp", "xph", "rep", "prof", "goals", "farm", "quests", "qdone" } },
     { "grp_time", { "clock", "reset", "tasks", "notes", "playtime", "run", "friends", "guild" } },
@@ -3834,7 +3846,7 @@ Profiles.GEARS = {
     hearth = "warnings", ammo = "warnings", quests = "warnings",
     goals = function() ns.Goals.ToggleWindow() end, farm = function() ns.Goals.ToggleWindow() end,
     clock = function() ns.Alarm.ToggleWindow() end, tasks = function() ns.Tasks.ToggleWindow() end,
-    notes = function() ns.Notes.ToggleWindow() end,
+    notes = function() ns.Notes.ToggleWindow() end, keep = function() ns.Keep.ToggleWindow() end,
     run = function() ns.Runs.ToggleWindow() end, qdone = function() ns.Completed.ToggleWindow() end,
 }
 function Profiles.AddGear(set, page, check, key)
@@ -3905,12 +3917,12 @@ local function BuildControls(parent, top)
     set.hint = page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     set.hint:SetPoint("TOPLEFT", 16, -60)
     set.info = page:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    set.info:SetPoint("TOPLEFT", 16, -400) -- abaixo do 8º item do grupo Progresso
+    set.info:SetPoint("TOPLEFT", 16, -408) -- abaixo do 8º item do grupo Progresso
     set.info:SetWidth(Profiles.MENU_W - 40)
     set.info:SetJustifyH("LEFT")
     for g, group in ipairs(Profiles.GROUPS) do
         local col, row = (g - 1) % 3, math.floor((g - 1) / 3)
-        local x, y = 16 + col * 210, -78 - row * 124
+        local x, y = 16 + col * 210, -78 - row * 130 -- 3.26: Equipamento e bolsas tem 5 itens
         local header = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         header:SetPoint("TOPLEFT", x, y)
         set.groups[g] = header
@@ -3960,9 +3972,9 @@ local function BuildControls(parent, top)
     set.packUndo = CreateButton(page, 90, function() Profiles.UndoPack() end)
     set.packUndo:SetPoint("TOPLEFT", 128 + #Profiles.PACKS * 104 + 4, -30)
     set.appearance = CreateButton(page, 200, function() ns.Appearance.ToggleWindow() end)
-    set.appearance:SetPoint("TOPLEFT", 16, -432)
+    set.appearance:SetPoint("TOPLEFT", 16, -442)
     set.order = CreateButton(page, 200, function() ns.Order.ToggleWindow() end)
-    set.order:SetPoint("TOPLEFT", 226, -432)
+    set.order:SetPoint("TOPLEFT", 226, -442)
 
     -- Aba "Geral" (3.24): o que vale para todos, em seções. Tooltip completo e botões rápidos ficam só na
     -- janela Aparência (antes apareciam nos dois lugares). A ordem de criação das caixinhas não mudou.
@@ -4067,6 +4079,7 @@ local function BuildControls(parent, top)
             local ok, s = pcall(BuildSummary)
             if ok then PrintSummary(s, false) end
         end },
+        { "keep", function() ns.Keep.ToggleWindow() end }, -- 3.26 (no fim: os testes contam os botões por posição)
     }
     for i, entry in ipairs(tools) do
         local button = CreateButton(page, 170, entry[2])
@@ -4485,6 +4498,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         db.questNames = ns.Completed.SanitizeNames(type(saved) == "table" and saved.questNames or nil) -- nomes aprendidos
         db.chatWindow = Profiles.CleanChatName(db.chatWindow) -- janela de chat das mensagens (3.20)
         db.notes = ns.Notes.Sanitize(type(saved) == "table" and saved.notes or nil) -- bloco de notas da conta (3.22)
+        db.keep = ns.Keep.Sanitize(type(saved) == "table" and saved.keep or nil) -- itens guardados (3.26)
         local extra = {} -- barras 2 e 3, validadas do mesmo jeito
         for n = 2, Profiles.MAX_BARS do extra[n] = Profiles.SanitizeBar(FarolDB, n) end
         db.minimap = ns.MinimapButton.Sanitize(type(saved) == "table" and saved.minimap or nil) -- botão do minimapa
@@ -4508,6 +4522,8 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         FarolCharDB.runs = ns.Runs.Sanitize(type(savedChar) == "table" and savedChar.runs or nil) -- masmorras
         FarolCharDB.goals = ns.Goals.Sanitize(type(savedChar) == "table" and savedChar.goals or nil) -- metas
         FarolCharDB.farm = ns.Farm.Sanitize(type(savedChar) == "table" and savedChar.farm or nil) -- metas de farm
+        FarolCharDB.keepSeen = ns.Keep.SanitizeSeen(type(savedChar) == "table" and savedChar.keepSeen or nil) -- itens guardados
+        FarolCharDB.keepBank = ns.Keep.SanitizeBank(type(savedChar) == "table" and savedChar.keepBank or nil) -- banco anotado
         FarolCharDB.tasks = ns.Tasks.Sanitize(type(savedChar) == "table" and savedChar.tasks or nil) -- lista de tarefas
         FarolCharDB.diag = ns.Diag.Sanitize(type(savedChar) == "table" and savedChar.diag or nil) -- último logout
         -- Perfil deste personagem: o da conta (padrão) ou o próprio.
@@ -4581,7 +4597,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_notes", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_chat", "help_diag", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_notes", "help_keep", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_chat", "help_diag", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -4664,6 +4680,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Completed.HandleCommand(rest)
     elseif cmd == "notas" or cmd == "nota" or cmd == "notes" or cmd == "note" or cmd == "anotacoes" then
         ns.Notes.HandleCommand(rest)
+    elseif cmd == "guardar" or cmd == "guardados" or cmd == "keep" or cmd == "kept" then
+        ns.Keep.HandleCommand(rest)
     elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then
         ns.Tasks.HandleCommand(rest)
     elseif cmd == "perfil" or cmd == "perfis" or cmd == "profile" or cmd == "profiles" then

@@ -156,7 +156,7 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   escolhe os mais recentes pelos números antes de limpar o texto) aprendido de `QUEST_DETAIL`, `QUEST_ACCEPTED`,
   `QUEST_LOG_UPDATE` (no máx. a cada 5 s), `QUEST_COMPLETE` e entregas; só com `questRecord` ligado. Nunca buscar nomes
   no Wowhead (termos de uso proíbem coleta) nem com pedido ao servidor sem autorização do dono.
-- **Itens guardados (3.26, Keep.lua):** `FarolDB.keep = { {id, n ≤ 40, r? ≤ 40, k = "l"|"p"|nil, v, p?} }` (máx. 30,
+- **Itens guardados (3.26, Keep.lua):** `FarolDB.keep = { {id, n ≤ 40, r? ≤ 40, k = "l"|"p"|nil, v, p?} }` (máx. 50,
   sem id repetido) + `FarolCharDB.keepSeen[id] = true` (aviso "já pode" dado uma vez por personagem). Contagem:
   `GetItemCount(id, true)` (total) e `GetItemCount(id)` (bolsas); banco = diferença. Nível do evento
   `PLAYER_LEVEL_UP(level)` vale mais que `UnitLevel` (que ainda pode estar no antigo). Profissão pelo nome em
@@ -164,7 +164,11 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   AddTooltipPostCall(Enum.TooltipDataType.Item, …)` (modernos) ou `GameTooltip:HookScript("OnTooltipSetItem")`
   (antigos), registrada **só** quando o jogador liga `keepTooltip`, uma única vez, cada chamada em `pcall`, só
   acrescenta uma linha no `GameTooltip`. Shift + clique de item só chega na caixa do chat: o fluxo é
-  `/farol guardar [link]: motivo` (a caixa da janela aceita o nome).
+  `/farol guardar [link]: motivo` (a caixa da janela aceita o nome). Lista de escolha (`FarolKeepPick`): bolsas
+  (`ns.ReadBagSlot`) + `FarolCharDB.keepBank = { t, l = { {id, n, c, q} } }` (máx. 1000), anotado só com o banco
+  aberto (`BANKFRAME_OPENED`/`PLAYERBANKSLOTS_CHANGED`/`BAG_UPDATE` enquanto aberto; bolsas -1, `LastBag()+1..+NUM_BANKBAGSLOTS`
+  e `Enum.BagIndex.CharacterBankTab_N`); leitura sem espaços não apaga o anotado. "✓" não existe na fonte do jogo:
+  `Keep.CHECK` usa a textura `ReadyCheck-Ready`. Janela de saques: botão "Guardar" (`Keep.KeepLink`).
 - **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
   lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 

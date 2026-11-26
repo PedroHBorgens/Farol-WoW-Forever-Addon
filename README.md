@@ -424,14 +424,19 @@ with `/farol notes` or **Notes...** in Menu > Tools.
 
 Since 3.26, you can keep a list of items you want to hold on to — for example a material for a recipe you only learn
 at a higher level. Open it with `/farol keep` or **Kept items...** in Menu > Tools. The list is for the **whole
-account** (up to 30 items).
+account** (up to 50 items).
 
-- At the top: the item (type its name, or use `/farol keep` and Shift-click the item), an optional **reason** and
+- At the top: the item — **click the box to pick from a list of what you have** (bags, plus the bank as it was the
+  last time you opened it; typing filters, the mouse wheel scrolls, click or Enter picks), or use `/farol keep` and
+  Shift-click the item — an optional **reason** and
   **when** it becomes useful: no deadline, a **character level** or a **profession level** (from your professions).
   Click a row to load it back into the form and change it.
 - Each row shows how many you have (with how many are in the bank, when the game says), the reason and the state:
   "level 35 — 7 to go", "ready", or "no deadline". **X** removes it, with **Undo** at the bottom.
-- Kept items are left out of **Junk in bags**.
+- Kept items are left out of **Junk in bags**. The **Loot** window has a **Keep** button on each item (a check when
+  it is already kept).
+- The game only shows the bank while it is open: when you open it, Farol notes which items are there (item number and
+  name, up to 1000, per character) just for this list. It never opens the bank or touches items.
 - Optional reminders (off by default, in the window or by command):
   - **at a merchant** (`/farol keep merchant on`): which kept items are in your bags, with the reason;
   - **when the time comes** (`/farol keep ready on`): once per character, when you reach the level or profession level;

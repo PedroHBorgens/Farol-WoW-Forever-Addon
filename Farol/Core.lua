@@ -4523,6 +4523,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         FarolCharDB.goals = ns.Goals.Sanitize(type(savedChar) == "table" and savedChar.goals or nil) -- metas
         FarolCharDB.farm = ns.Farm.Sanitize(type(savedChar) == "table" and savedChar.farm or nil) -- metas de farm
         FarolCharDB.keepSeen = ns.Keep.SanitizeSeen(type(savedChar) == "table" and savedChar.keepSeen or nil) -- itens guardados
+        FarolCharDB.keepBank = ns.Keep.SanitizeBank(type(savedChar) == "table" and savedChar.keepBank or nil) -- banco anotado
         FarolCharDB.tasks = ns.Tasks.Sanitize(type(savedChar) == "table" and savedChar.tasks or nil) -- lista de tarefas
         FarolCharDB.diag = ns.Diag.Sanitize(type(savedChar) == "table" and savedChar.diag or nil) -- último logout
         -- Perfil deste personagem: o da conta (padrão) ou o próprio.

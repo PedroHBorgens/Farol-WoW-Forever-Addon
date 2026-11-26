@@ -159,16 +159,16 @@ page("farol-04-clock-alarms-snooze", alarms + popup, "Clock alarms with snooze �
 # 5. Loot
 loot_items = [("q5","⚔️","[Stormcaller, Blade of the Tides]","","Today","21:42"),("q4","🛡️","[Helm of the Lighthouse]","","Today","21:38"),("q3","💍","[Band of the Tides]","","Today","09:30"),
               ("q2","🌿","[Meadow Bloom]","x6","Yesterday","22:27"),("q1","🧵","[Linen Cloth]","x12","Yesterday","21:20"),("q2","🗡️","[Harbor Cutlass]","","Nov 7","21:12")]
-rows = "".join(f'<div class="row" style="padding:3px 0;font-size:15px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{ic(e)} <span class="{q}">{n}</span></span><span style="white-space:nowrap"><span class="dim">{c}</span>&nbsp;&nbsp;<span style="color:#8c8c8c">{d}</span> <span style="color:#c8c8c8">{t}</span>&nbsp;&nbsp;<span class="btn" style="padding:0 7px;font-size:11px">+ Goal</span></span></div>' for q,e,n,c,d,t in loot_items)
+rows = "".join(f'<div class="row" style="padding:3px 0;font-size:15px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{ic(e)} <span class="{q}">{n}</span></span><span style="white-space:nowrap"><span class="dim">{c}</span>&nbsp;&nbsp;<span style="color:#8c8c8c">{d}</span> <span style="color:#c8c8c8">{t}</span>&nbsp;&nbsp;<span class="btn" style="padding:0 7px;font-size:11px;{'opacity:.6' if n == '[Meadow Bloom]' else ''}">{'✓' if n == '[Meadow Bloom]' else 'Keep'}</span> <span class="btn" style="padding:0 7px;font-size:11px">+ Goal</span></span></div>' for q,e,n,c,d,t in loot_items)
 dd = """<div class="tip" style="position:absolute;left:236px;top:92px;width:200px;font-size:14px;line-height:1.7;z-index:2;background:#0a0d1a">
 <div><span class="k">✓</span> <span class="q0">Poor</span></div><div>&nbsp;&nbsp;&nbsp;<span class="q1">Common</span></div><div><span class="k">✓</span> <span class="q2">Uncommon</span></div>
 <div><span class="k">✓</span> <span class="q3">Rare</span></div><div><span class="k">✓</span> <span class="q4">Epic</span></div><div><span class="k">✓</span> <span class="q5">Legendary+</span></div>
 <div class="dim">Check all</div><div class="dim">Uncheck all</div></div>"""
 loot = f"""<div class="win" style="width:720px;padding-bottom:26px"><div class="x">×</div><div class="t">Recent loot</div>
 <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px"><span class="k">Show:</span><span class="btn">10 ▾</span><span class="k" style="margin-left:14px">Quality:</span><span class="btn">5 selected ▾</span></div>
-{dd}{rows}<div class="dim" style="font-size:12px;margin-top:10px">Hover: details · Shift-click: link · Wheel: scroll · + Goal: track the item (farm goal)</div>
+{dd}{rows}<div class="dim" style="font-size:12px;margin-top:10px">Hover: details · Shift-click: link · Wheel: scroll · Keep: save it for later · + Goal: track the item (farm goal)</div>
 <div style="position:absolute;right:8px;bottom:6px;color:#aaa">◢</div></div>"""
-page("farol-05-recent-loot-window", loot, "Recent loot: when you got it, quality filter, + Goal to track", "Últimos saques: quando você pegou, filtro de qualidade e + Meta para acompanhar")
+page("farol-05-recent-loot-window", loot, "Recent loot: quality filter, Keep and + Goal", "Últimos saques: quando você pegou, filtro de qualidade, Guardar e + Meta")
 
 # 6. Warnings: grouped window with remind-time dropdowns + history
 def wrow(text):
@@ -497,7 +497,12 @@ kchat = ('<div class="cwin" style="width:520px;font-size:13.5px;line-height:1.6"
          '<div><span style="color:#33ccff">Farol:</span> <span class="g">you reached level 35: you can now use Moonleaf herb ×12 (Alchemy recipe). 8 are in the bank.</span></div></div>')
 ktip = ('<div class="tip" style="width:300px"><div class="q2" style="font-weight:bold">Moonleaf herb</div><div>Trade goods</div>'
         '<div style="color:#ffd75a;margin-top:4px">Farol: kept — Alchemy recipe (level 35)</div></div>')
-page("farol-19-kept-items", f'{kwin}<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{kchat}{ktip}</div>',
+kpick = ('<div class="tip" style="width:420px;font-size:13.5px;line-height:1.5"><div class="dim" style="font-size:12px">Click the item box: 3 items with "moon" · wheel to scroll</div>'
+         '<div class="row"><span>🌿 <span class="q2">Moonleaf herb</span></span><span>×12 <span class="dim">bags + bank</span></span></div>'
+         '<div class="row"><span>🌙 Moonstone shard</span><span>×2 <span class="dim">bank</span></span></div>'
+         '<div class="row"><span>🐟 <span class="q1">Moon perch</span></span><span>×5 <span class="dim">bags</span></span></div>'
+         '<div class="dim" style="font-size:12px">bank noted: Today 07:40</div></div>')
+page("farol-19-kept-items", f'{kwin}<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{kpick}{kchat}{ktip}</div>',
      "Kept items: save materials for later, get reminded", "Itens guardados: materiais para depois, com lembrete no comerciante e na hora certa",
      KCSS + CHAT_CSS)
 print("pages ok")

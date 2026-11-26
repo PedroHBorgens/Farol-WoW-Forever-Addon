@@ -150,6 +150,51 @@ return {
         E:slash("keep merchant maybe"); T.has(E:lastMsg(), "usage: /farol keep")
     end },
 
+    { "pick list: click the item box to see bags + noted bank; typing filters; click or Enter picks", function(T, Mock)
+        local H = setup(Mock)
+        H:slash("guardar"); local W, box = H.env.FarolKeep, H.env.FarolKeepItem
+        box._scripts.OnEditFocusGained(box)
+        local pick = H.env.FarolKeepPick
+        T.ok(pick:IsShown(), "list opens with the box")
+        T.has(H:text(pick.head), "itens nas bolsas e no banco"); T.eq(H:text(pick.bank), "abra o banco uma vez para os itens dele aparecerem aqui")
+        local names = {}
+        for i = 1, 8 do local row = H.env["FarolKeepPick" .. i]; if row:IsShown() then names[#names + 1] = H:text(row.name) end end
+        T.eq(names[1], "Couro Rasgado", "alphabetical"); T.has(table.concat(names, ","), "Erva-de-luar")
+        -- banco: só quando aberto; anota número e nome (o banco continua lá na próxima sessão)
+        H.bankSlots = { [-1] = 28 }; H.bagItems[-1] = { [1] = { 9010, 20 }, [2] = { 7001, 8 } }
+        H:event("BANKFRAME_OPENED"); H:event("BANKFRAME_CLOSED")
+        local noted = H.env.FarolCharDB.keepBank
+        T.eq(#noted.l, 2); T.eq(noted.l[1].n, "Erva-de-luar"); T.eq(noted.l[1].c, 8)
+        H.bagItems[-1] = {}; H:event("PLAYERBANKSLOTS_CHANGED"); T.eq(#H.env.FarolCharDB.keepBank.l, 2, "closed bank: nothing re-read")
+        box:SetText("pão"); box._scripts.OnTextChanged(box, true)
+        T.eq(H:text(pick.head), '1 item com "pão"')
+        local row = H.env.FarolKeepPick1
+        T.eq(H:text(row.name), "Pão de Centeio"); T.eq(H:text(row.count), "×25"); T.eq(H:text(row.where), "bolsas + banco")
+        T.has(H:text(pick.bank), "banco anotado:")
+        box:SetText("erva"); box._scripts.OnTextChanged(box, true); T.eq(H:text(H.env.FarolKeepPick1.where), "bolsas + banco")
+        H:click(H.env.FarolKeepPick1)
+        T.eq(box:GetText(), "Erva-de-luar"); T.ok(not pick:IsShown(), "list closes after picking")
+        H.env.FarolKeepReason:SetText("receita"); H:click(H.env.FarolKeepAdd)
+        T.eq(H.env.FarolDB.keep[1].id, 7001); T.eq(H.env.FarolDB.keep[1].r, "receita")
+        box._scripts.OnEditFocusGained(box); box:SetText("erva"); box._scripts.OnTextChanged(box, true)
+        T.has(H:text(H.env.FarolKeepPick1.where), "guardado", "already kept is marked")
+        box._scripts.OnEnterPressed(box); T.eq(H.env.FarolKeepReason:GetText(), "receita", "Enter picks the first; kept item loads its reason")
+        box._scripts.OnEditFocusGained(box); box:SetText("zzz"); box._scripts.OnTextChanged(box, true)
+        T.eq(H:text(pick.head), "nenhum item com esse nome nas bolsas nem no banco anotado")
+        box._scripts.OnEscapePressed(box); T.ok(not pick:IsShown(), "Esc closes the list")
+    end },
+
+    { "loot window: Keep button per item; already kept shows a check and is disabled", function(T, Mock)
+        local H = setup(Mock)
+        H:event("CHAT_MSG_LOOT", "Você recebe saque: " .. LINK .. "x2.")
+        H:slash("saque")
+        local keep = H.env.FarolLootKeep1
+        T.ok(keep and keep:IsShown(), "button shown"); T.eq(H:text(keep), "Guardar")
+        H:click(keep); T.eq(H.env.FarolDB.keep[1].id, 7001); T.has(chat(H), "guardado: Erva-de-luar.")
+        T.eq(keep._disabled, true, "already kept: disabled"); T.has(keep._text, "ReadyCheck-Ready")
+        H.ns.Keep.KeepLink(LINK); T.has(H:lastMsg(), "já está guardado: Erva-de-luar.")
+    end },
+
     { "saved data is validated: bad types, NaN, '|', duplicates, too many, huge files", function(T, Mock)
         local big = {}
         for i = 1, 5000 do big[i] = { id = 100 + i, n = "Item " .. i } end
@@ -163,10 +208,17 @@ return {
         T.eq(keep[2].id, 6); T.eq(keep[2].k, nil, "absurd level dropped"); T.eq(keep[3].k, nil, "profession without name dropped")
         T.eq(keep[4].p, "Couraria"); T.eq(keep[4].v, 120)
         T.eq(H.env.FarolDB.keepMerchant, false); T.eq(H.env.FarolDB.keepReady, false); T.eq(H.env.FarolDB.keepTooltip, false)
-        local B = setup(Mock, nil, { keep = big }); T.eq(#B.env.FarolDB.keep, 30, "at most 30")
+        local B = setup(Mock, nil, { keep = big }); T.eq(#B.env.FarolDB.keep, 50, "at most 50")
         local S = Mock.new(); S:login(nil, { keepSeen = { [7001] = true, [-1] = true, x = true, [8] = "sim" } })
         T.eq(S.env.FarolCharDB.keepSeen[7001], true); T.eq(S.env.FarolCharDB.keepSeen[-1], nil); T.eq(S.env.FarolCharDB.keepSeen[8], nil)
-        for i = 1, 30 do H:slash("guardar |cffffffff|Hitem:" .. (8000 + i) .. "::|h[I" .. i .. "]|h|r") end
-        T.eq(#H.env.FarolDB.keep, 30); T.has(H:lastMsg(), "a lista já tem 30 itens")
+        for i = 1, 50 do H:slash("guardar |cffffffff|Hitem:" .. (8000 + i) .. "::|h[I" .. i .. "]|h|r") end
+        T.eq(#H.env.FarolDB.keep, 50); T.has(H:lastMsg(), "a lista já tem 50 itens")
+        -- banco anotado adulterado: tipos ruins, repetidos, '|', enorme
+        local bank = { t = 0 / 0, l = { { id = 9001, n = "Couro|r", c = -5, q = 99 }, { id = 9001, n = "Dup" }, "x", { id = 1.5, n = "Meio" } } }
+        for i = 1, 3000 do bank.l[#bank.l + 1] = { id = 20000 + i, n = "B" .. i, c = 1 } end
+        local Z = Mock.new(); Z:login(nil, { keepBank = bank })
+        local saved = Z.env.FarolCharDB.keepBank
+        T.eq(saved.t, nil); T.eq(saved.l[1].n, "Couror"); T.eq(saved.l[1].c, 1); T.eq(saved.l[1].q, nil)
+        T.ok(#saved.l <= 1000, "at most 1000 bank items")
     end },
 }

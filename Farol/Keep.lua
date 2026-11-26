@@ -6,8 +6,10 @@
   O Farol só lembra: nunca vende, move, trava ou usa itens (o test_toc.lua proíbe essas funções).
 
   FarolDB.keep = { { id, n = nome (≤ 40 letras), r = motivo (≤ 40), k = "l" (nível) | "p" (profissão) | nil,
-                     v = nível alvo, p = nome da profissão (≤ 40) }, ... } (máx. 30, sem id repetido; Keep.Sanitize)
+                     v = nível alvo, p = nome da profissão (≤ 40) }, ... } (máx. 50, sem id repetido; Keep.Sanitize)
   FarolCharDB.keepSeen = { [id] = true } (personagem: "já avisei que ficou pronto"; Keep.SanitizeSeen)
+  FarolCharDB.keepBank = { t = quando, l = { {id, n ≤ 40, c, q}, ... } } (personagem: o que estava no banco na última
+  vez que ele foi aberto — o jogo só mostra o banco aberto; máx. 1000; Keep.SanitizeBank). Só para a lista de escolha.
   Opções (Core DEFAULTS, desligadas — regra 8): keepMerchant (lembrar no comerciante), keepReady (avisar na hora
   certa) e keepTooltip (linha no tooltip do item).
   Nada é enviado e não há pedido ao servidor.
@@ -15,7 +17,9 @@
 
 local _, ns = ...
 
-local MAX_ITEMS = 30
+local MAX_ITEMS = 50
+local MAX_BANK = 1000
+local PICK_ROWS = 8
 local MAX_TEXT = 40
 local MAX_ID = 10000000
 local MAX_LEVEL = 100
@@ -26,6 +30,8 @@ local MERCHANT_LIST = 5
 
 local Keep = {}
 ns.Keep = Keep
+-- "✓" não existe na fonte do jogo: usa a textura de "pronto" do próprio jogo.
+Keep.CHECK = "|TInterface\\RaidFrame\\ReadyCheck-Ready:14:14|t "
 
 ---------------------------------------------------------------------------
 -- Textos / Strings
@@ -72,7 +78,21 @@ local STRINGS = {
         keep_removed  = "tirado da lista: %s (Desfazer na janela ou /farol guardar desfazer).",
         keep_restored = "de volta à lista: %s.",
         keep_nothing_undo = "nada para desfazer.",
-        keep_full     = "a lista já tem 30 itens: tire algum antes.",
+        keep_full     = "a lista já tem 50 itens: tire algum antes.",
+        keep_pick_all = "%d itens nas bolsas e no banco (rode o mouse para ver mais)",
+        keep_pick_all_1 = "%d item nas bolsas e no banco",
+        keep_pick_filter = "%d itens com \"%s\" (rode o mouse para ver mais)",
+        keep_pick_filter_1 = "%d item com \"%s\"",
+        keep_pick_none = "nenhum item com esse nome nas bolsas nem no banco anotado",
+        keep_pick_bank = "banco anotado: %s",
+        keep_pick_nobank = "abra o banco uma vez para os itens dele aparecerem aqui",
+        keep_where_bags = "bolsas",
+        keep_where_bank = "banco",
+        keep_where_both = "bolsas + banco",
+        keep_where_kept = "guardado",
+        keep_already  = "já está guardado: %s.",
+        loot_keep     = "Guardar",
+        loot_keep_tip = "Guardar este item para depois (Itens guardados: /farol guardar)",
         keep_not_found = "item não encontrado: use /farol guardar e Shift + clique no item (ou o item precisa estar nas bolsas ou nos saques).",
         keep_missing  = "esse item não está na lista.",
         keep_bad_value = "escreva o nível de 1 a %d.",
@@ -131,7 +151,21 @@ local STRINGS = {
         keep_removed  = "removed from the list: %s (Undo in the window or /farol keep undo).",
         keep_restored = "back on the list: %s.",
         keep_nothing_undo = "nothing to undo.",
-        keep_full     = "the list already has 30 items: remove one first.",
+        keep_full     = "the list already has 50 items: remove one first.",
+        keep_pick_all = "%d items in your bags and bank (scroll for more)",
+        keep_pick_all_1 = "%d item in your bags and bank",
+        keep_pick_filter = "%d items with \"%s\" (scroll for more)",
+        keep_pick_filter_1 = "%d item with \"%s\"",
+        keep_pick_none = "no item with that name in your bags or the noted bank",
+        keep_pick_bank = "bank noted: %s",
+        keep_pick_nobank = "open your bank once to see its items here",
+        keep_where_bags = "bags",
+        keep_where_bank = "bank",
+        keep_where_both = "bags + bank",
+        keep_where_kept = "kept",
+        keep_already  = "already kept: %s.",
+        loot_keep     = "Keep",
+        loot_keep_tip = "Keep this item for later (Kept items: /farol keep)",
         keep_not_found = "item not found: use /farol keep and Shift-click the item (or the item must be in your bags or loot).",
         keep_missing  = "that item is not on the list.",
         keep_bad_value = "type a level from 1 to %d.",
@@ -560,6 +594,152 @@ function Keep.SetOption(key, value)
 end
 
 ---------------------------------------------------------------------------
+-- O que o personagem tem (lista de escolha): bolsas agora + banco anotado na última vez que foi aberto.
+-- Só lê. O jogo só mostra o banco enquanto ele está aberto; o Farol nunca abre o banco nem mexe em itens.
+---------------------------------------------------------------------------
+
+function Keep.SanitizeBank(saved)
+    local clean = { l = {} }
+    if type(saved) ~= "table" then return clean end
+    clean.t = Int(saved.t, 0, 4e9)
+    local list = type(saved.l) == "table" and saved.l or {}
+    local seen = {}
+    for i = 1, MAX_BANK do -- só as primeiras posições (arquivo adulterado enorme carrega rápido)
+        local item = list[i]
+        if item == nil then break end
+        if type(item) == "table" then
+            local id, name = Int(item.id, 1, MAX_ID), Clean(item.n)
+            if id and name ~= "" and not seen[id] then
+                seen[id] = true
+                clean.l[#clean.l + 1] = { id = id, n = name, c = Int(item.c, 1, 1000000) or 1, q = Int(item.q, 0, 8) }
+            end
+        end
+    end
+    return clean
+end
+
+local function NumSlots(bag)
+    local getSlots = (C_Container and C_Container.GetContainerNumSlots) or GetContainerNumSlots
+    if type(getSlots) ~= "function" then return 0 end
+    local ok, n = pcall(getSlots, bag)
+    return ok and Int(n, 0, 200) or 0
+end
+
+-- Um espaço de bolsa: número, nome, quantidade e qualidade do item (nil = vazio ou o jogo não respondeu).
+local function SlotItem(bag, slot)
+    if not ns.ReadBagSlot then return nil end
+    local ok, item, count, quality = pcall(ns.ReadBagSlot, bag, slot)
+    if not ok or item == nil then return nil end
+    local id, name
+    if type(item) == "string" and ns.Farm then id, name = ns.Farm.ParseLink(item)
+    elseif type(item) == "number" then id = Int(item, 1, MAX_ID) end
+    if not id then return nil end
+    if not name then
+        local getInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
+        if type(getInfo) == "function" then
+            local okInfo, found, _, infoQuality = pcall(getInfo, id)
+            if okInfo and type(found) == "string" then name = Clean(found); quality = quality or infoQuality end
+        end
+    end
+    if not name or name == "" then return nil end
+    return id, name, Int(count, 1, 100000) or 1, Int(quality, 0, 8)
+end
+
+local function AddTo(map, id, name, count, quality, field)
+    local entry = map[id]
+    if not entry then
+        entry = { id = id, n = name, q = quality, bags = 0, bank = 0 }
+        map[id] = entry
+    end
+    entry[field] = entry[field] + count
+    if quality and not entry.q then entry.q = quality end
+end
+
+local function ReadBags(map)
+    local last = 4
+    if ns.LastBag then
+        local ok, value = pcall(ns.LastBag)
+        last = ok and Int(value, 0, 20) or 4
+    end
+    for bag = 0, last do
+        for slot = 1, NumSlots(bag) do
+            local id, name, count, quality = SlotItem(bag, slot)
+            if id then AddTo(map, id, name, count, quality, "bags") end
+        end
+    end
+    return last
+end
+
+-- Bolsas do banco: o espaço principal (-1) e as bolsas do banco depois das bolsas normais; nos clientes novos,
+-- também as abas do banco do personagem (Enum.BagIndex.CharacterBankTab_N), se existirem.
+local function BankBags(last)
+    local bags, seen = {}, {}
+    local function Add(bag) if type(bag) == "number" and not seen[bag] then seen[bag] = true; bags[#bags + 1] = bag end end
+    Add(type(BANK_CONTAINER) == "number" and BANK_CONTAINER or -1)
+    local extra = Int(NUM_BANKBAGSLOTS, 0, 12) or 7
+    for bag = last + 1, last + extra do Add(bag) end
+    local index = Enum and Enum.BagIndex
+    if type(index) == "table" then
+        for n = 1, 8 do Add(index["CharacterBankTab_" .. n]) end
+    end
+    return bags
+end
+
+local bankOpen = false
+
+function Keep.ScanBank()
+    if not bankOpen or type(FarolCharDB) ~= "table" then return false end
+    local map, slots = {}, 0
+    local last = 4
+    if ns.LastBag then
+        local ok, value = pcall(ns.LastBag)
+        last = ok and Int(value, 0, 20) or 4
+    end
+    for _, bag in ipairs(BankBags(last)) do
+        local n = NumSlots(bag)
+        slots = slots + n
+        for slot = 1, n do
+            local id, name, count, quality = SlotItem(bag, slot)
+            if id then AddTo(map, id, name, count, quality, "bank") end
+        end
+    end
+    if slots == 0 then return false end -- o jogo não mostrou o banco: não apaga o que já estava anotado
+    local list = {}
+    for _, entry in pairs(map) do list[#list + 1] = { id = entry.id, n = entry.n, c = entry.bank, q = entry.q } end
+    table.sort(list, function(a, b) return a.n < b.n or (a.n == b.n and a.id < b.id) end)
+    while #list > MAX_BANK do list[#list] = nil end
+    local now = time and time() or 0
+    FarolCharDB.keepBank = { t = Int(now, 0, 4e9), l = list }
+    return true
+end
+
+-- Tudo o que o personagem tem (bolsas + banco anotado), sem repetir, em ordem alfabética.
+function Keep.Inventory()
+    local map = {}
+    ReadBags(map)
+    local bank = type(FarolCharDB) == "table" and type(FarolCharDB.keepBank) == "table" and FarolCharDB.keepBank.l
+    if type(bank) == "table" then
+        for _, item in ipairs(bank) do AddTo(map, item.id, item.n, item.c, item.q, "bank") end
+    end
+    local list = {}
+    for _, entry in pairs(map) do list[#list + 1] = entry end
+    table.sort(list, function(a, b)
+        local la, lb = string.lower(a.n), string.lower(b.n)
+        return la < lb or (la == lb and a.id < b.id)
+    end)
+    return list
+end
+
+-- Botão "Guardar" da janela de saques.
+function Keep.KeepLink(link)
+    if not ns.Farm then return false end
+    local id, name = ns.Farm.ParseLink(link)
+    if not id then Print(T("keep_not_found")) return false end
+    if Keep.Has(id) then Print(string.format(T("keep_already"), Keep.Entry(id).n)) return false end
+    return Keep.Set(id, name)
+end
+
+---------------------------------------------------------------------------
 -- Janela
 ---------------------------------------------------------------------------
 
@@ -601,9 +781,92 @@ local function WhenItems()
     return items
 end
 
+local pickOffset, pickList = 0, {}
+
+local function Quality(q)
+    local colors = ITEM_QUALITY_COLORS
+    local c = type(colors) == "table" and q and colors[q]
+    if type(c) == "table" and type(c.r) == "number" then return c.r, c.g, c.b end
+    return 1, 1, 1
+end
+
+local function IconOf(id)
+    local icon
+    if C_Item and C_Item.GetItemIconByID then
+        local ok, value = pcall(C_Item.GetItemIconByID, id)
+        if ok then icon = value end
+    end
+    if not icon and GetItemIcon then
+        local ok, value = pcall(GetItemIcon, id)
+        if ok then icon = value end
+    end
+    return icon or "Interface\\Icons\\INV_Misc_QuestionMark"
+end
+
+local function HidePicker() if window and window.pick then window.pick:Hide() end end
+
+local function RefreshPicker()
+    local pick = window and window.pick
+    if not pick or not pick:IsShown() then return end
+    local filter = string.lower(ns.Trim(window.item:GetText() or "", 200))
+    if window.pickedName and window.item:GetText() == window.pickedName then filter = "" end
+    pickList = {}
+    for _, entry in ipairs(Keep.Inventory()) do
+        if filter == "" or string.find(string.lower(entry.n), filter, 1, true) then pickList[#pickList + 1] = entry end
+    end
+    pickOffset = math.max(0, math.min(pickOffset, #pickList - PICK_ROWS))
+    if #pickList == 0 then pick.head:SetText(T("keep_pick_none"))
+    elseif filter == "" then pick.head:SetText(string.format(ns.TN("keep_pick_all", #pickList), #pickList))
+    else pick.head:SetText(string.format(ns.TN("keep_pick_filter", #pickList), #pickList, filter)) end
+    local bank = type(FarolCharDB) == "table" and FarolCharDB.keepBank
+    pick.bank:SetText(bank and bank.t and string.format(T("keep_pick_bank"), ns.FormatWhen(bank.t)) or T("keep_pick_nobank"))
+    for i, row in ipairs(pick.rows) do
+        local entry = pickList[pickOffset + i]
+        row.entry = entry
+        if entry then
+            row.icon:SetTexture(IconOf(entry.id))
+            row.name:SetText(entry.n)
+            row.name:SetTextColor(Quality(entry.q))
+            row.count:SetText("×" .. (entry.bags + entry.bank))
+            local where = entry.bags > 0 and entry.bank > 0 and T("keep_where_both")
+                or (entry.bank > 0 and T("keep_where_bank") or T("keep_where_bags"))
+            if Keep.Has(entry.id) then where = Keep.CHECK .. ns.C.good .. T("keep_where_kept") .. "|r" end
+            row.where:SetText(where)
+            row:Show()
+        else
+            row:Hide()
+        end
+    end
+end
+
+local function ShowPicker()
+    if not (window and window.pick) then return end
+    pickOffset = 0
+    window.pick:Show()
+    RefreshPicker()
+end
+
+local function Choose(entry)
+    if not entry then return end
+    window.pickedId, window.pickedName = entry.id, entry.n
+    window.item:SetText(entry.n)
+    local kept = Keep.Entry(entry.id)
+    if kept then -- já guardado: traz o motivo e o "quando" para editar
+        window.reason:SetText(kept.r or "")
+        when = { k = kept.k, p = kept.p }
+        window.value:SetText(kept.v and tostring(kept.v) or "")
+    end
+    HidePicker()
+    window.reason:SetFocus()
+    RefreshWindow()
+end
+
 local function AddFromForm()
+    HidePicker()
     local text = window.item:GetText() or ""
-    local id, name = Keep.Resolve(text)
+    local id, name
+    if window.pickedId and text == window.pickedName then id, name = window.pickedId, window.pickedName
+    else id, name = Keep.Resolve(text) end
     if not id then Print(T("keep_not_found")) return end
     local spec = { k = when.k, p = when.p }
     if when.k then
@@ -613,6 +876,7 @@ local function AddFromForm()
         spec.v = value
     end
     if Keep.Set(id, name or Clean(text), window.reason:GetText(), spec) then
+        window.pickedId, window.pickedName = nil, nil
         window.item:SetText(""); window.reason:SetText(""); window.value:SetText("")
         window.item:ClearFocus(); window.reason:ClearFocus(); window.value:ClearFocus()
         RefreshWindow()
@@ -655,19 +919,83 @@ local function CreateWindow()
     -- Criar no topo (padrão 3.24): item, motivo, quando, valor, Guardar.
     frame.item = Box(frame, "FarolKeepItem", 600, 200)
     frame.item:SetPoint("TOPLEFT", 30, -46)
-    frame.item:SetScript("OnEnterPressed", function() frame.reason:SetFocus() end)
+    frame.item:SetScript("OnEnterPressed", function()
+        if frame.pick:IsShown() and pickList[pickOffset + 1] and frame.item:GetText() ~= frame.pickedName then
+            Choose(pickList[pickOffset + 1]) -- Enter = o primeiro da lista filtrada
+        else
+            HidePicker(); frame.reason:SetFocus()
+        end
+    end)
+    frame.item:SetScript("OnEscapePressed", function(self) HidePicker(); self:ClearFocus() end)
+    frame.item:SetScript("OnEditFocusGained", function() ShowPicker() end)
+    frame.item:SetScript("OnTextChanged", function(self, userInput)
+        if userInput then
+            if self:GetText() ~= frame.pickedName then frame.pickedId, frame.pickedName = nil, nil end
+            pickOffset = 0
+            if not frame.pick:IsShown() then frame.pick:Show() end
+            RefreshPicker()
+        end
+    end)
     ns.Placeholder(frame.item, "keep_ph_item")
     frame.reason = Box(frame, "FarolKeepReason", 250, MAX_TEXT)
     frame.reason:SetPoint("TOPLEFT", 30, -74)
     frame.reason:SetScript("OnEnterPressed", AddFromForm)
+    frame.reason:SetScript("OnEditFocusGained", function() HidePicker() end)
     ns.Placeholder(frame.reason, "keep_ph_reason")
     frame.when = ns.CreateDropdown(frame, "FarolKeepWhen", 170, WhenItems)
     frame.when:SetPoint("LEFT", frame.reason, "RIGHT", 10, 0)
     frame.value = Box(frame, "FarolKeepValue", 44, 4)
     frame.value:SetPoint("LEFT", frame.when, "RIGHT", 10, 0)
     frame.value:SetScript("OnEnterPressed", AddFromForm)
+    frame.value:SetScript("OnEditFocusGained", function() HidePicker() end)
     frame.add = Button(frame, "FarolKeepAdd", 110, AddFromForm)
     frame.add:SetPoint("LEFT", frame.value, "RIGHT", 8, 0)
+
+    -- Lista de escolha (abre ao clicar na caixa do item; digitar filtra; rodinha rola; clique ou Enter escolhe).
+    frame.pick = CreateFrame("Frame", "FarolKeepPick", frame, ns.backdropTemplate)
+    frame.pick:SetSize(520, PICK_ROWS * 20 + 46)
+    frame.pick:SetPoint("TOPLEFT", frame.item, "BOTTOMLEFT", -6, -2)
+    if frame.pick.SetFrameLevel and frame.GetFrameLevel then frame.pick:SetFrameLevel(frame:GetFrameLevel() + 20) end
+    frame.pick:EnableMouse(true)
+    if frame.pick.SetBackdrop then
+        frame.pick:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, tileSize = 16, edgeSize = 12,
+            insets = { left = 3, right = 3, top = 3, bottom = 3 } })
+        frame.pick:SetBackdropColor(0.02, 0.02, 0.04, 0.97)
+    end
+    frame.pick.head = ns.Dim(frame.pick:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
+    frame.pick.head:SetPoint("TOPLEFT", 10, -7)
+    frame.pick.bank = ns.Dim(frame.pick:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
+    frame.pick.bank:SetPoint("BOTTOMLEFT", 10, 7)
+    frame.pick.rows = {}
+    for i = 1, PICK_ROWS do
+        local row = CreateFrame("Button", "FarolKeepPick" .. i, frame.pick)
+        row:SetSize(500, 20)
+        row:SetPoint("TOPLEFT", 8, -22 - (i - 1) * 20)
+        row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+        row.icon = row:CreateTexture(nil, "ARTWORK")
+        row.icon:SetSize(16, 16)
+        row.icon:SetPoint("LEFT", 2, 0)
+        row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        row.name:SetPoint("LEFT", 24, 0)
+        row.name:SetWidth(300)
+        row.name:SetJustifyH("LEFT")
+        if row.name.SetWordWrap then row.name:SetWordWrap(false) end
+        row.count = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        row.count:SetPoint("LEFT", 330, 0)
+        row.count:SetWidth(52)
+        row.count:SetJustifyH("LEFT")
+        row.where = ns.Dim(row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
+        row.where:SetPoint("LEFT", 386, 0)
+        row:SetScript("OnClick", function(self) Choose(self.entry) end)
+        frame.pick.rows[i] = row
+    end
+    frame.pick:EnableMouseWheel(true)
+    frame.pick:SetScript("OnMouseWheel", function(_, delta)
+        pickOffset = math.max(0, pickOffset - (delta or 0) * 3)
+        RefreshPicker()
+    end)
+    frame.pick:Hide()
 
     frame.headItem = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     frame.headItem:SetPoint("TOPLEFT", 26, -104)
@@ -744,6 +1072,7 @@ local function CreateWindow()
     ns.UndoBar(frame)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
+    frame:SetScript("OnHide", function() HidePicker() end)
     tinsert(UISpecialFrames, "FarolKeep") -- Esc fecha
     ns.MakeToplevel(frame)
     frame:Hide()
@@ -803,12 +1132,21 @@ function Keep.Refresh() if RefreshWindow then RefreshWindow() end end
 ---------------------------------------------------------------------------
 
 local events = CreateFrame("Frame")
-for _, event in ipairs({ "MERCHANT_SHOW", "PLAYER_LEVEL_UP", "SKILL_LINES_CHANGED", "PLAYER_ENTERING_WORLD" }) do
+for _, event in ipairs({ "MERCHANT_SHOW", "PLAYER_LEVEL_UP", "SKILL_LINES_CHANGED", "PLAYER_ENTERING_WORLD",
+                         "BANKFRAME_OPENED", "BANKFRAME_CLOSED", "PLAYERBANKSLOTS_CHANGED", "BAG_UPDATE" }) do
     pcall(events.RegisterEvent, events, event)
 end
 events:SetScript("OnEvent", function(_, event, arg1)
     if not DB() then return end
-    if event == "MERCHANT_SHOW" then
+    if event == "BANKFRAME_OPENED" then
+        bankOpen = true
+        pcall(Keep.ScanBank)
+    elseif event == "BANKFRAME_CLOSED" then
+        bankOpen = false
+    elseif event == "PLAYERBANKSLOTS_CHANGED" or event == "BAG_UPDATE" then
+        if bankOpen then pcall(Keep.ScanBank) end
+        if window and window.pick and window.pick:IsShown() then RefreshPicker() end
+    elseif event == "MERCHANT_SHOW" then
         pcall(Keep.OnMerchant)
     elseif event == "PLAYER_LEVEL_UP" then
         pcall(Keep.CheckReady, Int(arg1, 1, MAX_LEVEL))

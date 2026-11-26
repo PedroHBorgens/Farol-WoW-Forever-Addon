@@ -433,14 +433,19 @@ digitar. Abra com `/farol notas` ou **Anotações...** em Menu > Ferramentas.
 
 Desde a 3.26, dá para ter uma lista de itens que você quer guardar — por exemplo um material de uma receita que só
 aprende num nível mais alto. Abra com `/farol guardar` ou **Guardados...** em Menu > Ferramentas. A lista é da
-**conta inteira** (até 30 itens).
+**conta inteira** (até 50 itens).
 
-- No topo: o item (digite o nome, ou use `/farol guardar` e Shift + clique no item), um **motivo** opcional e
+- No topo: o item — **clique na caixa para escolher numa lista do que você tem** (bolsas, mais o banco como estava na
+  última vez que você o abriu; digitar filtra, a rodinha rola, clique ou Enter escolhe), ou use `/farol guardar` e
+  Shift + clique no item —, um **motivo** opcional e
   **quando** ele fica útil: sem prazo, num **nível do personagem** ou num **nível de profissão** (das suas profissões).
   Clique numa linha para trazê-la de volta ao formulário e mudar.
 - Cada linha mostra quantos você tem (e quantos estão no banco, quando o jogo informa), o motivo e o estado:
   "nível 35 — faltam 7", "já pode" ou "sem prazo". **X** tira da lista, com **Desfazer** no rodapé.
-- Itens guardados não entram no **Lixo nas bolsas**.
+- Itens guardados não entram no **Lixo nas bolsas**. A janela de **Saques** tem um botão **Guardar** em cada item
+  (um ✓ quando já está guardado).
+- O jogo só mostra o banco enquanto ele está aberto: ao abrir, o Farol anota quais itens estão lá (número e nome do
+  item, até 1000, por personagem) só para essa lista. Ele nunca abre o banco nem mexe em itens.
 - Lembretes opcionais (desligados, na janela ou por comando):
   - **no comerciante** (`/farol guardar comerciante on`): quais guardados estão nas bolsas, com o motivo;
   - **na hora certa** (`/farol guardar hora on`): uma vez por personagem, ao chegar no nível ou na profissão;

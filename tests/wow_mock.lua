@@ -399,7 +399,7 @@ function Mock.new(opts)
         env.GetNetStats = function() return 1, 2, 87 end
         env.GetPlayerMapPosition = function() return 0.453, 0.611 end
         env.SetMapToCurrentZone = noop
-        env.GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end
+        env.GetContainerNumSlots = function(bag) return (bag >= 0 and bag <= 4) and 16 or (H.bankSlots and H.bankSlots[bag]) or 0 end
         env.GetContainerNumFreeSlots = function(bag) return H.bagFree[bag] or 0, 0 end
         env.GetItemInfo = itemInfo
         env.GetContainerItemInfo = function(bag, slot) -- 3.3.5a
@@ -466,7 +466,7 @@ function Mock.new(opts)
         }
         env.C_Container = {
             GetItemCooldown = function(id) return H.containerCooldown(id) end,
-            GetContainerNumSlots = function(bag) return bag <= 4 and 16 or 0 end,
+            GetContainerNumSlots = function(bag) return (bag >= 0 and bag <= 4) and 16 or (H.bankSlots and H.bankSlots[bag]) or 0 end,
             GetContainerNumFreeSlots = function(bag) return H.bagFree[bag] or 0, 0 end,
             GetContainerItemInfo = function(bag, slot) -- cliente moderno: tabela
                 local entry, item, link = bagItem(bag, slot)

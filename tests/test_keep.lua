@@ -32,7 +32,7 @@ return {
         T.eq(H.env.FarolDB.items.keep, false, "bar item off"); T.eq(H.env.FarolDB.keepMerchant, false)
         T.eq(H.env.FarolDB.keepReady, false); T.eq(H.env.FarolDB.keepTooltip, false)
         H:slash("guardar"); local W = H.env.FarolKeep
-        T.ok(W:IsShown(), "window open"); T.eq(H.env.UISpecialFrames[#H.env.UISpecialFrames], "FarolKeep")
+        T.ok(W:IsShown(), "window open"); T.ok(table.concat(H.env.UISpecialFrames, ",", 1, #H.env.UISpecialFrames):find("FarolKeep", 1, true), "Esc closes it")
         T.ok(W.empty:IsShown(), "empty state"); T.eq(H:text(H.env.FarolKeepItem.farolHint), "Nome do item (ou /farol guardar + Shift + clique no item)")
         H.env.FarolKeepItem:SetText("Erva-de-luar"); H.env.FarolKeepReason:SetText("receita de Alquimia")
         pick(H, "Quando: nível")

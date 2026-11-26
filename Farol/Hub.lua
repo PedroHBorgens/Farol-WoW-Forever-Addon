@@ -80,6 +80,30 @@ local STRINGS = {
         hub_chars_row = "%s (%d)",
         hub_chars_you = " — você",
         hub_level     = "Nível %d",
+        hub_rank1 = "Aprendiz", hub_rank2 = "Artífice", hub_rank3 = "Perito", hub_rank4 = "Artesão", hub_rank5 = "Mestre",
+        hub_limit     = "seu limite %d",
+        hub_at_limit  = "no limite",
+        hub_to_limit  = "faltam %d para o limite",
+        hub_this_session = "Nesta sessão",
+        hub_next_step = "Próximo passo",
+        hub_train     = "procure um instrutor para treinar %s",
+        hub_points    = "pontos",
+        hub_per_hour  = "~%d por hora",
+        hub_no_change = "sem mudança",
+        hub_chars_title = "Personagens deste reino",
+        hub_col_char  = "PERSONAGEM", hub_col_level = "NÍVEL", hub_col_gold = "OURO", hub_col_rest = "DESCANSO",
+        hub_col_bind  = "PEDRA DE REGRESSO", hub_col_seen = "VISTO",
+        hub_now       = "agora",
+        hub_rest_full = "cheio (%d%%)",
+        hub_locks_title = "Instâncias salvas",
+        hub_locks_none = "nenhuma instância salva anotada",
+        hub_bosses    = "%d de %d chefes",
+        hub_resets_in = "reseta em %s",
+        hub_rest_title = "Descanso",
+        hub_rest_note = "estimado pelas regras do estilo clássico",
+        hub_rest_ready = "descanso cheio: pronto para upar",
+        hub_rest_eta  = "%d%% · cheio em ~%s",
+        hub_rest_none = "nenhum outro personagem com descanso anotado",
         hub_profs_head = "Suas profissões (nível / limite do treinamento)",
         hub_profs_empty = "Nenhuma profissão encontrada.",
         hub_on        = "Central do Farol ligada (estilo detalhado): as janelas do Farol abrem dentro dela. /farol central off volta ao simples.",
@@ -146,6 +170,30 @@ local STRINGS = {
         hub_chars_row = "%s (%d)",
         hub_chars_you = " — you",
         hub_level     = "Level %d",
+        hub_rank1 = "Apprentice", hub_rank2 = "Journeyman", hub_rank3 = "Expert", hub_rank4 = "Artisan", hub_rank5 = "Master",
+        hub_limit     = "your limit %d",
+        hub_at_limit  = "at the limit",
+        hub_to_limit  = "%d to the limit",
+        hub_this_session = "This session",
+        hub_next_step = "Next step",
+        hub_train     = "find a trainer to learn %s",
+        hub_points    = "points",
+        hub_per_hour  = "~%d per hour",
+        hub_no_change = "no change",
+        hub_chars_title = "Characters on this realm",
+        hub_col_char  = "CHARACTER", hub_col_level = "LEVEL", hub_col_gold = "GOLD", hub_col_rest = "RESTED",
+        hub_col_bind  = "HEARTHSTONE", hub_col_seen = "SEEN",
+        hub_now       = "now",
+        hub_rest_full = "full (%d%%)",
+        hub_locks_title = "Saved instances",
+        hub_locks_none = "no saved instances noted",
+        hub_bosses    = "%d of %d bosses",
+        hub_resets_in = "resets in %s",
+        hub_rest_title = "Rested XP",
+        hub_rest_note = "estimated with the classic-style rules",
+        hub_rest_ready = "fully rested: ready to level",
+        hub_rest_eta  = "%d%% · full in ~%s",
+        hub_rest_none = "no other character with rested XP noted",
         hub_profs_head = "Your professions (level / training limit)",
         hub_profs_empty = "No professions found.",
         hub_on        = "Farol hub on (detailed style): Farol windows open inside it. /farol hub off goes back to simple.",
@@ -456,91 +504,295 @@ local function RefreshHome(page)
     })
 end
 
-local LIST_ROWS = 16
+---------------------------------------------------------------------------
+-- Kit de estilo do modo detalhado (3.28): cartão com título e "subtítulo" à direita, trilha de progresso com marcas.
+-- As próximas versões usam o mesmo kit nas outras telas da Central.
+---------------------------------------------------------------------------
 
-local function BuildList(page, headKey)
-    page.head = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    page.head:SetPoint("TOPLEFT", 6, -4)
-    page.headKey = headKey
-    page.empty = ns.Dim(page:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
-    page.empty:SetPoint("TOPLEFT", 6, -30)
-    page.empty:SetWidth(WIDTH - SIDE_W - 40)
-    page.empty:SetJustifyH("LEFT")
-    page.rows = {}
-    for i = 1, LIST_ROWS do
-        local row = {}
-        local y = -30 - (i - 1) * 26
-        row.left = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        row.left:SetPoint("TOPLEFT", 10, y)
-        row.right = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        row.right:SetPoint("TOPRIGHT", -14, y)
-        row.right:SetJustifyH("RIGHT")
-        row.back = page:CreateTexture(nil, "BACKGROUND")
-        row.back:SetPoint("TOPLEFT", 4, y + 4)
-        row.back:SetSize(WIDTH - SIDE_W - 34, 22)
-        Fill(row.back, 1, 1, 1, i % 2 == 0 and 0.03 or 0.06)
-        row.bar = page:CreateTexture(nil, "ARTWORK")
-        row.bar:SetPoint("TOPLEFT", 300, y - 4)
-        row.bar:SetHeight(8)
-        row.barBack = page:CreateTexture(nil, "BORDER")
-        row.barBack:SetPoint("TOPLEFT", 300, y - 4)
-        row.barBack:SetSize(260, 8)
-        Fill(row.barBack, 0.15, 0.15, 0.15, 1)
-        page.rows[i] = row
+local Kit = {}
+Hub.Kit = Kit
+
+function Kit.Card(parent, x, y, w, h)
+    local card = CreateFrame("Frame", nil, parent, ns.backdropTemplate)
+    card:SetSize(w, h)
+    card:SetPoint("TOPLEFT", x, y)
+    if card.SetBackdrop then
+        card:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, tileSize = 16, edgeSize = 12,
+            insets = { left = 3, right = 3, top = 3, bottom = 3 } })
+        card:SetBackdropColor(0.09, 0.075, 0.05, 0.95)
+        if card.SetBackdropBorderColor then card:SetBackdropBorderColor(0.6, 0.47, 0.2, 1) end
     end
+    card.title = card:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    card.title:SetPoint("TOPLEFT", 12, -10)
+    card.badge = card:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    card.badge:SetPoint("LEFT", card.title, "RIGHT", 10, 0)
+    card.sub = card:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    card.sub:SetPoint("TOPRIGHT", -12, -12)
+    card.sub:SetJustifyH("RIGHT")
+    return card
 end
 
-local function ShowRows(page, data, emptyKey)
-    page.head:SetText(T(page.headKey))
-    if #data == 0 then page.empty:SetText(T(emptyKey)); page.empty:Show() else page.empty:Hide() end
-    for i, row in ipairs(page.rows) do
-        local d = data[i]
-        if d then
-            row.left:SetText(d[1]); row.right:SetText(d[2] or "")
-            row.left:Show(); row.right:Show(); row.back:Show()
-            if d.pct then
-                row.bar:SetWidth(math.max(1, 260 * d.pct)); row.bar:Show(); row.barBack:Show()
-                Fill(row.bar, d.pct >= 1 and 0.9 or 0.25, d.pct >= 1 and 0.55 or 0.7, 0.2, 1)
-            else
-                row.bar:Hide(); row.barBack:Hide()
-            end
+function Kit.Line(card, y, w)
+    local line = {}
+    line.left = card:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    line.left:SetPoint("TOPLEFT", 12, y)
+    line.right = card:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    line.right:SetPoint("TOPRIGHT", -12, y)
+    line.right:SetJustifyH("RIGHT")
+    line.right:SetWidth(w - 160)
+    if line.right.SetWordWrap then line.right:SetWordWrap(false) end
+    return line
+end
+
+-- Trilha 0..cap com marcas (ex.: 75/150/225/300), o que já havia (verde), o que subiu (dourado) e o limite (laranja).
+function Kit.Track(card, x, y, w)
+    local t = { x = x, w = w, ticks = {}, labels = {} }
+    t.back = card:CreateTexture(nil, "BORDER"); t.back:SetPoint("TOPLEFT", x, y); t.back:SetSize(w, 12)
+    Fill(t.back, 0.1, 0.1, 0.1, 1)
+    t.base = card:CreateTexture(nil, "ARTWORK"); t.base:SetPoint("TOPLEFT", x, y); t.base:SetHeight(12)
+    Fill(t.base, 0.25, 0.7, 0.25, 1)
+    t.gain = card:CreateTexture(nil, "ARTWORK"); t.gain:SetPoint("TOPLEFT", t.base, "TOPRIGHT", 0, 0); t.gain:SetHeight(12)
+    Fill(t.gain, 1, 0.82, 0.2, 1)
+    t.limit = card:CreateTexture(nil, "OVERLAY"); t.limit:SetSize(3, 20)
+    Fill(t.limit, 1, 0.54, 0.2, 1)
+    t.limitText = card:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    t.y = y
+    for i = 1, 5 do
+        t.ticks[i] = card:CreateTexture(nil, "OVERLAY"); t.ticks[i]:SetSize(2, 16); Fill(t.ticks[i], 0.8, 0.64, 0.3, 1)
+        t.labels[i] = ns.Dim(card:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
+    end
+    return t
+end
+
+function Kit.SetTrack(t, start, level, limit, marks, names)
+    local cap = marks[#marks]
+    local function X(v) return t.x + math.max(0, math.min(1, v / cap)) * t.w end
+    t.base:SetWidth(math.max(1, X(start) - t.x))
+    local gain = X(level) - X(start)
+    if gain >= 1 then t.gain:SetWidth(gain); t.gain:Show() else t.gain:Hide() end
+    t.limit:ClearAllPoints(); t.limit:SetPoint("TOP", t.back, "TOPLEFT", X(limit) - t.x, 4)
+    t.limitText:ClearAllPoints(); t.limitText:SetPoint("BOTTOM", t.limit, "TOP", 0, 1)
+    t.limitText:SetText(string.format(T("hub_limit"), limit))
+    for i = 1, 5 do
+        local v = marks[i]
+        if v then
+            t.ticks[i]:ClearAllPoints(); t.ticks[i]:SetPoint("TOP", t.back, "TOPLEFT", X(v) - t.x, 2)
+            t.labels[i]:ClearAllPoints(); t.labels[i]:SetPoint("TOP", t.ticks[i], "BOTTOM", 0, -1)
+            t.labels[i]:SetText(v .. " · " .. (names[i] or ""))
+            t.ticks[i]:Show(); t.labels[i]:Show()
         else
-            row.left:Hide(); row.right:Hide(); row.back:Hide(); row.bar:Hide(); row.barBack:Hide()
+            t.ticks[i]:Hide(); t.labels[i]:Hide()
         end
     end
 end
 
-local function RefreshChars(page)
-    local data = {}
-    local list
-    if ns.RealmCharacters then
-        local ok, l = pcall(ns.RealmCharacters)
-        if ok then list = l end
+---------------------------------------------------------------------------
+-- Página Profissões (3.28): um cartão por profissão com a trilha 75/150/225/300, o limite e o ganho da sessão.
+---------------------------------------------------------------------------
+
+local PROF_CARDS = 5
+local profStart = {} -- [nome] = nível na primeira leitura desta sessão (só na memória)
+
+local function ReadProfs()
+    if not ns.ReadProfessions then return {} end
+    local ok, list = pcall(ns.ReadProfessions)
+    if not ok or type(list) ~= "table" then return {} end
+    local out = {}
+    for _, p in ipairs(list) do
+        if type(p) == "table" and type(p.name) == "string" then
+            local level, max = Num(p.level, 0, 1000), Num(p.max, 1, 1000)
+            if level and max then
+                out[#out + 1] = { name = p.name, level = level, max = max }
+                if profStart[p.name] == nil or profStart[p.name] > level then profStart[p.name] = level end
+            end
+        end
     end
-    for i, c in ipairs(list or {}) do
-        if i > LIST_ROWS then break end
-        local name = string.format(T("hub_chars_row"), c.name, c.level or 0) .. (c.current and (ns.C.good .. T("hub_chars_you") .. "|r") or "")
-        local when = c.t and ns.FormatWhen and (ns.C.dim .. ns.FormatWhen(c.t) .. "|r  ") or ""
-        data[#data + 1] = { name, when .. (ns.FormatMoney and ns.FormatMoney(c.gold or 0) or tostring(c.gold or 0)) }
+    return out
+end
+Hub.ReadProfs = ReadProfs
+
+local RANKS = { 75, 150, 225, 300, 375 }
+local function RankIndex(max)
+    for i, v in ipairs(RANKS) do if max <= v then return i end end
+    return #RANKS
+end
+
+local function BuildProfs(page)
+    local W = WIDTH - SIDE_W - 24
+    page.cards = {}
+    for i = 1, PROF_CARDS do
+        local card = Kit.Card(page, 0, -(i - 1) * 100, W, 94)
+        card.track = Kit.Track(card, 20, -48, W - 110) -- folga para o rótulo da última marca
+        card.session = Kit.Line(card, -76, W)
+        page.cards[i] = card
     end
-    ShowRows(page, data, "hub_chars_empty")
+    page.empty = ns.Dim(page:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
+    page.empty:SetPoint("TOPLEFT", 6, -6)
 end
 
 local function RefreshProfs(page)
-    local data = {}
-    local list
-    if ns.ReadProfessions then
-        local ok, l = pcall(ns.ReadProfessions)
-        if ok and type(l) == "table" then list = l end
-    end
-    for _, p in ipairs(list or {}) do
-        if type(p) == "table" and p.name and #data < LIST_ROWS then
-            local level, max = Num(p.level, 0, 1000) or 0, Num(p.max, 1, 1000) or 1
-            local color = level >= max and ns.C.warn or ""
-            data[#data + 1] = { p.name, color .. level .. " / " .. max .. (color ~= "" and "|r" or ""), pct = math.min(1, level / max) }
+    local list = ReadProfs()
+    if #list == 0 then page.empty:SetText(T("hub_profs_empty")); page.empty:Show() else page.empty:Hide() end
+    local seconds = ns.GetSessionSeconds and ns.GetSessionSeconds() or 0
+    for i, card in ipairs(page.cards) do
+        local p = list[i]
+        if p then
+            local rank = RankIndex(p.max)
+            local marks, names = {}, {}
+            local top = math.max(4, rank)
+            for r = 1, top do marks[r] = RANKS[r]; names[r] = T("hub_rank" .. r) end
+            card.title:SetText(p.name)
+            card.badge:SetText("[" .. T("hub_rank" .. rank) .. "]")
+            local left = p.max - p.level
+            local sub = p.level .. " / " .. p.max
+            if left == 0 then sub = sub .. " · " .. ns.C.warn .. T("hub_at_limit") .. "|r"
+            elseif left <= 15 then sub = sub .. " · " .. ns.C.warn .. string.format(T("hub_to_limit"), left) .. "|r" end
+            card.sub:SetText(sub)
+            local start = math.min(profStart[p.name] or p.level, p.level)
+            Kit.SetTrack(card.track, start, p.level, p.max, marks, names)
+            local gain = p.level - start
+            card.session.left:SetText(left == 0 and rank < #RANKS and T("hub_next_step") or T("hub_this_session"))
+            if left == 0 and rank < #RANKS then
+                card.session.right:SetText(ns.C.warn .. string.format(T("hub_train"), T("hub_rank" .. (rank + 1))) .. "|r")
+            elseif gain > 0 then
+                local text = ns.C.good .. "+" .. gain .. "|r " .. T("hub_points")
+                if seconds >= 600 then text = text .. " · " .. string.format(T("hub_per_hour"), math.floor(gain * 3600 / seconds + 0.5)) end
+                card.session.right:SetText(text)
+            else
+                card.session.right:SetText(ns.C.dim .. T("hub_no_change") .. "|r")
+            end
+            card:Show()
+        else
+            card:Hide()
         end
     end
-    ShowRows(page, data, "hub_profs_empty")
+end
+
+---------------------------------------------------------------------------
+-- Página Personagens (3.28): tabela do reino + instâncias salvas + descanso.
+---------------------------------------------------------------------------
+
+local CHAR_ROWS = 8
+local COLS = { 12, 200, 260, 380, 520, 690 } -- personagem, nível, ouro, descanso, Pedra, visto
+
+local function BuildChars(page)
+    local W = WIDTH - SIDE_W - 24
+    page.table = Kit.Card(page, 0, 0, W, 60 + CHAR_ROWS * 24)
+    page.heads = {}
+    for i, x in ipairs(COLS) do
+        local h = page.table:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        h:SetPoint("TOPLEFT", x, -36)
+        page.heads[i] = h
+    end
+    page.rows = {}
+    for r = 1, CHAR_ROWS do
+        local y = -54 - (r - 1) * 24
+        local row = { cells = {} }
+        row.back = page.table:CreateTexture(nil, "BORDER")
+        row.back:SetPoint("TOPLEFT", 6, y + 3); row.back:SetSize(W - 12, 22)
+        Fill(row.back, 1, 1, 1, r % 2 == 0 and 0.03 or 0.06)
+        for i, x in ipairs(COLS) do
+            local c = page.table:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            c:SetPoint("TOPLEFT", x, y)
+            c:SetWidth((COLS[i + 1] or (W - 10)) - x - 8); c:SetJustifyH("LEFT")
+            if c.SetWordWrap then c:SetWordWrap(false) end
+            row.cells[i] = c
+        end
+        row.restBack = page.table:CreateTexture(nil, "ARTWORK")
+        row.restBack:SetPoint("TOPLEFT", COLS[4], y - 14); row.restBack:SetSize(110, 4)
+        Fill(row.restBack, 0.15, 0.15, 0.15, 1)
+        row.restFill = page.table:CreateTexture(nil, "OVERLAY")
+        row.restFill:SetPoint("TOPLEFT", row.restBack, "TOPLEFT", 0, 0); row.restFill:SetHeight(4)
+        page.rows[r] = row
+    end
+    local y2 = -(60 + CHAR_ROWS * 24) - 10
+    page.locks = Kit.Card(page, 0, y2, W, 86)
+    page.lockLines = { Kit.Line(page.locks, -34, W), Kit.Line(page.locks, -52, W), Kit.Line(page.locks, -70, W) }
+    page.rest = Kit.Card(page, 0, y2 - 96, W, 68)
+    page.restLines = { Kit.Line(page.rest, -34, W), Kit.Line(page.rest, -52, W) }
+    page.empty = ns.Dim(page.table:CreateFontString(nil, "OVERLAY", "GameFontHighlight"))
+    page.empty:SetPoint("TOPLEFT", 12, -56); page.empty:SetWidth(W - 30); page.empty:SetJustifyH("LEFT")
+end
+
+local function Duration(seconds)
+    seconds = math.max(0, math.floor(seconds or 0))
+    if seconds >= 86400 then return string.format("%dd %dh", math.floor(seconds / 86400), math.floor(seconds % 86400 / 3600)) end
+    return ns.FormatDuration and ns.FormatDuration(seconds) or tostring(seconds)
+end
+
+local function RefreshChars(page)
+    local list, total
+    if ns.CharDetails then
+        local ok, l, t = pcall(ns.CharDetails)
+        if ok then list, total = l, t end
+    end
+    list = list or {}
+    page.table.title:SetText(T("hub_chars_title"))
+    page.table.sub:SetText(total and (T("hub_row_gold") .. ": " .. (ns.FormatMoney and ns.FormatMoney(total) or total)) or "")
+    for i, key in ipairs({ "hub_col_char", "hub_col_level", "hub_col_gold", "hub_col_rest", "hub_col_bind", "hub_col_seen" }) do
+        page.heads[i]:SetText(T(key))
+    end
+    if #list == 0 then page.empty:SetText(T("hub_chars_empty")); page.empty:Show() else page.empty:Hide() end
+    for r, row in ipairs(page.rows) do
+        local c = list[r]
+        if c then
+            local cells = row.cells
+            cells[1]:SetText(c.current and (ns.C.warn .. c.name .. T("hub_chars_you") .. "|r") or c.name)
+            cells[2]:SetText(tostring(c.level or "--"))
+            cells[3]:SetText(ns.FormatMoney and ns.FormatMoney(c.gold or 0) or tostring(c.gold or 0))
+            if c.pct then
+                cells[4]:SetText(c.full and (ns.C.good .. string.format(T("hub_rest_full"), c.pct) .. "|r") or (c.pct .. "%"))
+                row.restFill:SetWidth(math.max(1, 110 * math.min(1, c.pct / 150)))
+                Fill(row.restFill, c.full and 0.25 or 0.3, c.full and 0.75 or 0.44, c.full and 0.25 or 0.72, 1)
+                row.restBack:Show(); row.restFill:Show()
+            else
+                cells[4]:SetText("--"); row.restBack:Hide(); row.restFill:Hide()
+            end
+            cells[5]:SetText(c.bind or "--")
+            cells[6]:SetText(c.current and T("hub_now") or (c.t and ns.FormatWhen and ns.FormatWhen(c.t) or "--"))
+            for _, cell in ipairs(cells) do cell:Show() end
+            row.back:Show()
+        else
+            for _, cell in ipairs(row.cells) do cell:Hide() end
+            row.back:Hide(); row.restBack:Hide(); row.restFill:Hide()
+        end
+    end
+    -- Instâncias salvas (as que ainda não resetaram).
+    page.locks.title:SetText(T("hub_locks_title"))
+    local locks = {}
+    for _, c in ipairs(list) do
+        for _, l in ipairs(c.locks or {}) do locks[#locks + 1] = { c.name, l } end
+    end
+    for i, line in ipairs(page.lockLines) do
+        local item = locks[i]
+        if item then
+            local l = item[2]
+            line.left:SetText(item[1] .. " — " .. (l.n or ""))
+            local bosses = (l.k and l.b) and (string.format(T("hub_bosses"), l.k, l.b) .. " · ") or ""
+            line.right:SetText(bosses .. string.format(T("hub_resets_in"), Duration(l.left)))
+        else
+            line.left:SetText(i == 1 and (ns.C.dim .. T("hub_locks_none") .. "|r") or ""); line.right:SetText("")
+        end
+    end
+    -- Descanso dos outros personagens.
+    page.rest.title:SetText(T("hub_rest_title"))
+    page.rest.sub:SetText(ns.C.dim .. T("hub_rest_note") .. "|r")
+    local rests = {}
+    for _, c in ipairs(list) do
+        if not c.current and c.pct then rests[#rests + 1] = c end
+    end
+    table.sort(rests, function(a, b) return a.pct > b.pct end)
+    for i, line in ipairs(page.restLines) do
+        local c = rests[i]
+        if c then
+            line.left:SetText(c.name .. " (" .. (c.level or "?") .. ")")
+            line.right:SetText(c.full and (ns.C.good .. T("hub_rest_ready") .. "|r")
+                or string.format(T("hub_rest_eta"), c.pct, Duration(c.eta)))
+        else
+            line.left:SetText(i == 1 and (ns.C.dim .. T("hub_rest_none") .. "|r") or ""); line.right:SetText("")
+        end
+    end
 end
 
 ---------------------------------------------------------------------------
@@ -656,11 +908,11 @@ local function CreateHub()
     frame.pages.chars = CreateFrame("Frame", nil, frame.content)
     frame.pages.chars:SetPoint("TOPLEFT", 0, 0)
     frame.pages.chars:SetSize(WIDTH - SIDE_W - 24, HEIGHT - TOP_H - FOOT_H - 16)
-    BuildList(frame.pages.chars, "hub_chars_head")
+    BuildChars(frame.pages.chars)
     frame.pages.profs = CreateFrame("Frame", nil, frame.content)
     frame.pages.profs:SetPoint("TOPLEFT", 0, 0)
     frame.pages.profs:SetSize(WIDTH - SIDE_W - 24, HEIGHT - TOP_H - FOOT_H - 16)
-    BuildList(frame.pages.profs, "hub_profs_head")
+    BuildProfs(frame.pages.profs)
 
     -- Rodapé.
     frame.footBack = frame:CreateTexture(nil, "BORDER")
@@ -796,3 +1048,15 @@ function Hub.HandleCommand(rest)
     local value = SWITCH[word]
     if value == nil then Print(T("hub_usage")) else Hub.SetEnabled(value) end
 end
+
+---------------------------------------------------------------------------
+-- Eventos: anota o nível das profissões ao entrar (para o "nesta sessão") e atualiza a página aberta.
+---------------------------------------------------------------------------
+
+local events = CreateFrame("Frame")
+for _, event in ipairs({ "PLAYER_ENTERING_WORLD", "SKILL_LINES_CHANGED" }) do pcall(events.RegisterEvent, events, event) end
+events:SetScript("OnEvent", function()
+    if not DB() then return end
+    pcall(ReadProfs)
+    if hub and hub:IsShown() and current == "profs" then Hub.Refresh() end
+end)

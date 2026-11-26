@@ -84,7 +84,7 @@ return {
         H:login(saved)
         H:slash("concluidas")
         local W = H.env.FarolCompleted
-        T.ok(W:IsShown()); T.eq(H.env.UISpecialFrames[#H.env.UISpecialFrames], "FarolCompleted")
+        T.ok(W:IsShown()); T.ok(table.concat(H.env.UISpecialFrames, ",", 1, #H.env.UISpecialFrames):find("FarolCompleted", 1, true), "Esc closes it")
         T.eq(H:text(H.env.FarolCompletedChar), "Garrosh — este")
         T.has(H:text(W.totalText), "Total no jogo: 412"); T.eq(H:text(W.recorded), "Registradas: 1")
         T.eq(H:text(W.rows[1].name), "Minha missão")

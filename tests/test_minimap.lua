@@ -4,7 +4,7 @@
 local function setup(Mock, opts, saved)
     local H = Mock.new(opts)
     H.env.Minimap = H.env.CreateFrame("Frame", "Minimap") -- o minimapa do jogo
-    H:login(saved)
+    H:login(saved or { hub = false }) -- estilo simples (quem já usava); o detalhado tem teste próprio
     return H, H.env.FarolMinimapButton
 end
 local function all(H) return H.strip(table.concat(H.msgs, "\n")) end

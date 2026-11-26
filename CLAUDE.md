@@ -311,6 +311,11 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   move a Central; `frame.farolDocked`/`farolUndock` guardam o que volta) e ao fechar voltam ao `UIParent`. Janela nova
   que deve abrir na Central: entra em `SECTIONS`. Cartões da Início usam `ns.ItemText(item)` (o texto da célula da
   barra, sem o rótulo); a página atualiza 1x/s só com a Central aberta. `ns.SetLang`, `ns.SummaryNow` exportados.
+  **3.28:** `db.hub` vem **ligado só em instalação nova** (sem itens salvos; aprovado pelo dono, lista
+  `ON_NEW_INSTALL` do `test_defaults.lua`); quem já usa recebe desligado. Kit de estilo `Hub.Kit` (`Card`, `Line`,
+  `Track`/`SetTrack`) para as próximas telas (só no estilo detalhado; o simples fica como está). Profissões: graus pelo
+  limite (75/150/225/300/375), ganho da sessão em `profStart` (só memória, anotado no `PLAYER_ENTERING_WORLD`).
+  Personagens: `ns.CharDetails()` (Core) = personagens do reino com descanso estimado/real e instâncias ativas.
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 
@@ -393,6 +398,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Bloco de notas (janela, item, tooltip) | 18 (e 02/03 pela contagem de itens) |
 | Itens guardados (janela, lembretes, tooltip do item) | 19 (e 02/03 pela contagem de itens) |
 | Central do Farol (estilo detalhado: moldura, barra lateral, cartões) | 20 |
+| Central: páginas Profissões e Personagens | 21 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

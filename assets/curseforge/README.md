@@ -27,6 +27,7 @@ fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o sel
 | `farol-16-chat-tab-diagnostics.png` | A chat tab of its own + /farol diag | Mensagens numa aba de chat própria e /farol diagnostico |
 | `farol-17-minimap-colorblind.png` | Minimap button and colorblind-friendly colors | Botão no minimapa e cores para daltonismo |
 | `farol-18-notepad.png` | Notepad: 10 notes, one click away | Bloco de notas: 10 anotações da conta, a um clique (botão 📓 e tecla de atalho) |
+| `farol-21-hub-professions-characters.png` | Professions to your limit, and all your characters | Profissões até o seu limite e todos os seus personagens (Central do Farol) |
 | `farol-20-hub-detailed-style.png` | Two styles: simple, or everything in the Farol hub | Dois estilos: simples, ou tudo na Central do Farol (barra lateral e cartões) |
 | `farol-19-kept-items.png` | Kept items: save materials for later, get reminded | Itens guardados: materiais para depois, com lembrete no comerciante e na hora certa |
 

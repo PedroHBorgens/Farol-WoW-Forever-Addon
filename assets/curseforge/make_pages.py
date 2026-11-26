@@ -545,4 +545,40 @@ hub_html = (f'<div class="hub"><div class="hmed"><img src="data:image/png;base64
     + '</div><div class="hfoot"><span class="btn">Summary now</span><span class="btn">Bar...</span><span class="btn">Appearance...</span><span class="dim" style="margin-left:auto;font-size:11px">Click a card to open its section · read-only; nothing is sent</span></div></div>')
 page("farol-20-hub-detailed-style", hub_html, "Two styles: simple, or everything in the Farol hub",
      "Dois estilos: simples, ou tudo na Central do Farol (barra lateral e cartões)", HCSS)
+# 21. Hub: professions and characters (3.28)
+PCSS = """.ptr{position:relative;height:12px;border:1px solid #000;border-radius:3px;background:#1c1c1c;margin:16px 30px 18px 0}
+.ptr .f{position:absolute;left:0;top:0;bottom:0;background:#3fbf3f}.ptr .s{position:absolute;top:0;bottom:0;background:#ffd75a}
+.ptk{position:absolute;top:-3px;bottom:-3px;width:2px;background:#c9a24a}.ptl{position:absolute;top:15px;font-size:10px;color:#a89a78;transform:translateX(-50%);white-space:nowrap}
+.plim{position:absolute;top:-5px;bottom:-5px;width:3px;background:#ff8a33}.ptl.top{top:-15px;color:#e8dcb8}
+.pb{display:inline-block;border:1px solid #6e5b2e;border-radius:9px;padding:0 7px;font-size:10.5px;color:#e8dcb8;margin-left:6px}
+.pct{display:grid;grid-template-columns:1.3fr .5fr 1fr 1fr 1.2fr .8fr;gap:6px;padding:4px 6px;font-size:12px;border-bottom:1px solid #ffffff10}
+.pct.h{color:#ffb347;font-weight:bold;font-size:10.5px;letter-spacing:1px}"""
+def ptrack(level, limit, start, names=("Apprentice","Journeyman","Expert","Artisan")):
+    pc = lambda v: v / 300 * 100
+    h = f'<div class="ptr"><span class="f" style="width:{pc(start)}%"></span><span class="s" style="left:{pc(start)}%;width:{pc(level)-pc(start)}%"></span>'
+    for v, n in zip((75, 150, 225, 300), names): h += f'<span class="ptk" style="left:{pc(v)}%"></span><span class="ptl" style="left:{pc(v)}%">{v} · {n}</span>'
+    return h + f'<span class="plim" style="left:{pc(limit)}%"></span><span class="ptl top" style="left:{pc(limit)}%">your limit {limit}</span></div>'
+def pcard(name, rank, sub, track, row):
+    return (f'<div class="hcard"><h3 style="display:flex;justify-content:space-between;text-transform:none;font-size:13px;color:#ffd75a"><span>{name}<span class="pb">{rank}</span></span>'
+            f'<span style="font-weight:normal;color:#e8e2d0">{sub}</span></h3>{track}<div class="hrow"><span>{row[0]}</span><span>{row[1]}</span></div></div>')
+profs_main = ('<div class="hmain" style="display:block">'
+    + pcard("First Aid", "Journeyman", '133 / 150 · <span class="y">17 to the limit</span>', ptrack(133, 150, 115), ("This session", '<span class="g">+18</span> points · ~16 per hour'))
+    + '<div style="height:8px"></div>' + pcard("Herbalism", "Expert", "192 / 225", ptrack(192, 225, 192), ("This session", '<span class="dim">no change</span>'))
+    + '<div style="height:8px"></div>' + pcard("Fishing", "Journeyman", '150 / 150 · <span class="y">at the limit</span>', ptrack(150, 150, 141), ("Next step", '<span class="y">find a trainer to learn Expert</span>'))
+    + '</div>')
+chars_main = ('<div class="hmain" style="display:block"><div class="hcard"><h3 style="display:flex;justify-content:space-between;text-transform:none;font-size:13px;color:#ffd75a"><span>Characters on this realm</span><span style="font-weight:normal;color:#a89a78;font-size:11px">Account gold: 1482g 10s</span></h3>'
+    '<div class="pct h"><span>CHARACTER</span><span>LEVEL</span><span>GOLD</span><span>RESTED</span><span>HEARTHSTONE</span><span>SEEN</span></div>'
+    '<div class="pct"><span class="y">Aldric — you</span><span>26</span><span>123g 45s</span><span>15%</span><span>Lighthouse Bay</span><span>now</span></div>'
+    '<div class="pct"><span>Mira</span><span>34</span><span>1020g 50s</span><span class="g">full (150%)</span><span>Valley Village</span><span class="dim">Yesterday</span></div>'
+    '<div class="pct"><span>Tor</span><span>12</span><span>338g 15s</span><span>62%</span><span>Old Harbor</span><span class="dim">Nov 8</span></div></div>'
+    '<div style="height:8px"></div>' + hcard("Saved instances", [("Tor — Ancient Crypt", "2 of 5 bosses · resets in 2d 4h"), ("Mira — Sunken Tower", "5 of 5 bosses · resets in 5h 12m")])
+    + '<div style="height:8px"></div>' + hcard("Rested XP", [("Mira (34)", '<span class="g">fully rested: ready to level</span>'), ("Tor (12)", "62% · full in ~2d 6h")]) + '</div>')
+def hub_page(active, main):
+    side = "".join(f'<div class="hnav{" on" if n == active else ""}"><i>{e}</i>{n}</div>' for e, n, _ in navs)
+    return (f'<div style="width:590px;height:310px;position:relative"><div class="hub" style="transform:scale(.555);transform-origin:top left;margin:0;position:absolute;left:0;top:0"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:56px;height:56px;border-radius:50%"></div>'
+        '<div class="htop"><span class="hban">Farol</span><div class="hmeta"><span>v3.28</span><span class="hpill">English ▾</span><span class="hpill">Simple style</span></div></div>'
+        f'<div class="hside">{side}<div class="hwho"><b>Aldric</b><br><span class="dim">Level 26</span></div></div>{main}'
+        '<div class="hfoot"><span class="btn">Summary now</span><span class="btn">Bar...</span><span class="btn">Appearance...</span></div></div></div>')
+page("farol-21-hub-professions-characters", f'<div style="display:flex;gap:28px;align-items:center;margin-top:40px">{hub_page("Professions", profs_main)}{hub_page("Characters", chars_main)}</div>',
+     "Professions to your limit, and all your characters", "Profissões até o seu limite e todos os seus personagens (Central do Farol)", HCSS + PCSS)
 print("pages ok")

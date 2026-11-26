@@ -5,8 +5,20 @@
 local function chat(H) return H.strip(table.concat(H.msgs, "\n")) end
 
 return {
-    { "off by default (simple style: windows open on their own); /farol central turns it on and opens Home", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+    { "new install: detailed style on (owner, 3.28); existing users keep the simple style", function(T, Mock)
+        local N = Mock.new({ locale = "ptBR" }):login()
+        T.eq(N.env.FarolDB.hub, true, "new install starts in the detailed style")
+        local U = Mock.new():login({ items = { fps = true } })
+        T.eq(U.env.FarolDB.hub, false, "rule 8: updating never turns it on")
+        local K = Mock.new():login({ items = { fps = true }, hub = true })
+        T.eq(K.env.FarolDB.hub, true, "a saved choice is kept")
+        local Z = Mock.new():login({ hub = false })
+        T.eq(Z.env.FarolDB.hub, false, "a saved 'off' is kept even without items")
+        N.ns.MinimapButton.Click("LeftButton"); T.ok(N.env.FarolHub and N.env.FarolHub:IsShown(), "minimap opens the hub")
+    end },
+
+    { "simple style for existing users (windows open on their own); /farol central turns it on and opens Home", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }):login({ items = { fps = true } })
         T.eq(H.env.FarolDB.hub, false, "rule 8: off")
         H:slash("notas"); T.ok(H.env.FarolNotes:IsShown())
         T.eq(H.env.FarolNotes:GetParent(), H.env.UIParent, "simple style: not docked"); T.eq(H.env.FarolHub, nil, "hub not even created")
@@ -51,15 +63,30 @@ return {
     { "own pages: characters and professions; back to simple style; menu checkbox and minimap", function(T, Mock)
         local H = Mock.new({ locale = "ptBR" })
         H.profs = { { "Alquimia", 150, 150, true }, { "Pesca", 40, 75 } }
-        H:login({ hub = true, chars = { Azralon = { Mira = { gold = 50000, level = 34, t = 1 } } } })
+        H:login({ hub = true })
         H:slash("central"); local hub = H.env.FarolHub
         H:click(H.env.FarolHubNavprofs)
         local profs = hub.pages.profs
         T.ok(profs:IsShown()); T.ok(not hub.pages.home:IsShown())
-        T.eq(H:text(profs.rows[1].left), "Alquimia"); T.has(H:text(profs.rows[1].right), "150 / 150"); T.ok(profs.rows[1].bar:IsShown())
-        T.eq(H:text(profs.rows[2].left), "Pesca")
-        H:click(H.env.FarolHubNavchars); T.ok(hub.pages.chars:IsShown())
-        T.has(H:text(hub.pages.chars.head), "Personagens deste reino")
+        local c1, c2 = profs.cards[1], profs.cards[2]
+        T.eq(H:text(c1.title), "Alquimia"); T.eq(H:text(c1.badge), "[Artífice]")
+        T.has(H:text(c1.sub), "150 / 150"); T.has(H:text(c1.sub), "no limite")
+        T.eq(H:text(c1.session.left), "Próximo passo"); T.has(H:text(c1.session.right), "procure um instrutor para treinar Perito")
+        T.eq(H:text(c1.track.limitText), "seu limite 150"); T.eq(H:text(c1.track.labels[4]), "300 · Artesão")
+        T.eq(H:text(c2.title), "Pesca"); T.eq(H:text(c2.badge), "[Aprendiz]"); T.has(H:text(c2.sub), "40 / 75")
+        T.has(H:text(c2.session.right), "sem mudança")
+        -- subiu na sessão: parte dourada e "+N pontos"
+        H.profs[2][2] = 49; H:event("SKILL_LINES_CHANGED")
+        T.has(H:text(c2.session.right), "+9"); T.ok(c2.track.gain:IsShown(), "gain shown in gold")
+        T.ok(not profs.cards[3]:IsShown(), "only the professions you have")
+        -- Personagens: tabela, instâncias e descanso
+        H:click(H.env.FarolHubNavchars)
+        local chars = hub.pages.chars
+        T.ok(chars:IsShown()); T.eq(H:text(chars.table.title), "Personagens deste reino")
+        T.eq(H:text(chars.heads[5]), "PEDRA DE REGRESSO")
+        local first = chars.rows[1].cells
+        T.has(H:text(first[1]), "— você", "current character first"); T.eq(H:text(first[6]), "agora")
+        T.has(H:text(chars.locks.title), "Instâncias salvas"); T.has(H:text(chars.rest.title), "Descanso")
         H:click(H.env.FarolHubSimple); T.eq(H.env.FarolDB.hub, false); T.ok(not hub:IsShown()); T.has(H:lastMsg(), "estilo simples")
         H:slash("notas"); T.eq(H.env.FarolNotes:GetParent(), H.env.UIParent, "simple again: not docked"); H:slash("notas")
         H:slash("menu"); local set = H.env.FarolOptions.controls; H:click(set.tabs.general)
@@ -70,6 +97,25 @@ return {
         H.ns.MinimapButton.Click("LeftButton"); T.ok(H.env.FarolHub:IsShown(), "minimap click opens the hub in detailed style")
         H:slash("central talvez"); T.has(H:lastMsg(), "uso: /farol central")
         H:slash("central off"); T.eq(H.env.FarolDB.hub, false)
+    end },
+
+    { "characters page: other characters with rest estimate and saved instances (any realm name)", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = true }); H:update(1)
+        local name, realm = H.ns.CurrentCharacter()
+        local now = H.env.time()
+        H.env.FarolDB.chars[realm]["Mira"] = { gold = 10000000, level = 34, t = now - 3600, rest = 1500, max = 1000, inn = true,
+            bind = "Vila do Vale", locks = { { n = "Cripta Antiga", k = 2, b = 5, r = now + 2 * 86400 } } }
+        H.env.FarolDB.chars[realm]["Tor"] = { gold = 500, level = 12, t = now - 86400, rest = 100, max = 1000, inn = true }
+        H:slash("central"); H:click(H.env.FarolHubNavchars)
+        local chars = H.env.FarolHub.pages.chars
+        T.has(H:text(chars.rows[1].cells[1]), "— você")
+        T.eq(H:text(chars.rows[2].cells[1]), "Mira"); T.eq(H:text(chars.rows[2].cells[5]), "Vila do Vale")
+        T.has(H:text(chars.rows[2].cells[4]), "cheio")
+        T.eq(H:text(chars.lockLines[1].left), "Mira — Cripta Antiga"); T.has(H:text(chars.lockLines[1].right), "2 de 5 chefes")
+        T.has(H:text(chars.lockLines[1].right), "reseta em 2d")
+        T.eq(H:text(chars.restLines[1].left), "Mira (34)"); T.has(H:text(chars.restLines[1].right), "pronto para upar")
+        T.has(H:text(chars.restLines[2].right), "cheio em ~")
+        T.has(H:text(chars.table.sub), "Ouro da conta")
     end },
 
     { "saved value is validated; English texts; language dropdown", function(T, Mock)

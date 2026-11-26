@@ -55,6 +55,8 @@ local STRINGS = {
         farm_nothing_undo = "nada para desfazer.",
         farm_undo     = "Desfazer",
         farm_undo_line = "apagada: %s",
+        farm_card_sub = "%d de %d · Shift + clique no item ou \"+ Meta\" nos saques",
+        farm_card_gain = "+%d nesta sessão",
         loot_track    = "+ Meta",
         loot_track_tip = "Acompanhar este item (meta de farm de %d; mude na janela Metas)",
         help_farm     = "  /farol meta item     - metas de farm: quantos itens juntar (Shift + clique no item)",
@@ -88,6 +90,8 @@ local STRINGS = {
         farm_nothing_undo = "nothing to undo.",
         farm_undo     = "Undo",
         farm_undo_line = "removed: %s",
+        farm_card_sub = "%d of %d · shift-click the item or \"+ Goal\" in the loot window",
+        farm_card_gain = "+%d this session",
         loot_track    = "+ Goal",
         loot_track_tip = "Track this item (farm goal of %d; change it in the Goals window)",
         help_farm     = "  /farol goal item     - farm goals: how many items to gather (shift-click the item)",
@@ -519,6 +523,7 @@ end
 local ROW_H = 24
 
 function Farm.Attach(frame, top)
+    frame.farmTop = top
     frame.farmHeader = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.farmHeader:SetPoint("TOPLEFT", 24, top)
     -- "Desfazer" ao lado do título, só depois de apagar uma meta.
@@ -597,3 +602,83 @@ function Farm.RefreshRows(frame)
     return #list
 end
 Farm.ROW_H = ROW_H
+
+-- Posições de sempre (estilo simples): volta tudo ao lugar depois da Central.
+function Farm.SimpleRows(frame)
+    if not frame or not frame.farmRows then return end
+    local top = frame.farmTop or -192
+    frame.farmHeader:Show()
+    frame.farmHeader:ClearAllPoints(); frame.farmHeader:SetPoint("TOPLEFT", 24, top)
+    frame.farmUndo:ClearAllPoints(); frame.farmUndo:SetPoint("TOPLEFT", 314, top + 3)
+    for i, row in ipairs(frame.farmRows) do
+        local y = top - 22 - (i - 1) * ROW_H
+        row.text:ClearAllPoints(); row.text:SetPoint("TOPLEFT", 30, y - 4); row.text:SetWidth(200)
+        row.box:ClearAllPoints(); row.box:SetPoint("TOPLEFT", 244, y); row.box:SetWidth(62)
+        row.set:ClearAllPoints(); row.set:SetPoint("TOPLEFT", 314, y)
+        row.remove:ClearAllPoints(); row.remove:SetPoint("LEFT", row.set, "RIGHT", 4, 0)
+        if row.icon then row.icon:Hide() end
+    end
+end
+
+-- Central do Farol (3.30): metas de farm em cartões (2 colunas × 5), com ícone, barra, ganho da sessão e estimativa.
+-- Painel em (8, top) com 754 de largura; devolve quantas metas há.
+function Farm.DetailRows(frame, top)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit or not frame or not frame.farmRows then return 0 end
+    local list = Farm.Statuses()
+    local panel = Kit.Panel(frame, "farm", 8, top, 754, 300)
+    panel.title:SetText((string.gsub(T("farm_header"), "[:：]%s*$", "")))
+    local undo = Farm.lastRemoved
+    panel.sub:SetText(undo and string.format(T("farm_undo_line"), Short(undo.entry.n))
+        or (#list == 0 and T("tt_farm_none") or string.format(T("farm_card_sub"), #list, MAX_ITEMS)))
+    frame.farmHeader:Hide()
+    frame.farmUndo:ClearAllPoints(); frame.farmUndo:SetPoint("TOPLEFT", 190, top - 6)
+    for i, row in ipairs(frame.farmRows) do
+        local status = list[i]
+        local col, line = (i - 1) % 2, math.floor((i - 1) / 2)
+        local x, y = 20 + col * 370, top - 32 - line * 53
+        local card = Kit.Panel(frame, "fcard" .. i, x, y, 360, 49)
+        card.title:SetText(""); card.sub:SetText("")
+        local parts = { "fname" .. i, "fsess" .. i, "feta" .. i }
+        if status then
+            for _, part in ipairs(card.parts) do part:Show() end
+            if not row.icon then
+                row.icon = frame:CreateTexture(nil, "ARTWORK")
+                row.icon:SetSize(28, 28)
+            end
+            row.icon:ClearAllPoints(); row.icon:SetPoint("TOPLEFT", x + 8, y - 10)
+            row.icon:SetTexture(ns.ItemIcon and ns.ItemIcon(status.entry.id) or nil)
+            row.icon:Show()
+            row.text:ClearAllPoints(); row.text:SetPoint("TOPLEFT", x + 44, y - 8); row.text:SetWidth(180)
+            row.text:SetText(Short(status.name) .. " " .. Progress(status))
+            row.box:ClearAllPoints(); row.box:SetPoint("TOPLEFT", x + 236, y - 4); row.box:SetWidth(54)
+            row.set:Hide()
+            row.remove:ClearAllPoints(); row.remove:SetPoint("TOPLEFT", x + 326, y - 4)
+            local bar = Kit.Bar(frame, "farm" .. i)
+            local r, g, b = 1, 0.82, 0.2
+            if status.done then r, g, b = 0.25, 0.75, 0.25 end
+            Kit.SetBar(bar, x + 44, y - 26, 300, (status.pct or 0) / 100, true, r, g, b)
+            local sess, eta = "", ""
+            if status.done then
+                sess = ns.C.good .. T("goal_done") .. "|r"
+            elseif status.gained and status.gained > 0 then
+                sess = string.format(T("farm_card_gain"), status.gained)
+                if status.eta then eta = "~" .. Duration(status.eta) end
+            elseif status.have then
+                sess = T("tt_farm_norate")
+            end
+            ns.Dim(Kit.Text(frame, parts[2], "GameFontHighlightSmall", x + 44, y - 35, 200)):SetText(sess)
+            ns.Dim(Kit.Text(frame, parts[3], "GameFontHighlightSmall", x + 244, y - 35, 100, "RIGHT")):SetText(eta)
+        else
+            for _, part in ipairs(card.parts) do part:Hide() end
+            if row.icon then row.icon:Hide() end
+            local bar = frame.farolBars and frame.farolBars["farm" .. i]
+            if bar then bar.back:Hide(); bar.fill:Hide() end
+            for k = 2, 3 do
+                local t = frame.farolPanels["text:" .. parts[k]]
+                if t then t.fs:SetText(""); t.fs:Hide() end
+            end
+        end
+    end
+    return #list
+end

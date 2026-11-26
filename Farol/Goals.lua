@@ -44,6 +44,14 @@ local STRINGS = {
         goal_set      = "Definir",
         goal_clear    = "Limpar",
         goal_warn     = "Avisar quando alcançar uma meta (ouro, nível ou farm)",
+        goal_card_gold = "Ouro", goal_card_level = "Nível",
+        goal_card_target = "meta %s", goal_card_none = "sem meta: digite e clique em Definir",
+        goal_card_from = "do %d ao %d",
+        goal_card_have = "Você tem", goal_card_left = "Falta", goal_card_eta = "No ritmo atual", goal_card_now = "Agora",
+        goal_card_levels = "%s níveis", goal_card_level1 = "%s nível", goal_card_dec = ",",
+        goal_card_gold_line = "%d%% · %s por hora nesta sessão",
+        goal_card_level_line = "%d%% do caminho · %s XP por hora",
+        goal_card_norate = "%d%% · ainda sem ritmo nesta sessão",
         goal_set_gold = "meta de ouro: %s.",
         goal_set_level = "meta de nível: %d.",
         goal_cleared  = "meta apagada: %s.",
@@ -76,6 +84,14 @@ local STRINGS = {
         goal_set      = "Set",
         goal_clear    = "Clear",
         goal_warn     = "Warn when a goal is reached (gold, level or farm)",
+        goal_card_gold = "Gold", goal_card_level = "Level",
+        goal_card_target = "goal %s", goal_card_none = "no goal: type it and click Set",
+        goal_card_from = "from %d to %d",
+        goal_card_have = "You have", goal_card_left = "Left", goal_card_eta = "At this pace", goal_card_now = "Now",
+        goal_card_levels = "%s levels", goal_card_level1 = "%s level", goal_card_dec = ".",
+        goal_card_gold_line = "%d%% · %s per hour this session",
+        goal_card_level_line = "%d%% of the way · %s XP per hour",
+        goal_card_norate = "%d%% · no pace yet this session",
         goal_set_gold = "gold goal: %s.",
         goal_set_level = "level goal: %d.",
         goal_cleared  = "goal cleared: %s.",
@@ -273,6 +289,8 @@ end
 ---------------------------------------------------------------------------
 
 local RefreshWindow -- definida abaixo
+local SimpleLayout, DetailLayout -- layout de sempre e o da Central (3.30), definidos depois da janela
+local DETAIL_W, DETAIL_H = 770, 500
 local function Changed()
     if ns.UpdateText then ns.UpdateText() end
     if RefreshWindow then RefreshWindow() end
@@ -395,10 +413,107 @@ local function CreateWindow()
     for _, row in ipairs(frame.farmRows or {}) do chain[#chain + 1] = row.box end
     ns.TabChain(chain)
     frame:SetScript("OnShow", function() RefreshWindow() end)
+    -- Central do Farol (estilo detalhado, 3.30): cartões de ouro, nível e farm; fora dela, o layout de sempre.
+    frame.farolDetailSize = { DETAIL_W, DETAIL_H }
+    frame.farolDetail = function(on)
+        local Kit = ns.Hub and ns.Hub.Kit
+        if Kit then Kit.ShowPanels(frame, on) end
+        for _, b in pairs(frame.farolBars or {}) do if not on then b.back:Hide(); b.fill:Hide() end end
+        if not on then SimpleLayout(frame) end
+        RefreshWindow()
+    end
     tinsert(UISpecialFrames, "FarolGoals") -- ESC fecha
     ns.MakeToplevel(frame)
     frame:Hide()
     return frame
+end
+
+SimpleLayout = function(frame)
+    frame.hint:Show()
+    for _, entry in ipairs({ { frame.gold, -80 }, { frame.level, -138 } }) do
+        local row, y = entry[1], entry[2]
+        row.label:Show()
+        row.label:ClearAllPoints(); row.label:SetPoint("TOPLEFT", 24, y - 4)
+        row.box:ClearAllPoints(); row.box:SetPoint("TOPLEFT", 84, y)
+        row.set:ClearAllPoints(); row.set:SetPoint("TOPLEFT", 190, y + 1)
+        row.status:ClearAllPoints(); row.status:SetPoint("TOPLEFT", 30, y - 26)
+    end
+    frame.warn:ClearAllPoints(); frame.warn:SetPoint("BOTTOMLEFT", 20, 18)
+    if ns.Farm then ns.Farm.SimpleRows(frame) end
+end
+
+-- "3,3 níveis" (vírgula em português)
+local function Levels(n)
+    local text = string.format("%.1f", n)
+    if T("goal_card_dec") == "," then text = (string.gsub(text, "%.", ",")) end
+    return string.format(T(n == 1 and "goal_card_level1" or "goal_card_levels"), text)
+end
+
+DetailLayout = function(frame)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit then return end
+    local data = Data()
+    frame.hint:Hide()
+    local gold, level = Goals.GoldStatus(), Goals.LevelStatus()
+    local cards = {
+        { key = "gold", x = 8, row = frame.gold, status = gold },
+        { key = "level", x = 390, row = frame.level, status = level },
+    }
+    for _, card in ipairs(cards) do
+        local x, st, row = card.x, card.status, card.row
+        local panel = Kit.Panel(frame, card.key, x, -6, 372, 128)
+        panel.title:SetText(T(card.key == "gold" and "goal_card_gold" or "goal_card_level"))
+        local labels, values, line, pct, color = {}, {}, "", 0, nil
+        if card.key == "gold" then
+            panel.sub:SetText(st and string.format(T("goal_card_target"), Short(st.target)) or T("goal_card_none"))
+            labels = { T("goal_card_have"), T("goal_card_left"), T("goal_card_eta") }
+            local have = st and st.have or Money()
+            values[1] = have and (ns.FormatMoney and ns.FormatMoney(have) or Short(have)) or "--"
+            if st and st.done then
+                values[2] = ns.C.good .. T("goal_done") .. "|r"
+            elseif st and st.have then
+                values[2] = Short(st.target - st.have)
+            end
+            if st and st.pct then
+                pct = st.pct
+                line = st.rate and st.rate > 0 and string.format(T("goal_card_gold_line"), st.pct, Short(st.rate))
+                    or string.format(T("goal_card_norate"), st.pct)
+            end
+        else
+            local lv = Level()
+            panel.sub:SetText(st and string.format(T("goal_card_from"), data.ls or math.max(1, (lv or 2) - 1), st.target) or T("goal_card_none"))
+            labels = { T("goal_card_now"), T("goal_card_left"), T("goal_card_eta") }
+            local cur, max = XP()
+            values[1] = lv and (tostring(lv) .. (cur and string.format(" %s%d%%|r", ns.C.dim, math.floor(cur / max * 100)) or "")) or "--"
+            if st and st.done then
+                values[2] = ns.C.good .. T("goal_done") .. "|r"
+            elseif st and lv then
+                values[2] = Levels(math.max(0, st.target - lv - (cur and cur / max or 0)))
+            end
+            if st and st.pct then
+                pct = st.pct
+                line = st.rate and st.rate > 0 and string.format(T("goal_card_level_line"), st.pct, tostring(math.floor(st.rate)))
+                    or string.format(T("goal_card_norate"), st.pct)
+            end
+            color = { 0.48, 0.3, 1 }
+        end
+        if st and st.done then
+            values[3] = ns.C.good .. T("goal_done") .. "|r"; pct = 100; color = { 0.25, 0.75, 0.25 }
+        elseif st and st.eta then
+            values[3] = "~" .. Duration(st.eta)
+        end
+        for i = 1, 3 do Kit.Stat(frame, card.key .. i, x + 12 + (i - 1) * 120, -32, 116, labels[i], values[i] or "--") end
+        local c = color or { 0.25, 0.75, 0.25 }
+        Kit.SetBar(Kit.Bar(frame, card.key), x + 12, -72, 348, st and pct / 100 or 0, st and true or false, c[1], c[2], c[3])
+        row.label:Hide()
+        row.status:ClearAllPoints(); row.status:SetPoint("TOPLEFT", x + 12, -82)
+        row.status:SetText(ns.C.dim .. line .. "|r")
+        row.box:ClearAllPoints(); row.box:SetPoint("TOPLEFT", x + 18, -98)
+        row.set:ClearAllPoints(); row.set:SetPoint("TOPLEFT", x + 116, -97)
+    end
+    if ns.Farm then ns.Farm.DetailRows(frame, -142) end
+    Kit.Panel(frame, "warn", 8, -450, 754, 40)
+    frame.warn:ClearAllPoints(); frame.warn:SetPoint("TOPLEFT", 18, -457)
 end
 
 local function StatusText(status, have, target)
@@ -429,6 +544,7 @@ RefreshWindow = function()
     window.warn:SetChecked(settings and settings.goals or false)
     window.warn.label:SetText(T("goal_warn"))
     local rows = ns.Farm and ns.Farm.RefreshRows(window) or 0
+    if window.farolDocked then DetailLayout(window) return end
     window:SetHeight(280 + rows * (ns.Farm and ns.Farm.ROW_H or 0))
 end
 

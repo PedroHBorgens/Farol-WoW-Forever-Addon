@@ -452,6 +452,10 @@ detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simple
   "N de M", barra de progresso e o tempo até o reset); anotações com a lista à esquerda e o editor à direita
   ("editada ..."); guardados em cartões com o ícone do item, a quantidade (com o banco), o motivo e quando dá para
   usar. O estilo simples continua com as janelas de sempre.
+- **Metas, Missões concluídas e Masmorras** (3.30) em cartões: ouro e nível lado a lado ("Você tem", "Falta", o
+  tempo no ritmo atual e uma barra) e as metas de farm em cartões (ícone, barra, ganho da sessão, estimativa); missões
+  concluídas com um resumo (registradas, hoje, total no jogo) e a lista com o link do Wowhead; masmorras com a corrida
+  atual ao vivo, as médias das últimas corridas e o histórico.
 - As outras seções são as janelas de sempre, encaixadas na Central; arrastá-las move a Central. Com o estilo
   detalhado ligado, qualquer janela do Farol (por comando, pelo menu ou pelo botão do minimapa) abre dentro dela.
 - No topo: idioma e **Estilo simples**; no rodapé: Resumo agora, Barra... e Aparência....

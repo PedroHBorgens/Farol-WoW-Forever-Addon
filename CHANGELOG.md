@@ -2,6 +2,17 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.30.0 — Hub: goals, completed quests and dungeons in cards
+- **Goals** (detailed style): Gold and Level cards side by side ("You have" / "Now", "Left", time at this pace, a
+  progress bar and the Set/Clear boxes); farm goals as cards in two columns (item icon, count, progress bar, gain
+  this session and the estimate; Enter in the box changes the amount).
+- **Completed quests**: character and search on top, a summary (recorded, today, total in the game), the list with
+  column titles and the Wowhead link in the footer, and the options in their own panel.
+- **Dungeons**: the current run updates live (time, XP, gold, loot), the averages of the last runs and the history
+  as rows; summary and "Clear history" at the bottom.
+- Only inside the hub: the simple style keeps the usual windows. Nothing new is saved and nothing is sent.
+- Image 23 (goals, completed quests and dungeons in the hub). 796 tests (2 passes).
+
 ## 3.29.0 — Hub: tasks, notes and kept items in cards
 - **Tasks** (detailed style): a "New task" panel on top and two columns, **Daily** and **Weekly**, each with "N of M",
   the time to reset and a progress bar; the "warn before the reset" option in its own panel.

@@ -811,6 +811,7 @@ local function IconOf(id)
     end
     return icon or "Interface\\Icons\\INV_Misc_QuestionMark"
 end
+ns.ItemIcon = IconOf -- também usado pelos cartões de farm (Farm.lua) na Central
 
 local function HidePicker() if window and window.pick then window.pick:Hide() end end
 

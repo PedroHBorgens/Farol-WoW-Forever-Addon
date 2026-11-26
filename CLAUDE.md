@@ -322,6 +322,11 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   simples: `SimpleLayout` em Tasks/Keep). Painéis com `Hub.Kit.Panel(frame, chave, x, y, w, h)` (fundo + borda +
   título + subtítulo, em `frame.farolPanels`), `Kit.ShowPanels`, `Kit.Bar`/`SetBar`. O medalhão usa o caminho da
   textura (`Interface\\AddOns\\Farol\\Media\\Farol`), nunca `ns.ICON` (é um código `|T…|t` de chat).
+  **3.30:** Metas (`Farm.DetailRows`/`SimpleRows` para os cartões de farm; ícone por `ns.ItemIcon`, do Keep),
+  Missões concluídas e Masmorras (a corrida atual se atualiza pelo `Runs.Update` enquanto a janela está encaixada).
+  Textos e números dos cartões: `Kit.Text(frame, chave, fonte, x, y, w, alinhamento)` e `Kit.Stat(...)` (rótulo pequeno +
+  número grande), guardados em `frame.farolPanels["text:" .. chave]` e escondidos junto com os painéis;
+  `Kit.SetBar(..., r, g, b)` aceita a cor. Testes de janela no estilo simples fazem login com `hub = false`.
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 
@@ -406,6 +411,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Central do Farol (estilo detalhado: moldura, barra lateral, cartões) | 20 |
 | Central: páginas Profissões e Personagens | 21 |
 | Central: Tarefas, Anotações e Guardados em cartões | 22 |
+| Central: Metas, Missões concluídas e Masmorras em cartões | 23 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

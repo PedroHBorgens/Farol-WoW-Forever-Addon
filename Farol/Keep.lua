@@ -90,6 +90,10 @@ local STRINGS = {
         keep_where_bank = "banco",
         keep_where_both = "bolsas + banco",
         keep_where_kept = "guardado",
+        keep_form_title = "Guardar um item",
+        keep_form_sub = "clique na caixa para escolher das bolsas e do banco",
+        keep_opts_title = "Lembretes",
+        keep_opts_sub = "só no seu chat; nada é enviado",
         keep_already  = "já está guardado: %s.",
         loot_keep     = "Guardar",
         loot_keep_tip = "Guardar este item para depois (Itens guardados: /farol guardar)",
@@ -163,6 +167,10 @@ local STRINGS = {
         keep_where_bank = "bank",
         keep_where_both = "bags + bank",
         keep_where_kept = "kept",
+        keep_form_title = "Keep an item",
+        keep_form_sub = "click the box to pick from your bags and bank",
+        keep_opts_title = "Reminders",
+        keep_opts_sub = "only in your chat; nothing is sent",
         keep_already  = "already kept: %s.",
         loot_keep     = "Keep",
         loot_keep_tip = "Keep this item for later (Kept items: /farol keep)",
@@ -745,6 +753,7 @@ end
 
 local window
 local offset = 0
+local SimpleLayout, DetailLayout -- layouts da janela (definidos abaixo)
 local when = { k = nil } -- escolha do menu "Quando" (só na sessão)
 
 local function Button(parent, name, width, onClick)
@@ -1073,10 +1082,75 @@ local function CreateWindow()
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
     frame:SetScript("OnHide", function() HidePicker() end)
+    frame.farolDetail = function(on) -- Central do Farol: itens em cartões (Hub.Kit); fora dela, a janela de sempre
+        local Kit = ns.Hub and ns.Hub.Kit
+        if Kit then Kit.ShowPanels(frame, on) end
+        if not on then SimpleLayout(frame); for _, row in ipairs(frame.rows) do row.name:SetTextColor(1, 1, 1) end end
+        RefreshWindow()
+    end
     tinsert(UISpecialFrames, "FarolKeep") -- Esc fecha
     ns.MakeToplevel(frame)
     frame:Hide()
     return frame
+end
+
+-- Layout de sempre (estilo simples) e o de cartões na Central do Farol (estilo detalhado, 3.29).
+SimpleLayout = function(frame)
+    for _, h in ipairs({ frame.headItem, frame.headHave, frame.headWhy }) do h:Show() end
+    frame.note:Show()
+    for i, row in ipairs(frame.rows) do
+        local y = -120 - (i - 1) * ROW_H
+        row.pick:ClearAllPoints(); row.pick:SetPoint("TOPLEFT", 22, y); row.pick:SetSize(570, 22)
+        row.name:ClearAllPoints(); row.name:SetPoint("LEFT", 4, 0); row.name:SetWidth(200)
+        row.have:ClearAllPoints(); row.have:SetPoint("LEFT", 214, 0); row.have:SetWidth(96)
+        row.why:ClearAllPoints(); row.why:SetPoint("LEFT", 314, 0); row.why:SetWidth(252); row.why:SetJustifyH("LEFT")
+        row.remove:ClearAllPoints(); row.remove:SetPoint("TOPRIGHT", -30, y)
+        if row.icon then row.icon:Hide() end
+    end
+    local y = -120 - ROWS * ROW_H - 4
+    frame.scrollInfo:ClearAllPoints(); frame.scrollInfo:SetPoint("TOPRIGHT", -30, y)
+    for i, check in ipairs(frame.checks) do check:ClearAllPoints(); check:SetPoint("TOPLEFT", 20, y - 16 - (i - 1) * 24) end
+end
+
+DetailLayout = function(frame, list)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit then return end
+    local form = Kit.Panel(frame, "form", 14, -12, 632, 92)
+    form.title:SetText(T("keep_form_title")); form.sub:SetText(T("keep_form_sub"))
+    for _, h in ipairs({ frame.headItem, frame.headHave, frame.headWhy }) do h:Hide() end
+    frame.note:Hide()
+    frame.scrollInfo:ClearAllPoints(); frame.scrollInfo:SetPoint("TOPRIGHT", -18, -106)
+    for i, row in ipairs(frame.rows) do
+        local col, line = (i - 1) % 2, math.floor((i - 1) / 2)
+        local x, y = 14 + col * 318, -122 - line * 46
+        local card = Kit.Panel(frame, "card" .. i, x, y, 314, 42)
+        row.pick:ClearAllPoints(); row.pick:SetPoint("TOPLEFT", x + 2, y - 2); row.pick:SetSize(278, 38)
+        if not row.icon then
+            row.icon = row.pick:CreateTexture(nil, "ARTWORK"); row.icon:SetSize(30, 30); row.icon:SetPoint("LEFT", 4, 0)
+        end
+        row.name:ClearAllPoints(); row.name:SetPoint("TOPLEFT", 42, -4); row.name:SetWidth(128)
+        row.have:ClearAllPoints(); row.have:SetPoint("TOPLEFT", 42, -21); row.have:SetWidth(230)
+        row.why:ClearAllPoints(); row.why:SetPoint("TOPRIGHT", -2, -5); row.why:SetWidth(128); row.why:SetJustifyH("RIGHT")
+        row.remove:ClearAllPoints(); row.remove:SetPoint("TOPLEFT", x + 286, y - 10)
+        local entry = list[offset + i]
+        for _, part in ipairs(card.parts) do if entry then part:Show() else part:Hide() end end
+        card.title:SetText(""); card.sub:SetText("")
+        if entry then
+            row.icon:SetTexture(IconOf(entry.id)); row.icon:Show()
+            row.name:SetTextColor(Quality(entry.q))
+            local total, bags = Keep.Counts(entry.id)
+            local have = tostring(total)
+            if total > bags then have = have .. " " .. string.format(T("keep_bank"), total - bags) end
+            row.have:SetText(ns.C.dim .. have .. (entry.r and (" · " .. entry.r) or "") .. "|r")
+            local _, state = Keep.Status(entry)
+            row.why:SetText(state)
+        elseif row.icon then
+            row.icon:Hide()
+        end
+    end
+    local opt = Kit.Panel(frame, "options", 14, -358, 632, 104)
+    opt.title:SetText(T("keep_opts_title")); opt.sub:SetText(T("keep_opts_sub"))
+    for i, check in ipairs(frame.checks) do check:ClearAllPoints(); check:SetPoint("TOPLEFT", 22, -384 - (i - 1) * 24) end
 end
 
 RefreshWindow = function()
@@ -1118,6 +1192,7 @@ RefreshWindow = function()
     window.note:SetText(T("keep_note"))
     local undo = Keep.lastRemoved
     ns.ShowUndo(window, undo and string.format(T("keep_undo_line"), undo.entry.n), T("keep_undo"))
+    if window.farolDocked then DetailLayout(window, list) end
 end
 
 function Keep.ToggleWindow()

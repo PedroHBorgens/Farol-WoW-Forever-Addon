@@ -118,6 +118,50 @@ return {
         T.has(H:text(chars.table.sub), "Ouro da conta")
     end },
 
+    { "3.29: the medallion shows the Farol icon file (not the chat code)", function(T, Mock)
+        local H = Mock.new():login({ hub = true }); H:slash("central")
+        local tex = H.env.FarolHub.medal._texture
+        T.eq(tex, "Interface\\AddOns\\Farol\\Media\\Farol"); T.hasnt(tostring(tex), "|T")
+    end },
+
+    { "3.29: Tasks in cards inside the hub (daily | weekly), back to the usual layout outside", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = true })
+        H:slash("tarefa add Pescaria"); H:slash("tarefa add semanal Masmorra"); H:slash("tarefa add Ervas")
+        H:slash("tarefa feita 1")
+        H:slash("tarefa"); local W = H.env.FarolTasks
+        T.eq(W.farolDocked, true); T.eq(W:GetWidth(), 770, "detailed size")
+        local p = W.farolPanels
+        T.eq(H:text(p.daily.title), "Diárias"); T.has(H:text(p.daily.sub), "1 de 2 · reseta em")
+        T.eq(H:text(p.weekly.title), "Semanais"); T.has(H:text(p.weekly.sub), "0 de 1")
+        T.ok(p.daily.bg:IsShown(), "panels shown"); T.eq(W.farolBars.daily.fill:GetWidth(), 174, "half of the bar")
+        T.eq(W.rows[2].check._x, 402, "weekly task in the right column"); T.eq(W.rows[3].check._x, 20, "daily task in the left one")
+        T.ok(not W.hint:IsShown(), "hint moved into the panel"); T.eq(W._bgAlpha, 0, "dialog frame hidden: the hub has its own")
+        W:Hide()
+        T.ok(not p.daily.bg:IsShown(), "panels hidden outside the hub"); T.eq(W:GetWidth(), 460, "usual size back")
+        H:slash("central off"); H:slash("tarefa")
+        T.eq(W.rows[2].check._x, 20, "usual layout back"); T.ok(W.hint:IsShown())
+    end },
+
+    { "3.29: Notes and Kept items in cards inside the hub", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" })
+        H.items[7001] = { "Erva-de-luar", 2, 25 }; H.itemCounts[7001] = 4
+        H:login({ hub = true, notes = { { t = "Rota", x = "a", m = 1800000000 }, { t = "Feita", x = "", d = true } } })
+        H:slash("notas"); local N = H.env.FarolNotes
+        T.eq(N.farolDocked, true); T.ok(N.farolPanels.list.bg:IsShown())
+        T.eq(H:text(N.farolPanels.list.title), "Anotações"); T.eq(H:text(N.farolPanels.list.sub), "1 de 2 pendentes")
+        T.ok(not N.title:IsShown(), "window title hidden: the hub has the section")
+        N:Hide(); T.ok(not N.farolPanels.list.bg:IsShown()); T.ok(N.title:IsShown(), "title back outside the hub")
+        H:slash("guardar |cff1eff00|Hitem:7001::|h[Erva-de-luar]|h|r: receita de Alquimia")
+        H:slash("guardar"); local K = H.env.FarolKeep
+        T.eq(K.farolDocked, true)
+        local card1, card2 = K.farolPanels.card1, K.farolPanels.card2
+        T.ok(card1.bg:IsShown(), "card for the item"); T.ok(not card2.bg:IsShown(), "no card without an item")
+        T.has(H:text(K.rows[1].have), "receita de Alquimia"); T.has(H:text(K.rows[1].why), "sem prazo")
+        T.ok(K.rows[1].icon:IsShown(), "item icon"); T.eq(H:text(K.farolPanels.form.title), "Guardar um item")
+        T.eq(H:text(K.farolPanels.options.title), "Lembretes"); T.ok(not K.note:IsShown())
+        K:Hide(); T.ok(not card1.bg:IsShown()); T.eq(K.rows[1].pick._x, 22, "usual row back")
+    end },
+
     { "saved value is validated; English texts; language dropdown", function(T, Mock)
         for _, bad in ipairs({ "sim", 1, 0 / 0, {} }) do
             local X = Mock.new():login({ hub = bad })

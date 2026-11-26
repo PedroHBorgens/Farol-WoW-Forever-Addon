@@ -269,10 +269,24 @@ local function FitScale(frame)
     return math.min(1, cw / w, ch / h)
 end
 
+-- Janelas com layout de cartões (3.29): ao entrar na Central, perdem a moldura de diálogo (a Central já tem a dela)
+-- e chamam frame.farolDetail(true), que reorganiza tudo em painéis; ao sair, voltam exatamente como eram.
+local function Skin(frame, on)
+    if frame.SetBackdropColor then frame:SetBackdropColor(1, 1, 1, on and 0 or 1) end
+    if frame.SetBackdropBorderColor then frame:SetBackdropBorderColor(1, 1, 1, on and 0 or 1) end
+    if frame.farolBacking then if on then frame.farolBacking:Hide() else frame.farolBacking:Show() end end
+    if frame.title then if on then frame.title:Hide() else frame.title:Show() end end
+end
+
 local function Release(frame, hide)
     if not frame or not frame.farolDocked then return end
     frame.farolDocked = false
     local saved = frame.farolUndock or {}
+    if frame.farolDetail then
+        Skin(frame, false)
+        if saved.w and saved.h then frame:SetSize(saved.w, saved.h) end
+        pcall(frame.farolDetail, false)
+    end
     switching = true
     if hide then frame:Hide() end
     switching = false
@@ -291,6 +305,12 @@ local function Dock(frame)
         dragStart = frame:GetScript("OnDragStart"), dragStop = frame:GetScript("OnDragStop") }
     frame.farolDocked = true
     frame:SetParent(hub.content)
+    if frame.farolDetail then
+        frame.farolUndock.w, frame.farolUndock.h = frame:GetWidth(), frame:GetHeight()
+        if frame.farolDetailSize then frame:SetSize(frame.farolDetailSize[1], frame.farolDetailSize[2]) end
+        Skin(frame, true)
+        pcall(frame.farolDetail, true)
+    end
     if frame.SetScale then frame:SetScale(FitScale(frame)) end
     frame:ClearAllPoints()
     frame:SetPoint("TOP", hub.content, "TOP", 0, -2)
@@ -531,6 +551,58 @@ function Kit.Card(parent, x, y, w, h)
     card.sub:SetPoint("TOPRIGHT", -12, -12)
     card.sub:SetJustifyH("RIGHT")
     return card
+end
+
+-- Painel desenhado com texturas no próprio quadro (fundo + borda dourada + título + subtítulo): como fica atrás
+-- dos textos e botões da janela, serve para "vestir" as janelas de sempre quando entram na Central.
+function Kit.Panel(frame, key, x, y, w, h)
+    frame.farolPanels = frame.farolPanels or {}
+    local p = frame.farolPanels[key]
+    if not p then
+        p = { parts = {} }
+        local function Tex(layer, r, g, b, a)
+            local t = frame:CreateTexture(nil, layer); Fill(t, r, g, b, a); p.parts[#p.parts + 1] = t; return t
+        end
+        p.bg = Tex("BACKGROUND", 0.09, 0.075, 0.05, 0.95)
+        p.top = Tex("BORDER", 0.6, 0.47, 0.2, 1); p.bottom = Tex("BORDER", 0.6, 0.47, 0.2, 1)
+        p.left = Tex("BORDER", 0.6, 0.47, 0.2, 1); p.right = Tex("BORDER", 0.6, 0.47, 0.2, 1)
+        p.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge"); p.parts[#p.parts + 1] = p.title
+        p.sub = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")); p.parts[#p.parts + 1] = p.sub
+        p.sub:SetJustifyH("RIGHT")
+        frame.farolPanels[key] = p
+    end
+    p.bg:ClearAllPoints(); p.bg:SetPoint("TOPLEFT", x, y); p.bg:SetSize(w, h)
+    p.top:ClearAllPoints(); p.top:SetPoint("TOPLEFT", x, y); p.top:SetSize(w, 1)
+    p.bottom:ClearAllPoints(); p.bottom:SetPoint("TOPLEFT", x, y - h + 1); p.bottom:SetSize(w, 1)
+    p.left:ClearAllPoints(); p.left:SetPoint("TOPLEFT", x, y); p.left:SetSize(1, h)
+    p.right:ClearAllPoints(); p.right:SetPoint("TOPLEFT", x + w - 1, y); p.right:SetSize(1, h)
+    p.title:ClearAllPoints(); p.title:SetPoint("TOPLEFT", x + 12, y - 9)
+    p.sub:ClearAllPoints(); p.sub:SetPoint("TOPRIGHT", frame, "TOPLEFT", x + w - 12, y - 12)
+    return p
+end
+
+function Kit.ShowPanels(frame, on)
+    for _, p in pairs(frame.farolPanels or {}) do
+        for _, part in ipairs(p.parts) do if on then part:Show() else part:Hide() end end
+    end
+end
+
+-- Barrinha de progresso feita de texturas (fundo + parte cheia), presa a um painel.
+function Kit.Bar(frame, key)
+    frame.farolBars = frame.farolBars or {}
+    local b = frame.farolBars[key]
+    if not b then
+        b = { back = frame:CreateTexture(nil, "BORDER"), fill = frame:CreateTexture(nil, "ARTWORK") }
+        Fill(b.back, 0.12, 0.12, 0.12, 1); Fill(b.fill, 1, 0.82, 0.2, 1)
+        frame.farolBars[key] = b
+    end
+    return b
+end
+
+function Kit.SetBar(b, x, y, w, pct, on)
+    b.back:ClearAllPoints(); b.back:SetPoint("TOPLEFT", x, y); b.back:SetSize(w, 6)
+    b.fill:ClearAllPoints(); b.fill:SetPoint("TOPLEFT", x, y); b.fill:SetSize(math.max(1, w * math.max(0, math.min(1, pct or 0))), 6)
+    if on then b.back:Show(); b.fill:Show() else b.back:Hide(); b.fill:Hide() end
 end
 
 function Kit.Line(card, y, w)
@@ -832,7 +904,7 @@ local function CreateHub()
     frame.medal = frame:CreateTexture(nil, "OVERLAY")
     frame.medal:SetSize(64, 64)
     frame.medal:SetPoint("TOPLEFT", -14, 18)
-    frame.medal:SetTexture(ns.ICON or "Interface\\Icons\\INV_Misc_Map_01")
+    frame.medal:SetTexture("Interface\\AddOns\\Farol\\Media\\Farol") -- arquivo do ícone (ns.ICON é o código do chat)
     frame.medalRing = frame:CreateTexture(nil, "OVERLAY", nil, 2)
     frame.medalRing:SetSize(90, 90)
     frame.medalRing:SetPoint("CENTER", frame.medal, "CENTER", 13, -13)

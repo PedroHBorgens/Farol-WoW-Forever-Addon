@@ -43,6 +43,11 @@ local STRINGS = {
         task_add      = "Adicionar",
         task_warn     = "Avisar 1 h antes do reset diário se faltar alguma diária",
         task_resets   = "Reset diário em %s · semanal em %s",
+        task_new      = "Nova tarefa",
+        task_new_sub  = "diárias zeram no reset diário; semanais, no semanal",
+        task_col_daily = "Diárias",
+        task_col_weekly = "Semanais",
+        task_col_sub  = "%d de %d · reseta em %s",
         task_added    = "tarefa adicionada: %s (%s).",
         task_removed  = "tarefa apagada: %s (Desfazer na janela ou /farol tarefa desfazer).",
         task_restored = "tarefa de volta: %s.",
@@ -77,6 +82,11 @@ local STRINGS = {
         task_empty    = "No tasks yet: type one above and click Add.",
         task_placeholder = "New task...",
         task_daily    = "Daily",
+        task_new      = "New task",
+        task_new_sub  = "daily tasks reset at the daily reset; weekly, at the weekly one",
+        task_col_daily = "Daily",
+        task_col_weekly = "Weekly",
+        task_col_sub  = "%d of %d · resets in %s",
         task_weekly   = "Weekly",
         task_add      = "Add",
         task_warn     = "Warn 1 h before the daily reset if a daily task is left",
@@ -241,6 +251,8 @@ end
 ---------------------------------------------------------------------------
 
 local RefreshWindow -- definida abaixo
+local SimpleLayout, DetailLayout -- layouts da janela (definidos abaixo)
+local DETAIL_W, DETAIL_H = 770, 500 -- tamanho na Central do Farol
 
 local function Changed()
     if ns.UpdateText then ns.UpdateText() end
@@ -408,10 +420,78 @@ local function CreateWindow()
     ns.UndoBar(frame)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
+    -- Central do Farol (estilo detalhado): cartões Diárias/Semanais; fora dela, o layout de sempre.
+    frame.farolDetailSize = { DETAIL_W, DETAIL_H }
+    frame.farolDetail = function(on)
+        local Kit = ns.Hub and ns.Hub.Kit
+        if Kit then Kit.ShowPanels(frame, on) end
+        for _, b in pairs(frame.farolBars or {}) do if not on then b.back:Hide(); b.fill:Hide() end end
+        if not on then SimpleLayout(frame) end
+        RefreshWindow()
+    end
     tinsert(UISpecialFrames, "FarolTasks") -- ESC fecha
     ns.MakeToplevel(frame)
     frame:Hide()
     return frame
+end
+
+-- Posições de sempre (estilo simples) e o layout em cartões da Central (estilo detalhado, 3.29).
+SimpleLayout = function(frame)
+    local addY = -98 - MAX_TASKS * ROW_HEIGHT + 20
+    frame.hint:Show(); frame.resets:Show()
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 26, -108)
+    for i, row in ipairs(frame.rows) do
+        local y = -98 - (i - 1) * ROW_HEIGHT
+        row.check:ClearAllPoints(); row.check:SetPoint("TOPLEFT", 20, y)
+        row.kind:ClearAllPoints(); row.kind:SetPoint("TOPRIGHT", -62, y - 6)
+        row.remove:ClearAllPoints(); row.remove:SetPoint("TOPRIGHT", -26, y - 2)
+        row.text:SetWidth(270)
+    end
+    frame.name:ClearAllPoints(); frame.name:SetPoint("TOPLEFT", 30, -68); frame.name:SetWidth(180)
+    frame.warn:ClearAllPoints(); frame.warn:SetPoint("TOPLEFT", 20, addY - 30)
+    frame.undoText:ClearAllPoints(); frame.undoText:SetPoint("TOPLEFT", 26, addY - 86)
+    frame.undo:ClearAllPoints(); frame.undo:SetPoint("TOPRIGHT", -26, addY - 82)
+end
+
+DetailLayout = function(frame, list, now, daily, weekly)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit then return end
+    local new = Kit.Panel(frame, "new", 8, -6, 754, 70)
+    new.title:SetText(T("task_new")); new.sub:SetText(T("task_new_sub"))
+    frame.hint:Hide(); frame.resets:Hide()
+    frame.name:ClearAllPoints(); frame.name:SetPoint("TOPLEFT", 26, -40); frame.name:SetWidth(470)
+    local cols = { { key = "daily", x = 8, weekly = false, reset = daily }, { key = "weekly", x = 390, weekly = true, reset = weekly } }
+    for _, col in ipairs(cols) do
+        local panel = Kit.Panel(frame, col.key, col.x, -84, 372, 318)
+        local total, done = 0, 0
+        for _, task in ipairs(list) do
+            if (task.w and true or false) == col.weekly then
+                total = total + 1
+                if IsDone(task, now, daily, weekly) then done = done + 1 end
+            end
+        end
+        panel.title:SetText(T(col.weekly and "task_col_weekly" or "task_col_daily"))
+        panel.sub:SetText(string.format(T("task_col_sub"), done, total, Countdown(col.reset)))
+        Kit.SetBar(Kit.Bar(frame, col.key), col.x + 12, -112, 348, total > 0 and done / total or 0, true)
+        col.n = 0
+    end
+    for i, row in ipairs(frame.rows) do
+        local task = list[i]
+        if task then
+            local col = task.w and cols[2] or cols[1]
+            col.n = col.n + 1
+            local x, y = col.x + 12, -124 - (col.n - 1) * 26
+            row.check:ClearAllPoints(); row.check:SetPoint("TOPLEFT", x, y)
+            row.remove:ClearAllPoints(); row.remove:SetPoint("TOPLEFT", x + 318, y - 2)
+            row.text:SetWidth(270)
+            row.kind:Hide()
+        end
+    end
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 22, -126)
+    Kit.Panel(frame, "warn", 8, -410, 754, 38)
+    frame.warn:ClearAllPoints(); frame.warn:SetPoint("TOPLEFT", 18, -417)
+    frame.undoText:ClearAllPoints(); frame.undoText:SetPoint("TOPLEFT", 24, -464)
+    frame.undo:ClearAllPoints(); frame.undo:SetPoint("TOPRIGHT", -18, -460)
 end
 
 RefreshWindow = function()
@@ -443,6 +523,7 @@ RefreshWindow = function()
     window.warn:SetChecked(settings and settings.tasks or false)
     window.warn.label:SetText(T("task_warn"))
     window.resets:SetText(string.format(T("task_resets"), Countdown(daily), Countdown(weekly)))
+    if window.farolDocked then DetailLayout(window, list, now, daily, weekly) end
 end
 
 function Tasks.ToggleWindow()

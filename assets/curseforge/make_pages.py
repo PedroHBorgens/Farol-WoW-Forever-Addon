@@ -581,4 +581,46 @@ def hub_page(active, main):
         '<div class="hfoot"><span class="btn">Summary now</span><span class="btn">Bar...</span><span class="btn">Appearance...</span></div></div></div>')
 page("farol-21-hub-professions-characters", f'<div style="display:flex;gap:28px;align-items:center;margin-top:40px">{hub_page("Professions", profs_main)}{hub_page("Characters", chars_main)}</div>',
      "Professions to your limit, and all your characters", "Profissões até o seu limite e todos os seus personagens (Central do Farol)", HCSS + PCSS)
+# 22. Hub: tasks, notes and kept items in cards (3.29)
+TCSS = """.hpan{border:1px solid #7a5f2a;border-radius:6px;background:linear-gradient(#1c170f,#120f0a);padding:7px 10px;margin-bottom:8px}
+.hpan h4{margin:0 0 5px;display:flex;justify-content:space-between;font:bold 14px 'DejaVu Serif',serif;color:#ffd75a}.hpan h4 small{font:11px 'DejaVu Sans';color:#a89a78}
+.tbar{height:7px;border:1px solid #000;border-radius:3px;background:#222;margin:2px 0 6px;overflow:hidden}.tbar span{display:block;height:100%;background:#3fbf3f}
+.tk{display:flex;align-items:center;gap:7px;margin:3px 0;font-size:12.5px}.tk .box{width:13px;height:13px;font-size:10px}
+.kc{display:flex;gap:8px;align-items:center;border:1px solid #5a4520;border-radius:5px;background:#16120b;padding:4px 7px;font-size:12px}.kc .ki{font-size:22px;font-family:'Noto Color Emoji'}"""
+def hub_small(active, main, scale=.455):
+    side = "".join(f'<div class="hnav{" on" if n == active else ""}"><i>{e}</i>{n}</div>' for e, n, _ in navs)
+    return (f'<div style="width:{int(1066*scale)}px;height:{int(546*scale)}px;position:relative"><div class="hub" style="transform:scale({scale});transform-origin:top left;margin:0;position:absolute;left:0;top:0"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:56px;height:56px;border-radius:50%"></div>'
+        '<div class="htop"><span class="hban">Farol</span><div class="hmeta"><span>v3.29</span><span class="hpill">English ▾</span><span class="hpill">Simple style</span></div></div>'
+        f'<div class="hside">{side}<div class="hwho"><b>Aldric</b><br><span class="dim">Level 26</span></div></div>{main}'
+        '<div class="hfoot"><span class="btn">Summary now</span><span class="btn">Bar...</span><span class="btn">Appearance...</span></div></div></div>')
+def tk(done, name, kind=""):
+    return f'<div class="tk"><span class="box">{"✓" if done else ""}</span><span class="{"dim" if done else ""}">{name}</span><span class="btn" style="margin-left:auto;padding:0 5px">X</span></div>'
+def tcol(title, sub, pct, items):
+    return f'<div class="hpan" style="flex:1;height:250px"><h4>{title}<small>{sub}</small></h4><div class="tbar"><span style="width:{pct}%"></span></div>' + "".join(items) + '</div>'
+tasks_main = ('<div class="hmain" style="display:block"><div class="hpan"><h4>New task<small>daily tasks reset at the daily reset; weekly ones at the weekly</small></h4>'
+    '<div style="display:flex;gap:8px"><span class="kin" style="flex:1">New task...</span><span class="btn">Type: Daily</span><span class="btn">Add</span></div></div>'
+    '<div style="display:flex;gap:8px">' + tcol("Daily", "2 of 3 · resets in 5h 12m", 66, [tk(1, "Fishing daily"), tk(1, "Cooking daily"), tk(0, "Herb run")])
+    + tcol("Weekly", "0 of 2 · resets in 2d 4h", 0, [tk(0, "Ancient Crypt"), tk(0, "Sunken Tower")]) + '</div>'
+    '<div class="hpan"><div class="tk"><span class="box">✓</span>Warn 1 h before the daily reset if a daily is left</div></div></div>')
+notes_main = ('<div class="hmain" style="display:flex;gap:8px;align-items:flex-start"><div class="hpan" style="width:270px;height:400px;white-space:nowrap"><h4>Notes<small>2 of 3 pending</small></h4>'
+    + tk(0, "Farm route") + tk(0, "Buy at the auction") + tk(1, "Train First Aid")
+    + '<div style="margin-top:250px;display:flex;gap:6px"><span class="btn">+ New note</span><span class="btn">Clear done</span></div></div>'
+    '<div class="hpan" style="flex:1;height:400px"><h4><span></span><small>edited Today 20:27</small></h4><div class="kin" style="font-style:normal;color:#fff">Farm route</div>'
+    '<div class="kin" style="height:250px;margin-top:8px;font-style:normal;color:#e8e2d0;white-space:pre-line">Lake east of the village: herbs and fish.\nThen the old mine: copper.\nSell the junk before going back.</div>'
+    '<div style="display:flex;gap:6px;margin-top:8px;align-items:center"><span class="dim" style="font-size:11px">96 / 500 · saved as you type</span><span class="btn" style="margin-left:auto">✓ Done</span><span class="btn">Delete</span></div></div></div>')
+def kc(icon, name, cls, have, when):
+    return f'<div class="kc"><span class="ki">{icon}</span><div style="flex:1"><div class="{cls}">{name}</div><div class="dim">{have}</div></div><div style="font-size:11px;text-align:right">{when}</div><span class="btn" style="padding:0 5px">X</span></div>'
+keep_main = ('<div class="hmain" style="display:block"><div class="hpan"><h4>Keep an item<small>click the box to pick from your bags and bank</small></h4>'
+    '<div class="kin" style="margin-bottom:5px">Item name (or /farol keep + Shift-click the item)</div>'
+    '<div style="display:flex;gap:8px"><span class="kin" style="flex:1">Reason (optional): Alchemy recipe...</span><span class="btn">When: no deadline</span><span class="btn">+ Keep</span></div></div>'
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">'
+    + kc("🌿", "Moonleaf herb", "q2", "12 (8 bank) · Alchemy recipe", '<span class="y">level 35 — 7 to go</span>')
+    + kc("✨", "Glimmer dust", "", "5 · Enchanting", '<span class="g">ready</span>')
+    + kc("🦎", "Marsh leather", "", "20 (20 bank) · bag for my alt", '<span class="dim">no deadline</span>')
+    + kc("🍖", "Old boar meat", "q0", "3 · village quest", '<span class="dim">no deadline</span>') + '</div>'
+    '<div class="hpan"><h4>Reminders<small>only in your chat; nothing is sent</small></h4>'
+    '<div class="tk"><span class="box">✓</span>Remind me when I open a merchant</div><div class="tk"><span class="box">✓</span>Tell me when the time comes</div></div></div>')
+page("farol-22-hub-tasks-notes-kept", '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:64px">'
+     f'<div style="display:flex;gap:20px">{hub_small("Tasks", tasks_main)}{hub_small("Notes", notes_main)}</div>{hub_small("Kept items", keep_main)}</div>',
+     "Tasks, notes and kept items in cards", "Tarefas, anotações e guardados em cartões (Central do Farol)", HCSS + TCSS + KCSS)
 print("pages ok")

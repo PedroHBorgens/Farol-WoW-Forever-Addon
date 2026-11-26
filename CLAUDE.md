@@ -316,6 +316,12 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   `Track`/`SetTrack`) para as próximas telas (só no estilo detalhado; o simples fica como está). Profissões: graus pelo
   limite (75/150/225/300/375), ganho da sessão em `profStart` (só memória, anotado no `PLAYER_ENTERING_WORLD`).
   Personagens: `ns.CharDetails()` (Core) = personagens do reino com descanso estimado/real e instâncias ativas.
+  **3.29:** janela encaixada com `frame.farolDetail(on)` (+ `frame.farolDetailSize` opcional) ganha o visual em
+  cartões só dentro da Central: `Dock` chama `Skin` (fundo/borda transparentes, esconde `farolBacking` e o título),
+  aplica o tamanho e chama `farolDetail(true)`; `Release` desfaz e chama `farolDetail(false)` (que volta ao layout
+  simples: `SimpleLayout` em Tasks/Keep). Painéis com `Hub.Kit.Panel(frame, chave, x, y, w, h)` (fundo + borda +
+  título + subtítulo, em `frame.farolPanels`), `Kit.ShowPanels`, `Kit.Bar`/`SetBar`. O medalhão usa o caminho da
+  textura (`Interface\\AddOns\\Farol\\Media\\Farol`), nunca `ns.ICON` (é um código `|T…|t` de chat).
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 
@@ -399,6 +405,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Itens guardados (janela, lembretes, tooltip do item) | 19 (e 02/03 pela contagem de itens) |
 | Central do Farol (estilo detalhado: moldura, barra lateral, cartões) | 20 |
 | Central: páginas Profissões e Personagens | 21 |
+| Central: Tarefas, Anotações e Guardados em cartões | 22 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

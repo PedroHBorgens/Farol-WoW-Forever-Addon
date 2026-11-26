@@ -7,7 +7,7 @@ local function all(H) return H.strip(table.concat(H.msgs, "\n")) end
 
 -- Código do addon sem comentários (para as varreduras de texto).
 local FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua",
-                "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua",
+                "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua",
                 "MinimapButton.lua" }
 local function source(file)
     local f = assert(io.open("Farol/" .. file, "r"))

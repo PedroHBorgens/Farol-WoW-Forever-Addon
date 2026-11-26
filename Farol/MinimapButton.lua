@@ -103,6 +103,8 @@ function MinimapButton.Click(button)
     elseif button == "RightButton" then
         local hidden = ns.SetAllBarsHidden and ns.SetAllBarsHidden(not ns.AllBarsHidden())
         Print(hidden and T("mm_bars_hidden") or T("mm_bars_shown"))
+    elseif ns.Hub and ns.Hub.Enabled() then
+        ns.Hub.Toggle() -- estilo detalhado: abre a Central do Farol
     else
         if ns.OpenOptions then ns.OpenOptions("bar") end
     end

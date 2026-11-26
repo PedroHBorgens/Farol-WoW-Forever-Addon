@@ -50,7 +50,7 @@ return {
     { "tampered saved data with wrong types never breaks any window", function(T, Mock)
         local KEYS = { "x", "y", "point", "lang", "scale", "bgAlpha", "fontSize", "iconSize", "barWidth", "items",
                        "alarms", "loot", "warnings", "order", "snoozeMinutes", "shown", "locked", "icons", "vertical",
-                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind", "questRecord", "questShowOld", "completed", "questNames", "notesButton", "keep", "keepMerchant", "keepReady", "keepTooltip" }
+                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind", "questRecord", "questShowOld", "completed", "questNames", "notesButton", "keep", "keepMerchant", "keepReady", "keepTooltip", "hub" }
         for i = 1, 60 do
             local db = {}
             for _, key in ipairs(KEYS) do if random(3) > 1 then db[key] = pick(BAD) end end
@@ -111,7 +111,7 @@ return {
                 local H = Mock.new():login(db, char)
                 H:event("PLAYER_ENTERING_WORLD", true, false) -- mostra o resumo salvo (se ficou válido)
                 H:update(1)
-                for _, cmd in ipairs({ "menu", "saque", "historico", "ordem", "alarme", "aviso", "aparencia", "resumo", "meta", "farm", "diagnostico", "chat", "notas", "guardar" }) do
+                for _, cmd in ipairs({ "menu", "saque", "historico", "ordem", "alarme", "aviso", "aparencia", "resumo", "meta", "farm", "diagnostico", "chat", "notas", "guardar", "central" }) do
                     H:slash(cmd)
                 end
             end)

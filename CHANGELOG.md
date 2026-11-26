@@ -2,6 +2,19 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.27.0 — Farol hub (detailed style)
+- New **detailed style**: the **Farol hub**, one panel with a side bar (Home · Characters · Goals · Quests ·
+  Professions · Tasks · Notes · Kept items · Dungeons · Loot · Alarms · Warnings · Settings). Off by default: the
+  **simple style** works as always. Turn it on with `/farol hub` (PT `/farol central`), Menu > General > "Detailed
+  style (Farol hub)" or the button inside; `/farol hub off` or **Simple style** goes back. The minimap button opens the
+  hub when the detailed style is on.
+- **Home** in cards: this session (gold, gold/hour, XP, XP/hour, XP bar with rested), quests, tasks and resets, gear and
+  bags, notes, kept items, last warning, characters and professions; click a card to open its section.
+- **Characters** (this realm: level, gold, last seen) and **Professions** (bar up to the training limit) pages.
+- The usual windows open inside the hub (scaled to fit, dragging moves the hub) and go back to normal when closed or
+  when you switch to the simple style. The bar itself does not change. Read-only; nothing is sent.
+- Saved: `hub` (account, checked on load). New image 20. 780 tests (2 passes).
+
 ## 3.26.0 — Kept items
 - New **Kept items** window (`/farol keep`, Menu > Tools > Kept items...): an account list (up to 50) of items you want
   to hold on to, with an optional reason and **when** they become useful (no deadline, a character level or a

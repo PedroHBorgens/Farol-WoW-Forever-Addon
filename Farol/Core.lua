@@ -101,6 +101,7 @@ local DEFAULTS = {
     keepMerchant = false,   -- itens guardados: lembrar ao abrir um comerciante (3.26, desligado)
     keepReady = false,      -- itens guardados: avisar quando ficarem prontos (3.26, desligado)
     keepTooltip = false,    -- itens guardados: linha "guardado" no tooltip do item (3.26, desligado)
+    hub = false,            -- estilo detalhado: Central do Farol (3.27, desligado = estilo simples de sempre)
     fontSize = 11,          -- tamanho do texto da barra (8 a 24)
     iconSize = 14,          -- tamanho dos ícones da barra e dos botões ao lado (10 a 32)
 }
@@ -892,6 +893,7 @@ function ns.MakeToplevel(frame)
     if frame.HookScript then
         frame:HookScript("OnShow", function(self) self:Raise() end)
     end
+    if ns.Hub and ns.Hub.Watch then ns.Hub.Watch(frame) end -- estilo detalhado: a janela abre dentro da Central
 end
 -- Texto de apoio (dicas, "vazio"): cinza claro em vez da fonte apagada do jogo (contraste >= 4,5:1).
 function ns.Dim(fs)
@@ -2585,7 +2587,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes", "news_questvalue", "news_notesbutton", "news_keep" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes", "news_questvalue", "news_notesbutton", "news_keep", "news_hub" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -2602,7 +2604,7 @@ Profiles.NEWS_ITEM = { news_rep = "rep", news_reset = "reset", news_prof = "prof
                        news_tasks = "tasks", news_notes = "notes", news_goals = "goals", news_runs = "run", news_farm = "farm", news_quests = "quests",
                        news_hearth = "hearth", news_keep = "keep" }
 Profiles.NEWS_WARN = { news_breaks = "pause", news_questvalue = "questValue" }
-Profiles.NEWS_OPTION = { news_colors = "colorblind", news_sources = "sources" }
+Profiles.NEWS_OPTION = { news_colors = "colorblind", news_sources = "sources", news_hub = "hub" }
 
 -- Janela de chat das mensagens do Farol (3.20). O Farol só ESCREVE (AddMessage local) numa janela que o jogador já
 -- tem; nunca cria, renomeia ou configura abas (isso mudaria as configurações de chat do jogo). Nome salvo em
@@ -2741,7 +2743,15 @@ end
 -- Itens da barra: cada um devolve o texto que aparece no painel
 ---------------------------------------------------------------------------
 
-local ITEM_TEXT = {
+local ITEM_TEXT
+-- Texto de um item da barra (Central do Farol, 3.27): o mesmo da célula, protegido.
+function ns.ItemText(key)
+    local fn = ITEM_TEXT and ITEM_TEXT[key]
+    if not fn then return nil end
+    local ok, text = pcall(fn)
+    return ok and type(text) == "string" and text or nil
+end
+ITEM_TEXT = {
     fps = function()
         local fps = GetFPS()
         return string.format("%s%d|r fps", ColorHighIsGood(fps, 50, 25), fps)
@@ -3668,6 +3678,7 @@ local function SetLang(lang)
     db.lang = lang
     UpdateText()
     RefreshOptions()
+    if ns.Hub then ns.Hub.Refresh() end
     if ns.Alarm then ns.Alarm.Refresh() end
     if ns.Loot then ns.Loot.Refresh() end
     if ns.Warnings then ns.Warnings.Refresh() end
@@ -3999,6 +4010,7 @@ local function BuildControls(parent, top)
     set.minimapLock = CreateCheck(page, 330, -284, function(value) ns.MinimapButton.SetLocked(value) end)
     set.colorblind = CreateCheck(page, 20, -308, function(value) Profiles.SetColorblind(value) end)
     set.sources = CreateCheck(page, 20, -128, function(value) ns.Sources.SetEnabled(value) end)
+    set.hub = CreateCheck(page, 330, -180, function(value) ns.Hub.SetEnabled(value) end) -- 3.27: estilo detalhado
     set.chatLabel = page:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     set.chatLabel:SetPoint("TOPLEFT", 24, -82)
     set.chat = ns.CreateDropdown(page, "FarolChatWindow" .. index, 240, function() return Profiles.ChatItems() end)
@@ -4063,6 +4075,12 @@ local function BuildControls(parent, top)
         set.warnings = ns.Warnings.BuildControls(set.pages.warnings, index == 1 and "FarolPanelWarn" or "FarolWarn")
     end
 
+    ns.SetLang = SetLang -- Central do Farol (3.27)
+    function ns.SummaryNow()
+        pcall(SampleXP); pcall(SampleRep)
+        local ok, s = pcall(BuildSummary)
+        if ok then PrintSummary(s, false) end
+    end
     -- Aba "Ferramentas": um botão para cada janela, com o que ela faz.
     page = set.pages.tools
     local tools = {
@@ -4074,11 +4092,7 @@ local function BuildControls(parent, top)
         { "qdone", function() ns.Completed.ToggleWindow() end },
         { "loot", function() ns.Loot.ToggleWindow() end },
         { "history", function() ns.Warnings.ToggleHistory() end },
-        { "summary", function()
-            pcall(SampleXP); pcall(SampleRep)
-            local ok, s = pcall(BuildSummary)
-            if ok then PrintSummary(s, false) end
-        end },
+        { "summary", function() ns.SummaryNow() end },
         { "keep", function() ns.Keep.ToggleWindow() end }, -- 3.26 (no fim: os testes contam os botões por posição)
     }
     for i, entry in ipairs(tools) do
@@ -4151,6 +4165,8 @@ RefreshOptions = function()
         set.colorblind.label:SetText(T("opt_colorblind"))
         set.colorblind:SetChecked(db.colorblind)
         set.sources.label:SetText(T("opt_sources"))
+        set.hub.label:SetText(T("opt_hub"))
+        set.hub:SetChecked(db.hub)
         set.sources:SetChecked(db.sources)
         set.chatLabel:SetText(T("opt_chat"))
         set.chat:SetText(Profiles.ChatLabel())
@@ -4597,7 +4613,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_notes", "help_keep", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_chat", "help_diag", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_notes", "help_keep", "help_hub", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_chat", "help_diag", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -4682,6 +4698,8 @@ SlashCmdList["FAROL"] = function(msg)
         ns.Notes.HandleCommand(rest)
     elseif cmd == "guardar" or cmd == "guardados" or cmd == "keep" or cmd == "kept" then
         ns.Keep.HandleCommand(rest)
+    elseif cmd == "central" or cmd == "hub" or cmd == "painel" then
+        ns.Hub.HandleCommand(rest)
     elseif cmd == "tarefa" or cmd == "tarefas" or cmd == "task" or cmd == "tasks" then
         ns.Tasks.HandleCommand(rest)
     elseif cmd == "perfil" or cmd == "perfis" or cmd == "profile" or cmd == "profiles" then

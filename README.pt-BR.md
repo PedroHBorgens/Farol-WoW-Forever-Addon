@@ -68,6 +68,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol chat Nome`  | Em qual janela de chat o Farol escreve (ex.: uma aba "Farol"); `/farol chat principal` volta ao padrão |
 | `/farol origem on\|off` | Mostra de onde vem o XP e o ouro da sessão (missões, monstros, saque, comerciante) |
 | `/farol diagnostico` | Mostra no seu próprio chat como o jogo respondeu (personagem, reino, ouro, último logout, eventos); só leitura |
+| `/farol central`    | Central do Farol (estilo detalhado): todas as janelas num painel com barra lateral; `off` = estilo simples |
 | `/farol guardar`    | Itens guardados para depois: motivo, quando ficam úteis, lembretes (`[item]: motivo`, `lista`, `tirar N`, `desfazer`) |
 | `/farol notas`      | Bloco de notas da conta: até 10 anotações com caixinha de concluída (`nova Título`, `lista`, `desfazer`) |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
@@ -428,6 +429,24 @@ digitar. Abra com `/farol notas` ou **Anotações...** em Menu > Ferramentas.
 - Comandos: `/farol notas nova Título`, `/farol notas lista`, `/farol notas desfazer`, `/farol notas botao on|off`.
 - As anotações ficam só no seu computador; nada é enviado. O texto salvo é conferido ao carregar (tamanhos máximos,
   sem códigos do chat).
+
+## Central do Farol (estilo detalhado)
+
+Desde a 3.27 o Farol tem dois estilos. O **simples** (padrão) funciona como sempre: cada janela abre sozinha. O
+**detalhado** junta tudo num painel só, a **Central do Farol**: ligue com `/farol central` (ou Menu > Geral > "Estilo
+detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simples** volta.
+
+- Barra lateral com todas as seções: Início · Personagens · Metas · Missões · Profissões · Tarefas · Anotações ·
+  Guardados · Masmorras · Saques · Alarmes · Avisos · Configurações, e o nome e o nível do personagem embaixo.
+- **Início** mostra cartões: esta sessão (ouro, ouro por hora, XP, XP por hora e a barra de XP com o descansado),
+  missões, tarefas e resets, equipamento e bolsas, anotações, itens guardados, o último aviso e personagens e
+  profissões. Clique num cartão para abrir a seção.
+- **Personagens** lista seus personagens deste reino (nível, ouro, quando foram vistos) e **Profissões** cada
+  profissão com uma barra até o limite do treinamento.
+- As outras seções são as janelas de sempre, encaixadas na Central; arrastá-las move a Central. Com o estilo
+  detalhado ligado, qualquer janela do Farol (por comando, pelo menu ou pelo botão do minimapa) abre dentro dela.
+- No topo: idioma e **Estilo simples**; no rodapé: Resumo agora, Barra... e Aparência....
+- A barra em si não muda nos dois estilos. Só leitura; nada é enviado.
 
 ## Itens guardados (para depois)
 

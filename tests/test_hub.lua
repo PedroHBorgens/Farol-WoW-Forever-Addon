@@ -162,6 +162,66 @@ return {
         K:Hide(); T.ok(not card1.bg:IsShown()); T.eq(K.rows[1].pick._x, 22, "usual row back")
     end },
 
+    { "3.30: Goals in cards (gold, level, farm cards) inside the hub; usual layout outside", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" })
+        H.items[4306] = { "Tecido de Seda", 1, 150 }; H.itemCounts[4306] = 27
+        H:login({ hub = true })
+        H:slash("meta ouro 500"); H:slash("meta nivel 40")
+        H:slash("meta item |cffffffff|Hitem:4306::::::::60:::::|h[Tecido de Seda]|h|r 40")
+        H:slash("meta"); local W = H.env.FarolGoals
+        T.eq(W.farolDocked, true); T.eq(W:GetWidth(), 770)
+        local p = W.farolPanels
+        T.eq(H:text(p.gold.title), "Ouro"); T.eq(H:text(p.gold.sub), "meta 500g")
+        T.eq(H:text(p["text:gold1.l"].fs), "Você tem"); T.has(H:text(p["text:gold2.v"].fs), "376g")
+        T.eq(H:text(p.level.title), "Nível"); T.has(H:text(p.level.sub), "ao 40")
+        T.has(H:text(p["text:level2.v"].fs), "níveis")
+        T.eq(H:text(p.farm.title), "Farm (itens)"); T.has(H:text(p.farm.sub), "1 de 10")
+        T.ok(p.fcard1.bg:IsShown(), "card for the farm goal"); T.ok(not p.fcard2.bg:IsShown(), "no card without a goal")
+        T.ok(W.farmRows[1].icon:IsShown(), "item icon"); T.has(H:text(W.farmRows[1].text), "27/40")
+        T.ok(not W.farmRows[1].set:IsShown(), "Enter in the box sets the amount")
+        T.ok(not W.hint:IsShown()); T.eq(W._bgAlpha, 0)
+        W:Hide()
+        T.ok(not p.gold.bg:IsShown(), "panels hidden outside the hub"); T.ok(not W.farmRows[1].icon:IsShown())
+        H:slash("central off"); H:slash("meta")
+        T.ok(W.hint:IsShown()); T.ok(W.farmRows[1].set:IsShown()); T.eq(W.gold.box._x, 84, "usual layout back")
+        T.has(H:text(W.gold.status), "de 500g")
+    end },
+
+    { "3.30: Dungeons (now, averages, history) and Completed quests in cards inside the hub", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" })
+        local now = 1800000000
+        H.env.time = function(t) if t then return os.time(t) end return now end
+        H.env.GetInstanceInfo = function() return "Cripta Antiga", H.instanceType end
+        H:login({ hub = true, questRecord = true },
+            { runs = { list = { { n = "Torre", k = "party", t = now - 9000, s = 2400, x = 16000, g = 81200, l = 27, r = 0, e = 0, d = 1 },
+                                 { n = "Fortaleza", k = "raid", t = now - 90000, s = 6000, x = 30000, g = 140000, l = 58, r = 1, e = 0, d = 4 } } } })
+        H.instanceType = "party"; H:event("PLAYER_ENTERING_WORLD")
+        for _ = 1, 3 do now = now + 1; H:update(1) end
+        H:slash("masmorra"); local R = H.env.FarolRuns
+        T.eq(R.farolDocked, true)
+        local p = R.farolPanels
+        T.eq(H:text(p.now.title), "Agora: Cripta Antiga"); T.has(H:text(p.now.sub), "desde")
+        T.eq(H:text(p.avg.title), "Últimas 2"); T.eq(H:text(p["text:avg1.v"].fs), "1h 10m")
+        T.eq(H:text(p.hist.sub), "2 de 10 · deste personagem")
+        T.ok(p.row1.bg:IsShown()); T.ok(p.row2.bg:IsShown()); T.ok(not p.row3.bg:IsShown(), "no row card without a run")
+        now = now + 60; H:update(1)
+        T.eq(H:text(p["text:now1.v"].fs), "1m", "the current run updates live")
+        H.instanceType = nil; H:event("PLAYER_ENTERING_WORLD")
+        T.eq(H:text(p.now.title), "Corrida atual"); T.eq(H:text(p.avg.title), "Últimas 3", "the run went to the history")
+        R:Hide(); T.ok(not p.now.bg:IsShown())
+        local name, realm = H.ns.CurrentCharacter() -- 2ª passada: reino vazio e sobrenome (WoW Forever real)
+        H.env.FarolDB.completed = { [realm] = { [name] = { list = {
+            { i = 1520, n = "Lobos", l = 24, z = "Vale", t = now - 60 }, { i = 1521, n = "Ervas", t = now - 3 * 86400 } } } } }
+        H:slash("concluidas"); local C = H.env.FarolCompleted
+        T.eq(C.farolDocked, true)
+        local q = C.farolPanels
+        T.eq(H:text(q.list.title), "Últimas entregues"); T.eq(H:text(q["text:sum1.v"].fs), "2")
+        T.eq(H:text(q["text:sum2.v"].fs), "1", "turned in today"); T.eq(H:text(q["text:qd_col_zone"].fs), "Zona")
+        T.ok(not C.recorded:IsShown()); T.ok(not C.note:IsShown())
+        H:click(H.env.FarolCompletedRow1); T.ok(H.env.FarolCompletedLink:IsShown(), "link still works in the hub")
+        C:Hide(); T.ok(not q.list.bg:IsShown()); T.ok(C.recorded:IsShown(), "usual texts back outside the hub")
+    end },
+
     { "saved value is validated; English texts; language dropdown", function(T, Mock)
         for _, bad in ipairs({ "sim", 1, 0 / 0, {} }) do
             local X = Mock.new():login({ hub = bad })

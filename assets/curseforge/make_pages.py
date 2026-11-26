@@ -623,4 +623,48 @@ keep_main = ('<div class="hmain" style="display:block"><div class="hpan"><h4>Kee
 page("farol-22-hub-tasks-notes-kept", '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:64px">'
      f'<div style="display:flex;gap:20px">{hub_small("Tasks", tasks_main)}{hub_small("Notes", notes_main)}</div>{hub_small("Kept items", keep_main)}</div>',
      "Tasks, notes and kept items in cards", "Tarefas, anotações e guardados em cartões (Central do Farol)", HCSS + TCSS + KCSS)
+# 23. Hub: goals, completed quests and dungeons in cards (3.30)
+GCSS = """.trk{height:9px;border:1px solid #000;border-radius:3px;background:#222;overflow:hidden;margin:4px 0 3px;position:relative}.trk span{position:absolute;top:0;bottom:0;left:0}
+.st{display:flex;gap:30px}.st .dim{font-size:11px}.big{font-size:18px;font-weight:bold;color:#fff}
+.fc{border:1px solid #5a4520;border-radius:5px;background:#16120b;padding:5px 9px;font-size:12px}.fc .ki{font-size:20px;font-family:'Noto Color Emoji';margin-right:6px}
+.qr{display:grid;grid-template-columns:44px 1fr 150px 90px;gap:8px;padding:3px 4px;font-size:12px;border-bottom:1px solid #ffffff10}
+.qr.h{color:#ffb347;font-weight:bold;font-size:10.5px}.qr.sel{background:#3a2a0e;box-shadow:inset 3px 0 0 #ffd100}
+.rc{display:grid;grid-template-columns:1fr 64px 64px 84px 96px 50px;gap:6px;align-items:center;padding:4px 6px;font-size:12px;border:1px solid #5a452066;border-radius:4px;background:#15110a;margin-bottom:4px}"""
+def gtrk(p, color="#3fbf3f"): return f'<div class="trk"><span style="width:{p}%;background:{color}"></span></div>'
+def gfc(icon, name, cls, have, goal, pct, sess, eta, color="#ffd75a"):
+    return (f'<div class="fc"><div style="display:flex;align-items:center"><span class="ki">{icon}</span><span class="{cls}" style="flex:1">{name} {have}/{goal}</span>'
+            f'<span class="kin" style="width:40px;font-style:normal;color:#fff">{goal}</span><span class="btn" style="padding:0 5px;margin-left:8px">X</span></div>'
+            f'{gtrk(pct, color)}<div style="display:flex;justify-content:space-between" class="dim"><span>{sess}</span><span>{eta}</span></div></div>')
+def gstat(items): return '<div class="st">' + "".join(f'<div><div class="dim">{a}</div><div class="big">{b}</div></div>' for a, b in items) + '</div>'
+goals_main = ('<div class="hmain" style="display:block"><div style="display:flex;gap:8px">'
+    '<div class="hpan" style="flex:1"><h4>Gold<small>goal 500g</small></h4>' + gstat([("You have", '123<span class="gold">g</span> 45<span class="silver">s</span>'), ("Left", "376g"), ("At this pace", "~11h 50m")])
+    + gtrk(24) + '<div class="dim" style="font-size:11px">24% · 31g per hour this session</div><div style="display:flex;gap:6px;margin-top:5px"><span class="kin" style="width:70px;font-style:normal;color:#fff">500</span><span class="btn">Set</span><span class="btn">Clear</span></div></div>'
+    '<div class="hpan" style="flex:1"><h4>Level<small>from 24 to 30</small></h4>' + gstat([("Now", '26 <span class="dim" style="font-size:12px">72%</span>'), ("Left", "3.3 levels"), ("At this pace", "~9h 20m")])
+    + gtrk(45, "#7a4dff") + '<div class="dim" style="font-size:11px">45% of the way · 17800 XP per hour</div><div style="display:flex;gap:6px;margin-top:5px"><span class="kin" style="width:40px;font-style:normal;color:#fff">30</span><span class="btn">Set</span><span class="btn">Clear</span></div></div></div>'
+    '<div class="hpan"><h4>Farm (items)<small>3 of 10 · shift-click the item or "+ Goal" in the loot window</small></h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'
+    + gfc("🌿", "Moonleaf herb", "q2", 38, 60, 63, "+14 this session", "~40m")
+    + gfc("🪨", "Copper ore", "", 20, 20, 100, '<span class="g">reached</span>', "", "#3fbf3f")
+    + gfc("🐟", "Lake perch", "q1", 7, 40, 17, "+7 this session", "~1h 30m") + '</div></div>'
+    '<div class="hpan"><div class="tk"><span class="box">✓</span>Warn when a goal is reached (gold, level or farm)</div></div></div>')
+def gqr(l, n, z, t, sel=False): return f'<div class="qr{" sel" if sel else ""}"><span class="y">[{l}]</span><span>{n}</span><span class="dim">{z}</span><span class="dim">{t}</span></div>'
+quests_main = ('<div class="hmain" style="display:block"><div style="display:flex;gap:8px">'
+    '<div class="hpan" style="flex:1.5"><h4>Completed quests<small></small></h4><div style="display:flex;gap:6px;align-items:center"><span>Character:</span><span class="btn">Aldric — this one ▾</span><span class="kin" style="flex:1">search by name or ID...</span></div></div>'
+    '<div class="hpan" style="flex:1"><h4>Summary<small>on this computer only</small></h4>' + gstat([("Recorded", "146"), ("Today", "9"), ("Total in game", "412")]) + '</div></div>'
+    '<div class="hpan"><h4>Recently turned in<small>click a row for the Wowhead link</small></h4><div class="qr h"><span>Level</span><span>Quest</span><span>Zone</span><span>When</span></div>'
+    + gqr(24, "Wolves on the north road", "Mill Valley", "Today 21:42", True) + gqr(25, "A parcel for the smith", "Lighthouse Bay", "Today 21:10")
+    + gqr(25, "The lost diary", "Grey Hills", "Today 20:31") + gqr(23, "Herbs for the healer", "Mill Valley", "Yesterday")
+    + '<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><span class="dim" style="font-size:11px">Wowhead (Ctrl+C):</span><span class="kin" style="flex:1;font-style:normal;color:#fff">https://www.wowhead.com/forever/quest=1520</span></div></div>'
+    '<div class="hpan"><div class="tk"><span class="box">✓</span>Record turned-in quests (on this computer only; nothing is sent)</div></div></div>')
+def grc(n, tm, xp, gold, loot, dead): return f'<div class="rc"><span>{n}</span><span>{tm}</span><span class="blue">{xp}</span><span>{gold}</span><span>{loot}</span><span>{dead}</span></div>'
+runs_main = ('<div class="hmain" style="display:block"><div style="display:flex;gap:8px">'
+    '<div class="hpan" style="flex:1.2;border-color:#c9a24a"><h4>Now: Ancient Crypt<small>dungeon · since 21:05</small></h4>' + gstat([("Time", "37m"), ("XP", "+14.2k"), ("Gold", '+6<span class="gold">g</span> 40<span class="silver">s</span>'), ("Loot", "23 (2 rares)")]) + '</div>'
+    '<div class="hpan" style="flex:1"><h4>Last 10<small>average per run</small></h4>' + gstat([("Time", "42m"), ("XP", "+15.1k"), ("Gold", '+7<span class="gold">g</span> 10<span class="silver">s</span>')]) + '</div></div>'
+    '<div class="hpan"><h4>History<small>4 of 10 · this character</small></h4>'
+    + grc('Sunken Tower <span class="dim">· Today 19:40</span>', "48m", "+16.0k", "+8g 12s", "27 (1 rare)", "1")
+    + grc('Ancient Crypt <span class="dim">· Yesterday</span>', "39m", "+13.9k", "+6g 05s", "21", "0")
+    + grc('Stone Keep <span class="dim">· Nov 22</span>', "1h 52m", "+31.4k", "+14g 70s", "58 (1 epic)", '<span class="y">4</span>') + '</div>'
+    '<div class="hpan" style="display:flex;align-items:center"><div class="tk" style="flex:1"><span class="box">✓</span>Show the summary in chat when leaving</div><span class="btn">Clear history</span></div></div>')
+page("farol-23-hub-goals-quests-dungeons", '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:64px">'
+     f'<div style="display:flex;gap:20px">{hub_small("Goals", goals_main)}{hub_small("Quests", quests_main)}</div>{hub_small("Dungeons", runs_main)}</div>',
+     "Goals, completed quests and dungeons in cards", "Metas, missões concluídas e masmorras em cartões (Central do Farol)", HCSS + TCSS + KCSS + GCSS)
 print("pages ok")

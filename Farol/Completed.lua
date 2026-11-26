@@ -61,6 +61,10 @@ local STRINGS = {
         qd_empty_on   = "Nenhuma missão registrada ainda: entregue uma missão.",
         qd_no_match   = "Nenhuma missão com esse nome ou ID.",
         qd_scroll     = "%d–%d de %d",
+        qd_list_title = "Últimas entregues", qd_list_sub = "clique numa linha para o link do Wowhead",
+        qd_sum = "Resumo", qd_sum_sub = "só neste computador",
+        qd_stat_rec = "Registradas", qd_stat_today = "Hoje", qd_stat_total = "Total no jogo",
+        qd_col_quest = "Missão", qd_col_level = "Nível", qd_col_id = "ID", qd_col_zone = "Zona", qd_col_when = "Quando",
         qd_unknown    = "Missão",
         qd_rec_on     = "registro de missões entregues: ligado (só neste computador).",
         qd_rec_off    = "registro de missões entregues: desligado (a lista guardada continua).",
@@ -105,6 +109,10 @@ local STRINGS = {
         qd_turn_on    = "Turn on recording",
         qd_empty_on   = "No quests recorded yet: turn in a quest.",
         qd_no_match   = "No quest with that name or ID.",
+        qd_list_title = "Recently turned in", qd_list_sub = "click a row for the Wowhead link",
+        qd_sum = "Summary", qd_sum_sub = "on this computer only",
+        qd_stat_rec = "Recorded", qd_stat_today = "Today", qd_stat_total = "Total in game",
+        qd_col_quest = "Quest", qd_col_level = "Level", qd_col_id = "ID", qd_col_zone = "Zone", qd_col_when = "When",
         qd_scroll     = "%d–%d of %d",
         qd_unknown    = "Quest",
         qd_rec_on     = "recording turned-in quests: on (on this computer only).",
@@ -602,6 +610,8 @@ local window
 local selected     -- { realm, name } escolhido no menu (nil = o atual)
 local offset = 0   -- rolagem
 local search = ""
+local SimpleLayout, DetailLayout -- layout de sempre e o da Central (3.30), definidos depois da janela
+local DETAIL_W, DETAIL_H = 770, 480
 
 local function SetRecording(value)
     local db = DB()
@@ -821,10 +831,94 @@ local function CreateWindow()
     frame.linkLabel:Hide(); frame.link:Hide()
 
     frame:SetScript("OnShow", function() Completed.Refresh(); RefreshWindow() end)
+    -- Central do Farol (estilo detalhado, 3.30): escolha + busca, resumo, lista e opções em cartões.
+    frame.farolDetailSize = { DETAIL_W, DETAIL_H }
+    frame.farolDetail = function(on)
+        local Kit = ns.Hub and ns.Hub.Kit
+        if Kit then Kit.ShowPanels(frame, on) end
+        if not on then SimpleLayout(frame) end
+        RefreshWindow()
+    end
     tinsert(UISpecialFrames, "FarolCompleted") -- ESC fecha
     ns.MakeToplevel(frame)
     frame:Hide()
     return frame
+end
+
+SimpleLayout = function(frame)
+    frame.recorded:Show(); frame.known:Show(); frame.totalText:Show()
+    frame.charLabel:ClearAllPoints(); frame.charLabel:SetPoint("TOPLEFT", 24, -52)
+    frame.search:ClearAllPoints(); frame.search:SetPoint("TOPRIGHT", -30, -50); frame.search:SetWidth(200)
+    for i, row in ipairs(frame.rows) do
+        local y = -104 - (i - 1) * ROW_H
+        row.level:ClearAllPoints(); row.level:SetPoint("TOPLEFT", 26, y)
+        row.name:ClearAllPoints(); row.name:SetPoint("TOPLEFT", 64, y); row.name:SetWidth(240)
+        row.id:ClearAllPoints(); row.id:SetPoint("TOPLEFT", 310, y)
+        row.zone:ClearAllPoints(); row.zone:SetPoint("TOPLEFT", 380, y)
+        row.when:ClearAllPoints(); row.when:SetPoint("TOPRIGHT", -30, y)
+        row.click:ClearAllPoints(); row.click:SetPoint("TOPLEFT", 22, y + 3); row.click:SetWidth(596)
+    end
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 26, -110); frame.empty:SetWidth(580)
+    local bottom = -104 - ROWS * ROW_H - 10
+    frame.record:ClearAllPoints(); frame.record:SetPoint("TOPLEFT", 20, bottom)
+    frame.scrollInfo:ClearAllPoints(); frame.scrollInfo:SetPoint("TOPRIGHT", -30, bottom - 6)
+    frame.old:ClearAllPoints(); frame.old:SetPoint("TOPLEFT", 20, bottom - 24)
+    frame.note:ClearAllPoints(); frame.note:SetPoint("TOPLEFT", 24, bottom - 54); frame.note:SetWidth(590)
+    frame.linkLabel:ClearAllPoints(); frame.linkLabel:SetPoint("TOPLEFT", 24, bottom - 54)
+    frame.link:ClearAllPoints(); frame.link:SetPoint("TOPLEFT", 150, bottom - 50)
+end
+
+-- Quantas missões da lista foram entregues hoje (pelo relógio do computador).
+local function TodayCount(info)
+    if not info then return 0 end
+    local ok, now = pcall(time)
+    local okd, parts = pcall(date, "*t")
+    if not ok or type(now) ~= "number" or not okd or type(parts) ~= "table" then return 0 end
+    local start = now - ((parts.hour or 0) * 3600 + (parts.min or 0) * 60 + (parts.sec or 0))
+    local count = 0
+    for i = #info.list, 1, -1 do
+        local t = info.list[i].t
+        if type(t) == "number" and t >= start then count = count + 1 end
+    end
+    return count
+end
+
+DetailLayout = function(frame, info, total)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit then return end
+    local top = Kit.Panel(frame, "top", 8, -6, 470, 76)
+    top.title:SetText(T("qd_title")); top.sub:SetText("")
+    frame.charLabel:ClearAllPoints(); frame.charLabel:SetPoint("TOPLEFT", 20, -46)
+    frame.search:ClearAllPoints(); frame.search:SetPoint("TOPLEFT", 324, -42); frame.search:SetWidth(144)
+    local sum = Kit.Panel(frame, "sum", 486, -6, 276, 76)
+    sum.title:SetText(T("qd_sum")); sum.sub:SetText(T("qd_sum_sub"))
+    local values = { tostring(info and #info.list or 0), tostring(TodayCount(info)), total and tostring(total) or "--" }
+    local labels = { T("qd_stat_rec"), T("qd_stat_today"), T("qd_stat_total") }
+    for i = 1, 3 do Kit.Stat(frame, "sum" .. i, 498 + (i - 1) * 86, -32, 84, labels[i], values[i]) end
+    frame.recorded:Hide(); frame.totalText:Hide()
+    local list = Kit.Panel(frame, "list", 8, -90, 754, 316)
+    list.title:SetText(T("qd_list_title")); list.sub:SetText(T("qd_list_sub"))
+    local heads = { { "qd_col_level", 20 }, { "qd_col_quest", 60 }, { "qd_col_id", 360 }, { "qd_col_zone", 430 }, { "qd_col_when", 620 } }
+    for _, h in ipairs(heads) do Kit.Text(frame, h[1], "GameFontNormalSmall", h[2], -118, 120):SetText(T(h[1])) end
+    for i, row in ipairs(frame.rows) do
+        local y = -136 - (i - 1) * ROW_H
+        row.level:ClearAllPoints(); row.level:SetPoint("TOPLEFT", 20, y)
+        row.name:ClearAllPoints(); row.name:SetPoint("TOPLEFT", 60, y); row.name:SetWidth(290)
+        row.id:ClearAllPoints(); row.id:SetPoint("TOPLEFT", 360, y)
+        row.zone:ClearAllPoints(); row.zone:SetPoint("TOPLEFT", 430, y)
+        row.when:ClearAllPoints(); row.when:SetPoint("TOPRIGHT", -20, y)
+        row.click:ClearAllPoints(); row.click:SetPoint("TOPLEFT", 14, y + 3); row.click:SetWidth(742)
+    end
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 20, -142); frame.empty:SetWidth(720)
+    local foot = -136 - ROWS * ROW_H - 6
+    frame.known:ClearAllPoints(); frame.known:SetPoint("TOPLEFT", 20, foot - 4)
+    frame.scrollInfo:ClearAllPoints(); frame.scrollInfo:SetPoint("TOPRIGHT", -20, foot - 4)
+    frame.linkLabel:ClearAllPoints(); frame.linkLabel:SetPoint("TOPLEFT", 200, foot - 4)
+    frame.link:ClearAllPoints(); frame.link:SetPoint("TOPLEFT", 320, foot)
+    Kit.Panel(frame, "opts", 8, -414, 754, 62)
+    frame.record:ClearAllPoints(); frame.record:SetPoint("TOPLEFT", 18, -420)
+    frame.old:ClearAllPoints(); frame.old:SetPoint("TOPLEFT", 18, -442)
+    frame.note:Hide() -- na Central, o lugar da nota é o do link (rodapé da lista)
 end
 
 RefreshWindow = function()
@@ -882,6 +976,7 @@ RefreshWindow = function()
     if window.link:IsShown() then window.note:Hide() else window.note:Show() end
     window.old:SetChecked(ShowOld())
     window.old.label:SetText(T("qd_old"))
+    if window.farolDocked then DetailLayout(window, info, shownTotal) end
 end
 
 function Completed.ToggleWindow()

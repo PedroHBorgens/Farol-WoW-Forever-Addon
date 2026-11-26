@@ -2,7 +2,7 @@
 -- Gold and level goals: bar, tooltip, estimate from the session pace, window, commands, warning, tampered data.
 
 local function setup(Mock, opts, savedChar)
-    local H = Mock.new(opts):login(nil, savedChar)
+    local H = Mock.new(opts):login({ hub = false }, savedChar) -- estilo simples; a Central tem teste próprio (test_hub)
     H:slash("mostrar metas"); H:update(1)
     return H
 end

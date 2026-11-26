@@ -599,10 +599,36 @@ function Kit.Bar(frame, key)
     return b
 end
 
-function Kit.SetBar(b, x, y, w, pct, on)
+function Kit.SetBar(b, x, y, w, pct, on, r, g, bl)
+    if r then Fill(b.fill, r, g, bl, 1) end
     b.back:ClearAllPoints(); b.back:SetPoint("TOPLEFT", x, y); b.back:SetSize(w, 6)
     b.fill:ClearAllPoints(); b.fill:SetPoint("TOPLEFT", x, y); b.fill:SetSize(math.max(1, w * math.max(0, math.min(1, pct or 0))), 6)
     if on then b.back:Show(); b.fill:Show() else b.back:Hide(); b.fill:Hide() end
+end
+
+-- Texto solto de um painel (some junto com os painéis fora da Central). justify: "LEFT" (padrão) ou "RIGHT".
+function Kit.Text(frame, key, template, x, y, w, justify)
+    frame.farolPanels = frame.farolPanels or {}
+    local p = frame.farolPanels["text:" .. key]
+    if not p then
+        local fs = frame:CreateFontString(nil, "OVERLAY", template or "GameFontHighlight")
+        if fs.SetWordWrap then fs:SetWordWrap(false) end
+        p = { parts = { fs }, fs = fs }
+        frame.farolPanels["text:" .. key] = p
+    end
+    local fs = p.fs
+    fs:ClearAllPoints()
+    fs:SetWidth(w or 200)
+    fs:SetJustifyH(justify or "LEFT")
+    fs:SetPoint("TOPLEFT", x, y)
+    fs:Show()
+    return fs
+end
+
+-- Número em destaque com o rótulo pequeno em cima ("Você tem" / "123g 45s").
+function Kit.Stat(frame, key, x, y, w, label, value)
+    ns.Dim(Kit.Text(frame, key .. ".l", "GameFontHighlightSmall", x, y, w)):SetText(label or "")
+    Kit.Text(frame, key .. ".v", "GameFontHighlightLarge", x, y - 14, w):SetText(value or "--")
 end
 
 function Kit.Line(card, y, w)

@@ -226,7 +226,7 @@ return {
 
     { "clicking a quest shows its Wowhead link (WoW Forever section) to copy; read-only; English URL", function(T, Mock)
         local H = Mock.new({ locale = "ptBR" }); H.completedIDs = { 791, 5 }
-        H:login({ questRecord = true, questShowOld = true, completed = { Azralon = { Garrosh = { list = {
+        H:login({ hub = false, questRecord = true, questShowOld = true, completed = { Azralon = { Garrosh = { list = {
             { n = "Sem ID", t = 1700000000 }, { i = 1234, n = "Lobos", t = 1700000100 } } } } } })
         H:slash("concluidas")
         local W, link = H.env.FarolCompleted, H.env.FarolCompletedLink

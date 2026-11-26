@@ -58,6 +58,10 @@ local STRINGS = {
         run_clear_confirm = "Apagar %d corridas?",
         run_clear_confirm_1 = "Apagar %d corrida?",
         run_cleared   = "histórico de masmorras apagado.",
+        run_now       = "Agora: %s", run_now_none = "Corrida atual", run_now_hint = "entre numa masmorra ou raide",
+        run_since     = "%s · desde %s",
+        run_avg       = "Últimas %d", run_avg_1 = "Última %d", run_avg_sub = "médias por corrida",
+        run_hist      = "Histórico", run_hist_sub = "%d de %d · deste personagem",
         run_sum_on    = "resumo ao sair de masmorras: ligado.",
         run_sum_off   = "resumo ao sair de masmorras: desligado.",
         run_usage     = "uso: /farol masmorra || /farol masmorra resumo on||off || /farol masmorra limpar",
@@ -96,6 +100,10 @@ local STRINGS = {
         run_clear_confirm = "Delete %d runs?",
         run_clear_confirm_1 = "Delete %d run?",
         run_cleared   = "dungeon history cleared.",
+        run_now       = "Now: %s", run_now_none = "Current run", run_now_hint = "go into a dungeon or raid",
+        run_since     = "%s · since %s",
+        run_avg       = "Last %d", run_avg_1 = "Last %d", run_avg_sub = "average per run",
+        run_hist      = "History", run_hist_sub = "%d of %d · this character",
         run_sum_on    = "summary when leaving dungeons: on.",
         run_sum_off   = "summary when leaving dungeons: off.",
         run_usage     = "usage: /farol dungeon || /farol dungeon summary on||off || /farol dungeon clear",
@@ -246,6 +254,7 @@ local function Sample(run)
 end
 
 local RefreshWindow -- definida abaixo
+local window       -- janela (criada ao abrir)
 
 local function PrintSummary(run)
     if not (ns.GetDB() and ns.GetDB().runSummary) then return end
@@ -291,6 +300,7 @@ function Runs.Update()
         Sample(cur)
         cur.u = now
     end
+    if window and window.farolDocked and window:IsShown() then RefreshWindow() end -- Central: "Agora" ao vivo
 end
 
 function Runs.OnLoot(quality)
@@ -351,10 +361,12 @@ end
 -- Janela
 ---------------------------------------------------------------------------
 
-local window
 local COLS = { { "run_col_when", 22, 110 }, { "run_col_name", 136, 170 }, { "run_col_time", 312, 70 },
                { "run_col_xp", 386, 70 }, { "run_col_gold", 460, 90 }, { "run_col_loot", 554, 150 },
                { "run_col_deaths", 708, 60 } }
+
+local SimpleLayout, DetailLayout -- layout de sempre e o da Central (3.30), definidos depois da janela
+local DETAIL_W, DETAIL_H = 770, 500
 
 local function SetSummary(value)
     local db = ns.GetDB()
@@ -432,10 +444,87 @@ local function CreateWindow()
     frame.clear:SetScript("OnClick", function(self) ns.ConfirmClick(self, #Data().list, "run_clear_confirm", ClearHistory) end)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
+    -- Central do Farol (estilo detalhado, 3.30): corrida atual, médias e histórico em cartões.
+    frame.farolDetailSize = { DETAIL_W, DETAIL_H }
+    frame.farolDetail = function(on)
+        local Kit = ns.Hub and ns.Hub.Kit
+        if Kit then Kit.ShowPanels(frame, on) end
+        if not on then SimpleLayout(frame) end
+        RefreshWindow()
+    end
     tinsert(UISpecialFrames, "FarolRuns") -- ESC fecha
     ns.MakeToplevel(frame)
     frame:Hide()
     return frame
+end
+
+SimpleLayout = function(frame)
+    frame.hint:Show()
+    for i, col in ipairs(COLS) do
+        frame.header[i]:ClearAllPoints(); frame.header[i]:SetPoint("TOPLEFT", col[2], -66)
+    end
+    for r, row in ipairs(frame.rows) do
+        for i, col in ipairs(COLS) do
+            row[i]:ClearAllPoints(); row[i]:SetPoint("TOPLEFT", col[2], -88 - (r - 1) * 20)
+        end
+    end
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 22, -92)
+    local bottom = -96 - MAX_RUNS * 20
+    frame.summary:ClearAllPoints(); frame.summary:SetPoint("TOPLEFT", 20, bottom)
+    frame.clear:ClearAllPoints(); frame.clear:SetPoint("TOPRIGHT", -24, bottom)
+end
+
+DetailLayout = function(frame)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit then return end
+    local data = Data()
+    local list, cur, now = data.list, data.cur, Now()
+    frame.hint:Hide()
+    -- Corrida atual
+    local live = Kit.Panel(frame, "now", 8, -6, 400, 86)
+    local labels = { T("run_col_time"), T("run_col_xp"), T("run_col_gold"), T("run_col_loot") }
+    local values = {}
+    if cur and now then
+        live.title:SetText(string.format(T("run_now"), cur.n))
+        local since = ""
+        local ok, text = pcall(date, "%H:%M", math.floor(cur.t))
+        if ok and text then since = text end
+        live.sub:SetText(string.format(T("run_since"), Kind(cur), since))
+        values = { Duration(now - cur.t), "+" .. Short(cur.x), Gold(cur.g), LootText(cur) }
+    else
+        live.title:SetText(T("run_now_none"))
+        live.sub:SetText(T("run_now_hint"))
+    end
+    for i = 1, 4 do Kit.Stat(frame, "now" .. i, 20 + (i - 1) * 96, -32, 92, labels[i], values[i] or "--") end
+    -- Médias das últimas corridas
+    local avg = Kit.Panel(frame, "avg", 416, -6, 346, 86)
+    avg.title:SetText(string.format(ns.TN("run_avg", #list), #list))
+    avg.sub:SetText(T("run_avg_sub"))
+    local s, x, g = 0, 0, 0
+    for _, run in ipairs(list) do s, x, g = s + run.s, x + run.x, g + run.g end
+    local n = #list
+    local avgs = n > 0 and { Duration(s / n), "+" .. Short(x / n), Gold(g / n) } or {}
+    for i = 1, 3 do Kit.Stat(frame, "avg" .. i, 428 + (i - 1) * 110, -32, 106, labels[i], avgs[i] or "--") end
+    -- Histórico
+    local hist = Kit.Panel(frame, "hist", 8, -100, 754, 346)
+    hist.title:SetText(T("run_hist"))
+    hist.sub:SetText(string.format(T("run_hist_sub"), n, MAX_RUNS))
+    for i, col in ipairs(COLS) do
+        frame.header[i]:ClearAllPoints(); frame.header[i]:SetPoint("TOPLEFT", col[2] - 4, -128)
+    end
+    for r, row in ipairs(frame.rows) do
+        local y = -150 - (r - 1) * 28
+        local card = Kit.Panel(frame, "row" .. r, 16, y + 6, 738, 24)
+        card.title:SetText(""); card.sub:SetText("")
+        for _, part in ipairs(card.parts) do if list[n - r + 1] then part:Show() else part:Hide() end end
+        for i, col in ipairs(COLS) do
+            row[i]:ClearAllPoints(); row[i]:SetPoint("TOPLEFT", col[2] - 4, y)
+        end
+    end
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 22, -152)
+    Kit.Panel(frame, "bottom", 8, -454, 754, 40)
+    frame.summary:ClearAllPoints(); frame.summary:SetPoint("TOPLEFT", 18, -461)
+    frame.clear:ClearAllPoints(); frame.clear:SetPoint("TOPRIGHT", -18, -462)
 end
 
 RefreshWindow = function()
@@ -459,6 +548,7 @@ RefreshWindow = function()
     window.summary.label:SetText(T("run_summary"))
     window.clear.farolAsk = nil
     window.clear:SetText(T("run_clear"))
+    if window.farolDocked then DetailLayout(window) end
 end
 
 function Runs.ToggleWindow()

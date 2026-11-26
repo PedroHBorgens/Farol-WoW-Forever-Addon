@@ -38,7 +38,7 @@ return {
     end },
 
     { "news line says the option is off and where to turn it on", function(T, Mock)
-        local H = Mock.new():login({ items = { fps = true }, newsSeen = #Mock.new():login().ns.NEWS - 12 })
+        local H = Mock.new():login({ items = { fps = true }, newsSeen = #Mock.new():login().ns.NEWS - 13 })
         T.has(all(H), "cores para daltonismo (azul, amarelo e laranja) e janelas mais legíveis — desligado (ligue em Menu > Geral)")
     end },
 
@@ -76,7 +76,7 @@ return {
 
     { "status colors come only from the palette (so the colorblind option reaches every module)", function(T)
         for _, file in ipairs({ "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua",
-                                "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "MinimapButton.lua" }) do
+                                "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua", "MinimapButton.lua" }) do
             local f = io.open("Farol/" .. file, "r"); local code = f:read("*a"); f:close()
             for _, literal in ipairs({ "|cff40ff40", "|cff00ff00", "|cffffff3a", "|cffff4040", "|cffff3333", "|cffff6666", "|cff888888" }) do
                 T.ok(not code:find(literal, 1, true), file .. " uses " .. literal .. " (use ns.C.good/warn/bad/dim)")

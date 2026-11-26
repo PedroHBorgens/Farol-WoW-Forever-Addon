@@ -68,6 +68,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol chat Name`  | Which chat window Farol writes to (e.g. a tab named "Farol"); `/farol chat main` goes back |
 | `/farol source on\|off` | Show where the session's XP and gold come from (quests, monsters, loot, merchant) |
 | `/farol diag`       | Shows in your own chat how the game answered (character, realm, gold, last logout, events); read-only |
+| `/farol hub`        | Farol hub (detailed style): every window in one panel with a side bar; `off` = simple style |
 | `/farol keep`       | Items kept for later: reason, when they become useful, reminders (`[item]: reason`, `list`, `remove N`, `undo`) |
 | `/farol notes`      | Account notepad: up to 10 notes with a done checkbox (`new Title`, `list`, `undo`) |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
@@ -419,6 +420,24 @@ with `/farol notes` or **Notes...** in Menu > Tools.
 - **Key binding** of your choice: Esc → Options → Keybindings → AddOns → Farol → "Notes" (Farol sets no key).
 - Commands: `/farol notes new Title`, `/farol notes list`, `/farol notes undo`, `/farol notes button on|off`.
 - The notes stay on your computer; nothing is sent. Saved text is checked on load (size limits, no chat codes).
+
+## Farol hub (detailed style)
+
+Since 3.27 Farol has two styles. **Simple** (the default) works as always: each window opens on its own. **Detailed**
+puts everything in one panel, the **Farol hub**: turn it on with `/farol hub` (or Menu > General > "Detailed style
+(Farol hub)"); `/farol hub off` or the **Simple style** button goes back.
+
+- A side bar with every section: Home · Characters · Goals · Quests · Professions · Tasks · Notes · Kept items ·
+  Dungeons · Loot · Alarms · Warnings · Settings, and your character's name and level at the bottom.
+- **Home** shows cards: this session (gold, gold per hour, XP, XP per hour and the XP bar with rested), quests, tasks
+  and resets, gear and bags, notes, kept items, the last warning, and characters and professions. Click a card to open
+  its section.
+- **Characters** lists your characters on this realm (level, gold, when they were last seen) and **Professions** each
+  profession with a bar up to the training limit.
+- The other sections are the usual windows, placed inside the hub; dragging them moves the hub. With the detailed
+  style on, opening any Farol window (by command, the menu or the minimap button) opens it inside the hub.
+- At the top: language and **Simple style**; at the bottom: Summary now, Bar... and Appearance....
+- The bar itself does not change in either style. Read-only; nothing is sent.
 
 ## Kept items (for later)
 

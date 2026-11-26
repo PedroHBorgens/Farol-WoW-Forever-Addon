@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "MinimapButton.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua", "MinimapButton.lua" }
 
 local function noop() end
 
@@ -39,6 +39,8 @@ function Frame:Hide()
     if self._scripts.OnHide then self._scripts.OnHide(self) end
 end
 function Frame:IsShown() return self._shown end
+function Frame:GetName() return self._name end
+function Frame:SetParent(parent) self._parent = parent end
 function Frame:IsVisible() return self._shown end
 
 function Frame:SetSize(w, h) self._w, self._h = w, h end

@@ -177,7 +177,7 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Notes, Goals, Farm, Keep, Quests, Hearth, Runs, Completed, Sources, Diag, MinimapButton
+                    Appearance, Order, Tasks, Notes, Goals, Farm, Keep, Quests, Hearth, Runs, Completed, Sources, Diag, Hub, MinimapButton
   Core.lua          barras (até 3, grade de células), 31 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
@@ -203,6 +203,8 @@ Farol/
                     jogador ligar, total do jogo; /farol concluidas)
   Sources.lua       de onde vem o XP e o ouro (opção "sources", desligada; tooltips XP/ouro, resumo, /farol origem)
   Diag.lua          /farol diagnostico: leituras cruas do jogo, último logout e contagem de eventos (só leitura)
+  Hub.lua           Central do Farol (3.27, estilo detalhado, `db.hub` desligado): barra lateral, página Início em
+                    cartões, Personagens, Profissões; as janelas de sempre encaixadas (/farol central)
   MinimapButton.lua botão próprio no minimapa (sem bibliotecas) + entrada AddonCompartment do .toc (/farol minimapa)
   Bindings.xml      atalhos de teclado oficiais (só abrem janelas: histórico de avisos e anotações; nenhuma tecla definida)
   Media/Farol.tga   ícone original (64×64)
@@ -303,6 +305,12 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 - **Caixa de várias linhas (3.24.1):** um `EditBox` com `SetMultiLine(true)` fora de um ScrollFrame só aceita clique
   na altura do texto (vazio = uma linha fina) e pode ficar por baixo de um fundo com backdrop. Faça a caixa **filha**
   do fundo (fica por cima) e deixe o fundo com `EnableMouse(true)` + `OnMouseDown` → `caixa:SetFocus()` (Notes.lua).
+- **Central do Farol (3.27, Hub.lua):** estilo detalhado = `db.hub` (desligado). `ns.MakeToplevel` chama
+  `Hub.Watch(frame)`: as janelas listadas em `Hub.SECTIONS` (pelo nome, `FarolNotes` etc.) ganham `HookScript`
+  OnShow/OnHide; com o estilo ligado, ao abrir vão para `FarolHubContent` (`SetParent`, `SetScale` para caber, arrastar
+  move a Central; `frame.farolDocked`/`farolUndock` guardam o que volta) e ao fechar voltam ao `UIParent`. Janela nova
+  que deve abrir na Central: entra em `SECTIONS`. Cartões da Início usam `ns.ItemText(item)` (o texto da célula da
+  barra, sem o rótulo); a página atualiza 1x/s só com a Central aberta. `ns.SetLang`, `ns.SummaryNow` exportados.
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 
@@ -384,6 +392,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Botão do minimapa e cores para daltonismo | 17 |
 | Bloco de notas (janela, item, tooltip) | 18 (e 02/03 pela contagem de itens) |
 | Itens guardados (janela, lembretes, tooltip do item) | 19 (e 02/03 pela contagem de itens) |
+| Central do Farol (estilo detalhado: moldura, barra lateral, cartões) | 20 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

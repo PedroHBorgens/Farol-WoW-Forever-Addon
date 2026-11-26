@@ -432,8 +432,9 @@ digitar. Abra com `/farol notas` ou **Anotações...** em Menu > Ferramentas.
 
 ## Central do Farol (estilo detalhado)
 
-Desde a 3.27 o Farol tem dois estilos. O **simples** (padrão) funciona como sempre: cada janela abre sozinha. O
-**detalhado** junta tudo num painel só, a **Central do Farol**: ligue com `/farol central` (ou Menu > Geral > "Estilo
+Desde a 3.27 o Farol tem dois estilos. O **simples** funciona como sempre: cada janela abre sozinha. O **detalhado**
+junta tudo num painel só, a **Central do Farol**. Desde a 3.28 uma **instalação nova** já começa no estilo detalhado;
+quem já usava o Farol continua como estava até escolher. Ligue com `/farol central` (ou Menu > Geral > "Estilo
 detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simples** volta.
 
 - Barra lateral com todas as seções: Início · Personagens · Metas · Missões · Profissões · Tarefas · Anotações ·
@@ -441,8 +442,12 @@ detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simple
 - **Início** mostra cartões: esta sessão (ouro, ouro por hora, XP, XP por hora e a barra de XP com o descansado),
   missões, tarefas e resets, equipamento e bolsas, anotações, itens guardados, o último aviso e personagens e
   profissões. Clique num cartão para abrir a seção.
-- **Personagens** lista seus personagens deste reino (nível, ouro, quando foram vistos) e **Profissões** cada
-  profissão com uma barra até o limite do treinamento.
+- **Profissões** (3.28): um cartão por profissão com o grau, uma trilha com as marcas 75 · 150 · 225 · 300 (verde = o
+  que você tinha, dourado = o que subiu nesta sessão, laranja = o limite do seu treinamento), os pontos ganhos na sessão
+  (e por hora) e o próximo passo ("procure um instrutor para treinar Perito") ao chegar no limite.
+- **Personagens** (3.28): tabela dos seus personagens deste reino (nível, ouro, descanso com barra, onde está a Pedra de
+  Regresso, quando foram vistos), as instâncias salvas (chefes, tempo para resetar) e quem está com o descanso cheio ou
+  quando vai estar.
 - As outras seções são as janelas de sempre, encaixadas na Central; arrastá-las move a Central. Com o estilo
   detalhado ligado, qualquer janela do Farol (por comando, pelo menu ou pelo botão do minimapa) abre dentro dela.
 - No topo: idioma e **Estilo simples**; no rodapé: Resumo agora, Barra... e Aparência....

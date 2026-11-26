@@ -71,7 +71,7 @@ return {
         local H = setup(Mock)
         H:slash("tarefa")
         local W = H.env.FarolTasks
-        T.ok(W:IsShown(), "window open"); T.eq(H.env.UISpecialFrames[#H.env.UISpecialFrames], "FarolTasks")
+        T.ok(W:IsShown(), "window open"); T.ok(table.concat(H.env.UISpecialFrames, ",", 1, #H.env.UISpecialFrames):find("FarolTasks", 1, true), "Esc closes it")
         T.ok(W.empty:IsShown(), "empty hint")
         H.env.FarolTaskName:SetText("Vender no leilão"); H:click(H.env.FarolTaskAdd)
         H:click(H.env.FarolTaskKind); T.eq(H.env.FarolTaskKind._text, "Tipo: Semanal")

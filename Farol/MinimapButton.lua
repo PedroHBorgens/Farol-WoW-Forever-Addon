@@ -23,6 +23,7 @@ ns.MinimapButton = MinimapButton
 local STRINGS = {
     pt = {
         mm_left       = "Clique: abrir o menu",
+        mm_left_hub   = "Clique: abrir a Central do Farol",
         mm_right      = "Clique direito: mostrar/esconder as barras",
         mm_shift      = "Shift + clique: avisos",
         mm_drag       = "Arraste para mover em volta do minimapa",
@@ -41,6 +42,7 @@ local STRINGS = {
     },
     en = {
         mm_left       = "Click: open the menu",
+        mm_left_hub   = "Click: open the Farol hub",
         mm_right      = "Right-click: show/hide the bars",
         mm_shift      = "Shift-click: warnings",
         mm_drag       = "Drag to move it around the minimap",
@@ -112,7 +114,7 @@ end
 
 local function FillTooltip(locked)
     GameTooltip:AddLine("Farol", 0.2, 0.8, 1)
-    GameTooltip:AddLine(T("mm_left"), 1, 1, 1)
+    GameTooltip:AddLine(T(ns.Hub and ns.Hub.Enabled() and "mm_left_hub" or "mm_left"), 1, 1, 1)
     GameTooltip:AddLine(T("mm_right"), 1, 1, 1)
     GameTooltip:AddLine(T("mm_shift"), 1, 1, 1)
     if locked ~= nil then GameTooltip:AddLine(locked and T("mm_locked") or T("mm_drag"), 0.6, 0.6, 0.6) end

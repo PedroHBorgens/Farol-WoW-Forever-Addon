@@ -7,6 +7,8 @@ local ON_ITEMS = { fps = true, ms = true, coords = true, zone = true, durab = tr
 local ON_WARNINGS = { durab = true, bags = true, sound = true, talents = true, ranks = true, prof = true }
 local ON_GENERAL = { shown = true, summary = true, runSummary = true, border = true, icons = true,
                      warnButton = true, lootButton = true }
+-- Ligado só em INSTALAÇÃO NOVA (quem já usa continua desligado), aprovado pelo dono: Central do Farol (3.28).
+local ON_NEW_INSTALL = { hub = true }
 -- Padrões "ligado se não estiver salvo" (x ~= false) permitidos: arquivo → quantos.
 local DEFAULT_TRUE_PATTERNS = { ["Alarm.lua"] = 1, ["Loot.lua"] = 1, ["MinimapButton.lua"] = 1 }
 local FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua",
@@ -56,6 +58,15 @@ return {
             T.ok(not H.env.FarolBar2 or not H.env.FarolBar2:IsShown(), "bar 2 off"); T.ok(not H.env.FarolBar3 or not H.env.FarolBar3:IsShown(), "bar 3 off")
             T.eq(#H.env.FarolDB.alarms, 0, "no alarms"); T.eq(#H.env.FarolCharDB.tasks, 0, "no tasks")
             T.eq(#H.env.FarolCharDB.farm, 0, "no farm goals"); T.eq(H.env.FarolCharDB.goals.gold, nil, "no goals")
+        end
+    end },
+
+    { "on only in a new install (owner-approved list); updating never turns them on", function(T, Mock)
+        local fresh = Mock.new():login()
+        local used = Mock.new():login({ items = { fps = true } })
+        for key in pairs(ON_NEW_INSTALL) do
+            T.eq(fresh.env.FarolDB[key], true, key .. ": on in a new install")
+            T.eq(used.env.FarolDB[key], false, key .. ": off for players who already use Farol")
         end
     end },
 

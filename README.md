@@ -423,17 +423,22 @@ with `/farol notes` or **Notes...** in Menu > Tools.
 
 ## Farol hub (detailed style)
 
-Since 3.27 Farol has two styles. **Simple** (the default) works as always: each window opens on its own. **Detailed**
-puts everything in one panel, the **Farol hub**: turn it on with `/farol hub` (or Menu > General > "Detailed style
-(Farol hub)"); `/farol hub off` or the **Simple style** button goes back.
+Since 3.27 Farol has two styles. **Simple** works as always: each window opens on its own. **Detailed** puts
+everything in one panel, the **Farol hub**. Since 3.28 a **new install** starts in the detailed style; if you already
+used Farol, nothing changes until you choose. Turn it on with `/farol hub` (or Menu > General > "Detailed style (Farol
+hub)"); `/farol hub off` or the **Simple style** button goes back.
 
 - A side bar with every section: Home · Characters · Goals · Quests · Professions · Tasks · Notes · Kept items ·
   Dungeons · Loot · Alarms · Warnings · Settings, and your character's name and level at the bottom.
 - **Home** shows cards: this session (gold, gold per hour, XP, XP per hour and the XP bar with rested), quests, tasks
   and resets, gear and bags, notes, kept items, the last warning, and characters and professions. Click a card to open
   its section.
-- **Characters** lists your characters on this realm (level, gold, when they were last seen) and **Professions** each
-  profession with a bar up to the training limit.
+- **Professions** (3.28): a card per profession with its rank, a track with the 75 · 150 · 225 · 300 marks (green =
+  what you had, gold = what you gained this session, orange = your training limit), points gained this session (and
+  per hour) and the next step ("find a trainer to learn Expert") when you reach the limit.
+- **Characters** (3.28): a table of your characters on this realm (level, gold, rested XP with a bar, where the
+  Hearthstone is bound, when they were last seen), their saved instances (bosses, time to reset) and who is fully
+  rested or when they will be.
 - The other sections are the usual windows, placed inside the hub; dragging them moves the hub. With the detailed
   style on, opening any Farol window (by command, the menu or the minimap button) opens it inside the hub.
 - At the top: language and **Simple style**; at the bottom: Summary now, Bar... and Appearance....

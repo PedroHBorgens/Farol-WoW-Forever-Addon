@@ -398,6 +398,7 @@ local STRINGS = {
         tt_shift_full = "Segure Shift para ver todas as informações.",
         tt_more      = "e mais %d",
         welcome1     = "Boas-vindas! A barra começa só com o básico: %s.",
+        welcome_hub  = "as janelas abrem na Central do Farol (estilo detalhado; /farol central abre). Prefere janelas soltas? /farol central off.",
         welcome2     = "há mais %d informações e vários avisos desligados — clique com o botão direito na barra para escolher (ou /farol menu). /farol ajuda lista os comandos.",
         news_title   = "novidades desde a sua última versão (a maioria vem desligada — ative no menu: clique direito na barra):",
         news_rep     = "reputação na barra",
@@ -756,6 +757,7 @@ local STRINGS = {
         tt_shift_full = "Hold Shift to see all information.",
         tt_more      = "and %d more",
         welcome1     = "Welcome! The bar starts with the basics only: %s.",
+        welcome_hub  = "windows open in the Farol hub (detailed style; /farol hub opens it). Prefer separate windows? /farol hub off.",
         welcome2     = "there are %d more items and several warnings turned off — right-click the bar to choose (or /farol menu). /farol help lists the commands.",
         news_title   = "new since your last version (most are off by default — turn them on in the menu: right-click the bar):",
         news_rep     = "reputation on the bar",
@@ -1062,6 +1064,9 @@ local function SanitizeDB(saved)
             clean.items[key] = ITEM_DEFAULTS[key] -- padrão do item (instalação nova)
         end
     end
+    -- Estilo detalhado (Central do Farol): aprovado pelo dono (3.28) só em INSTALAÇÃO NOVA (sem itens salvos).
+    -- Quem já usa o Farol continua no estilo simples até escolher (regra 8: atualizar nunca liga nada).
+    if saved.hub == nil and next(savedItems) == nil then clean.hub = true end
 
     return clean
 end
@@ -1782,6 +1787,41 @@ local function RestedAlts()
     return list
 end
 ns.RestedAlts = RestedAlts -- usado pelo aviso de "descanso cheio"
+
+-- Todos os personagens anotados deste reino, com descanso estimado e instâncias ativas (Central do Farol, 3.28).
+-- O personagem atual usa o descanso real do jogo. Só lê o que o Farol já anotou.
+function Profiles.CharDetails()
+    local name, realm = CurrentCharacter()
+    if not name or not db or type(db.chars) ~= "table" then return nil end
+    local list, now, total = {}, time(), 0
+    for charName, info in pairs(db.chars[realm] or {}) do
+        local row = { name = charName, level = info.level, gold = info.gold, t = info.t, bind = info.bind,
+                      current = charName == name, inn = info.inn, locks = {} }
+        if row.current and UnitXPMax and GetXPExhaustion then
+            local okMax, max = pcall(UnitXPMax, "player")
+            local okRest, rest = pcall(GetXPExhaustion)
+            local function Ok(v) return type(v) == "number" and v == v and v >= 0 and v <= 1e9 and not IsSecret(v) end
+            if okMax and Ok(max) and max > 0 then
+                rest = (okRest and Ok(rest)) and rest or 0
+                row.pct = math.floor(rest / max * 100 + 0.5); row.full = rest >= REST_CAP * max
+            end
+        else
+            row.pct, row.full, row.eta = EstimateRest(info, now)
+        end
+        for _, lock in ipairs(info.locks or {}) do
+            if lock.r > now then row.locks[#row.locks + 1] = { n = lock.n, k = lock.k, b = lock.b, left = lock.r - now } end
+        end
+        total = total + (info.gold or 0)
+        list[#list + 1] = row
+    end
+    table.sort(list, function(a, b)
+        if a.current ~= b.current then return a.current end
+        if (a.level or 0) ~= (b.level or 0) then return (a.level or 0) > (b.level or 0) end
+        return a.name < b.name
+    end)
+    return list, total
+end
+ns.CharDetails = function() return Profiles.CharDetails() end
 
 -- Outros personagens do reino com instâncias ainda salvas (bloqueios vencidos somem sozinhos).
 local function AltLockouts()
@@ -2723,6 +2763,7 @@ local function ShowOnboarding()
         local on, total = ItemCounts()
         Print(string.format(T("welcome1"), table.concat(shown, ", ")))
         Print(string.format(T("welcome2"), total - on))
+        if db.hub then Print(T("welcome_hub")) end
     else
         ShowNews(db.newsSeen)
     end

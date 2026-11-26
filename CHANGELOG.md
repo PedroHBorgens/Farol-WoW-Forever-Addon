@@ -2,6 +2,20 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.28.0 — Hub: professions and characters
+- **Professions** page (detailed style): a card per profession with its rank (Apprentice · Journeyman · Expert ·
+  Artisan), a track with the 75/150/225/300 marks — green = what you had at login, gold = gained this session, orange =
+  your training limit — points gained this session (per hour after 10 min) and the next step at the limit ("find a
+  trainer to learn Expert"). The session gain stays in memory only.
+- **Characters** page: table of your characters on this realm (current first; level, gold, rested XP with a bar,
+  Hearthstone location, last seen), their saved instances (bosses, time to reset) and rested XP (who is full, when the
+  others will be).
+- A shared style kit for the detailed style (card, line, track), to be used by the other hub screens next.
+- **New installs start in the detailed style** (approved by the owner). Players who already use Farol keep the simple
+  style until they choose (rule 8: updating never turns anything on). The welcome message says how to go back
+  (`/farol hub off`); the minimap tooltip says "open the Farol hub" in the detailed style.
+- Image 21 (professions and characters). 786 tests (2 passes).
+
 ## 3.27.0 — Farol hub (detailed style)
 - New **detailed style**: the **Farol hub**, one panel with a side bar (Home · Characters · Goals · Quests ·
   Professions · Tasks · Notes · Kept items · Dungeons · Loot · Alarms · Warnings · Settings). Off by default: the

@@ -448,6 +448,10 @@ detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simple
 - **Personagens** (3.28): tabela dos seus personagens deste reino (nível, ouro, descanso com barra, onde está a Pedra de
   Regresso, quando foram vistos), as instâncias salvas (chefes, tempo para resetar) e quem está com o descanso cheio ou
   quando vai estar.
+- **Tarefas, Anotações e Guardados** (3.29) em cartões: tarefas em duas colunas (diárias e semanais, cada uma com
+  "N de M", barra de progresso e o tempo até o reset); anotações com a lista à esquerda e o editor à direita
+  ("editada ..."); guardados em cartões com o ícone do item, a quantidade (com o banco), o motivo e quando dá para
+  usar. O estilo simples continua com as janelas de sempre.
 - As outras seções são as janelas de sempre, encaixadas na Central; arrastá-las move a Central. Com o estilo
   detalhado ligado, qualquer janela do Farol (por comando, pelo menu ou pelo botão do minimapa) abre dentro dela.
 - No topo: idioma e **Estilo simples**; no rodapé: Resumo agora, Barra... e Aparência....

@@ -11,6 +11,8 @@ local function setup(Mock, opts, saved)
     H.itemCounts[7001] = 4
     H.bankCounts = { [7001] = 8 }
     H.bagItems[2] = { [1] = { 7001, 4 } } -- nas bolsas: dá para achar pelo nome
+    saved = saved or {}
+    if saved.hub == nil then saved.hub = false end -- estilo simples; o layout da Central tem teste próprio (test_hub)
     H:login(saved)
     return H
 end

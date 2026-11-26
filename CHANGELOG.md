@@ -2,6 +2,16 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.29.0 — Hub: tasks, notes and kept items in cards
+- **Tasks** (detailed style): a "New task" panel on top and two columns, **Daily** and **Weekly**, each with "N of M",
+  the time to reset and a progress bar; the "warn before the reset" option in its own panel.
+- **Notes**: the list on the left ("N of M pending") and the editor on the right ("edited Today 20:27").
+- **Kept items**: a "Keep an item" panel, the items as cards in two columns (icon, name in the item's quality color,
+  count with the bank, reason and when you can use it) and the reminders in their own panel.
+- Only inside the hub: the simple style keeps the usual windows, and they go back to normal when you close the hub.
+- Fix: the Farol icon now shows in the top-left corner of the hub.
+- Image 22 (tasks, notes and kept items in the hub). 792 tests (2 passes).
+
 ## 3.28.0 — Hub: professions and characters
 - **Professions** page (detailed style): a card per profession with its rank (Apprentice · Journeyman · Expert ·
   Artisan), a track with the 75/150/225/300 marks — green = what you had at login, gold = gained this session, orange =

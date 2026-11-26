@@ -37,6 +37,8 @@ local STRINGS = {
         news_notesbutton = "botão das anotações ao lado da barra e tecla de atalho (Esc > Opções > Teclas de atalho > Farol); ligue o botão em Menu > Geral > Aparência...",
         note_title    = "Anotações",
         note_title_n  = "Anotações (%d/%d pendentes)",
+        note_pending_sub = "%d de %d pendentes",
+        note_edited   = "editada %s",
         note_empty    = "Nenhuma anotação ainda: clique em + Nova nota.",
         note_pick     = "Escolha uma anotação à esquerda (ou crie uma nova).",
         note_untitled = "(sem título)",
@@ -88,6 +90,8 @@ local STRINGS = {
         news_notesbutton = "notes button next to the bar and a key binding (Esc > Options > Keybindings > Farol); turn the button on in Menu > General > Appearance...",
         note_title    = "Notes",
         note_title_n  = "Notes (%d/%d pending)",
+        note_pending_sub = "%d of %d pending",
+        note_edited   = "edited %s",
         note_empty    = "No notes yet: click + New note.",
         note_pick     = "Pick a note on the left (or create a new one).",
         note_untitled = "(untitled)",
@@ -568,6 +572,11 @@ local function CreateWindow()
     ns.UndoBar(frame)
 
     frame:SetScript("OnShow", function() RefreshWindow() end)
+    frame.farolDetail = function(on) -- Central do Farol: cartões (Hub.Kit); fora dela, a janela de sempre
+        local Kit = ns.Hub and ns.Hub.Kit
+        if on then RefreshWindow() end
+        if Kit then Kit.ShowPanels(frame, on) end
+    end
     tinsert(UISpecialFrames, "FarolNotes") -- ESC fecha
     ns.MakeToplevel(frame)
     frame:Hide()
@@ -640,6 +649,16 @@ RefreshWindow = function(typing)
     local label = undo and (#undo == 1 and Title(undo[1].note) or string.format(ns.TN("note_restored_n", #undo), #undo))
     ns.ShowUndo(window, label and string.format(T("note_undo_line"), label), T("note_undo"))
     ns.UpdatePlaceholder(window.titleBox); ns.UpdatePlaceholder(window.textBox)
+    -- Central do Farol (estilo detalhado, 3.29): dois cartões, a lista à esquerda e a anotação aberta à direita.
+    local Kit = window.farolDocked and ns.Hub and ns.Hub.Kit
+    if Kit then
+        local left = Kit.Panel(window, "list", 12, -10, 274, 374)
+        left.title:SetText(T("note_title")); left.sub:SetText(total > 0 and string.format(T("note_pending_sub"), pending, total) or "")
+        local right = Kit.Panel(window, "editor", 292, -10, 516, 374)
+        local open = selected and list[selected]
+        right.title:SetText("")
+        right.sub:SetText(open and open.m and ns.FormatWhen and string.format(T("note_edited"), ns.FormatWhen(open.m)) or "")
+    end
 end
 
 function Notes.ToggleWindow()

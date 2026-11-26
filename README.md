@@ -439,6 +439,10 @@ hub)"); `/farol hub off` or the **Simple style** button goes back.
 - **Characters** (3.28): a table of your characters on this realm (level, gold, rested XP with a bar, where the
   Hearthstone is bound, when they were last seen), their saved instances (bosses, time to reset) and who is fully
   rested or when they will be.
+- **Tasks, Notes and Kept items** (3.29) in cards: tasks in two columns (daily and weekly, each with "N of M", a
+  progress bar and the time to reset); notes with the list on the left and the editor on the right ("edited ...");
+  kept items as cards with the item's icon, the count (bank included), the reason and when you can use it. The
+  simple style keeps the usual windows.
 - The other sections are the usual windows, placed inside the hub; dragging them moves the hub. With the detailed
   style on, opening any Farol window (by command, the menu or the minimap button) opens it inside the hub.
 - At the top: language and **Simple style**; at the bottom: Summary now, Bar... and Appearance....

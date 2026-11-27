@@ -1,6 +1,7 @@
 -- Alarmes: disparo, repetição a cada 30 s, soneca configurável, parar, dia seguinte, servidor, janela.
 -- Alarms: trigger, 30 s repeat, configurable snooze, stop, next day, server time, window.
 
+local function NoHub(saved) saved = saved or {}; if saved.hub == nil then saved.hub = false end; return saved end -- estilo simples (a Central tem teste próprio)
 local function at(H, hour, minute) H.clock.hour, H.clock.min = hour, minute end
 
 local function count(text)
@@ -11,10 +12,10 @@ end
 
 return {
     { "saved alarms are validated and names are cleaned", function(T, Mock)
-        local H = Mock.new():login({ alarms = {
+        local H = Mock.new():login(NoHub({ alarms = {
             { h = 7, m = 30, label = "Raid |cffff0000|Hitem:1|h[x]|h|r\n" .. string.rep("é", 50) },
             { h = 99, m = 1 }, "lixo", { h = 8, m = 0, server = true, enabled = false },
-        } })
+        } }))
         local alarms = H.env.FarolDB.alarms
         T.eq(#alarms, 2, "invalid alarms dropped")
         T.hasnt(alarms[1].label, "|", "no escape codes")
@@ -24,7 +25,7 @@ return {
     end },
 
     { "rings at the set time and repeats every 30 seconds", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login(NoHub())
         H:slash("alarme add 07:30 Raide")
         H:update(1); T.eq(H.sounds, 0, "not yet")
         at(H, 7, 30); H:update(1); T.eq(H.sounds, 1, "rang")
@@ -36,7 +37,7 @@ return {
     end },
 
     { "snooze (button uses the configured time) and stop", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login(NoHub())
         H:slash("alarme add 07:30")
         H:update(1); at(H, 7, 30); H:update(1)
         T.eq(H:text(H.env.FarolAlarmPopup.snooze), "Soneca (5 min)")
@@ -51,7 +52,7 @@ return {
     end },
 
     { "snooze time is configurable and one-off snooze keeps the setting", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login(NoHub())
         H:slash("alarme soneca 10"); T.eq(H.env.FarolDB.snoozeMinutes, 10)
         H:slash("alarme soneca 0"); H:slash("alarme soneca 99"); T.eq(H.env.FarolDB.snoozeMinutes, 10)
         H:slash("alarme add 09:00")
@@ -66,14 +67,14 @@ return {
     end },
 
     { "no false alarm in the same minute it is created", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login(NoHub())
         at(H, 7, 30)
         H:slash("alarme add 07:30")
         H:update(1); H:update(1); T.eq(H.sounds, 0)
     end },
 
     { "server-time alarms use the game clock", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login(NoHub())
         H:slash("alarme add 21:06 servidor Guilda")
         T.eq(H.env.FarolDB.alarms[1].server, true)
         H:update(1)
@@ -82,7 +83,7 @@ return {
     end },
 
     { "server-time alarms wait (no error) while the game reports an invalid time", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login(NoHub())
         H:slash("alarme add 21:06 servidor")
         H:update(1)
         for _, bad in ipairs({ 0 / 0, math.huge, 21.1, -1, "21" }) do
@@ -95,7 +96,7 @@ return {
     end },
 
     { "alarm commands: add, invalid time, list, enable/disable, remove, limit of 10", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login(NoHub())
         H:slash("alarme add 22:15 servidor Dormir")
         H:slash("alarme add 25:00"); T.has(H:lastMsg(), "horário inválido")
         H:slash("alarme add 6h05 Acordar cedo")
@@ -112,7 +113,7 @@ return {
     end },
 
     { "alarms window: add from the form (name cleaned) and set the snooze", function(T, Mock)
-        local H = Mock.new():login({ hub = false }) -- estilo simples
+        local H = Mock.new():login(NoHub({ hub = false })) -- estilo simples
         H:slash("alarme")
         local window = H.env.FarolAlarms
         T.ok(window:IsShown(), "window open")
@@ -134,7 +135,7 @@ return {
     end },
 
     { "alarms keep working with the panel hidden", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login(NoHub())
         H:slash("") -- esconde o painel
         T.ok(not H.env.FarolFrame:IsShown())
         H:slash("alarme add 07:30")

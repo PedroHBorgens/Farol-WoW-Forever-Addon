@@ -58,6 +58,7 @@ local STRINGS = {
         al_list_title = "alarmes:",
         al_list_empty = "nenhum alarme. Crie com /farol alarme add 07:30",
         al_more       = "+%d tocando",
+        al_popup_title = "Alarme", al_now_ringing = "tocando agora",
         al_next       = "Próximo", al_next_local = "pelo relógio do computador", al_next_server = "pelo relógio do servidor",
         al_next_none  = "nenhum alarme ligado", al_in = "em %s", al_now = "agora", al_off_word = "desligado",
         al_list       = "Alarmes", al_list_sub = "%d de 10 · marque para ligar", al_new_sub = "até 10",
@@ -70,6 +71,7 @@ local STRINGS = {
     en = {
         al_title      = "Alarms",
         al_hint       = "Up to 10 alarms. Tick the box to turn one on.",
+        al_popup_title = "Alarm", al_now_ringing = "ringing now",
         al_next       = "Next", al_next_local = "by your computer clock", al_next_server = "by the server clock",
         al_next_none  = "no alarm on", al_in = "in %s", al_now = "now", al_off_word = "off",
         al_list       = "Alarms", al_list_sub = "%d of 10 · tick to turn on", al_new_sub = "up to 10",
@@ -300,12 +302,43 @@ local function UpdatePopup()
         return
     end
     popup = popup or CreatePopup()
-    popup.title:SetText(ICON .. " " .. T("al_ringing"))
-    local text = Describe(active[1].alarm)
-    if #active > 1 then text = text .. "  " .. string.format(T("al_more"), #active - 1) end
-    popup.text:SetText(text)
     popup.snooze:SetText(string.format(T("al_snooze_btn"), SnoozeMinutes()))
     popup.stop:SetText(T("al_stop_btn"))
+    local Kit = ns.Hub and ns.Hub.Enabled and ns.Hub.Enabled() and ns.Hub.Kit
+    local alarm = active[1].alarm
+    if Kit then
+        -- Visual da Central (3.33): hora em destaque, nome, Local/Servidor e a borda mais clara enquanto toca.
+        popup:SetSize(400, 132)
+        Kit.Popup(popup, true, 400, 132, true)
+        popup.title:ClearAllPoints(); popup.title:SetPoint("TOPLEFT", 36, -9); popup.title:SetJustifyH("LEFT")
+        popup.title:SetText(T("al_popup_title"))
+        Kit.Text(popup, "more", "GameFontHighlightSmall", 150, -11, 140):SetText(#active > 1 and string.format(T("al_more"), #active - 1) or "")
+        popup.farolStripe = popup.farolStripe or popup:CreateTexture(nil, "ARTWORK")
+        Kit.Fill(popup.farolStripe, 1, 0.82, 0.2, 1)
+        popup.farolStripe:ClearAllPoints(); popup.farolStripe:SetPoint("TOPLEFT", 12, -42); popup.farolStripe:SetSize(4, 44)
+        popup.farolStripe:Show()
+        Kit.Text(popup, "time", "GameFontNormalHuge", 24, -46, 96):SetText(string.format("%02d:%02d", alarm.h, alarm.m))
+        popup.text:ClearAllPoints(); popup.text:SetPoint("TOPLEFT", 126, -44); popup.text:SetWidth(258)
+        popup.text:SetJustifyH("LEFT")
+        popup.text:SetText(alarm.label ~= "" and alarm.label or T("al_unnamed"))
+        ns.Dim(Kit.Text(popup, "kind", "GameFontHighlightSmall", 126, -64, 258)):SetText(
+            (alarm.server and T("al_server") or T("al_local")) .. " · " .. T("al_now_ringing"))
+        popup.snooze:ClearAllPoints(); popup.snooze:SetPoint("BOTTOMLEFT", 24, 14)
+        popup.stop:ClearAllPoints(); popup.stop:SetPoint("LEFT", popup.snooze, "RIGHT", 8, 0)
+    else
+        if popup.farolPanels and ns.Hub and ns.Hub.Kit then ns.Hub.Kit.Popup(popup, false) end
+        if popup.farolStripe then popup.farolStripe:Hide() end
+        popup:SetSize(380, 96)
+        popup.title:ClearAllPoints(); popup.title:SetPoint("TOP", 0, -16); popup.title:SetJustifyH("CENTER")
+        popup.title:SetText(ICON .. " " .. T("al_ringing"))
+        local text = Describe(alarm)
+        if #active > 1 then text = text .. "  " .. string.format(T("al_more"), #active - 1) end
+        popup.text:ClearAllPoints(); popup.text:SetPoint("TOP", popup.title, "BOTTOM", 0, -6); popup.text:SetWidth(340)
+        popup.text:SetJustifyH("CENTER")
+        popup.text:SetText(text)
+        popup.snooze:ClearAllPoints(); popup.snooze:SetPoint("BOTTOMLEFT", 20, 16)
+        popup.stop:ClearAllPoints(); popup.stop:SetPoint("BOTTOMRIGHT", -20, 16)
+    end
     popup:Show()
 end
 

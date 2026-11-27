@@ -2,8 +2,9 @@
 -- alça ◢ muda a largura (salva, validada; clique direito ou "Posição padrão" volta ao padrão).
 -- Warnings window: wrapped text, full-text tooltip, resizable width.
 
+local function NoHub(saved) saved = saved or {}; if saved.hub == nil then saved.hub = false end; return saved end -- estilo simples (a Central tem teste próprio)
 local function setup(Mock, warnings, opts)
-    local H = Mock.new(opts or { locale = "ptBR" }):login({ warnings = warnings })
+    local H = Mock.new(opts or { locale = "ptBR" }):login(NoHub({ warnings = warnings }))
     H.durability = { [1] = { 100, 100 } }; H:event("UPDATE_INVENTORY_DURABILITY"); H:update(1)
     return H
 end
@@ -71,9 +72,9 @@ return {
 
     { "saved width is validated; English texts; old client", function(T, Mock)
         for _, bad in ipairs({ -5, 300, 1e9, 0 / 0, 1 / 0, "900", true, 700.5 }) do
-            T.eq(Mock.new():login({ warnings = { popupW = bad } }).env.FarolDB.warnings.popupW, 0, "bad width -> default")
+            T.eq(Mock.new():login(NoHub({ warnings = { popupW = bad } })).env.FarolDB.warnings.popupW, 0, "bad width -> default")
         end
-        T.eq(Mock.new():login({ warnings = { popupW = 520 } }).env.FarolDB.warnings.popupW, 520)
+        T.eq(Mock.new():login(NoHub({ warnings = { popupW = 520 } })).env.FarolDB.warnings.popupW, 520)
         local E = setup(Mock, { pause = true, pauseMin = 15, water = true, waterMin = 15 }, { locale = "enUS" })
         minutes(E, 15)
         local row = E.env.FarolWarnRow1Line

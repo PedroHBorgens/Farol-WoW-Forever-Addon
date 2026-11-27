@@ -679,6 +679,71 @@ local function CreatePopup()
     return frame
 end
 
+-- Visual da Central (3.33, estilo detalhado): moldura do Farol, faixa colorida do nível, ícone do tipo e o aviso em
+-- título + detalhe. Desligado (estilo simples): tudo volta ao lugar de sempre.
+local KIND_ICON = {
+    durab = "Interface\\Icons\\Trade_BlackSmithing", bags = "Interface\\Icons\\INV_Misc_Bag_08",
+    ammo = "Interface\\Icons\\INV_Ammo_Arrow_02", reag = "Interface\\Icons\\INV_Misc_Dust_02",
+    talents = "Interface\\Icons\\Ability_Marksmanship", ranks = "Interface\\Icons\\INV_Misc_Book_09",
+    prof = "Interface\\Icons\\Trade_Engineering", restFull = "Interface\\Icons\\Spell_Nature_Sleep",
+    goals = "Interface\\Icons\\Ability_Hunter_SniperShot", questFull = "Interface\\Icons\\INV_Misc_Book_08",
+    questReady = "Interface\\Icons\\INV_Misc_Book_08", questLevel = "Interface\\Icons\\INV_Misc_Book_08",
+    hearthReady = "Interface\\Icons\\INV_Misc_Rune_01", tasks = "Interface\\Icons\\INV_Misc_Note_01",
+    pause = "Interface\\Icons\\Spell_Nature_TimeStop", water = "Interface\\Icons\\INV_Drink_07",
+}
+local KIND_LEVEL = { durab = "bad", ammo = "bad", reag = "bad", bags = "warn", questFull = "warn", tasks = "warn",
+    pause = "warn", water = "warn" } -- o resto é informação (faixa dourada)
+
+local function HubStyle() return ns.Hub and ns.Hub.Enabled and ns.Hub.Enabled() and ns.Hub.Kit and true or false end
+
+-- "Bolsas quase cheias: 2 espaços livres." vira título ("Bolsas quase cheias") + detalhe ("2 espaços livres.").
+local function TitleAndDetail(text)
+    text = tostring(text or "")
+    local a, b = string.match(text, "^(.-):%s+(.+)$")
+    if not a or a == "" or #a > 60 then a, b = string.match(text, "^(.-)%s+—%s+(.+)$") end
+    if not a or a == "" or #a > 60 then return text, nil end
+    return a, b
+end
+local function StyledText(entry)
+    local title, detail = TitleAndDetail(entry.text)
+    if not detail then return title end
+    return title .. "\n" .. ns.C.dim .. detail .. "|r"
+end
+
+local function Mark(owner, key)
+    owner.farolStripe = owner.farolStripe or owner:CreateTexture(nil, "ARTWORK")
+    owner.farolKind = owner.farolKind or owner:CreateTexture(nil, "ARTWORK")
+    owner.farolKind:SetSize(28, 28)
+    owner.farolKind:SetTexture(KIND_ICON[key] or "Interface\\Icons\\INV_Misc_Note_06")
+    if owner.farolKind.SetTexCoord then owner.farolKind:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+    local level = KIND_LEVEL[key]
+    local r, g, b = ns.Hub.Kit.ColorOf(level and ns.C[level] or nil)
+    ns.Hub.Kit.Fill(owner.farolStripe, r, g, b, 1)
+    owner.farolStripe:Show(); owner.farolKind:Show()
+end
+local function Unmark(owner)
+    if owner.farolStripe then owner.farolStripe:Hide() end
+    if owner.farolKind then owner.farolKind:Hide() end
+end
+
+local function StylePopup(on, group, width, height)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if Kit then Kit.Popup(popup, on, width, height) end
+    popup.title:ClearAllPoints()
+    if on then
+        popup.title:SetPoint("TOPLEFT", 36, -9); popup.title:SetJustifyH("LEFT")
+        popup.silence:ClearAllPoints(); popup.silence:SetPoint("BOTTOMLEFT", 14, 12)
+        popup.time:ClearAllPoints(); popup.time:SetPoint("BOTTOMRIGHT", -26, 12)
+    else
+        popup.title:SetPoint("TOP", 0, -16); popup.title:SetJustifyH("CENTER")
+        popup.silence:ClearAllPoints(); popup.silence:SetPoint("BOTTOMLEFT", 22, 16)
+        popup.time:ClearAllPoints(); popup.time:SetPoint("BOTTOMRIGHT", -26, 16)
+        Unmark(popup)
+        popup.text:ClearAllPoints(); popup.text:SetPoint("TOP", popup.title, "BOTTOM", 0, -6)
+        popup.text:SetJustifyH("CENTER")
+    end
+end
+
 Render = function()
     if #queue == 0 then
         groupMinutes = nil
@@ -691,9 +756,10 @@ Render = function()
     for i, row in ipairs(popup.rows) do
         if not (group and queue[i]) then row.entry = nil; row:Hide() end
     end
+    local styled = HubStyle()
     if group then
         local width = GroupWidth()
-        local textWidth = width - 40 - BUTTONS_WIDTH - 10
+        local textWidth = width - 40 - BUTTONS_WIDTH - 10 - (styled and 40 or 0)
         popup.title:SetText(string.format(T("warn_group_title"), #queue))
         popup.text:SetText("")
         popup.text:Hide()
@@ -703,8 +769,18 @@ Render = function()
             popup.rows[i] = row
             row.entry = entry
             row.text:SetWidth(textWidth)
-            row.text:SetText(entry.text)
-            local height = math.max(ROW_HEIGHT - 4, TextHeight(row.text, entry.text, textWidth) + 8)
+            local shown = styled and StyledText(entry) or entry.text
+            row.text:SetText(shown)
+            row.text:ClearAllPoints(); row.text:SetPoint("TOPLEFT", styled and 40 or 0, -4)
+            local height = math.max(ROW_HEIGHT - 4, TextHeight(row.text, shown, textWidth) + 8)
+            if styled then
+                height = math.max(height, 36)
+                Mark(row, entry.key)
+                row.farolStripe:ClearAllPoints(); row.farolStripe:SetPoint("TOPLEFT", 0, -2); row.farolStripe:SetSize(4, height - 4)
+                row.farolKind:ClearAllPoints(); row.farolKind:SetPoint("TOPLEFT", 8, -4)
+            else
+                Unmark(row)
+            end
             row:SetSize(width - 40, height)
             row:ClearAllPoints()
             row:SetPoint("TOPLEFT", 20, -y)
@@ -716,13 +792,31 @@ Render = function()
         popup:SetSize(width, y + 56)
         popup.silence:SetText(T("warn_silence_all"))
         popup.remind:SetText(string.format(T("warn_remind_all"), groupMinutes or DefaultMinutes()))
+        StylePopup(styled, true, width, y + 56)
+        Unmark(popup)
     else
         local width = SingleWidth()
         popup.title:SetText(T("warn_popup_title"))
-        popup.text:SetWidth(width - 40)
-        popup.text:SetText(queue[1].text)
-        popup.text:Show()
-        popup:SetSize(width, math.max(118, 104 + TextHeight(popup.text, queue[1].text, width - 40)))
+        if styled then
+            local textWidth = width - 80
+            local shown = StyledText(queue[1])
+            popup.text:SetWidth(textWidth)
+            popup.text:SetText(shown)
+            popup.text:Show()
+            local height = math.max(120, 96 + TextHeight(popup.text, shown, textWidth))
+            popup:SetSize(width, height)
+            StylePopup(true, false, width, height)
+            popup.text:ClearAllPoints(); popup.text:SetPoint("TOPLEFT", 54, -44); popup.text:SetJustifyH("LEFT")
+            Mark(popup, queue[1].key)
+            popup.farolStripe:ClearAllPoints(); popup.farolStripe:SetPoint("TOPLEFT", 12, -42); popup.farolStripe:SetSize(4, height - 84)
+            popup.farolKind:ClearAllPoints(); popup.farolKind:SetPoint("TOPLEFT", 20, -44)
+        else
+            popup.text:SetWidth(width - 40)
+            popup.text:SetText(queue[1].text)
+            popup.text:Show()
+            popup:SetSize(width, math.max(118, 104 + TextHeight(popup.text, queue[1].text, width - 40)))
+            StylePopup(false, false, width, 118)
+        end
         popup.silence:SetText(T("warn_silence_btn"))
         popup.remind:SetText(string.format(T("warn_remind_btn"), queue[1].minutes))
     end

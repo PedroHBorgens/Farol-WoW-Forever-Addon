@@ -1,6 +1,7 @@
 -- Descanso dos seus personagens: gravado ao sair, estimativa (regras do estilo clássico), tooltip, aviso opcional.
 -- Rested XP of your characters: saved on logout, classic-style estimate, tooltip, optional warning.
 
+local function NoHub(saved) saved = saved or {}; if saved.hub == nil then saved.hub = false end; return saved end -- estilo simples (a Central tem teste próprio)
 local H8 = 8 * 3600
 
 local function alts(now)
@@ -28,16 +29,16 @@ return {
     -- identidade (o resto do comportamento real, como o ouro 0 ao sair, continua valendo). Ver test_forever_real.lua.
     fixedIdentity = true,
     { "logout saves the rested XP, the level's XP and whether you are in an inn/city", function(T, Mock)
-        local H = Mock.new():login(); H.resting = true; H:update(1)
+        local H = Mock.new():login(NoHub()); H.resting = true; H:update(1)
         H:event("PLAYER_LOGOUT")
         local me = H.env.FarolDB.chars.Azralon.Garrosh
         T.eq(me.rest, 1500); T.eq(me.max, 10000); T.eq(me.inn, true)
-        local M = Mock.new():login(); M.xp.level = 60; M:update(1); M:event("PLAYER_LOGOUT")
+        local M = Mock.new():login(NoHub()); M.xp.level = 60; M:update(1); M:event("PLAYER_LOGOUT")
         T.eq(M.env.FarolDB.chars.Azralon.Garrosh.rest, nil, "max level: nothing to rest")
     end },
 
     { "tooltip estimates the rested XP of your other characters (classic rules)", function(T, Mock)
-        local H = Mock.new():login(alts(os.time())); fixGear(H); H:update(1)
+        local H = Mock.new():login(NoHub(alts(os.time()))); fixGear(H); H:update(1)
         local text = tip(H)
         T.has(text, "Descanso dos seus personagens (estimativa)")
         T.has(text, "Jaina (34) = 150%  cheio  estalagem/cidade")
@@ -54,10 +55,10 @@ return {
     end },
 
     { "optional warning (off by default): once at login when another character is full", function(T, Mock)
-        local H = Mock.new():login(alts(os.time())); fixGear(H); H:update(1)
+        local H = Mock.new():login(NoHub(alts(os.time()))); fixGear(H); H:update(1)
         T.eq(H.warnSounds, 0, "off by default")
         local saved = alts(os.time()); saved.warnings = { restFull = true }
-        local W = Mock.new():login(saved); fixGear(W); W:update(1)
+        local W = Mock.new():login(NoHub(saved)); fixGear(W); W:update(1)
         T.eq(W.warnSounds, 1)
         T.has(W:text(W.env.FarolWarnPopup.text), "Descanso cheio (150%): Jaina (34) — bom momento para jogar com eles.")
         W:click(W.env.FarolWarnRemindTime); W:click(W.env.FarolWarnRemindTimeEntry1) -- 2 min
@@ -76,7 +77,7 @@ return {
 
     { "no warning when nobody is full", function(T, Mock)
         local saved = alts(os.time()); saved.chars.Azralon.Jaina = nil; saved.warnings = { restFull = true }
-        local H = Mock.new():login(saved); fixGear(H); H:update(1)
+        local H = Mock.new():login(NoHub(saved)); fixGear(H); H:update(1)
         T.eq(H.warnSounds, 0)
     end },
 
@@ -88,7 +89,7 @@ return {
             C = { gold = 1, level = 10, t = now, rest = 10, max = 1e10 },
             D = { gold = 1, level = 10, t = now, rest = 10, max = 100, inn = "sim" },
         } } }
-        local H = Mock.new({ locale = "enUS" }):login(saved); fixGear(H); H:update(1)
+        local H = Mock.new({ locale = "enUS" }):login(NoHub(saved)); fixGear(H); H:update(1)
         local chars = H.env.FarolDB.chars.Azralon
         T.eq(chars.A.rest, nil); T.eq(chars.B.rest, nil); T.eq(chars.C.rest, nil)
         T.eq(chars.D.rest, 10); T.eq(chars.D.inn, false, "invalid inn flag becomes false")

@@ -311,6 +311,32 @@ return {
         T.ok(row.left:GetWidth() >= 150, "the label gets the width of its text (simulator: 150)")
     end },
 
+    { "3.32: Settings in cards inside the hub (same options, kept in sync); the usual menu outside", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true })
+        H:slash("central"); H.ns.Hub.Select("settings")
+        local W = H.env.FarolOptions
+        local d, simple = W.detailControls, W.controls
+        T.ok(d and d.detail, "a set of controls made for the hub")
+        T.ok(d.pages.bar:IsShown() and not simple.pages.bar:IsShown() and not simple.tabs.bar:IsShown(), "only the cards show")
+        local p = d.pages.bar.farolPanels
+        T.eq(H:text(p.barcard.title), "Barra"); T.eq(H:text(p.packcard.title), "Pacotes")
+        T.eq(H:text(p.grp1.title), "Desempenho"); T.has(H:text(p.grp1.sub), " de 3")
+        T.has(H:text(d.hint), "itens na barra")
+        H:click(d.items.mem) -- marca um item no cartão: o menu de sempre acompanha
+        T.eq(simple.items.mem:GetChecked() and true or false, H.env.FarolDB.items.mem and true or false)
+        H:click(d.tabs.warnings)
+        T.ok(d.pages.warnings:IsShown()); T.eq(H:text(d.pages.warnings.farolPanels.wgear.title), "Equipamento e bolsas")
+        H:click(d.tabs.general)
+        local g = d.pages.general.farolPanels
+        T.eq(H:text(g.lang.title), "Idioma"); T.has(H:text(g.restore.title), "Restaurar")
+        T.ok(not d.langHeader:IsShown(), "old section headers hidden in the cards")
+        H:slash("aviso"); T.ok(d.pages.warnings:IsShown(), "/farol aviso opens the Warnings card page inside the hub")
+        H.env.FarolHub:Hide()
+        H:slash("central off"); H:slash("menu")
+        T.ok(W:IsShown() and not W.farolDocked); T.ok(simple.tabs.bar:IsShown(), "usual tabs back")
+        T.ok(not d.tabs.bar:IsShown() and not d.pages.warnings:IsShown(), "cards hidden outside the hub")
+    end },
+
     { "saved value is validated; English texts; language dropdown", function(T, Mock)
         for _, bad in ipairs({ "sim", 1, 0 / 0, {} }) do
             local X = Mock.new():login({ hub = bad })

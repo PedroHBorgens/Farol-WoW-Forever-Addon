@@ -439,6 +439,10 @@ local STRINGS = {
         pfl_usage    = "uso: /farol perfil || /farol perfil conta || /farol perfil personagem || /farol perfil copiar Nome (ou conta) || /farol perfil desfazer",
         help_profile = "  /farol perfil        - perfil da conta ou só deste personagem; copiar de outro (\"copiar Nome\")",
         opt_bar      = "Editando:",
+        opt_card_bar = "Barra",       opt_card_bar_sub = "escolher não muda nada",
+        pk_card      = "Pacotes",     pk_card_sub = "só ligam o que você clicar",
+        opt_hint_count_short = "%d de %d itens na barra · passe o mouse num item para ver o que ele mostra",
+        warn_card_count = "%d de %d",
         bar_n        = "Barra %d",
         bar_off_short = "(desl.)",
         bar_on       = "ligada",
@@ -798,6 +802,10 @@ local STRINGS = {
         pfl_usage    = "usage: /farol profile || /farol profile account || /farol profile character || /farol profile copy Name (or account) || /farol profile undo",
         help_profile = "  /farol profile       - account profile or this character only; copy from another (\"copy Name\")",
         opt_bar      = "Editing:",
+        opt_card_bar = "Bar",         opt_card_bar_sub = "picking one changes nothing",
+        pk_card      = "Packs",       pk_card_sub = "only turn on what you click",
+        opt_hint_count_short = "%d of %d items on the bar · hover an item to see what it shows",
+        warn_card_count = "%d of %d",
         bar_n        = "Bar %d",
         bar_off_short = "(off)",
         bar_on       = "on",
@@ -3829,6 +3837,7 @@ function Profiles.Section(page, top, height, danger)
     local header = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     header:SetPoint("TOPLEFT", 20, top - 2)
     header.farolDanger, header.farolTop, header.farolHeight = danger, top, height
+    header.farolBox, header.farolLine = box, line -- a Central (3.32) esconde o fundo e o filete
     return header
 end
 
@@ -4126,7 +4135,8 @@ local function BuildControls(parent, top)
 
     -- Aba "Avisos": os controles do módulo de avisos (os do menu do Farol têm os nomes "FarolWarn...").
     if ns.Warnings and ns.Warnings.BuildControls then
-        set.warnings = ns.Warnings.BuildControls(set.pages.warnings, index == 1 and "FarolPanelWarn" or "FarolWarn")
+        set.warnings = ns.Warnings.BuildControls(set.pages.warnings,
+            index == 1 and "FarolPanelWarn" or (index == 2 and "FarolWarn" or "FarolHubWarn")) -- 3º conjunto: Central (3.32)
     end
 
     ns.SetLang = SetLang -- Central do Farol (3.27)
@@ -4240,8 +4250,98 @@ RefreshOptions = function()
             button:SetText(T("tool_" .. button.key))
             button.desc:SetText(T("tool_" .. button.key .. "_desc"))
         end
+        if set.detail and Profiles.DetailLayout then Profiles.DetailLayout(set) end
     end
     if ns.Warnings and ns.Warnings.RefreshControls then ns.Warnings.RefreshControls() end
+end
+
+-- Central do Farol (3.32): o menu em cartões. É um 3º conjunto de controles (feito só quando a aba Configurações
+-- da Central abre pela 1ª vez), arrumado aqui; o menu de sempre e o painel do jogo ficam como estão.
+function Profiles.DetailLayout(set)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit then return end
+    local function Put(region, x, y) region:ClearAllPoints(); region:SetPoint("TOPLEFT", x, y) end
+    local function HideSection(header)
+        header:Hide()
+        if header.farolBox then header.farolBox:Hide() end
+        if header.farolLine then header.farolLine:Hide() end
+    end
+    local function Card(page, key, x, y, w, h, title, sub)
+        local panel = Kit.Panel(page, key, x, y, w, h)
+        panel.title:SetText(title or ""); panel.sub:SetText(sub or "")
+        return panel
+    end
+    for _, key in ipairs(Profiles.TABS) do set.pages[key]:SetSize(770, 510) end
+    -- Barra
+    local page = set.pages.bar
+    Card(page, "barcard", 8, -2, 438, 74, T("opt_card_bar"), T("opt_card_bar_sub"))
+    set.barLabel:Hide()
+    for n, button in ipairs(set.bars) do Put(button, 20 + (n - 1) * 124, -30) end
+    Put(set.shown, 18, -54)
+    Card(page, "packcard", 454, -2, 308, 74, T("pk_card"), T("pk_card_sub"))
+    set.packBox:Hide(); set.packLabel:Hide()
+    for i, button in ipairs(set.packs) do
+        button:SetWidth(92)
+        Put(button, 466 + ((i - 1) % 3) * 96, -30 - math.floor((i - 1) / 3) * 26)
+    end
+    set.packUndo:SetWidth(92); Put(set.packUndo, 466 + (#set.packs % 3) * 96, -30 - math.floor(#set.packs / 3) * 26)
+    for g, group in ipairs(Profiles.GROUPS) do
+        local col, row = (g - 1) % 3, math.floor((g - 1) / 3)
+        local x, y, h = 8 + col * 254, row == 0 and -84 or -232, row == 0 and 140 or 206
+        local on = 0
+        for _, key in ipairs(group[2]) do if db.items[key] then on = on + 1 end end
+        local card = Card(page, "grp" .. g, x, y, 246, h, T(group[1]), string.format(T("warn_card_count"), on, #group[2]))
+        card.title:SetFontObject("GameFontNormal") -- título menor: "Equipamento e bolsas" + "1 de 5" cabem em 246
+        set.groups[g]:Hide()
+        for i, key in ipairs(group[2]) do Put(set.items[key], x + 8, y - 26 - (i - 1) * 22) end
+    end
+    Card(page, "foot", 8, -446, 754, 36)
+    if not (Profiles.packBackup and Profiles.packBackup.name) then
+        local on, total = ItemCounts()
+        set.hint:SetText(string.format(T("opt_hint_count_short"), on, total))
+    end
+    Put(set.hint, 20, -458); set.hint:SetWidth(452); set.hint:SetJustifyH("LEFT")
+    set.appearance:SetWidth(130); Put(set.appearance, 484, -453)
+    set.order:SetWidth(130); Put(set.order, 622, -453)
+    Put(set.info, 12, -488); set.info:SetWidth(746)
+    -- Ferramentas: um cartão por janela (2 colunas)
+    page = set.pages.tools
+    for i, button in ipairs(set.tools) do
+        local x, y = 8 + ((i - 1) % 2) * 381, -2 - math.floor((i - 1) / 2) * 52
+        Card(page, "tool" .. i, x, y, 373, 46)
+        button:SetWidth(164); Put(button, x + 10, y - 12)
+        button.desc:SetWidth(180); button.desc:SetJustifyH("LEFT")
+    end
+    -- Geral: 2 colunas de cartões; "Restaurar e apagar" num cartão avermelhado à parte
+    page = set.pages.general
+    for _, header in ipairs({ set.langHeader, set.chatHeader, set.barHeader, set.accessHeader, set.profileHeader, set.restoreHeader }) do
+        HideSection(header)
+    end
+    Card(page, "lang", 8, -2, 372, 60, T("opt_lang"))
+    local x = 20
+    for _, lang in ipairs({ "auto", "pt", "en" }) do Put(set.langs[lang], x, -28); x = x + 106 end
+    Card(page, "chat", 8, -70, 372, 140, T("opt_sec_chat"))
+    Put(set.chatLabel, 20, -96); Put(set.chat, 20, -114)
+    Put(set.summary, 18, -142); Put(set.sources, 18, -166)
+    set.sources.label:SetWidth(320); set.sources.label:SetJustifyH("LEFT")
+    Card(page, "access", 8, -218, 372, 120, T("opt_sec_access"))
+    Put(set.minimap, 18, -244); Put(set.minimapLock, 18, -268); Put(set.colorblind, 18, -292)
+    set.colorblind.label:SetWidth(320); set.colorblind.label:SetJustifyH("LEFT")
+    Card(page, "profiles", 390, -2, 372, 86, T("opt_profiles_header"))
+    Put(set.profileLabel, 402, -30); Put(set.profile, 470, -26); Put(set.copy, 402, -54)
+    Card(page, "barclock", 390, -96, 372, 140, T("opt_sec_bar"))
+    Put(set.serverTime, 400, -122); Put(set.hub, 400, -146); Put(set.goldTotal, 400, -170)
+    Put(set.appearanceAll, 402, -202); set.appearanceHint:SetWidth(196)
+    local restore = Card(page, "restore", 390, -244, 372, 112, Profiles.ALERT_ICON .. ns.C.bad .. T("opt_restore") .. "|r")
+    Profiles.Fill(restore.bg, 0.2, 0.05, 0.05, 0.95)
+    for _, edge in ipairs({ restore.top, restore.bottom, restore.left, restore.right }) do Profiles.Fill(edge, 0.75, 0.25, 0.25, 1) end
+    Put(set.reset, 402, -270); Put(set.sessionReset, 578, -270); Put(set.forget, 402, -298)
+    Put(set.forgetHint, 402, -326); set.forgetHint:SetWidth(348); set.forgetHint:SetJustifyH("LEFT")
+    -- Avisos (Warnings.lua)
+    if set.warnings and ns.Warnings and ns.Warnings.DetailSet then
+        set.warnings.detail = true
+        ns.Warnings.DetailSet(set.warnings)
+    end
 end
 
 -- Janela própria, criada só na primeira vez que for aberta.
@@ -4278,6 +4378,29 @@ local function CreateOptionsWindow()
     local set, bottom = BuildControls(window, -46)
     window.controls = set
     window:SetSize(Profiles.MENU_W, -bottom + 12)
+    window.title = title -- a Central esconde o título (ela já tem o dela)
+
+    -- Central do Farol (3.32): dentro dela o menu aparece em cartões (um 3º conjunto de controles, feito na 1ª
+    -- vez); fora dela, o de sempre. Os dois mostram as mesmas opções (RefreshOptions atualiza todos).
+    window.farolDetailSize = { 770, 560 }
+    window.farolDetail = function(on)
+        local simple, detail = window.controls, window.detailControls
+        if on and not detail then
+            detail = BuildControls(window, -6)
+            detail.detail = true
+            window.detailControls = detail
+        end
+        local function ShowSet(target, show, tab)
+            if not target then return end
+            for _, key in ipairs(Profiles.TABS) do
+                if show then target.tabs[key]:Show() else target.tabs[key]:Hide(); target.pages[key]:Hide() end
+            end
+            if show then target.tabLine:Show(); Profiles.SelectTab(target, tab or target.tab or "bar") else target.tabLine:Hide() end
+        end
+        ShowSet(simple, not on, detail and detail.tab)
+        ShowSet(detail, on, simple.tab)
+        RefreshOptions()
+    end
 
     window:SetScript("OnShow", RefreshOptions)
     tinsert(UISpecialFrames, "FarolOptions") -- ESC fecha a janela
@@ -4301,7 +4424,7 @@ ns.RefreshOptions = function() RefreshOptions() end -- outras janelas mudam opç
 function ns.OpenOptions(tab)
     if not db then return end
     optionsWindow = optionsWindow or CreateOptionsWindow()
-    local set = optionsWindow.controls
+    local set = optionsWindow.farolDocked and optionsWindow.detailControls or optionsWindow.controls
     if optionsWindow:IsShown() and set.tab == tab then optionsWindow:Hide() return end
     Profiles.SelectTab(set, tab)
     optionsWindow:Show()

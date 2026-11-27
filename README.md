@@ -450,6 +450,10 @@ hub)"); `/farol hub off` or the **Simple style** button goes back.
 - **Loot, Alarms and Warnings** (3.31) in cards: loot with filters, a summary and one card per item (Keep and
   + Goal buttons); alarms with the next one in big numbers ("rings in ...", live), the form and one card per alarm;
   the warnings history as a timeline by day (TODAY, YESTERDAY) with a summary.
+- **Settings** (3.32) in cards inside the hub: the Bar tab with the bar and pack cards and one card per item group
+  ("3 of 8" on), Warnings in cards per group with the numbers on each line, one card per tool, and General in cards
+  (Language, Profiles, Chat, Bar and clock, Minimap and accessibility; "Restore and delete" apart, in red). Same options
+  as the usual menu, kept in sync; outside the hub the menu stays as always.
 - **Hub size** (3.31): drag the ◢ grip in the bottom-right corner to make the whole hub bigger or smaller (70% to
   130%); double-click it to go back to 100%, or use `/farol hub size 85`. Saved for your account.
 - The other sections are the usual windows, placed inside the hub; dragging them moves the hub. With the detailed

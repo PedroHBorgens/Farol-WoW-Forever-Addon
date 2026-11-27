@@ -459,6 +459,10 @@ detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simple
 - **Saques, Alarmes e Avisos** (3.31) em cartões: saques com filtros, um resumo e um cartão por item (botões Guardar
   e + Meta); alarmes com o próximo em destaque ("toca em ...", ao vivo), o formulário e um cartão por alarme; o
   histórico de avisos numa linha do tempo por dia (HOJE, ONTEM) com um resumo.
+- **Configurações** (3.32) em cartões dentro da Central: aba Barra com os cartões da barra e dos pacotes e um cartão
+  por grupo de itens ("3 de 8" ligados), Avisos em cartões por grupo com os números na própria linha, um cartão por
+  ferramenta e Geral em cartões (Idioma, Perfis, Chat, Barra e relógio, Minimapa e acessibilidade; "Restaurar e
+  apagar" à parte, em vermelho). As mesmas opções do menu de sempre, sincronizadas; fora da Central o menu fica igual.
 - **Tamanho da Central** (3.31): arraste a alça ◢ no canto inferior direito para aumentar ou diminuir a Central
   inteira (70% a 130%); duplo clique volta a 100%, ou use `/farol central tamanho 85`. Fica salvo na conta.
 - As outras seções são as janelas de sempre, encaixadas na Central; arrastá-las move a Central. Com o estilo

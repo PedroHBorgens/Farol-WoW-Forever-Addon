@@ -333,6 +333,12 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   (`Hub.StartResize`/`StopResize`, `GetCursorPosition` em `pcall`; mantém o canto de cima à esquerda), duplo clique
   = 1, `/farol central tamanho N`. Ícone (3.31.1): `frame.medal` quadrado 28×28 no canto de cima à esquerda; ícone e
   título presos ao centro vertical de `frame.topBack` (mesma linha); sem anel/recorte (o anel do minimapa saía torto no jogo: não voltar a ele); fundo opaco `frame.backing`. `FormatWhen` passa por `pcall` (`Profiles.FormatWhenRaw`).
+- **Configurações na Central (3.32):** dentro da Central o `FarolOptions` mostra um **3º conjunto de controles**
+  (`window.detailControls`, `BuildControls(window, -6)` feito na 1ª vez, `set.detail = true`; avisos com o prefixo
+  `FarolHubWarn`), arrumado em cartões por `Profiles.DetailLayout(set)` (chamado no fim do `RefreshOptions`) e
+  `Warnings.DetailSet(set)`; o conjunto de sempre (`window.controls`) só é escondido. `window.farolDetail(on)` troca um
+  pelo outro; `ns.OpenOptions` usa o da Central quando a janela está encaixada. `Profiles.Section` guarda
+  `farolBox`/`farolLine` para a Central esconder. Testes de menu no estilo simples fazem login com `hub = false`.
 - **Texto nunca cortado (3.31.2):** `tests/test_textfit.lua` (com `tests/layout_check.lua`) mede todas as janelas e
   páginas da Central como o jogo — larguras de letra medidas em prints do WoW Forever, fonte normal +15% de folga — e
   falha se um texto da interface for cortado (largura fixa sem quebra), sair do quadro (`Kit.Panel`), do cartão
@@ -430,6 +436,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Central: Tarefas, Anotações e Guardados em cartões | 22 |
 | Central: Metas, Missões concluídas e Masmorras em cartões | 23 |
 | Central: Saques, Alarmes e Avisos em cartões; alça de tamanho | 24 |
+| Central: Configurações em cartões | 25 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

@@ -1720,6 +1720,7 @@ function Warnings.BuildControls(parent, prefix)
     set.history:SetScript("OnClick", function() Warnings.ToggleHistory() end)
     y = y - 40
 
+    set.page = parent
     sets[#sets + 1] = set
     return set, math.min(bottom, y)
 end
@@ -1778,9 +1779,54 @@ local function RefreshSet(set)
     if not set.questBox:HasFocus() then set.questBox:SetText(tostring(settings.questMin)) end
 end
 
+-- Central do Farol (3.32): os mesmos controles em cartões (só no conjunto feito para a Central, set.detail).
+local function DetailSet(set)
+    local Kit = ns.Hub and ns.Hub.Kit
+    local page = set.page
+    if not Kit or not page then return end
+    local function Card(key, x, y, w, h, title, header)
+        local panel = Kit.Panel(page, key, x, y, w, h)
+        panel.title:SetText(title or ""); panel.sub:SetText("")
+        if header then header:Hide() end
+        return panel
+    end
+    local function Put(region, x, y) region:ClearAllPoints(); region:SetPoint("TOPLEFT", x, y) end
+    local function Count(keys)
+        local settings, on = Settings(), 0
+        for _, key in ipairs(keys) do if settings[key] then on = on + 1 end end
+        return string.format(T("warn_card_count"), on, #keys)
+    end
+    Card("wtop", 8, -2, 754, 34)
+    Put(set.recommended, 18, -8)
+    local gear = Card("wgear", 8, -42, 372, 184, T("warn_sec_gear"), set.gearHeader)
+    gear.sub:SetText(Count({ "durab", "bags", "ammo", "reag" }))
+    Put(set.durab, 18, -68); Put(set.bags, 18, -93)
+    Put(set.ammo, 18, -118); Put(set.ammoYellowLabel, 48, -146)
+    Put(set.reag, 18, -168); Put(set.reagYellowLabel, 48, -196)
+    local char = Card("wchar", 8, -234, 372, 152, T("warn_sec_char"), set.charHeader)
+    char.sub:SetText(Count({ "talents", "ranks", "prof", "restFull", "goals" }))
+    Put(set.talents, 18, -260); Put(set.ranks, 18, -285); Put(set.prof, 18, -310)
+    Put(set.restFull, 18, -335); Put(set.goals, 18, -360)
+    local quests = Card("wquest", 390, -42, 372, 184, T("warn_sec_quests"), set.questHeader)
+    quests.sub:SetText(Count({ "questFull", "questReady", "hearthReady", "tasks", "questValue", "questLevel" }))
+    Put(set.questFull, 400, -68); Put(set.questReady, 400, -93); Put(set.hearthReady, 400, -118)
+    Put(set.tasks, 400, -143); Put(set.questValue, 400, -168); Put(set.questLevel, 400, -193)
+    local breaks = Card("wbreak", 390, -234, 372, 152, T("warn_sec_breaks"), set.breaksHeader)
+    breaks.sub:SetText(Count(BREAK_KEYS))
+    Put(set.pause, 400, -260); Put(set.pauseAnywhere, 422, -284)
+    Put(set.water, 400, -314); Put(set.waterAnywhere, 422, -338)
+    Card("whow", 8, -394, 754, 40, "", set.howHeader)
+    Put(set.sound, 18, -402); Put(set.remindLabel, 200, -410); Put(set.test, 486, -404)
+    Put(set.info, 16, -442); set.info:SetWidth(740)
+end
+Warnings.DetailSet = DetailSet
+
 RefreshWindow = function()
     if not ns.GetDB() or not Settings() then return end
-    for _, set in ipairs(sets) do RefreshSet(set) end
+    for _, set in ipairs(sets) do
+        RefreshSet(set)
+        if set.detail then DetailSet(set) end
+    end
 end
 Warnings.RefreshControls = function() RefreshWindow() end
 

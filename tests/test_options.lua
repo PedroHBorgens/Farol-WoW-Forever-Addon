@@ -18,7 +18,7 @@ end
 
 return {
     { "right-click opens the options window; /farol menu toggles it; Esc closes it", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
         local window = H.env.FarolOptions
         T.ok(window and window:IsShown(), "window open")
@@ -28,7 +28,7 @@ return {
     end },
 
     { "both menus have every checkbox, with translated labels", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local panel, window = openMenu(H)
         T.eq(#H:framesOf("CheckButton"), 2 * (ITEM_COUNT + GENERAL_COUNT), "settings panel + window")
         T.eq(H:text(window[1].label), "FPS")
@@ -52,7 +52,7 @@ return {
     end },
 
     { "ticking a box updates the bar, the saved settings and the other menu", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         local panel, window = openMenu(H)
         H:check(window[13], false) -- ouro
         T.eq(H.env.FarolDB.items.gold, false)
@@ -63,7 +63,7 @@ return {
     end },
 
     { "show panel, lock and server time options", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         local _, window = openMenu(H)
         H:check(window[33], true); T.eq(H.env.FarolDB.locked, true)
         H:check(window[32], false)
@@ -75,7 +75,7 @@ return {
     end },
 
     { "language buttons switch the menu and highlight the choice", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local _, window = openMenu(H)
         local buttons = {}
         for _, frame in ipairs(H:framesOf("Button")) do
@@ -90,7 +90,7 @@ return {
     end },
 
     { "every chat/UI string escapes literal '|' (WoW treats '|' as an escape code)", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         for lang, strings in pairs(H.ns.STRINGS) do
             for key, text in pairs(strings) do
                 local rest = text
@@ -103,7 +103,7 @@ return {
     end },
 
     { "help lists every command", function(T, Mock)
-        local H = Mock.new({ locale = "enUS" }):login()
+        local H = Mock.new({ locale = "enUS" }):login({ hub = false })
         H.msgs = {}
         H:slash("help")
         local help = H.strip(table.concat(H.msgs, "\n"))

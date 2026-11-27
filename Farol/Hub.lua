@@ -62,7 +62,7 @@ local STRINGS = {
         hub_row_log   = "Diário",
         hub_row_done  = "Concluídas",
         hub_row_tasks = "Tarefas",
-        hub_row_reset = "Resets",
+        hub_row_reset = "Resets", hub_row_daily = "Reset diário", hub_row_weekly = "Reset semanal",
         hub_row_durab = "Durabilidade",
         hub_row_bags  = "Bolsas",
         hub_row_junk  = "Lixo",
@@ -155,7 +155,7 @@ local STRINGS = {
         hub_row_log   = "Quest log",
         hub_row_done  = "Completed",
         hub_row_tasks = "Tasks",
-        hub_row_reset = "Resets",
+        hub_row_reset = "Resets", hub_row_daily = "Daily reset", hub_row_weekly = "Weekly reset",
         hub_row_durab = "Durability",
         hub_row_bags  = "Bags",
         hub_row_junk  = "Junk",
@@ -288,6 +288,7 @@ local function Release(frame, hide)
     if not frame or not frame.farolDocked then return end
     frame.farolDocked = false
     local saved = frame.farolUndock or {}
+    if frame.farolClose then frame.farolClose:Show() end
     if frame.farolDetail then
         Skin(frame, false)
         if saved.w and saved.h then frame:SetSize(saved.w, saved.h) end
@@ -311,6 +312,7 @@ local function Dock(frame)
         dragStart = frame:GetScript("OnDragStart"), dragStop = frame:GetScript("OnDragStop") }
     frame.farolDocked = true
     frame:SetParent(hub.content)
+    if frame.farolClose then frame.farolClose:Hide() end -- o X da Central fecha tudo; o de dentro cobria os subtítulos
     if frame.farolDetail then
         frame.farolUndock.w, frame.farolUndock.h = frame:GetWidth(), frame:GetHeight()
         if frame.farolDetailSize then frame:SetSize(frame.farolDetailSize[1], frame.farolDetailSize[2]) end
@@ -339,6 +341,9 @@ function Hub.Watch(frame)
     end)
     frame:HookScript("OnHide", function(self)
         if switching or not self.farolDocked then return end
+        -- A janela ainda "mostrada" (IsShown) só sumiu porque a Central fechou: fecha junto (3.31.2). Sem isso, ao
+        -- se soltar ela continuava aberta sozinha no meio da tela, e parecia que o X da Central não funcionava.
+        if self:IsShown() then Release(self, true) return end
         Release(self, false)
         if hub and hub:IsShown() then Hub.Select("home") end
     end)
@@ -366,6 +371,7 @@ local function Card(parent, x, y, w, h, titleKey, section, rows, leftW)
     leftW = leftW or 118
     local card = CreateFrame("Button", nil, parent, ns.backdropTemplate)
     card:SetSize(w, h)
+    card.farolW = w
     card:SetPoint("TOPLEFT", x, y)
     if card.SetBackdrop then
         card:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
@@ -402,6 +408,23 @@ local function Card(parent, x, y, w, h, titleKey, section, rows, leftW)
     return card
 end
 
+-- Rótulo à esquerda + valor à direita numa linha (3.31.2): o rótulo ocupa só o que precisa e o valor fica com o
+-- resto da largura; assim um valor comprido não é cortado só porque a coluna do rótulo tinha largura fixa.
+local function FitPair(left, right, total, pad)
+    if type(total) ~= "number" or total <= 0 then return end
+    pad = pad or 24
+    local lw = 0
+    if left:GetText() and left:GetText() ~= "" and left.GetStringWidth then
+        local ok, w = pcall(left.GetStringWidth, left)
+        if ok and type(w) == "number" and w == w then lw = math.ceil(w) end
+    end
+    local rightText = right:GetText()
+    if not rightText or rightText == "" then lw = total - pad end -- só o rótulo: usa a linha toda
+    lw = math.max(0, math.min(math.ceil(lw * 1.12) + 6, total - pad)) -- folga: no jogo a fonte pode sair mais larga
+    left:SetWidth(math.max(1, lw))
+    right:SetWidth(math.max(1, total - pad - lw - 10))
+end
+
 local function SetRows(card, rows)
     card.title:SetText(T(card.titleKey))
     for i, row in ipairs(card.rows) do
@@ -409,6 +432,7 @@ local function SetRows(card, rows)
         if data then
             row.left:SetText(data[1] or ""); row.right:SetText(data[2] or "")
             row.left:Show(); row.right:Show()
+            FitPair(row.left, row.right, card.farolW or card:GetWidth())
         else
             row.left:Hide(); row.right:Hide()
         end
@@ -501,7 +525,15 @@ local function RefreshHome(page)
     end
     local c = page.cards
     SetRows(c[1], { { T("hub_row_log"), Value("quests", true) }, { T("hub_row_done"), Value("qdone") } })
-    SetRows(c[2], { { T("hub_row_tasks"), Value("tasks") }, { T("hub_row_reset"), Value("reset", true) } })
+    -- Resets em duas linhas (3.31.2): "Diário 5h 12m · Semanal 2d 4h" numa linha só não cabia no cartão.
+    local daily, weekly
+    if ns.GetResetTimes then
+        local ok, d, w = pcall(ns.GetResetTimes)
+        if ok then daily, weekly = d, w end
+    end
+    SetRows(c[2], { { T("hub_row_tasks"), Value("tasks") },
+        { T("hub_row_daily"), type(daily) == "number" and (ns.FormatCountdown and ns.FormatCountdown(daily) or tostring(daily)) or "--" },
+        { T("hub_row_weekly"), type(weekly) == "number" and (ns.FormatCountdown and ns.FormatCountdown(weekly) or tostring(weekly)) or "--" } })
     SetRows(c[3], { { T("hub_row_durab"), Value("durab") }, { T("hub_row_bags"), Value("bags") },
         { T("hub_row_junk"), Value("junk") }, { T("hub_row_hearth"), Value("hearth", true) } })
     SetRows(c[4], { { T("hub_row_notes"), Value("notes") } })
@@ -611,6 +643,8 @@ function Kit.SetBar(b, x, y, w, pct, on, r, g, bl)
     b.fill:ClearAllPoints(); b.fill:SetPoint("TOPLEFT", x, y); b.fill:SetSize(math.max(1, w * math.max(0, math.min(1, pct or 0))), 6)
     if on then b.back:Show(); b.fill:Show() else b.back:Hide(); b.fill:Hide() end
 end
+
+Kit.FitPair = FitPair
 
 -- Texto solto de um painel (some junto com os painéis fora da Central). justify: "LEFT" (padrão) ou "RIGHT".
 function Kit.Text(frame, key, template, x, y, w, justify)
@@ -778,7 +812,7 @@ end
 ---------------------------------------------------------------------------
 
 local CHAR_ROWS = 8
-local COLS = { 12, 200, 260, 380, 520, 690 } -- personagem, nível, ouro, descanso, Pedra, visto
+local COLS = { 12, 212, 258, 362, 476, 650 } -- personagem, nível, ouro, descanso, Pedra, visto (3.31.2: "Hoje 07:49" cabe)
 
 local function BuildChars(page)
     local W = WIDTH - SIDE_W - 24
@@ -879,6 +913,7 @@ local function RefreshChars(page)
             line.left:SetText(i == 1 and (ns.C.dim .. T("hub_locks_none") .. "|r") or ""); line.right:SetText("")
         end
     end
+    for _, line in ipairs(page.lockLines) do FitPair(line.left, line.right, page.locks:GetWidth()) end
     -- Descanso dos outros personagens.
     page.rest.title:SetText(T("hub_rest_title"))
     page.rest.sub:SetText(ns.C.dim .. T("hub_rest_note") .. "|r")
@@ -896,6 +931,7 @@ local function RefreshChars(page)
         else
             line.left:SetText(i == 1 and (ns.C.dim .. T("hub_rest_none") .. "|r") or ""); line.right:SetText("")
         end
+        FitPair(line.left, line.right, page.rest:GetWidth())
     end
 end
 

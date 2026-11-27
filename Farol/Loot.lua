@@ -556,6 +556,7 @@ local function CreateWindow()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.title:SetPoint("TOP", 0, -18)
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    frame.farolClose = close -- na Central fica escondido: o X da Central fecha tudo (3.31.2)
     close:SetPoint("TOPRIGHT", -6, -6)
 
     -- Linha de filtros: Mostrar [10 ▼]   Qualidade [Todas ▼]

@@ -685,6 +685,7 @@ local function CreateWindow()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.title:SetPoint("TOP", 0, -18)
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    frame.farolClose = close -- na Central fica escondido: o X da Central fecha tudo (3.31.2)
     close:SetPoint("TOPRIGHT", -6, -6)
 
     frame.charLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -898,8 +899,8 @@ DetailLayout = function(frame, info, total)
     frame.recorded:Hide(); frame.totalText:Hide()
     local list = Kit.Panel(frame, "list", 8, -90, 754, 316)
     list.title:SetText(T("qd_list_title")); list.sub:SetText(T("qd_list_sub"))
-    local heads = { { "qd_col_level", 20 }, { "qd_col_quest", 60 }, { "qd_col_id", 360 }, { "qd_col_zone", 430 }, { "qd_col_when", 620 } }
-    for _, h in ipairs(heads) do Kit.Text(frame, h[1], "GameFontNormalSmall", h[2], -118, 120):SetText(T(h[1])) end
+    local heads = { { "qd_col_level", 20, 38 }, { "qd_col_quest", 60, 290 }, { "qd_col_id", 360, 64 }, { "qd_col_zone", 430, 180 }, { "qd_col_when", 620, 130 } }
+    for _, h in ipairs(heads) do Kit.Text(frame, h[1], "GameFontNormalSmall", h[2], -118, h[3]):SetText(T(h[1])) end
     for i, row in ipairs(frame.rows) do
         local y = -136 - (i - 1) * ROW_H
         row.level:ClearAllPoints(); row.level:SetPoint("TOPLEFT", 20, y)

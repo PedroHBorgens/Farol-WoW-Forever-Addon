@@ -459,6 +459,7 @@ local function CreateWindow()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.title:SetPoint("TOP", 0, -18)
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    frame.farolClose = close -- na Central fica escondido: o X da Central fecha tudo (3.31.2)
     close:SetPoint("TOPRIGHT", -6, -6)
     frame.empty = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.empty:SetPoint("TOPLEFT", 26, -54)
@@ -652,7 +653,7 @@ RefreshWindow = function(typing)
     -- Central do Farol (estilo detalhado, 3.29): dois cartões, a lista à esquerda e a anotação aberta à direita.
     local Kit = window.farolDocked and ns.Hub and ns.Hub.Kit
     if Kit then
-        local left = Kit.Panel(window, "list", 12, -10, 274, 374)
+        local left = Kit.Panel(window, "list", 10, -10, 280, 374) -- 3.31.2: "Limpar concluídas" cabe dentro
         left.title:SetText(T("note_title")); left.sub:SetText(total > 0 and string.format(T("note_pending_sub"), pending, total) or "")
         local right = Kit.Panel(window, "editor", 292, -10, 516, 374)
         local open = selected and list[selected]

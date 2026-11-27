@@ -33,14 +33,29 @@ function Frame:Show()
     self._shown = true
     if self._scripts.OnShow then self._scripts.OnShow(self) end
 end
+-- Como o jogo: esconder um quadro também dispara o OnHide dos filhos que estavam aparecendo (eles continuam
+-- IsShown() = true, só deixam de estar visíveis). Já causou bug: a Central fechava e a janela encaixada, ao receber
+-- o OnHide, se soltava e continuava aberta sozinha (3.31.2).
+local function HideKids(self)
+    for kid in pairs(self._kids or {}) do
+        if kid._parent == self and kid._shown then
+            if kid._scripts.OnHide then kid._scripts.OnHide(kid) end
+            HideKids(kid)
+        end
+    end
+end
 function Frame:Hide()
     if not self._shown then return end
     self._shown = false
+    HideKids(self) -- os filhos primeiro: a ordem que expõe o bug (o jogo não garante a ordem)
     if self._scripts.OnHide then self._scripts.OnHide(self) end
 end
 function Frame:IsShown() return self._shown end
 function Frame:GetName() return self._name end
-function Frame:SetParent(parent) self._parent = parent end
+function Frame:SetParent(parent)
+    self._parent = parent
+    if type(parent) == "table" then parent._kids = parent._kids or {}; parent._kids[self] = true end
+end
 function Frame:IsVisible() return self._shown end
 
 function Frame:SetSize(w, h) self._w, self._h = w, h end
@@ -162,6 +177,7 @@ function Mock.new(opts)
         local frame = NewObject(env, kind, name)
         frame._template = template
         frame._parent = parent
+        if type(parent) == "table" then parent._kids = parent._kids or {}; parent._kids[frame] = true end
         table.insert(H.frames, frame)
         if name then env[name] = frame end
         return frame
@@ -645,4 +661,5 @@ function Mock.new(opts)
     return H
 end
 
+Mock.Frame = Frame -- usado pelo verificador de layout (tests/layout_check.lua)
 return Mock

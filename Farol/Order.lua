@@ -116,7 +116,7 @@ end
 local function CreateWindow()
     local count = #ns.ITEM_ORDER
     local frame = CreateFrame("Frame", "FarolOrder", UIParent, ns.backdropTemplate)
-    frame:SetSize(420, 112 + count * ROW_HEIGHT) -- nomes longos + "(escondido)" antes das setas
+    frame:SetSize(470, 112 + count * ROW_HEIGHT) -- nomes longos + "(escondido)" antes das setas
     frame:SetPoint("CENTER", 60, 0)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -136,6 +136,7 @@ local function CreateWindow()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.title:SetPoint("TOP", 0, -18)
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    frame.farolClose = close -- na Central fica escondido: o X da Central fecha tudo (3.31.2)
     close:SetPoint("TOPRIGHT", -6, -6)
     frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.hint:SetPoint("TOPLEFT", 22, -44)
@@ -154,6 +155,7 @@ local function CreateWindow()
         row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
         row.text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         row.text:SetPoint("TOPLEFT", 72, y - 3)
+        row.text:SetWidth(320); row.text:SetJustifyH("LEFT") -- 3.31.2: nome + "(escondido)" não passa por baixo das setas
         row.up = ArrowButton(frame, "FarolOrderUp" .. i, true)
         row.up:SetPoint("TOPRIGHT", -50, y + 1)
         row.up:SetScript("OnClick", function() Move(i, -1) end)

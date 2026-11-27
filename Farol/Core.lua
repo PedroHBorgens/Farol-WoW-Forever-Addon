@@ -980,6 +980,11 @@ function ns.Placeholder(box, key, anchor)
     if not box.HookScript then return end -- sem HookScript (cliente antigo) a frase não saberia sumir: fica sem ela
     local hint = ns.Dim(box:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     hint:SetPoint(anchor or "LEFT", box, anchor or "LEFT", 2, 0) -- caixa de várias linhas: "TOPLEFT"
+    if not anchor then -- uma linha: a frase-guia nunca passa da caixa (3.31.2)
+        hint:SetPoint("RIGHT", box, "RIGHT", -4, 0)
+        if hint.SetWordWrap then hint:SetWordWrap(false) end
+        hint:SetJustifyH("LEFT")
+    end
     box.farolHint, box.farolHintKey = hint, key
     local function Update() ns.UpdatePlaceholder(box) end
     box:HookScript("OnTextChanged", Update)
@@ -3967,8 +3972,8 @@ local function BuildControls(parent, top)
     set.barLabel:SetPoint("TOPLEFT", 16, -4)
     set.bars = {}
     for n = 1, Profiles.MAX_BARS do
-        local button = CreateButton(page, 108, function() Profiles.Select(n) end) -- cabe "Barra 2 (desl.)"
-        button:SetPoint("TOPLEFT", 88 + (n - 1) * 112, 0)
+        local button = CreateButton(page, 118, function() Profiles.Select(n) end) -- cabe "Barra 2 (desl.)" (3.31.2: +10)
+        button:SetPoint("TOPLEFT", 88 + (n - 1) * 122, 0)
         -- Escolher a barra não muda nada (diferente dos pacotes): a faixa de explicação diz isso.
         button:SetScript("OnEnter", function() Profiles.ShowInfo(set, nil, T("bar_pick_info")) end)
         button:SetScript("OnLeave", function() Profiles.ShowInfo(set, nil) end)
@@ -4002,7 +4007,7 @@ local function BuildControls(parent, top)
             if Profiles.GEARS[key] then Profiles.AddGear(set, page, check, key) end
         end
     end
-    set.shown = CreateCheck(page, 430, -1, SetShown) -- logo depois dos botões Barra 1/2/3 (terminam em 420)
+    set.shown = CreateCheck(page, 458, -1, SetShown) -- logo depois dos botões Barra 1/2/3 (terminam em 450)
     set.locked = CreateCheck(page, 490, -1, SetLocked)
     -- "Travar" logo depois do fim do texto de "Mostrar" (a fonte do jogo é mais larga que a estimativa).
     set.locked:ClearAllPoints()
@@ -4017,7 +4022,7 @@ local function BuildControls(parent, top)
     set.packs = {}
     for i, pack in ipairs(Profiles.PACKS) do
         local button = CreateButton(page, 100, function() Profiles.ApplyPack(pack[1]) end)
-        button:SetPoint("TOPLEFT", 128 + (i - 1) * 104, -30) -- depois de "Aplicar pacote:"
+        button:SetPoint("TOPLEFT", 138 + (i - 1) * 104, -30) -- depois de "Aplicar pacote:" (3.31.2: +10, não encosta)
         button.key = pack[1]
         button:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -4030,7 +4035,7 @@ local function BuildControls(parent, top)
         set.packs[i] = button
     end
     set.packUndo = CreateButton(page, 90, function() Profiles.UndoPack() end)
-    set.packUndo:SetPoint("TOPLEFT", 128 + #Profiles.PACKS * 104 + 4, -30)
+    set.packUndo:SetPoint("TOPLEFT", 138 + #Profiles.PACKS * 104 + 4, -30)
     set.appearance = CreateButton(page, 200, function() ns.Appearance.ToggleWindow() end)
     set.appearance:SetPoint("TOPLEFT", 16, -442)
     set.order = CreateButton(page, 200, function() ns.Order.ToggleWindow() end)
@@ -4267,6 +4272,7 @@ local function CreateOptionsWindow()
     title:SetText(ICON .. " Farol")
 
     local close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
+    window.farolClose = close -- na Central fica escondido (3.31.2)
     close:SetPoint("TOPRIGHT", -6, -6)
 
     local set, bottom = BuildControls(window, -46)

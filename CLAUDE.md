@@ -333,13 +333,24 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   (`Hub.StartResize`/`StopResize`, `GetCursorPosition` em `pcall`; mantém o canto de cima à esquerda), duplo clique
   = 1, `/farol central tamanho N`. Ícone (3.31.1): `frame.medal` quadrado 28×28 no canto de cima à esquerda; ícone e
   título presos ao centro vertical de `frame.topBack` (mesma linha); sem anel/recorte (o anel do minimapa saía torto no jogo: não voltar a ele); fundo opaco `frame.backing`. `FormatWhen` passa por `pcall` (`Profiles.FormatWhenRaw`).
+- **Texto nunca cortado (3.31.2):** `tests/test_textfit.lua` (com `tests/layout_check.lua`) mede todas as janelas e
+  páginas da Central como o jogo — larguras de letra medidas em prints do WoW Forever, fonte normal +15% de folga — e
+  falha se um texto da interface for cortado (largura fixa sem quebra), sair do quadro (`Kit.Panel`), do cartão
+  (`Kit.Card`) ou da janela, não couber no botão ou se sobrepuser a outro. Roda em PT e EN, com dados cheios e com
+  tudo vazio. Tela/estado novo: acrescente o cenário lá. Nomes digitados pelo jogador podem terminar em "..." (lista
+  `LONG`). Regras: rótulo + valor numa linha = `FitPair` (Hub; o rótulo fica só com a largura dele); texto de largura
+  fixa = `SetWordWrap(false)` só para nomes do jogador; frase-guia de caixa (`ns.Placeholder`) presa às duas bordas
+  da caixa. Aumentar a Central (alça ◢) aumenta o texto junto: não resolve corte, o layout é que tem de caber.
+- **Fechar a Central (3.31.2):** o jogo dispara o `OnHide` das janelas de dentro quando a Central some (elas continuam
+  `IsShown()`); o `Hub.Watch` fecha a janela junto (`Release(self, true)`), senão ela se soltava e ficava aberta sozinha.
+  O simulador faz o mesmo (filhos primeiro). Dentro da Central o X de cada janela (`frame.farolClose`) fica escondido.
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 
 ## Testes
 
 ```
-lua5.1 tests/run.lua        # ~740 testes (2 passadas); deve terminar com "0 failed"
+lua5.1 tests/run.lua        # ~810 testes (2 passadas); deve terminar com "0 failed"
 ```
 
 - **Duas passadas (3.18):** a 1ª com o simulador "de livro"; a 2ª, **forever-real** (`Mock.REAL`), com reino `""` e

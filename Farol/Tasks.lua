@@ -346,6 +346,7 @@ local function CreateWindow()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.title:SetPoint("TOP", 0, -18)
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    frame.farolClose = close -- na Central fica escondido: o X da Central fecha tudo (3.31.2)
     close:SetPoint("TOPRIGHT", -6, -6)
     frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.hint:SetPoint("TOPLEFT", 22, -44)
@@ -404,6 +405,7 @@ local function CreateWindow()
     frame.warn:SetPoint("TOPLEFT", 20, addY - 30)
     frame.warn.label = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.warn.label:SetPoint("LEFT", frame.warn, "RIGHT", 4, 0)
+    frame.warn.label:SetWidth(400); frame.warn.label:SetJustifyH("LEFT") -- texto longo quebra em 2 linhas, não sai da janela
     frame.warn:SetScript("OnClick", function(self) SetWarning(self:GetChecked() and true or false) end)
     frame.resets = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.resets:SetPoint("TOPLEFT", 26, addY - 60)
@@ -439,7 +441,7 @@ end
 SimpleLayout = function(frame)
     local addY = -98 - MAX_TASKS * ROW_HEIGHT + 20
     frame.hint:Show(); frame.resets:Show()
-    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 26, -108)
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 26, -108); frame.empty:SetWidth(0)
     for i, row in ipairs(frame.rows) do
         local y = -98 - (i - 1) * ROW_HEIGHT
         row.check:ClearAllPoints(); row.check:SetPoint("TOPLEFT", 20, y)
@@ -488,6 +490,7 @@ DetailLayout = function(frame, list, now, daily, weekly)
         end
     end
     frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 22, -126)
+    frame.empty:SetWidth(346); frame.empty:SetJustifyH("LEFT") -- fica dentro da coluna Diárias (3.31.2)
     Kit.Panel(frame, "warn", 8, -410, 754, 38)
     frame.warn:ClearAllPoints(); frame.warn:SetPoint("TOPLEFT", 18, -417)
     frame.undoText:ClearAllPoints(); frame.undoText:SetPoint("TOPLEFT", 24, -464)

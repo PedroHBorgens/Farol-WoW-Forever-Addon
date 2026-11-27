@@ -2,10 +2,10 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
-## 3.31.1 — Hub icon next to the title
-- The Farol icon now sits next to the "Farol" title in the hub's top bar, without the round frame in the corner (that
-  frame depended on a game texture and came out crooked).
-- Images 20–24 updated to match (icon next to the title).
+## 3.31.1 — Hub icon in the corner, on the title line
+- The Farol icon is now square, in the top-left corner of the hub, on the same line as the "Farol" title (both are
+  centered on the top bar), without the round frame that came out crooked.
+- Images 20–24 updated to match.
 
 ## 3.31.0 — Hub: loot, alarms and warnings in cards; hub size
 - **Loot** (detailed style): filters and a summary on top (items, uncommon or better, latest), one card per item with

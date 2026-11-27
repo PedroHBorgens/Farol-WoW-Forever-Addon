@@ -510,7 +510,7 @@ HCSS = """.hub{position:relative;width:1060px;height:540px;background:linear-gra
 .htop{grid-column:1/3;display:flex;align-items:center;justify-content:center;border-bottom:2px solid #5a4520;background:linear-gradient(#2a2112,#16120b);border-radius:8px 8px 0 0;position:relative}
 .hban{font:bold 20px 'DejaVu Serif',serif;color:#ffd75a;padding:2px 34px;border:1px solid #7a5f2a;border-radius:4px;background:#1b150b}
 .hmeta{position:absolute;right:12px;top:12px;display:flex;gap:8px;font-size:12px;color:#a89a78}.hpill{border:1px solid #6e5b2e;border-radius:3px;padding:1px 7px;color:#e8dcb8;background:#0c0a07}
-.hmed{position:absolute;left:50%;top:10px;margin-left:-82px;width:26px;height:26px;z-index:3}
+.hmed{position:absolute;left:14px;top:9px;width:28px;height:28px;z-index:3}
 .hside{border-right:2px solid #3e3018;background:#100e0a;padding:22px 8px 8px;display:flex;flex-direction:column;gap:1px}
 .hnav{display:flex;align-items:center;gap:10px;padding:4px 10px;border-radius:4px;color:#d8cfb4;font-size:13px}.hnav i{font-style:normal;width:18px;font-family:'Noto Color Emoji'}
 .hnav.on{background:linear-gradient(90deg,#5a3f12,#2a1f0d);color:#ffd75a;box-shadow:inset 3px 0 0 #ffd100;font-weight:bold}
@@ -523,7 +523,7 @@ HCSS = """.hub{position:relative;width:1060px;height:540px;background:linear-gra
 navs = [("🏠","Home",True),("👥","Characters",0),("🎯","Goals",0),("📜","Quests",0),("⚒️","Professions",0),("📋","Tasks",0),("📒","Notes",0),("📦","Kept items",0),("🗝️","Dungeons",0),("👜","Loot",0),("⏰","Alarms",0),("🔔","Warnings",0),("⚙️","Settings",0)]
 def hcard(title, rows, extra=""):
     return f'<div class="hcard" style="{extra}"><h3>{title}</h3>' + "".join(f'<div class="hrow"><span>{a}</span><span>{b}</span></div>' for a, b in rows) + '</div>'
-hub_html = (f'<div class="hub"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:26px;height:26px"></div>'
+hub_html = (f'<div class="hub"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:28px;height:28px;display:block"></div>'
     '<div class="htop"><span class="hban">Farol</span><div class="hmeta"><span>v3.27</span><span class="hpill">English ▾</span><span class="hpill">Simple style</span><span class="btn" style="padding:0 6px">×</span></div></div>'
     '<div class="hside">' + "".join(f'<div class="hnav{" on" if on else ""}"><i>{e}</i>{n}</div>' for e, n, on in navs)
     + '<div class="hwho"><b>Aldric</b><br><span class="dim">Level 26</span></div></div>'
@@ -575,7 +575,7 @@ chars_main = ('<div class="hmain" style="display:block"><div class="hcard"><h3 s
     + '<div style="height:8px"></div>' + hcard("Rested XP", [("Mira (34)", '<span class="g">fully rested: ready to level</span>'), ("Tor (12)", "62% · full in ~2d 6h")]) + '</div>')
 def hub_page(active, main):
     side = "".join(f'<div class="hnav{" on" if n == active else ""}"><i>{e}</i>{n}</div>' for e, n, _ in navs)
-    return (f'<div style="width:590px;height:310px;position:relative"><div class="hub" style="transform:scale(.555);transform-origin:top left;margin:0;position:absolute;left:0;top:0"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:26px;height:26px"></div>'
+    return (f'<div style="width:590px;height:310px;position:relative"><div class="hub" style="transform:scale(.555);transform-origin:top left;margin:0;position:absolute;left:0;top:0"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:28px;height:28px;display:block"></div>'
         '<div class="htop"><span class="hban">Farol</span><div class="hmeta"><span>v3.28</span><span class="hpill">English ▾</span><span class="hpill">Simple style</span></div></div>'
         f'<div class="hside">{side}<div class="hwho"><b>Aldric</b><br><span class="dim">Level 26</span></div></div>{main}'
         '<div class="hfoot"><span class="btn">Summary now</span><span class="btn">Bar...</span><span class="btn">Appearance...</span></div></div></div>')
@@ -589,7 +589,7 @@ TCSS = """.hpan{border:1px solid #7a5f2a;border-radius:6px;background:linear-gra
 .kc{display:flex;gap:8px;align-items:center;border:1px solid #5a4520;border-radius:5px;background:#16120b;padding:4px 7px;font-size:12px}.kc .ki{font-size:22px;font-family:'Noto Color Emoji'}"""
 def hub_small(active, main, scale=.455):
     side = "".join(f'<div class="hnav{" on" if n == active else ""}"><i>{e}</i>{n}</div>' for e, n, _ in navs)
-    return (f'<div style="width:{int(1066*scale)}px;height:{int(546*scale)}px;position:relative"><div class="hub" style="transform:scale({scale});transform-origin:top left;margin:0;position:absolute;left:0;top:0"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:26px;height:26px"></div>'
+    return (f'<div style="width:{int(1066*scale)}px;height:{int(546*scale)}px;position:relative"><div class="hub" style="transform:scale({scale});transform-origin:top left;margin:0;position:absolute;left:0;top:0"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:28px;height:28px;display:block"></div>'
         '<div class="htop"><span class="hban">Farol</span><div class="hmeta"><span>v3.29</span><span class="hpill">English ▾</span><span class="hpill">Simple style</span></div></div>'
         f'<div class="hside">{side}<div class="hwho"><b>Aldric</b><br><span class="dim">Level 26</span></div></div>{main}'
         '<div class="hfoot"><span class="btn">Summary now</span><span class="btn">Bar...</span><span class="btn">Appearance...</span></div></div></div>')

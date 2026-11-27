@@ -938,13 +938,13 @@ local function CreateHub()
     frame.topBack:SetPoint("TOPRIGHT", -12, -12)
     frame.topBack:SetHeight(TOP_H - 12)
     Fill(frame.topBack, 0.16, 0.12, 0.07, 0.95)
-    -- Ícone do Farol ao lado do título, dentro da faixa de cima (3.31.1): sem anel nem recorte, que dependiam do
-    -- desenho de texturas do jogo e saíam tortos. Simples, sempre alinhado.
+    -- Ícone do Farol (3.31.1): quadrado, no canto de cima à esquerda, na mesma linha do título "Farol". Os dois se
+    -- prendem ao centro vertical da faixa de cima, então ficam sempre alinhados (sem anel nem recorte).
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.title:SetPoint("TOP", 14, -24)
+    frame.title:SetPoint("CENTER", frame.topBack, "CENTER", 0, 0)
     frame.medal = frame:CreateTexture(nil, "OVERLAY")
-    frame.medal:SetSize(26, 26)
-    frame.medal:SetPoint("RIGHT", frame.title, "LEFT", -8, 0)
+    frame.medal:SetSize(28, 28)
+    frame.medal:SetPoint("LEFT", frame.topBack, "LEFT", 8, 0)
     frame.medal:SetTexture("Interface\\AddOns\\Farol\\Media\\Farol") -- arquivo do ícone (ns.ICON é o código do chat)
     frame.version = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.version:SetPoint("TOPRIGHT", -300, -28)

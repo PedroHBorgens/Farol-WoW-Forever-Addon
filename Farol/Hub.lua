@@ -932,30 +932,20 @@ local function CreateHub()
     frame.backing:SetPoint("TOPLEFT", 10, -10)
     frame.backing:SetPoint("BOTTOMRIGHT", -10, 10)
     Fill(frame.backing, 0.06, 0.05, 0.04, 1)
-    -- Topo: faixa escura com o título; medalhão com o ícone do Farol no canto.
+    -- Topo: faixa escura com o ícone e o título.
     frame.topBack = frame:CreateTexture(nil, "BORDER")
     frame.topBack:SetPoint("TOPLEFT", 12, -12)
     frame.topBack:SetPoint("TOPRIGHT", -12, -12)
     frame.topBack:SetHeight(TOP_H - 12)
     Fill(frame.topBack, 0.16, 0.12, 0.07, 0.95)
-    -- Medalhão (3.31): as mesmas proporções do botão do minimapa (que aparece certo), 3x maior:
-    -- disco escuro + ícone recortado em círculo + anel no canto de cima à esquerda de uma "caixa" de 93x93.
-    local MX, MY = -22 + 46.5, 30 - 46.5 + 3 -- centro do ícone (relativo ao canto da Central)
-    frame.medalBack = frame:CreateTexture(nil, "OVERLAY", nil, 1)
-    frame.medalBack:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
-    frame.medalBack:SetSize(60, 60)
-    frame.medalBack:SetPoint("CENTER", frame, "TOPLEFT", MX, MY)
-    frame.medal = frame:CreateTexture(nil, "OVERLAY", nil, 2)
-    frame.medal:SetSize(54, 54)
-    frame.medal:SetPoint("CENTER", frame, "TOPLEFT", MX, MY)
-    frame.medal:SetTexture("Interface\\AddOns\\Farol\\Media\\Farol") -- arquivo do ícone (ns.ICON é o código do chat)
-    if frame.medal.SetMask then pcall(frame.medal.SetMask, frame.medal, "Interface\\CharacterFrame\\TempPortraitAlphaMask") end
-    frame.medalRing = frame:CreateTexture(nil, "OVERLAY", nil, 3)
-    frame.medalRing:SetSize(159, 159)
-    frame.medalRing:SetPoint("TOPLEFT", frame, "TOPLEFT", -22, 30)
-    frame.medalRing:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+    -- Ícone do Farol (3.31.1): quadrado, no canto de cima à esquerda, na mesma linha do título "Farol". Os dois se
+    -- prendem ao centro vertical da faixa de cima, então ficam sempre alinhados (sem anel nem recorte).
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.title:SetPoint("TOP", 0, -24)
+    frame.title:SetPoint("CENTER", frame.topBack, "CENTER", 0, 0)
+    frame.medal = frame:CreateTexture(nil, "OVERLAY")
+    frame.medal:SetSize(28, 28)
+    frame.medal:SetPoint("LEFT", frame.topBack, "LEFT", 8, 0)
+    frame.medal:SetTexture("Interface\\AddOns\\Farol\\Media\\Farol") -- arquivo do ícone (ns.ICON é o código do chat)
     frame.version = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.version:SetPoint("TOPRIGHT", -300, -28)
     frame.lang = ns.CreateDropdown(frame, "FarolHubLang", 86, function()

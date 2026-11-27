@@ -272,7 +272,10 @@ return {
         H:slash("central tamanho 300"); T.has(H:lastMsg(), "uso: /farol central tamanho"); T.eq(H.env.FarolDB.hubScale, 0.85)
         H.env.GetCursorPosition = function() error("x") end
         H.ns.Hub.StartResize(H.env.FarolHubResize) -- cursor com erro: nada quebra
-        T.eq(hub.medalRing:GetWidth(), 159); T.eq(hub.medalBack._texture, "Interface\\Minimap\\UI-Minimap-Background")
+        T.eq(hub.medalRing, nil, "3.31.1: no ring (it came out crooked in the game)"); T.eq(hub.medal:GetWidth(), 28); T.eq(hub.medal:GetHeight(), 28, "square")
+        T.eq(hub.medal._anchorPoint, "LEFT"); T.eq(hub.medal._anchor, hub.topBack, "top-left corner of the top bar")
+        T.eq(hub.title._anchor, hub.topBack, "title on the same line (both centered on the top bar)")
+        T.eq(hub.medal._texture, "Interface\\AddOns\\Farol\\Media\\Farol", "the icon sits next to the title")
         for _, bad in ipairs({ 0 / 0, 1 / 0, 0.2, 5, "x" }) do
             local X = Mock.new():login({ hub = true, hubScale = bad })
             T.eq(X.env.FarolDB.hubScale, 1, "bad size goes back to 100%: " .. tostring(bad))

@@ -331,8 +331,8 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   (`Alarm.Live` atualiza o "toca em" pelo relógio do módulo) e Histórico de avisos (`HistoryDetail`, dias por
   `date("%Y%m%d")`). Tamanho da Central: `db.hubScale` 0,7–1,3 (validado no Core), alça `FarolHubResize`
   (`Hub.StartResize`/`StopResize`, `GetCursorPosition` em `pcall`; mantém o canto de cima à esquerda), duplo clique
-  = 1, `/farol central tamanho N`. Medalhão nas proporções do botão do minimapa (×3) com `SetMask` redondo (se
-  existir); fundo opaco `frame.backing`. `FormatWhen` passa por `pcall` (`Profiles.FormatWhenRaw`).
+  = 1, `/farol central tamanho N`. Ícone (3.31.1): `frame.medal` quadrado 28×28 no canto de cima à esquerda; ícone e
+  título presos ao centro vertical de `frame.topBack` (mesma linha); sem anel/recorte (o anel do minimapa saía torto no jogo: não voltar a ele); fundo opaco `frame.backing`. `FormatWhen` passa por `pcall` (`Profiles.FormatWhenRaw`).
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 

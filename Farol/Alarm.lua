@@ -58,6 +58,10 @@ local STRINGS = {
         al_list_title = "alarmes:",
         al_list_empty = "nenhum alarme. Crie com /farol alarme add 07:30",
         al_more       = "+%d tocando",
+        al_next       = "Próximo", al_next_local = "pelo relógio do computador", al_next_server = "pelo relógio do servidor",
+        al_next_none  = "nenhum alarme ligado", al_in = "em %s", al_now = "agora", al_off_word = "desligado",
+        al_list       = "Alarmes", al_list_sub = "%d de 10 · marque para ligar", al_new_sub = "até 10",
+        al_snooze_title = "Soneca", al_unnamed = "Alarme", al_next_line = "%s · toca %s",
         tt_alarms     = "Alarmes ligados",
         help_alarm    = "  /farol alarme        - abrir a janela de alarmes",
         help_alarm2   = "  /farol alarme add 07:30 [local||servidor] [nome] || lista || remover N || ativar N || desativar N || soneca MIN",
@@ -66,6 +70,10 @@ local STRINGS = {
     en = {
         al_title      = "Alarms",
         al_hint       = "Up to 10 alarms. Tick the box to turn one on.",
+        al_next       = "Next", al_next_local = "by your computer clock", al_next_server = "by the server clock",
+        al_next_none  = "no alarm on", al_in = "in %s", al_now = "now", al_off_word = "off",
+        al_list       = "Alarms", al_list_sub = "%d of 10 · tick to turn on", al_new_sub = "up to 10",
+        al_snooze_title = "Snooze", al_unnamed = "Alarm", al_next_line = "%s · rings %s",
         al_empty      = "No alarms yet.",
         al_new        = "New alarm",
         al_label_ph   = "name (optional)",
@@ -360,6 +368,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
     sinceCheck = 0
     local db = DB()
     if not db or not db.alarms then return end
+    if Alarm.Live then Alarm.Live() end -- Central: "toca em ..." ao vivo
 
     for _, alarm in ipairs(db.alarms) do
         if alarm.enabled then
@@ -449,6 +458,8 @@ end
 ---------------------------------------------------------------------------
 
 local window
+local SimpleLayout, DetailLayout -- layout de sempre e o da Central (3.31), definidos depois da janela
+local DETAIL_W, DETAIL_H = 770, 470
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolAlarms", UIParent, ns.backdropTemplate)
@@ -586,10 +597,113 @@ local function CreateWindow()
 
     frame:SetHeight(-(addY - 100) + 40)
     frame:SetScript("OnShow", function() RefreshWindow() end)
+    frame.colon = colon
+    -- Central do Farol (estilo detalhado, 3.31): próximo alarme, novo alarme, soneca e os alarmes em cartões.
+    frame.farolDetailSize = { DETAIL_W, DETAIL_H }
+    frame.farolDetail = function(on)
+        local Kit = ns.Hub and ns.Hub.Kit
+        if Kit then Kit.ShowPanels(frame, on) end
+        if not on then SimpleLayout(frame) end
+        RefreshWindow()
+    end
     tinsert(UISpecialFrames, "FarolAlarms") -- ESC fecha
     ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
+end
+
+SimpleLayout = function(frame)
+    frame.hint:Show(); frame.newHeader:Show(); frame.snoozeLabel:Show()
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 24, -72)
+    for i, row in ipairs(frame.rows) do
+        local y = -66 - (i - 1) * 26
+        row.check:ClearAllPoints(); row.check:SetPoint("TOPLEFT", 20, y)
+        row.text:ClearAllPoints(); row.text:SetPoint("LEFT", row.check, "RIGHT", 4, 0); row.text:SetWidth(330)
+        row.delete:ClearAllPoints(); row.delete:SetPoint("TOPRIGHT", -24, y - 1)
+    end
+    local addY = -66 - MAX_ALARMS * 26 - 12
+    frame.hour:ClearAllPoints(); frame.hour:SetPoint("TOPLEFT", 26, addY - 22)
+    frame.minute:ClearAllPoints(); frame.minute:SetPoint("TOPLEFT", 70, addY - 22)
+    frame.mode:ClearAllPoints(); frame.mode:SetPoint("TOPLEFT", 108, addY - 21)
+    frame.label:ClearAllPoints(); frame.label:SetPoint("TOPLEFT", 204, addY - 22); frame.label:SetWidth(150)
+    frame.labelHint:ClearAllPoints(); frame.labelHint:SetPoint("TOPLEFT", frame.label, "BOTTOMLEFT", 0, -2)
+    frame.add:ClearAllPoints(); frame.add:SetPoint("TOPLEFT", 20, addY - 62)
+    frame.test:ClearAllPoints(); frame.test:SetPoint("TOPLEFT", 150, addY - 62)
+    frame.snoozeBox:ClearAllPoints(); frame.snoozeBox:SetPoint("LEFT", frame.snoozeLabel, "RIGHT", 10, 0)
+end
+
+-- Minutos até o alarme tocar (0 = agora); nil se o relógio não estiver disponível.
+local function MinutesUntil(alarm)
+    local ok, h, m = pcall(NowHM, alarm.server)
+    if not ok or type(h) ~= "number" or type(m) ~= "number" then return nil end
+    return (alarm.h * 60 + alarm.m - (h * 60 + m)) % 1440
+end
+
+local function UntilText(minutes)
+    if not minutes then return "--" end
+    if minutes == 0 then return T("al_now") end
+    local text = ns.FormatDuration and ns.FormatDuration(minutes * 60) or (minutes .. "m")
+    return string.format(T("al_in"), text)
+end
+
+DetailLayout = function(frame, alarms)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit then return end
+    frame.hint:Hide(); frame.newHeader:Hide(); frame.snoozeLabel:Hide()
+    -- Próximo alarme ligado
+    local best, bestMin
+    for _, alarm in ipairs(alarms) do
+        if alarm.enabled then
+            local mins = MinutesUntil(alarm)
+            if mins and (not bestMin or mins < bestMin) then best, bestMin = alarm, mins end
+        end
+    end
+    local nextPanel = Kit.Panel(frame, "next", 8, -6, 300, 92)
+    nextPanel.title:SetText(T("al_next"))
+    nextPanel.sub:SetText(best and T(best.server and "al_next_server" or "al_next_local") or "")
+    Kit.Text(frame, "nexttime", "GameFontNormalHuge", 20, -34, 270):SetText(best and string.format("%02d:%02d", best.h, best.m) or "--:--")
+    ns.Dim(Kit.Text(frame, "nextline", "GameFontHighlightSmall", 20, -70, 276)):SetText(best
+        and string.format(T("al_next_line"), best.label ~= "" and best.label or T("al_unnamed"), UntilText(bestMin))
+        or T("al_next_none"))
+    -- Novo alarme
+    local new = Kit.Panel(frame, "new", 8, -106, 300, 130)
+    new.title:SetText(T("al_new")); new.sub:SetText(T("al_new_sub"))
+    frame.hour:ClearAllPoints(); frame.hour:SetPoint("TOPLEFT", 24, -138)
+    frame.minute:ClearAllPoints(); frame.minute:SetPoint("TOPLEFT", 66, -138)
+    frame.mode:ClearAllPoints(); frame.mode:SetPoint("TOPLEFT", 104, -137)
+    frame.label:ClearAllPoints(); frame.label:SetPoint("TOPLEFT", 24, -168); frame.label:SetWidth(176)
+    frame.labelHint:ClearAllPoints(); frame.labelHint:SetPoint("LEFT", frame.label, "RIGHT", 8, 0)
+    frame.add:ClearAllPoints(); frame.add:SetPoint("TOPLEFT", 20, -200)
+    frame.test:ClearAllPoints(); frame.test:SetPoint("TOPLEFT", 150, -200)
+    -- Soneca
+    local snooze = Kit.Panel(frame, "snooze", 8, -250, 300, 64)
+    snooze.title:SetText(T("al_snooze_title")); snooze.sub:SetText("")
+    frame.snoozeBox:ClearAllPoints(); frame.snoozeBox:SetPoint("TOPLEFT", 24, -280)
+    -- Alarmes em cartões
+    local list = Kit.Panel(frame, "list", 316, -6, 446, 454)
+    list.title:SetText(T("al_list")); list.sub:SetText(string.format(T("al_list_sub"), #alarms))
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 330, -40)
+    for i, row in ipairs(frame.rows) do
+        local alarm = alarms[i]
+        local y = -36 - (i - 1) * 41
+        local card = Kit.Panel(frame, "arow" .. i, 326, y, 426, 38)
+        card.title:SetText(""); card.sub:SetText("")
+        for _, part in ipairs(card.parts) do if alarm then part:Show() else part:Hide() end end
+        local timeText = Kit.Text(frame, "atime" .. i, "GameFontNormalLarge", 362, y - 11, 70)
+        local kind = ns.Dim(Kit.Text(frame, "akind" .. i, "GameFontHighlightSmall", 446, y - 22, 150))
+        local when = Kit.Text(frame, "awhen" .. i, "GameFontHighlightSmall", 596, y - 13, 116, "RIGHT")
+        row.check:ClearAllPoints(); row.check:SetPoint("TOPLEFT", 332, y - 7)
+        row.text:ClearAllPoints(); row.text:SetPoint("TOPLEFT", 446, y - 6); row.text:SetWidth(150)
+        row.delete:ClearAllPoints(); row.delete:SetPoint("TOPLEFT", 718, y - 8)
+        if alarm then
+            timeText:SetText((alarm.enabled and "" or ns.C.dim) .. string.format("%02d:%02d", alarm.h, alarm.m) .. (alarm.enabled and "" or "|r"))
+            row.text:SetText(alarm.label ~= "" and alarm.label or T("al_unnamed"))
+            kind:SetText(alarm.server and T("al_server") or T("al_local"))
+            when:SetText(alarm.enabled and UntilText(MinutesUntil(alarm)) or (ns.C.dim .. T("al_off_word") .. "|r"))
+        else
+            timeText:SetText(""); kind:SetText(""); when:SetText("")
+        end
+    end
 end
 
 RefreshWindow = function()
@@ -617,6 +731,11 @@ RefreshWindow = function()
     window.snoozeLabel:SetText(T("al_snooze_label"))
     window.snoozeUnit:SetText(T("al_snooze_unit") .. "  (1-60, Enter)")
     if not window.snoozeBox:HasFocus() then window.snoozeBox:SetText(tostring(SnoozeMinutes())) end
+    if window.farolDocked then DetailLayout(window, db.alarms) end
+end
+
+function Alarm.Live()
+    if window and window.farolDocked and window:IsShown() then RefreshWindow() end
 end
 
 function Alarm.ToggleWindow()

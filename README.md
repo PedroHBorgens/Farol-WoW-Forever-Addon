@@ -68,7 +68,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol chat Name`  | Which chat window Farol writes to (e.g. a tab named "Farol"); `/farol chat main` goes back |
 | `/farol source on\|off` | Show where the session's XP and gold come from (quests, monsters, loot, merchant) |
 | `/farol diag`       | Shows in your own chat how the game answered (character, realm, gold, last logout, events); read-only |
-| `/farol hub`        | Farol hub (detailed style): every window in one panel with a side bar; `off` = simple style |
+| `/farol hub`        | Farol hub (detailed style): every window in one panel with a side bar; `off` = simple style; `size 70-130` = hub size |
 | `/farol keep`       | Items kept for later: reason, when they become useful, reminders (`[item]: reason`, `list`, `remove N`, `undo`) |
 | `/farol notes`      | Account notepad: up to 10 notes with a done checkbox (`new Title`, `list`, `undo`) |
 | `/farol task`       | Daily and weekly task list (resets on its own; `/farol task add Name`) |
@@ -447,6 +447,11 @@ hub)"); `/farol hub off` or the **Simple style** button goes back.
   time at this pace and a progress bar) and the farm goals as cards (icon, bar, gain this session, estimate);
   completed quests with a summary (recorded, today, total in the game) and the list with the Wowhead link;
   dungeons with the current run live, the averages of the last runs and the history.
+- **Loot, Alarms and Warnings** (3.31) in cards: loot with filters, a summary and one card per item (Keep and
+  + Goal buttons); alarms with the next one in big numbers ("rings in ...", live), the form and one card per alarm;
+  the warnings history as a timeline by day (TODAY, YESTERDAY) with a summary.
+- **Hub size** (3.31): drag the ◢ grip in the bottom-right corner to make the whole hub bigger or smaller (70% to
+  130%); double-click it to go back to 100%, or use `/farol hub size 85`. Saved for your account.
 - The other sections are the usual windows, placed inside the hub; dragging them moves the hub. With the detailed
   style on, opening any Farol window (by command, the menu or the minimap button) opens it inside the hub.
 - At the top: language and **Simple style**; at the bottom: Summary now, Bar... and Appearance....

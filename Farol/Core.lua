@@ -102,6 +102,7 @@ local DEFAULTS = {
     keepReady = false,      -- itens guardados: avisar quando ficarem prontos (3.26, desligado)
     keepTooltip = false,    -- itens guardados: linha "guardado" no tooltip do item (3.26, desligado)
     hub = false,            -- estilo detalhado: Central do Farol (3.27, desligado = estilo simples de sempre)
+    hubScale = 1,           -- tamanho da Central (3.31): 0.7 a 1.3, proporcional
     fontSize = 11,          -- tamanho do texto da barra (8 a 24)
     iconSize = 14,          -- tamanho dos ícones da barra e dos botões ao lado (10 a 32)
 }
@@ -1031,6 +1032,7 @@ local function SanitizeDB(saved)
     if snooze ~= math.floor(snooze) or snooze < 1 or snooze > 60 then clean.snoozeMinutes = DEFAULTS.snoozeMinutes end
     -- Aparência: números fora da faixa (ou NaN) voltam ao padrão.
     if clean.scale ~= clean.scale or clean.scale < 0.5 or clean.scale > 2 then clean.scale = DEFAULTS.scale end
+    if clean.hubScale ~= clean.hubScale or clean.hubScale < 0.7 or clean.hubScale > 1.3 then clean.hubScale = DEFAULTS.hubScale end
     if clean.bgAlpha ~= clean.bgAlpha or clean.bgAlpha < 0 or clean.bgAlpha > 1 then clean.bgAlpha = DEFAULTS.bgAlpha end
     -- Largura da barra: 0 (uma linha), 1 (uma coluna) ou de 2 a 4000 pixels.
     if clean.barWidth ~= clean.barWidth or clean.barWidth < 0 or clean.barWidth > 4000 then
@@ -2270,7 +2272,7 @@ local function DateTokens(t)
     return tokens
 end
 
-local function FormatWhen(t, long)
+function Profiles.FormatWhenRaw(t, long)
     if type(t) ~= "number" or t ~= t or t <= 0 or t >= 4102444800 then return "--" end
     t = math.floor(t) -- segundos inteiros: date() recusa frações em motores Lua mais novos
     if t <= 0 then return "--" end
@@ -2293,6 +2295,12 @@ local function FormatWhen(t, long)
         label = string.gsub(T("when_date_year"), "%u+", tokens)
     end
     return "|cff8c8c8c" .. label .. "|r " .. tokens.HH .. ":" .. tokens.MI
+end
+-- Datas de histórico sem nunca quebrar a janela (3.31): uma leitura de relógio com erro vira "--".
+local function FormatWhen(t, long)
+    local ok, text = pcall(Profiles.FormatWhenRaw, t, long)
+    if ok and type(text) == "string" then return text end
+    return "--"
 end
 ns.FormatWhen = FormatWhen
 

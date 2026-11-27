@@ -327,6 +327,12 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   Textos e números dos cartões: `Kit.Text(frame, chave, fonte, x, y, w, alinhamento)` e `Kit.Stat(...)` (rótulo pequeno +
   número grande), guardados em `frame.farolPanels["text:" .. chave]` e escondidos junto com os painéis;
   `Kit.SetBar(..., r, g, b)` aceita a cor. Testes de janela no estilo simples fazem login com `hub = false`.
+  **3.31:** Saques (com a Central a lista tem altura fixa: `DETAIL_ROWS`, e a alça própria da janela some), Alarmes
+  (`Alarm.Live` atualiza o "toca em" pelo relógio do módulo) e Histórico de avisos (`HistoryDetail`, dias por
+  `date("%Y%m%d")`). Tamanho da Central: `db.hubScale` 0,7–1,3 (validado no Core), alça `FarolHubResize`
+  (`Hub.StartResize`/`StopResize`, `GetCursorPosition` em `pcall`; mantém o canto de cima à esquerda), duplo clique
+  = 1, `/farol central tamanho N`. Medalhão nas proporções do botão do minimapa (×3) com `SetMask` redondo (se
+  existir); fundo opaco `frame.backing`. `FormatWhen` passa por `pcall` (`Profiles.FormatWhenRaw`).
 - **Menus suspensos:** implementação própria em `Loot.lua` (o `UIDropDownMenu` da Blizzard é obsoleto e causa taint).
 - **Sliders:** usamos botões [-]/[+] (o template de slider mudou entre versões).
 
@@ -412,6 +418,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Central: páginas Profissões e Personagens | 21 |
 | Central: Tarefas, Anotações e Guardados em cartões | 22 |
 | Central: Metas, Missões concluídas e Masmorras em cartões | 23 |
+| Central: Saques, Alarmes e Avisos em cartões; alça de tamanho | 24 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

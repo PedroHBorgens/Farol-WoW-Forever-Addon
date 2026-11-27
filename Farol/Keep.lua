@@ -1129,9 +1129,14 @@ DetailLayout = function(frame, list)
         if not row.icon then
             row.icon = row.pick:CreateTexture(nil, "ARTWORK"); row.icon:SetSize(30, 30); row.icon:SetPoint("LEFT", 4, 0)
         end
-        row.name:ClearAllPoints(); row.name:SetPoint("TOPLEFT", 42, -4); row.name:SetWidth(128)
-        row.have:ClearAllPoints(); row.have:SetPoint("TOPLEFT", 42, -21); row.have:SetWidth(230)
-        row.why:ClearAllPoints(); row.why:SetPoint("TOPRIGHT", -2, -5); row.why:SetWidth(128); row.why:SetJustifyH("RIGHT")
+        -- Uma linha só em cada texto (nome comprido corta com "...", sem passar por cima da quantidade).
+        for _, fs in ipairs({ row.name, row.have, row.why }) do
+            if fs.SetWordWrap then fs:SetWordWrap(false) end
+            if fs.SetMaxLines then fs:SetMaxLines(1) end
+        end
+        row.name:ClearAllPoints(); row.name:SetPoint("TOPLEFT", 42, -4); row.name:SetWidth(150)
+        row.have:ClearAllPoints(); row.have:SetPoint("TOPLEFT", 42, -21); row.have:SetWidth(232)
+        row.why:ClearAllPoints(); row.why:SetPoint("TOPRIGHT", -2, -5); row.why:SetWidth(84); row.why:SetJustifyH("RIGHT")
         row.remove:ClearAllPoints(); row.remove:SetPoint("TOPLEFT", x + 286, y - 10)
         local entry = list[offset + i]
         for _, part in ipairs(card.parts) do if entry then part:Show() else part:Hide() end end

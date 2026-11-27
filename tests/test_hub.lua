@@ -222,6 +222,65 @@ return {
         C:Hide(); T.ok(not q.list.bg:IsShown()); T.ok(C.recorded:IsShown(), "usual texts back outside the hub")
     end },
 
+    { "3.31: Loot, Alarms and the warnings history in cards inside the hub", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true })
+        for i = 1, 3 do
+            H:event("CHAT_MSG_LOOT", "Você recebe saque: |cff1eff00|Hitem:" .. (7000 + i) .. "|h[Item " .. i .. "]|h|r.")
+        end
+        H:event("CHAT_MSG_LOOT", "Você recebe saque: |cffffffff|Hitem:7009|h[Pano]|h|r.")
+        H:slash("saque"); local L = H.env.FarolLoot
+        T.eq(L.farolDocked, true); T.eq(L:GetWidth(), 770)
+        local p = L.farolPanels
+        T.eq(H:text(p.list.title), "Últimos saques"); T.eq(H:text(p["text:sum1.v"].fs), "4")
+        T.has(H:text(p["text:sum2.v"].fs), "3", "uncommon or better")
+        T.ok(p.lrow1.bg:IsShown()); T.ok(p.lrow4.bg:IsShown()); T.ok(not p.lrow5.bg:IsShown(), "no card without loot")
+        T.ok(not L.grip:IsShown(), "the hub has its own size grip"); T.ok(not L.hint:IsShown())
+        L:Hide(); T.ok(L.grip:IsShown(), "grip back outside the hub"); T.ok(not p.list.bg:IsShown())
+        H:slash("alarme add 07:30 Raide"); H:slash("alarme add 12:00 servidor"); H:slash("alarme off 2")
+        H:slash("alarme"); local A = H.env.FarolAlarms
+        T.eq(A.farolDocked, true)
+        local a = A.farolPanels
+        T.eq(H:text(a["text:nexttime"].fs), "07:30", "next alarm on"); T.has(H:text(a["text:nextline"].fs), "Raide")
+        T.eq(H:text(a.list.sub), "2 de 10 · marque para ligar")
+        T.eq(H:text(a["text:atime1"].fs), "07:30"); T.has(H:text(a["text:awhen1"].fs), "em ")
+        T.has(H:text(a["text:awhen2"].fs), "desligado"); T.ok(not a.arow3.bg:IsShown())
+        T.ok(not A.hint:IsShown()); A:Hide(); T.ok(A.hint:IsShown(), "usual layout back"); T.eq(A.rows[1].check._x, 20)
+        H.env.FarolCharDB.warnHistory = { { t = 1700000000, text = "Antigo" }, { t = os.time() - 120, text = "Bolsas quase cheias" } }
+        H:slash("historico"); local W = H.env.FarolWarnHistory
+        T.eq(W.farolDocked, true)
+        local w = W.farolPanels
+        T.eq(H:text(w["text:sum1.v"].fs), "2"); T.eq(H:text(w["text:sum2.v"].fs), "1", "today")
+        T.has(H:text(w["text:sum3.v"].fs), "há "); T.eq(H:text(w["text:day1"].fs), "HOJE")
+        T.eq(H:text(W.rows[1]), "Bolsas quase cheias"); T.has(H:text(w["text:day2"].fs), "/", "older day: date")
+        W:Hide(); T.has(H:text(W.rows[1]) or "", "Bolsas", "usual rows back")
+    end },
+
+    { "3.31: hub size grip (70% to 130%, saved and validated), size command and the medallion parts", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true })
+        H:slash("central"); local hub = H.env.FarolHub
+        T.eq(hub:GetScale(), 1, "100% by default"); T.ok(H.env.FarolHubResize, "grip exists")
+        local cx, cy = 1000, 500
+        H.env.GetCursorPosition = function() return cx, cy end
+        H.ns.Hub.StartResize(H.env.FarolHubResize)
+        cx = cx + 500; H.env.FarolHubResize._scripts.OnUpdate(H.env.FarolHubResize, 0.1)
+        T.eq(H.env.FarolDB.hubScale, 1.3, "bigger, at most 130%"); T.eq(hub:GetScale(), 1.3)
+        cx = 0; cy = 2000; H.env.FarolHubResize._scripts.OnUpdate(H.env.FarolHubResize, 0.1)
+        T.eq(H.env.FarolDB.hubScale, 0.7, "smaller, at least 70%")
+        H.ns.Hub.StopResize(); T.eq(H.env.FarolHubResize._scripts.OnUpdate, nil)
+        H.env.FarolHubResize._scripts.OnDoubleClick(H.env.FarolHubResize); T.eq(H.env.FarolDB.hubScale, 1, "double-click: 100%")
+        H:slash("central tamanho 85"); T.eq(H.env.FarolDB.hubScale, 0.85); T.has(H:lastMsg(), "85%")
+        H:slash("central tamanho 300"); T.has(H:lastMsg(), "uso: /farol central tamanho"); T.eq(H.env.FarolDB.hubScale, 0.85)
+        H.env.GetCursorPosition = function() error("x") end
+        H.ns.Hub.StartResize(H.env.FarolHubResize) -- cursor com erro: nada quebra
+        T.eq(hub.medalRing:GetWidth(), 159); T.eq(hub.medalBack._texture, "Interface\\Minimap\\UI-Minimap-Background")
+        for _, bad in ipairs({ 0 / 0, 1 / 0, 0.2, 5, "x" }) do
+            local X = Mock.new():login({ hub = true, hubScale = bad })
+            T.eq(X.env.FarolDB.hubScale, 1, "bad size goes back to 100%: " .. tostring(bad))
+        end
+        local Y = Mock.new():login({ hub = true, hubScale = 1.2 }); Y:slash("central")
+        T.eq(Y.env.FarolHub:GetScale(), 1.2, "saved size is used when the hub opens")
+    end },
+
     { "saved value is validated; English texts; language dropdown", function(T, Mock)
         for _, bad in ipairs({ "sim", 1, 0 / 0, {} }) do
             local X = Mock.new():login({ hub = bad })

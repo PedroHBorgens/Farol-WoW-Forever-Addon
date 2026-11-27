@@ -55,6 +55,9 @@ local STRINGS = {
         loot_clear_ask_1 = "Apagar %d item?",
         loot_button_none = "Clique para ver",
         loot_when     = "Saqueado: %s",
+        loot_filters  = "Filtros", loot_filters_sub = "só o que você saqueou; nada é enviado",
+        loot_sum      = "Resumo", loot_sum_sub = "nesta lista",
+        loot_stat_items = "Itens", loot_stat_good = "Incomuns ou melhores", loot_stat_last = "Último",
         help_loot     = "  /farol saque [limpar] - abrir a janela de últimos saques (ou apagar o histórico)",
     },
     en = {
@@ -67,6 +70,9 @@ local STRINGS = {
         loot_cleared  = "loot history cleared.",
         loot_legend_plus = "Legendary+",
         loot_hint     = "Hover: details · Shift-click: link · Wheel: scroll",
+        loot_filters  = "Filters", loot_filters_sub = "only what you looted; nothing is sent",
+        loot_sum      = "Summary", loot_sum_sub = "in this list",
+        loot_stat_items = "Items", loot_stat_good = "Uncommon or better", loot_stat_last = "Latest",
         loot_all      = "All",
         loot_none     = "None",
         loot_n_selected = "%d selected",
@@ -452,6 +458,8 @@ ns.CreateDropdown = CreateDropdown -- também usado pelos avisos (tempo do "Lemb
 ---------------------------------------------------------------------------
 
 local scrollOffset = 0
+local SimpleLayout, DetailLayout -- layout de sempre e o da Central (3.31), definidos depois da janela
+local DETAIL_W, DETAIL_H, DETAIL_ROWS = 770, 480, 12
 
 local function CountItems()
     local items = {}
@@ -640,6 +648,7 @@ local function CreateWindow()
     frame.clear:SetScript("OnClick", function(self) ns.ConfirmClick(self, #history, "loot_clear_ask", Loot.Clear) end)
 
     local grip = CreateFrame("Button", "FarolLootResize", frame)
+    frame.grip = grip
     grip:SetSize(16, 16)
     grip:SetPoint("BOTTOMRIGHT", -8, 8)
     grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
@@ -666,10 +675,67 @@ local function CreateWindow()
         RefreshWindow()
     end)
     frame:SetScript("OnHide", CloseDropdown)
+    -- Central do Farol (estilo detalhado, 3.31): filtros, resumo e a lista em cartões.
+    frame.farolDetailSize = { DETAIL_W, DETAIL_H }
+    frame.farolDetail = function(on)
+        local Kit = ns.Hub and ns.Hub.Kit
+        if Kit then Kit.ShowPanels(frame, on) end
+        if not on then SimpleLayout(frame) end
+        RefreshWindow()
+    end
     tinsert(UISpecialFrames, "FarolLoot") -- ESC fecha
     ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
     return frame
+end
+
+SimpleLayout = function(frame)
+    frame.showLabel:ClearAllPoints(); frame.showLabel:SetPoint("TOPLEFT", 20, -52)
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 24, LIST_TOP - 4)
+    for i, row in ipairs(frame.rows) do
+        row:ClearAllPoints()
+        row:SetPoint("TOPLEFT", 20, LIST_TOP - (i - 1) * ROW_HEIGHT)
+        row:SetPoint("RIGHT", frame, "RIGHT", -20, 0)
+    end
+    frame.scrollInfo:ClearAllPoints(); frame.scrollInfo:SetPoint("BOTTOMLEFT", 22, 21)
+    frame.clear:ClearAllPoints(); frame.clear:SetPoint("BOTTOMRIGHT", -30, 16)
+    frame.hint:Show(); frame.grip:Show()
+end
+
+DetailLayout = function(frame, shown, fit)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit then return end
+    local filters = Kit.Panel(frame, "filters", 8, -6, 440, 70)
+    filters.title:SetText(T("loot_filters")); filters.sub:SetText(T("loot_filters_sub"))
+    frame.showLabel:ClearAllPoints(); frame.showLabel:SetPoint("TOPLEFT", 20, -44)
+    local sum = Kit.Panel(frame, "sum", 456, -6, 306, 70)
+    sum.title:SetText(T("loot_sum")); sum.sub:SetText(T("loot_sum_sub"))
+    local good = 0
+    for _, entry in ipairs(shown) do if type(entry.q) == "number" and entry.q >= 2 then good = good + 1 end end
+    local last = "--"
+    if shown[1] and type(shown[1].t) == "number" then
+        local ok, text = pcall(date, "%H:%M", shown[1].t)
+        if ok and type(text) == "string" then last = text end
+    end
+    Kit.Stat(frame, "sum1", 468, -30, 60, T("loot_stat_items"), tostring(#shown))
+    Kit.Stat(frame, "sum2", 532, -30, 150, T("loot_stat_good"), ns.C.good .. good .. "|r")
+    Kit.Stat(frame, "sum3", 690, -30, 66, T("loot_stat_last"), last)
+    local list = Kit.Panel(frame, "list", 8, -84, 754, 380)
+    list.title:SetText(T("loot_title")); list.sub:SetText(T("loot_hint"))
+    frame.hint:Hide(); frame.grip:Hide()
+    for i, row in ipairs(frame.rows) do
+        local y = -112 - (i - 1) * 26
+        row:ClearAllPoints()
+        row:SetPoint("TOPLEFT", 26, y)
+        row:SetPoint("RIGHT", frame, "RIGHT", -28, 0)
+        local card = Kit.Panel(frame, "lrow" .. i, 18, y + 2, 734, 24)
+        card.title:SetText(""); card.sub:SetText("")
+        local on = i <= fit and row:IsShown()
+        for _, part in ipairs(card.parts) do if on then part:Show() else part:Hide() end end
+    end
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 24, -116)
+    frame.scrollInfo:ClearAllPoints(); frame.scrollInfo:SetPoint("TOPLEFT", 22, -436)
+    frame.clear:ClearAllPoints(); frame.clear:SetPoint("TOPRIGHT", -20, -430)
 end
 
 RefreshWindow = function()
@@ -695,6 +761,7 @@ RefreshWindow = function()
     -- Quantas linhas cabem na altura atual (o resto é acessado rolando).
     local available = (window:GetHeight() or settings.h) + LIST_TOP - FOOTER_H
     local fit = math.max(1, math.floor(available / ROW_HEIGHT))
+    if window.farolDocked then fit = DETAIL_ROWS end -- Central: a lista tem altura fixa
     local maxOffset = math.max(0, #shown - fit)
     if scrollOffset > maxOffset then scrollOffset = maxOffset end
     if scrollOffset < 0 then scrollOffset = 0 end
@@ -734,6 +801,7 @@ RefreshWindow = function()
     else
         window.empty:Hide()
     end
+    if window.farolDocked then DetailLayout(window, shown, fit) end
 end
 
 function Loot.ToggleWindow()

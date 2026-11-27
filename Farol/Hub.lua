@@ -108,7 +108,10 @@ local STRINGS = {
         hub_profs_empty = "Nenhuma profissão encontrada.",
         hub_on        = "Central do Farol ligada (estilo detalhado): as janelas do Farol abrem dentro dela. /farol central off volta ao simples.",
         hub_off       = "estilo simples: cada janela do Farol abre sozinha, como antes.",
-        hub_usage     = "uso: /farol central || /farol central on||off",
+        hub_usage     = "uso: /farol central || /farol central on||off || /farol central tamanho 70-130",
+        hub_size_tip  = "Arraste para aumentar ou diminuir a Central (agora: %d%%). Duplo clique volta a 100%%.",
+        hub_size_set  = "tamanho da Central: %d%%.",
+        hub_size_usage = "uso: /farol central tamanho 70-130 (porcentagem; 100 = normal)",
         opt_hub       = "Estilo detalhado (Central do Farol)",
         help_hub      = "  /farol central       - Central do Farol: todas as janelas num painel só (estilo detalhado)",
         news_hub      = "Central do Farol (estilo detalhado): um painel com barra lateral e um resumo em cartões; as janelas abrem dentro dela (/farol central)",
@@ -198,7 +201,10 @@ local STRINGS = {
         hub_profs_empty = "No professions found.",
         hub_on        = "Farol hub on (detailed style): Farol windows open inside it. /farol hub off goes back to simple.",
         hub_off       = "simple style: each Farol window opens on its own, as before.",
-        hub_usage     = "usage: /farol hub || /farol hub on||off",
+        hub_usage     = "usage: /farol hub || /farol hub on||off || /farol hub size 70-130",
+        hub_size_tip  = "Drag to make the hub bigger or smaller (now: %d%%). Double-click goes back to 100%%.",
+        hub_size_set  = "hub size: %d%%.",
+        hub_size_usage = "usage: /farol hub size 70-130 (percent; 100 = normal)",
         opt_hub       = "Detailed style (Farol hub)",
         help_hub      = "  /farol hub           - Farol hub: every window in one panel (detailed style)",
         news_hub      = "Farol hub (detailed style): one panel with a side bar and a summary in cards; the windows open inside it (/farol hub)",
@@ -921,19 +927,32 @@ local function CreateHub()
             edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border", tile = true, tileSize = 32, edgeSize = 32,
             insets = { left = 11, right = 12, top = 12, bottom = 11 } })
     end
+    -- Fundo opaco (3.31): o fundo de diálogo do jogo é translúcido e deixava ver o mundo (e nomes) por trás.
+    frame.backing = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
+    frame.backing:SetPoint("TOPLEFT", 10, -10)
+    frame.backing:SetPoint("BOTTOMRIGHT", -10, 10)
+    Fill(frame.backing, 0.06, 0.05, 0.04, 1)
     -- Topo: faixa escura com o título; medalhão com o ícone do Farol no canto.
     frame.topBack = frame:CreateTexture(nil, "BORDER")
     frame.topBack:SetPoint("TOPLEFT", 12, -12)
     frame.topBack:SetPoint("TOPRIGHT", -12, -12)
     frame.topBack:SetHeight(TOP_H - 12)
     Fill(frame.topBack, 0.16, 0.12, 0.07, 0.95)
-    frame.medal = frame:CreateTexture(nil, "OVERLAY")
-    frame.medal:SetSize(64, 64)
-    frame.medal:SetPoint("TOPLEFT", -14, 18)
+    -- Medalhão (3.31): as mesmas proporções do botão do minimapa (que aparece certo), 3x maior:
+    -- disco escuro + ícone recortado em círculo + anel no canto de cima à esquerda de uma "caixa" de 93x93.
+    local MX, MY = -22 + 46.5, 30 - 46.5 + 3 -- centro do ícone (relativo ao canto da Central)
+    frame.medalBack = frame:CreateTexture(nil, "OVERLAY", nil, 1)
+    frame.medalBack:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
+    frame.medalBack:SetSize(60, 60)
+    frame.medalBack:SetPoint("CENTER", frame, "TOPLEFT", MX, MY)
+    frame.medal = frame:CreateTexture(nil, "OVERLAY", nil, 2)
+    frame.medal:SetSize(54, 54)
+    frame.medal:SetPoint("CENTER", frame, "TOPLEFT", MX, MY)
     frame.medal:SetTexture("Interface\\AddOns\\Farol\\Media\\Farol") -- arquivo do ícone (ns.ICON é o código do chat)
-    frame.medalRing = frame:CreateTexture(nil, "OVERLAY", nil, 2)
-    frame.medalRing:SetSize(90, 90)
-    frame.medalRing:SetPoint("CENTER", frame.medal, "CENTER", 13, -13)
+    if frame.medal.SetMask then pcall(frame.medal.SetMask, frame.medal, "Interface\\CharacterFrame\\TempPortraitAlphaMask") end
+    frame.medalRing = frame:CreateTexture(nil, "OVERLAY", nil, 3)
+    frame.medalRing:SetSize(159, 159)
+    frame.medalRing:SetPoint("TOPLEFT", frame, "TOPLEFT", -22, 30)
     frame.medalRing:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.title:SetPoint("TOP", 0, -24)
@@ -1031,6 +1050,24 @@ local function CreateHub()
     frame.appBtn = Foot("FarolHubAppearance", 120, "hub_appearance", function() if ns.Appearance then ns.Appearance.ToggleWindow() end end, frame.barBtn)
     frame.foot = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.foot:SetPoint("BOTTOMRIGHT", -24, 20)
+
+    -- Alça ◢ (3.31): arrastar aumenta/diminui a Central inteira, na proporção (70% a 130%); duplo clique = 100%.
+    frame.grip = CreateFrame("Button", "FarolHubResize", frame)
+    frame.grip:SetSize(18, 18)
+    frame.grip:SetPoint("BOTTOMRIGHT", -6, 6)
+    frame.grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    frame.grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    frame.grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    frame.grip:SetScript("OnMouseDown", function(self) Hub.StartResize(self) end)
+    frame.grip:SetScript("OnMouseUp", function() Hub.StopResize() end)
+    frame.grip:SetScript("OnDoubleClick", function() Hub.SetScale(1) end)
+    frame.grip:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine(string.format(T("hub_size_tip"), math.floor(Hub.Scale() * 100 + 0.5)), 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    frame.grip:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    if frame.SetScale then frame:SetScale(Hub.Scale()) end
 
     -- Atualiza a página Início uma vez por segundo enquanto a Central está aberta.
     local elapsed = 0
@@ -1134,6 +1171,57 @@ function Hub.SetEnabled(value)
     if ns.RefreshOptions then ns.RefreshOptions() end
 end
 
+-- Tamanho da Central (3.31): proporcional, de 70% a 130%, salvo em db.hubScale (validado no Core).
+Hub.SCALE_MIN, Hub.SCALE_MAX = 0.7, 1.3
+function Hub.Scale()
+    local db = DB()
+    local v = db and db.hubScale
+    if type(v) ~= "number" or v ~= v or v < Hub.SCALE_MIN or v > Hub.SCALE_MAX then return 1 end
+    return v
+end
+
+-- Muda a escala mantendo o canto de cima à esquerda no mesmo lugar da tela.
+local function ApplyScale(value)
+    if not hub or not hub.SetScale then return end
+    local old = hub:GetScale() or 1
+    local left, top = hub:GetLeft(), hub:GetTop()
+    hub:SetScale(value)
+    if type(left) == "number" and type(top) == "number" and old > 0 then
+        hub:ClearAllPoints()
+        hub:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left * old / value, top * old / value)
+    end
+end
+
+function Hub.SetScale(value)
+    local db = DB()
+    if not db or type(value) ~= "number" or value ~= value then return false end
+    value = math.max(Hub.SCALE_MIN, math.min(Hub.SCALE_MAX, math.floor(value * 100 + 0.5) / 100))
+    db.hubScale = value
+    ApplyScale(value)
+    return true
+end
+
+local resizing
+function Hub.StartResize(grip)
+    if not hub or not GetCursorPosition then return end
+    local ok, x, y = pcall(GetCursorPosition)
+    local eff = hub.GetEffectiveScale and hub:GetEffectiveScale() or 1
+    if not ok or type(x) ~= "number" or type(y) ~= "number" or type(eff) ~= "number" or eff <= 0 then return end
+    resizing = { x = x, y = y, scale = Hub.Scale(), w = WIDTH * eff, h = HEIGHT * eff }
+    grip:SetScript("OnUpdate", function()
+        if not resizing then return end
+        local okc, cx, cy = pcall(GetCursorPosition)
+        if not okc or type(cx) ~= "number" or type(cy) ~= "number" then return end
+        local f = math.max((resizing.w + cx - resizing.x) / resizing.w, (resizing.h + resizing.y - cy) / resizing.h)
+        if f == f then Hub.SetScale(resizing.scale * f) end
+    end)
+end
+
+function Hub.StopResize()
+    resizing = nil
+    if hub and hub.grip then hub.grip:SetScript("OnUpdate", nil) end
+end
+
 local SWITCH = { on = true, ligar = true, ligado = true, sim = true, off = false, desligar = false, desligado = false, nao = false,
     simples = false, simple = false, detalhado = true, detailed = true }
 
@@ -1141,6 +1229,15 @@ function Hub.HandleCommand(rest)
     local word = string.lower(string.match(rest or "", "^%s*(%a*)") or "")
     if word == "" then
         if Hub.Enabled() then Hub.Toggle() else Hub.SetEnabled(true) end
+        return
+    end
+    if word == "tamanho" or word == "size" or word == "escala" or word == "scale" then
+        local n = tonumber(string.match(rest or "", "(%d+)%s*%%?%s*$") or "")
+        if n and n >= Hub.SCALE_MIN * 100 and n <= Hub.SCALE_MAX * 100 and Hub.SetScale(n / 100) then
+            Print(string.format(T("hub_size_set"), math.floor(Hub.Scale() * 100 + 0.5)))
+        else
+            Print(T("hub_size_usage"))
+        end
         return
     end
     local value = SWITCH[word]

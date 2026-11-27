@@ -68,7 +68,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol chat Nome`  | Em qual janela de chat o Farol escreve (ex.: uma aba "Farol"); `/farol chat principal` volta ao padrão |
 | `/farol origem on\|off` | Mostra de onde vem o XP e o ouro da sessão (missões, monstros, saque, comerciante) |
 | `/farol diagnostico` | Mostra no seu próprio chat como o jogo respondeu (personagem, reino, ouro, último logout, eventos); só leitura |
-| `/farol central`    | Central do Farol (estilo detalhado): todas as janelas num painel com barra lateral; `off` = estilo simples |
+| `/farol central`    | Central do Farol (estilo detalhado): todas as janelas num painel com barra lateral; `off` = estilo simples; `tamanho 70-130` = tamanho da Central |
 | `/farol guardar`    | Itens guardados para depois: motivo, quando ficam úteis, lembretes (`[item]: motivo`, `lista`, `tirar N`, `desfazer`) |
 | `/farol notas`      | Bloco de notas da conta: até 10 anotações com caixinha de concluída (`nova Título`, `lista`, `desfazer`) |
 | `/farol tarefa`     | Lista de tarefas diárias e semanais (zera sozinha; `/farol tarefa add Nome`) |
@@ -456,6 +456,11 @@ detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simple
   tempo no ritmo atual e uma barra) e as metas de farm em cartões (ícone, barra, ganho da sessão, estimativa); missões
   concluídas com um resumo (registradas, hoje, total no jogo) e a lista com o link do Wowhead; masmorras com a corrida
   atual ao vivo, as médias das últimas corridas e o histórico.
+- **Saques, Alarmes e Avisos** (3.31) em cartões: saques com filtros, um resumo e um cartão por item (botões Guardar
+  e + Meta); alarmes com o próximo em destaque ("toca em ...", ao vivo), o formulário e um cartão por alarme; o
+  histórico de avisos numa linha do tempo por dia (HOJE, ONTEM) com um resumo.
+- **Tamanho da Central** (3.31): arraste a alça ◢ no canto inferior direito para aumentar ou diminuir a Central
+  inteira (70% a 130%); duplo clique volta a 100%, ou use `/farol central tamanho 85`. Fica salvo na conta.
 - As outras seções são as janelas de sempre, encaixadas na Central; arrastá-las move a Central. Com o estilo
   detalhado ligado, qualquer janela do Farol (por comando, pelo menu ou pelo botão do minimapa) abre dentro dela.
 - No topo: idioma e **Estilo simples**; no rodapé: Resumo agora, Barra... e Aparência....

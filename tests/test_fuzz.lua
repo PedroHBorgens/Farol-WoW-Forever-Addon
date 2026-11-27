@@ -50,7 +50,7 @@ return {
     { "tampered saved data with wrong types never breaks any window", function(T, Mock)
         local KEYS = { "x", "y", "point", "lang", "scale", "bgAlpha", "fontSize", "iconSize", "barWidth", "items",
                        "alarms", "loot", "warnings", "order", "snoozeMinutes", "shown", "locked", "icons", "vertical",
-                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind", "questRecord", "questShowOld", "completed", "questNames", "notesButton", "keep", "keepMerchant", "keepReady", "keepTooltip", "hub" }
+                       "summary", "serverTime", "goldTotal", "chars", "newsSeen", "tooltipFull", "minimap", "runSummary", "colorblind", "questRecord", "questShowOld", "completed", "questNames", "notesButton", "keep", "keepMerchant", "keepReady", "keepTooltip", "hub", "hubScale" }
         for i = 1, 60 do
             local db = {}
             for _, key in ipairs(KEYS) do if random(3) > 1 then db[key] = pick(BAD) end end

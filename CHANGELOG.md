@@ -2,6 +2,17 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.31.2 — Hub: no more cut texts; the hub X closes everything
+- The hub X now closes everything: a window open inside it (Warnings, Tasks, Loot...) no longer stays open on its own
+  in the middle of the screen. Inside the hub, each window's own X is hidden (it covered the panel subtitles).
+- Text review of the hub and the windows, in Portuguese and English: Home cards (labels take only the space they need;
+  the daily and weekly resets on their own lines), Characters columns ("Today 07:49", Hearthstone), saved instances and
+  rested lines, empty Tasks, Completed quest columns, Alarm names, Notes and Order lists, Appearance window, bar
+  buttons in the menu, and box hints that no longer go past their box.
+- New test (`test_textfit`): measures every window and hub page like the game and fails if interface text is cut or
+  leaves its panel; names you type can still end in "...".
+- 808 tests (2 passes).
+
 ## 3.31.1 — Hub icon in the corner, on the title line
 - The Farol icon is now square, in the top-left corner of the hub, on the same line as the "Farol" title (both are
   centered on the top bar), without the round frame that came out crooked.

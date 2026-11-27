@@ -256,7 +256,7 @@ end
 
 local function CreateWindow()
     local frame = CreateFrame("Frame", "FarolAppearance", UIParent, ns.backdropTemplate)
-    frame:SetSize(470, 484) -- 3.25: + "Mostrar botão das anotações"
+    frame:SetSize(520, 484) -- 3.25: + "Mostrar botão das anotações"; 3.31.2: textos longos das caixinhas cabem
     frame:SetPoint("CENTER", 0, 40)
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -276,6 +276,7 @@ local function CreateWindow()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.title:SetPoint("TOP", 0, -18)
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    frame.farolClose = close -- na Central fica escondido: o X da Central fecha tudo (3.31.2)
     close:SetPoint("TOPRIGHT", -6, -6)
 
     frame.scale = StepperRow(frame, -54, "FarolAppScale", StepScale)

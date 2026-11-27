@@ -284,6 +284,33 @@ return {
         T.eq(Y.env.FarolHub:GetScale(), 1.2, "saved size is used when the hub opens")
     end },
 
+    { "3.31.2: the hub X closes everything (no docked window left open); inner X hidden in the hub", function(T, Mock)
+        for _, sec in ipairs({ { "warnings", "FarolWarnHistory" }, { "tasks", "FarolTasks" }, { "loot", "FarolLoot" },
+                { "alarms", "FarolAlarms" }, { "notes", "FarolNotes" }, { "keep", "FarolKeep" }, { "goals", "FarolGoals" },
+                { "quests", "FarolCompleted" }, { "runs", "FarolRuns" }, { "settings", "FarolOptions" } }) do
+            local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true })
+            H:slash("central"); H.ns.Hub.Select(sec[1])
+            local W = H.env[sec[2]]
+            T.ok(W:IsShown() and W.farolDocked, sec[1] .. " docked")
+            T.ok(W.farolClose and not W.farolClose:IsShown(), sec[1] .. ": its own X is hidden inside the hub")
+            H.env.FarolHub:Hide() -- o X da Central (o jogo também esconde as janelas de dentro)
+            T.ok(not W:IsShown(), sec[1] .. ": closed together with the hub, not left open on its own")
+            T.eq(W:GetParent(), H.env.UIParent, sec[1] .. ": given back"); T.ok(W.farolClose:IsShown(), sec[1] .. ": X back")
+            H:slash("central off")
+            if sec[1] == "settings" then H:slash("menu") else H.ns.Hub.Select(sec[1]) end
+        end
+    end },
+
+    { "3.31.2: Home tasks card shows the daily and weekly reset on their own lines; labels fit their text", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true }); H:slash("central")
+        local card = H.env.FarolHub.pages.home.cards[2]
+        T.eq(H:text(card.rows[2].left), "Reset diário"); T.eq(H:text(card.rows[3].left), "Reset semanal")
+        T.ok(H:text(card.rows[2].right) ~= "", "daily countdown shown")
+        local row = card.rows[2]
+        T.ok(row.left:GetWidth() + row.right:GetWidth() + 34 <= card:GetWidth() + 0.5, "label + value fit the card")
+        T.ok(row.left:GetWidth() >= 150, "the label gets the width of its text (simulator: 150)")
+    end },
+
     { "saved value is validated; English texts; language dropdown", function(T, Mock)
         for _, bad in ipairs({ "sim", 1, 0 / 0, {} }) do
             local X = Mock.new():login({ hub = bad })

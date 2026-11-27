@@ -22,7 +22,7 @@ end
 
 return {
     { "four tabs; the Bar tab opens first and only one page shows at a time", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local window, set = open(H)
         T.ok(window:IsShown())
         for key, label in pairs({ bar = "Barra", warnings = "Avisos", tools = "Ferramentas", general = "Geral" }) do
@@ -37,7 +37,7 @@ return {
     end },
 
     { "items are grouped, in the same order as the bar items; group titles translated", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local flat = {}
         for _, group in ipairs(H.ns.ITEM_GROUPS) do for _, key in ipairs(group[2]) do flat[#flat + 1] = key end end
         T.eq(table.concat(flat, ","), table.concat(H.ns.ITEM_ORDER, ","), "every item once, same order")
@@ -49,7 +49,7 @@ return {
     end },
 
     { "/farol aviso opens the menu on the Warnings tab; again closes it; right-click goes back to Bar", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         H:slash("aviso")
         local window, set = H.env.FarolOptions, H.env.FarolOptions.controls
         T.ok(window:IsShown()); T.eq(shownTab(set), "warnings")
@@ -66,7 +66,7 @@ return {
     end },
 
     { "Warnings tab: sections, the new tasks checkbox, and sync with the game settings panel", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         H:slash("aviso")
         local w = H.env.FarolOptions.controls.warnings
         T.eq(H:text(w.gearHeader), "Equipamento e bolsas"); T.eq(H:text(w.charHeader), "Personagem")
@@ -81,7 +81,7 @@ return {
     end },
 
     { "Tools tab: one button per window, with a description; Summary now prints in chat", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local _, set = open(H); H:click(set.tabs.tools)
         local texts = {}
         for _, button in ipairs(set.tools) do texts[#texts + 1] = H:text(button) .. " = " .. H:text(button.desc) end
@@ -94,7 +94,7 @@ return {
     end },
 
     { "General tab: sections, Appearance-only options, danger area apart (3.24)", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local _, set = open(H); H:click(set.tabs.general)
         T.eq(H:text(set.langHeader), "Idioma"); T.eq(H:text(set.chatHeader), "Chat e mensagens")
         T.eq(H:text(set.barHeader), "Barra e relógio"); T.eq(H:text(set.accessHeader), "Minimapa e acessibilidade")
@@ -115,7 +115,7 @@ return {
     end },
 
     { "tabs look like tabs: only the open one is marked (3.24)", function(T, Mock)
-        local H = Mock.new({ locale = "enUS" }):login()
+        local H = Mock.new({ locale = "enUS" }):login({ hub = false })
         local _, set = open(H)
         T.ok(set.tabs.bar.farolMark:IsShown(), "Bar open"); T.ok(not set.tabs.general.farolMark:IsShown())
         H:click(set.tabs.general)
@@ -125,7 +125,7 @@ return {
     end },
 
     { "English tabs, groups and warning sections", function(T, Mock)
-        local H = Mock.new({ locale = "enUS" }):login()
+        local H = Mock.new({ locale = "enUS" }):login({ hub = false })
         local _, set = open(H)
         T.eq(H:text(set.tabs.tools), "Tools"); T.eq(H:text(set.groups[3]), "Gear and bags")
         T.eq(H:text(set.shown.label), "Show")

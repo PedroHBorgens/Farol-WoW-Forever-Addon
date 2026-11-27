@@ -698,4 +698,42 @@ grip_hub = grip_hub[:-12] + '<span class="grip">◢</span>' + grip_hub[-12:]
 page("farol-24-hub-loot-alarms-warnings", '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:64px">'
      f'<div style="display:flex;gap:20px">{hub_small("Loot", loot_main)}{hub_small("Alarms", alarms_main)}</div>{grip_hub}</div>',
      "Loot, alarms and warnings in cards · drag ◢ to resize", "Saques, alarmes e avisos em cartões · arraste ◢ para mudar o tamanho", HCSS + TCSS + KCSS + GCSS + LCSS)
+# 25. Hub: settings in cards (3.32)
+SCSS = """.seg{display:flex;margin-bottom:6px}.seg span{border:1px solid #7a5f2a;padding:2px 14px;font-size:12px;color:#d8cfb4;background:#14100a}.seg span.on{background:linear-gradient(#6a4a14,#3a2a0e);color:#ffd75a;font-weight:bold}
+.ck2{display:flex;align-items:center;gap:6px;font-size:11.5px;margin:1px 0}.ck2 .box{width:12px;height:12px;font-size:9px}.gear{font-family:'Noto Color Emoji';font-size:11px;margin-left:auto}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.hpan.red{border-color:#a33;background:linear-gradient(#2a1010,#160909)}.hpan.red h4{color:#ff8a8a}
+.nb{display:inline-block;border:1px solid #888;background:#000;color:#fff;font-size:11px;padding:0 4px;margin:0 4px}"""
+def sck(on, text, gear=False, extra=""):
+    return f'<div class="ck2"><span class="box">{"✓" if on else ""}</span><span>{text}{extra}</span>{"<span class=gear>⚙️</span>" if gear else ""}</div>'
+def sseg(active): return '<div class="seg">' + "".join(f'<span class="{"on" if t == active else ""}">{t}</span>' for t in ["Bar", "Warnings", "Tools", "General"]) + '</div>'
+def sgrp(title, sub, items, cls=""): return f'<div class="hpan {cls}" style="margin:0"><h4>{title}<small>{sub}</small></h4>' + "".join(items) + '</div>'
+set_bar = ('<div class="hmain" style="display:block">' + sseg("Bar") + '<div class="g2" style="margin-bottom:6px">'
+    + sgrp("Bar", "picking one changes nothing", ['<div style="display:flex;gap:5px"><span class="btn" style="color:#fff">Bar 1</span><span class="btn">Bar 2 (off)</span><span class="btn">Bar 3 (off)</span></div>', '<div style="display:flex;gap:14px">' + sck(1, "Show") + sck(1, "Lock") + '</div>'])
+    + sgrp("Packs", "only turn on what you click", ['<div style="display:flex;gap:5px;flex-wrap:wrap"><span class="btn">Basic</span><span class="btn">Leveling</span><span class="btn">Gold and farm</span><span class="btn">Dungeons</span></div>'])
+    + '</div><div class="g3">'
+    + sgrp("Performance", "3 of 3", [sck(1, "FPS"), sck(1, "Latency"), sck(1, "Memory")])
+    + sgrp("Place", "4 of 4", [sck(1, "Coordinates"), sck(1, "Zone"), sck(1, "Speed"), sck(1, "Hearthstone", True)])
+    + sgrp("Gear and bags", "2 of 5", [sck(1, "Durability"), sck(0, "Bags"), sck(1, "Junk in bags"), sck(0, "Ammo and reagents", True), sck(0, "Kept items", True)])
+    + sgrp("Gold", "1 of 3", [sck(1, "Gold"), sck(0, "Session gold"), sck(0, "Gold per hour")])
+    + sgrp("Progress", "3 of 8", [sck(1, "Experience (XP)"), sck(1, "XP per hour"), sck(0, "Reputation"), sck(0, "Professions"), sck(0, "Goals", True), sck(1, "Quest log", True)])
+    + sgrp("Time and social", "0 of 8", [sck(0, "Clock", True), sck(0, "Resets"), sck(0, "Tasks", True), sck(0, "Notes", True), sck(0, "Session time")])
+    + '</div></div>')
+set_warn = ('<div class="hmain" style="display:block">' + sseg("Warnings")
+    + '<div class="hpan" style="display:flex;gap:6px;align-items:center"><span class="btn">Recommended only</span><span class="btn">Turn all off</span><span class="dim" style="font-size:11px">only warns about what is ticked</span></div><div class="g2">'
+    + sgrp("Gear and bags", "3 of 4", [sck(1, "Durability below", extra='<span class="nb">20</span>%'), sck(1, "Bags with", extra='<span class="nb">2</span>free slots'), sck(0, "Ammo running low"), sck(0, "Reagents running low")])
+    + sgrp("Quests and travel", "0 of 6", [sck(0, "Quest log from", extra='<span class="nb">19</span>quests'), sck(0, "Quests ready"), sck(0, "Hearthstone ready"), sck(0, "Daily tasks left")])
+    + sgrp("Character", "3 of 5", [sck(1, "Unspent talent points"), sck(1, "Old spell ranks"), sck(1, "Profession at its limit"), sck(0, "Other character rested")])
+    + sgrp("Breaks", "0 of 2", [sck(0, "Break every", extra='<span class="nb">120</span>min'), sck(0, "Water every", extra='<span class="nb">45</span>min')])
+    + '</div><div class="hpan" style="margin-top:6px;display:flex;gap:8px;align-items:center">' + sck(1, "Play a sound") + '<span class="btn">30 min</span><span class="btn">Test warning</span><span class="btn">History...</span></div></div>')
+set_gen = ('<div class="hmain" style="display:block">' + sseg("General") + '<div class="g2">'
+    + sgrp("Language", "", ['<div style="display:flex;gap:5px"><span class="btn" style="color:#fff">Auto</span><span class="btn">Português</span><span class="btn">English</span></div>'])
+    + sgrp("Profiles", "advanced", ['<div style="display:flex;gap:5px;align-items:center">Profile: <span class="btn">Account ▾</span><span class="btn">Copy from...</span></div>'])
+    + sgrp("Chat and messages", "", ['<div class="ck2">Messages in: <span class="btn" style="padding:0 6px">Main chat ▾</span></div>', sck(1, "Session summary on login"), sck(0, "Where XP and gold come from")])
+    + sgrp("Bar and clock", "", [sck(0, "Server time"), sck(1, "Detailed style (Farol hub)"), sck(0, "Gold of all characters")])
+    + sgrp("Minimap and accessibility", "", [sck(1, "Minimap button"), sck(0, "Lock the minimap button"), sck(0, "Colorblind colors")])
+    + sgrp("⚠ Restore and delete", "asks for a 2nd click", ['<div style="display:flex;gap:5px;flex-wrap:wrap"><span class="btn">Default position</span><span class="btn">Reset session</span><span class="btn">Forget characters</span></div>'], "red")
+    + '</div></div>')
+page("farol-25-hub-settings", '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:64px">'
+     f'<div style="display:flex;gap:20px">{hub_small("Settings", set_bar)}{hub_small("Settings", set_warn)}</div>{hub_small("Settings", set_gen)}</div>',
+     "Settings in cards, inside the hub", "Configurações em cartões, dentro da Central do Farol", HCSS + TCSS + KCSS + GCSS + SCSS)
 print("pages ok")

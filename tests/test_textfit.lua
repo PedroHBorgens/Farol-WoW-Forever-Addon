@@ -57,6 +57,13 @@ local function Scenario(T, Mock, locale)
             { "quests", "FarolCompleted" }, { "runs", "FarolRuns" }, { "loot", "FarolLoot" }, { "alarms", "FarolAlarms" },
             { "warnings", "FarolWarnHistory" }, { "settings", "FarolOptions" } }
         for _, sec in ipairs(SECTIONS) do H.ns.Hub.Select(sec[1]); check(H, sec[2], "hub " .. sec[1]) end
+        -- 3.32: as 4 abas da Configurações em cartões
+        H.ns.Hub.Select("settings")
+        local detail = H.env.FarolOptions.detailControls
+        T.ok(detail, "settings in cards inside the hub")
+        for _, tab in ipairs({ "bar", "warnings", "tools", "general" }) do
+            H:click(detail.tabs[tab]); check(H, "FarolOptions", "hub settings " .. tab)
+        end
         -- Central vazia (instalação nova) e um personagem visto hoje
         local E = Mock.new({ locale = locale }); E:login({ hub = true })
         local n, r = E.ns.CurrentCharacter()

@@ -2,6 +2,19 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.32.0 — Hub: settings in cards
+- **Settings** inside the hub (detailed style), tab by tab:
+  - **Bar**: a "Bar" card (Bar 1/2/3, Show, Lock), a "Packs" card, one card per item group with how many are on
+    ("3 of 8") and the ⚙ next to items with settings, and the count with Appearance and Order at the bottom.
+  - **Warnings**: one card per group (gear and bags, character, quests and travel, breaks) with the numbers on the
+    line, and "How to warn" at the bottom.
+  - **Tools**: one card per window, with its short description.
+  - **General**: Language, Profiles, Chat and messages, Bar and clock, Minimap and accessibility; "Restore and delete"
+    in a red card apart, still with the 2nd click.
+- Same options as the usual menu, kept in sync (a 3rd set of controls, made only when the hub opens Settings).
+  Outside the hub the menu stays as always. `/farol warn` opens the Warnings cards when the hub is open.
+- Image 25. `test_textfit` checks the 4 tabs in the hub too. 810 tests (2 passes).
+
 ## 3.31.2 — Hub: no more cut texts; the hub X closes everything
 - The hub X now closes everything: a window open inside it (Warnings, Tasks, Loot...) no longer stays open on its own
   in the middle of the screen. Inside the hub, each window's own X is hidden (it covered the panel subtitles).

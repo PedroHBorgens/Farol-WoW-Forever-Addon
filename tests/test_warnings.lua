@@ -20,7 +20,7 @@ return {
     end },
 
     { "low durability warns once, on screen and in chat, with its own sound", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         setDurability(H, 15); H:update(1)
         T.eq(H.warnSounds, 1); T.eq(H.sounds, 0, "not the alarm sound")
         T.has(H.strip(H.screen), "Durabilidade baixa: 15% — hora de reparar!")
@@ -30,7 +30,7 @@ return {
     end },
 
     { "warns again only after repairing and after the 5 minute cooldown", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         setDurability(H, 15); H:update(1); T.eq(H.warnSounds, 1)
         setDurability(H, 100); H:update(1)                  -- reparou
         setDurability(H, 10); H:update(60); T.eq(H.warnSounds, 1, "cooldown")
@@ -38,7 +38,7 @@ return {
     end },
 
     { "bags: almost full, then full, without repeating while flapping", function(T, Mock)
-        local H = Mock.new({ locale = "enUS" }):login()
+        local H = Mock.new({ locale = "enUS" }):login({ hub = false })
         setDurability(H, 100)
         setFree(H, 2); H:update(1)
         T.eq(H.warnSounds, 1); T.has(H.strip(H.screen), "Bags almost full: 2 free slots.")
@@ -53,7 +53,7 @@ return {
     end },
 
     { "thresholds and switches by command; invalid values rejected", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         local w = H.env.FarolDB.warnings
         H:slash("aviso durab 30"); T.eq(w.durabPct, 30)
         H:slash("aviso durab 80"); T.has(H:lastMsg(), "valor inválido: use de 5 a 50"); T.eq(w.durabPct, 30)
@@ -74,7 +74,7 @@ return {
     end },
 
     { "warnings window: checkboxes, number boxes and test button", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
         local button
         for _, frame in ipairs(H:framesOf("Button")) do
@@ -99,7 +99,7 @@ return {
     end },
 
     { "warnings work with the panel hidden and ignore secret values", function(T, Mock)
-        local H = Mock.new({ secret = true }):login()
+        local H = Mock.new({ secret = true }):login({ hub = false })
         H:slash("")
         setDurability(H, 15) -- 15 é "secreto" no modo secret: ignorado
         H:update(1); T.eq(H.warnSounds, 0)

@@ -16,7 +16,7 @@ local function all(H) return H.strip(table.concat(H.msgs, "\n")) end
 
 return {
     { "presets add items; Basic goes back to the basics; Undo restores; nothing turns on by itself", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local before = on(H)
         local _, set = open(H)
         T.eq(H:text(set.packLabel), "Aplicar pacote:"); T.eq(H:text(set.packs[2]), "Upando")
@@ -40,7 +40,7 @@ return {
     end },
 
     { "a preset only changes the bar picked in the menu, and undo goes back to that bar", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         H:slash("barra 2 mostrar"); local _, set = open(H)
         H:click(set.bars[2]); T.eq(rawget(H.env.FarolDB, "activeBar"), 2)
         local bar1 = on(H) -- (lê a barra ativa)
@@ -52,7 +52,7 @@ return {
     end },
 
     { "gear next to items with settings opens the right window or tab; info strip explains the hovered item", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local _, set = open(H)
         for _, key in ipairs({ "hearth", "ammo", "quests", "goals", "farm", "clock", "tasks", "run" }) do
             T.ok(set.gears[key], "gear for " .. key)
@@ -74,7 +74,7 @@ return {
     end },
 
     { "profile and Copy from... moved to the General tab (advanced) and still work", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local _, set = open(H)
         T.eq(set.profile:GetParent(), set.pages.general); T.eq(set.copy:GetParent(), set.pages.general)
         T.eq(H:text(set.profileHeader), "Perfis (avançado)")
@@ -83,7 +83,7 @@ return {
     end },
 
     { "Warnings tab: Recommended only / Turn all off, grouped, with an info strip", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         H:slash("aviso")
         local w = H.env.FarolOptions.controls.warnings
         T.eq(H:text(w.recommended), "Só os recomendados"); T.eq(H:text(w.allOff), "Desligar todos")
@@ -109,14 +109,14 @@ return {
     end },
 
     { "every warning has a description in both languages", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         for _, key in ipairs({ "durab", "bags", "ammo", "reag", "talents", "ranks", "prof", "restFull", "goals", "questFull",
                                "questReady", "hearthReady", "tasks", "pause", "water", "anywhere", "sound" }) do
             for _, lang in ipairs({ "pt", "en" }) do
                 T.ok(H.ns.STRINGS[lang]["warn_desc_" .. key], lang .. " warn_desc_" .. key)
             end
         end
-        local E = Mock.new({ locale = "enUS" }):login()
+        local E = Mock.new({ locale = "enUS" }):login({ hub = false })
         local _, set = open(E)
         T.eq(E:text(set.packs[3]), "Gold & farm"); T.has(E:text(set.info), "Hover an item")
     end },

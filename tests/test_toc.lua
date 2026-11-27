@@ -77,8 +77,11 @@ return {
             "SetChatWindowShown", "AddChatWindowMessages", "RemoveChatWindowMessages",
             -- Pedra de Regresso: nunca usar itens nem vincular em outro lugar
             "UseInventoryItem", "ConfirmBinder", "C_PlayerInteractionManager", "UseToy", "C_Container.UseContainerItem",
+            -- combate (3.35): só ler o medidor; nunca apagar as lutas do jogo nem mexer no registro de combate dele
+            "ResetAllCombatSessions", "COMBAT_LOG_EVENT", "CombatLogGetCurrentEventInfo", "ClearEntries", "SetMessageLimit",
+            "SetEntryRetentionTime", "SetFilteredEventsEnabled", "ApplyFilterSettings", "RefilterEntries",
         }
-        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua", "MinimapButton.lua" }) do
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Combat.lua", "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua", "MinimapButton.lua" }) do
             local code = read("Farol/" .. file)
             code = string.gsub(code, "%-%-%[%[.-%]%]", "") -- comentários de bloco
             code = string.gsub(code, "%-%-[^\n]*", "")     -- comentários de linha
@@ -114,7 +117,7 @@ return {
                         "assets/video/make_video.py", "assets/video/timeline.js", "assets/video/youtube.py",
                         "assets/video/youtube.js", "assets/video/youtube_script.txt" }
         for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua",
-                                "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua", "MinimapButton.lua" }) do
+                                "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Combat.lua", "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua", "MinimapButton.lua" }) do
             files[#files + 1] = "Farol/" .. file
         end
         for _, path in ipairs(files) do
@@ -125,5 +128,23 @@ return {
                 T.ok(not string.find(lower, string.lower(name), 1, true), path .. " uses a Blizzard name: " .. name)
             end
         end
+    end },
+    { "3.35: no file overwrites another file's interface text (same key in two STRINGS tables)", function(T)
+        -- O registro de combate usou "cb_on"/"cb_off", que já eram das cores para daltonismo: o texto de um sumiu
+        -- em silêncio. Chave de texto (com "_", 8 espaços de recuo) só pode estar num arquivo.
+        local owner, dup = {}, {}
+        for _, file in ipairs({ "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua",
+                "Notes.lua", "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Combat.lua",
+                "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua", "MinimapButton.lua" }) do
+            local code = read("Farol/" .. file)
+            T.ok(code, file)
+            for line in string.gmatch(code or "", "[^\n]+") do
+                for key in string.gmatch(" " .. (string.match(line, "^        (%l.*)") or ""), "[%s,]([%l][%w]*_[%w_]*)%s*=%s*\"") do
+                    if owner[key] and owner[key] ~= file then dup[#dup + 1] = key .. " (" .. owner[key] .. ", " .. file .. ")" end
+                    owner[key] = owner[key] or file
+                end
+            end
+        end
+        T.eq(#dup, 0, "repeated text keys: " .. table.concat(dup, "; "))
     end },
 }

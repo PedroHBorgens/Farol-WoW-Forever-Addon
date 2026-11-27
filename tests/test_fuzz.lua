@@ -94,6 +94,11 @@ return {
                     x = pick(BAD), g = pick(BAD), l = pick(BAD), r = pick(BAD), e = pick(BAD), d = pick(BAD) }, pick(BAD) },
                     cur = random(2) == 1 and pick(BAD) or { n = "Ok", k = "party", t = pick(BAD), u = pick(BAD), x = pick(BAD) } },
                 diag = random(3) == 1 and pick(BAD) or { lz = pick(BAD), t = pick(BAD) },
+                combat = random(3) == 1 and pick(BAD) or { last = pick(BAD), list = { pick(BAD), { t = pick(BAD), n = pick(BAD), np = pick(BAD),
+                    s = pick(BAD), d = pick(BAD), tk = pick(BAD), h = pick(BAD), dd = pick(BAD), x = pick(BAD), k = pick(BAD), r = pick(BAD),
+                    sp = { pick(BAD), { i = pick(BAD), a = pick(BAD) } }, hits = pick({ pick(BAD), { { i = pick(BAD), a = pick(BAD), n = pick(BAD), pl = pick(BAD) } } }),
+                    pa = { pick(BAD), { n = pick(BAD), a = pick(BAD), b = pick(BAD), c = pick(BAD), al = pick(BAD), me = pick(BAD) } },
+                    u = pick({ pick(BAD), { hit = pick(BAD), crit = pick(BAD) } }) }, { t = 1800000000, n = "Ok", d = 1 } } },
                 goals = random(3) == 1 and pick(BAD) or { gold = pick(BAD), level = pick(BAD), ls = pick(BAD), gw = pick(BAD), lw = pick(BAD) },
                 tasks = random(3) == 1 and pick(BAD) or { { n = pick(BAD), w = pick(BAD), d = pick(BAD) }, pick(BAD), { n = "Ok", d = pick(BAD) } },
                 farm = random(3) == 1 and pick(BAD) or { { id = pick(BAD), n = pick(BAD), c = pick(BAD), w = pick(BAD) }, pick(BAD),
@@ -131,6 +136,6 @@ return {
         })
         T.eq(#H.env.FarolCharDB.warnHistory, 1, "only the valid date is kept")
         T.eq(H.env.FarolCharDB.items[1].t, 0, "invalid loot date reset to 0")
-        H:slash("historico"); H:slash("saque") -- abrir as janelas não pode dar erro
+        H:slash("historico"); H:slash("saque"); H:slash("combate") -- abrir as janelas não pode dar erro
     end },
 }

@@ -2,6 +2,26 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.35.0 — Combat log
+- New **Combat** section in the hub (and a **Combat...** window in the Tools tab; `/farol combat`), **off until you
+  turn it on**: your **last 50 fights** with title, when, duration, victory/defeat/duel, damage done and taken,
+  healing and deaths.
+  - **Positive**: your abilities with their own icon (hover = the game's own tooltip of the ability), damage, share
+    and a bar; critical hits; dodges and blocks.
+  - **Negative**: who hit you and with what (avoidable / deadly when the game says so); your missed attacks and the
+    hits the target blocked.
+  - **Participants**: allies and opponents with name, class (or creature/pet), damage done and taken.
+- The game blocks its own combat log for add-ons (checked in WoW Forever), so Farol reads only what is allowed: the
+  game's **damage meter** (`C_DamageMeter`), after each fight, and the combat numbers of you and your target
+  (`UNIT_COMBAT`). Farol never clears the game's fights, never changes the game's combat log and sends nothing.
+- **Other players' names are only shown during the session**; saved fights keep "another player" (owner's decision).
+  Saved data is validated on load (50 fights, 10 abilities, 10 hits, 20 participants each).
+- `/farol diagnostico` gains a line about the damage meter and the combat log.
+- Home: the last warning in the "Warnings and reminders" card shows only its start, in the small font (a long warning
+  was cut at the card's edge).
+- A test now fails if one file overwrites another file's interface text (the combat log first used two keys of the
+  colorblind option). Image 27. 836 tests (2 passes).
+
 ## 3.34.1 — Fits every screen; the hub starts on Home
 - Settings in the hub: the "Dungeons" pack button (2nd row) and the Show/Lock checkboxes no longer sit on the bottom
   border of their cards (the top cards are taller and the item groups moved down). Notes: the "+ New note" and

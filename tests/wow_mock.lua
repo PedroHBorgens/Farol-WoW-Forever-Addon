@@ -13,7 +13,7 @@
 local Mock = {}
 
 local ADDON_DIR = "Farol/"
-local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua", "MinimapButton.lua" }
+local ADDON_FILES = { "Core.lua", "Alarm.lua", "Loot.lua", "Warnings.lua", "Appearance.lua", "Order.lua", "Tasks.lua", "Notes.lua", "Goals.lua", "Farm.lua", "Keep.lua", "Quests.lua", "Hearth.lua", "Runs.lua", "Combat.lua", "Completed.lua", "Sources.lua", "Diag.lua", "Hub.lua", "MinimapButton.lua" }
 
 local function noop() end
 
@@ -26,6 +26,7 @@ local Frame = {}
 function Frame:SetScript(name, fn) self._scripts[name] = fn end
 function Frame:GetScript(name) return self._scripts[name] end
 function Frame:RegisterEvent(name) self._events[name] = true end
+function Frame:RegisterUnitEvent(name) self._events[name] = true end
 function Frame:UnregisterEvent(name) self._events[name] = nil end
 
 function Frame:Show()
@@ -187,6 +188,9 @@ function Mock.new(opts)
     env.wipe = function(t) for k in pairs(t) do t[k] = nil end return t end
     env.SlashCmdList = {}
     env.InCombatLockdown = function() return H.inCombat or false end
+    env.UnitGUID = function(unit) if unit == "player" then return "Player-1-0000AAAA" end return nil end
+    env.UnitCanAttack = function() return H.hostileTarget ~= false end
+    env.LOCALIZED_CLASS_NAMES_MALE = { ROGUE = "Ladino", MAGE = "Mago", PRIEST = "Sacerdote", WARRIOR = "Guerreiro" }
     env.IsShiftKeyDown = function() return H.shift or false end
     env.IsInInstance = function()
         if H.instanceType then return true, H.instanceType end
@@ -201,6 +205,7 @@ function Mock.new(opts)
     function tooltip:AddLine(text) table.insert(self.lines, text) end
     function tooltip:AddDoubleLine(a, b) table.insert(self.lines, a .. " = " .. b) end
     function tooltip:SetHyperlink(link) self.link = link end
+    function tooltip:SetSpellByID(id) self.spell = id; table.insert(self.lines, "spell:" .. tostring(id)) end
     function tooltip:Show() self.shown = true end
     function tooltip:Hide() self.shown = false end
     function tooltip:IsShown() return self.shown end
@@ -539,7 +544,21 @@ function Mock.new(opts)
         env.Enum = { SpellBookSpellBank = { Player = 0 } }
         env.C_Spell = {
             GetSpellName = function(id) local spell = H.spells[id]; return spell and spell[1] end,
+            GetSpellTexture = function(id) return H.spells[id] and (100000 + id) or nil end,
             GetSpellSubtext = function(id) return rankText(id, "Grau") end,
+        }
+        -- Medidor de dano do jogo (3.35): H.meter = { sessions = { {sessionID, name, durationSeconds} },
+        -- by = { [id] = { [tipo] = sessão } }, src = { [id] = { [tipo] = { [guid] = fonte } } } } (formato lido no WoW Forever)
+        H.meter = H.meter or { sessions = {}, by = {}, src = {} }
+        env.C_DamageMeter = {
+            IsDamageMeterAvailable = function() return H.meter ~= nil end,
+            GetAvailableCombatSessions = function() return H.meter and H.meter.sessions or {} end,
+            GetCombatSessionFromID = function(id, kind) return H.meter and H.meter.by[id] and H.meter.by[id][kind] end,
+            GetCombatSessionSourceFromID = function(id, kind, guid)
+                local s = H.meter and H.meter.src[id] and H.meter.src[id][kind]
+                return s and s[guid]
+            end,
+            ResetAllCombatSessions = function() H.meterReset = true end, -- o Farol nunca pode chamar
         }
         env.C_SpellBook = {
             GetNumSpellBookSkillLines = function() return 1 end,

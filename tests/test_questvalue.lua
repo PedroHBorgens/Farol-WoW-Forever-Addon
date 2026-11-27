@@ -57,7 +57,7 @@ return {
         H.xp.level, H.xp.cur = 31, 9000; H:update(5)
         T.has(all(H), "você sobe para o nível 32.")
         local Q = setup(Mock); Q:update(30); T.hasnt(all(Q), "você sobe para o nível")
-        local U = Mock.new({ locale = "ptBR" }); U:login({ items = { fps = true }, newsSeen = #Q.ns.NEWS - 4 })
+        local U = Mock.new({ locale = "ptBR" }); U:login({ items = { fps = true }, newsSeen = #Q.ns.NEWS - 5 })
         T.has(all(U), "missões prontas: quanto XP e ouro vão dar e se entregar todas sobe você de nível (barra e tooltip) — desligado (ligue em Menu > Avisos)")
     end },
 

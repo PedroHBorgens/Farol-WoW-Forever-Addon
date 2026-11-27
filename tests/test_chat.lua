@@ -13,7 +13,7 @@ end
 return {
     { "only Core's Print writes to the chat (modules use ns.Print)", function(T)
         for _, file in ipairs({ "Alarm", "Loot", "Warnings", "Appearance", "Order", "Tasks", "Notes", "Goals", "Farm", "Quests",
-                                "Hearth", "Runs", "Completed", "Sources", "Diag", "MinimapButton" }) do
+                                "Hearth", "Runs", "Combat", "Completed", "Sources", "Diag", "MinimapButton" }) do
             local f = assert(io.open("Farol/" .. file .. ".lua", "r")); local text = f:read("*a"); f:close()
             text = string.gsub(text, "%-%-[^\n]*", "")
             T.ok(not string.find(text, "DEFAULT_CHAT_FRAME", 1, true), file .. ": use ns.Print")

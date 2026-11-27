@@ -178,6 +178,28 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
   aberto (`BANKFRAME_OPENED`/`PLAYERBANKSLOTS_CHANGED`/`BAG_UPDATE` enquanto aberto; bolsas -1, `LastBag()+1..+NUM_BANKBAGSLOTS`
   e `Enum.BagIndex.CharacterBankTab_N`); leitura sem espaços não apaga o anotado. "✓" não existe na fonte do jogo:
   `Keep.CHECK` usa a textura `ReadyCheck-Ready`. Janela de saques: botão "Guardar" (`Keep.KeepLink`).
+- **Registro de combate (3.35, Combat.lua):** o `COMBAT_LOG_EVENT_UNFILTERED` é **bloqueado** para addons no WoW Forever
+  (`RegisterEvent` dá o aviso "ForceTaint_Strong", confirmado com `/run`); `C_CombatLog` só tem configuração (nunca
+  usar: `ClearEntries`, `SetMessageLimit`...). O que funciona (lido no jogo): **`C_DamageMeter`** —
+  `GetAvailableCombatSessions()` = `{ {sessionID, name (o inimigo principal), durationSeconds} }`;
+  `GetCombatSessionFromID(id, tipo)` = `{ combatSources = { {name, sourceGUID, classFilename, totalAmount,
+  amountPerSecond, isLocalPlayer, deathTimeSeconds, deathRecapID...} } }`; `GetCombatSessionSourceFromID(id, tipo,
+  guid)` = `{ combatSpells = { {spellID, totalAmount, isAvoidable, isDeadly, overkillAmount, creatureName,
+  combatSpellDetails = { {unitName, amount, isMob, isPet, unitClassFilename} }} } }`. Tipos (`Enum.DamageMeterType`):
+  DamageDone 0, Dps 1, HealingDone 2, Hps 3, Absorbs 4, Interrupts 5, Dispels 6, DamageTaken 7, AvoidableDamageTaken 8,
+  Deaths 9, EnemyDamageTaken 10; sessões: Overall 0, Current 1, Expired 2. Lido **depois** da luta
+  (`PLAYER_REGEN_ENABLED` → no próximo segundo, fora de `InCombatLockdown`), só sessões com id maior que
+  `combat.last` (`Combat.Baseline` no login). **Nunca** `ResetAllCombatSessions` (o simulador marca `H.meterReset`).
+  `UNIT_COMBAT(unit, ação, flag, valor, escola)` funciona em combate (WOUND/MISS/DODGE..., flag CRITICAL/BLOCK_REDUCED);
+  o jogo manda cada evento **duas vezes**: ignora a cópia no mesmo `GetTime`. Nome da habilidade: `C_Spell.GetSpellName`;
+  ícone `C_Spell.GetSpellTexture`; explicação ao passar o mouse `GameTooltip:SetSpellByID` (em `pcall`). A escola
+  (cor) da habilidade o medidor não informa. **Nomes de outros jogadores só na memória** (`live`, tabela fraca;
+  decisão do dono): no disco `pl = true` sem `n`, título de luta contra jogador `np = true`; o `Sanitize` apaga
+  qualquer `n` com `pl`. `FarolCharDB.combat = { last, list (máx. 50, mais recente primeiro) = { {t, s, n?, np?, x, k
+  = "duel"?, r = "w"/"l", d, tk, h, dd, sp = { {i, a} } (10), hits = { {i, a, n?, pl?, c?, ev?, dl?, pt?} } (10),
+  pa = { {a, b, al?, me?, pl?, n?, c?, pt?} } (20), u = {hit, crit, miss, blk, got, gcrit, avoid}} } }`. Opção
+  `db.combatLog` (desligada). Textos com o prefixo `cbt_` (o `cb_` já era das cores: o `test_toc` agora falha se dois
+  arquivos definirem a mesma chave de texto).
 - **Nomes genéricos** em tudo que o jogador vê (addon, READMEs, CurseForge, imagens, vídeos): nada de personagens,
   lugares ou itens da Blizzard. Um teste do `test_toc.lua` procura uma lista desses nomes; ao achar outro, acrescente.
 
@@ -186,7 +208,8 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
 ```
 Farol/
   Farol*.toc        4 arquivos (.toc); mesma versão em todos; ordem de carga: Core, Alarm, Loot, Warnings,
-                    Appearance, Order, Tasks, Notes, Goals, Farm, Keep, Quests, Hearth, Runs, Completed, Sources, Diag, Hub, MinimapButton
+                    Appearance, Order, Tasks, Notes, Goals, Farm, Keep, Quests, Hearth, Runs, Combat, Completed, Sources, Diag,
+                    Hub, MinimapButton
   Core.lua          barras (até 3, grade de células), 31 itens, tooltip, menu de opções, comandos /farol, dados salvos
   Alarm.lua         alarmes do relógio, soneca, janela e janelinha
   Loot.lua          janela de últimos saques, menus suspensos próprios, botão 👜
@@ -208,6 +231,8 @@ Farol/
   Hearth.lua        Pedra de Regresso (item "hearth": lugar + recarga; aviso hearthReady em Warnings.lua; lugar dos
                     personagens em chars[...].bind, gravado pelo Core)
   Runs.lua          registro de masmorras/raides (corrida atual no item "run", resumo ao sair, 10 últimas, /farol masmorra)
+  Combat.lua        registro de combate (3.35, desligado: 50 lutas lidas do medidor de dano do jogo, habilidades com
+                    ícone e tooltip, quem te acertou, participantes; seção "combat" da Central; /farol combate)
   Completed.lua     missões concluídas por personagem (janela com busca, item "qdone", registro desligado até o
                     jogador ligar, total do jogo; /farol concluidas)
   Sources.lua       de onde vem o XP e o ouro (opção "sources", desligada; tooltips XP/ouro, resumo, /farol origem)
@@ -387,7 +412,7 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
 ## Testes
 
 ```
-lua5.1 tests/run.lua        # ~810 testes (2 passadas); deve terminar com "0 failed"
+lua5.1 tests/run.lua        # ~840 testes (2 passadas); deve terminar com "0 failed"
 ```
 
 - **Duas passadas (3.18):** a 1ª com o simulador "de livro"; a 2ª, **forever-real** (`Mock.REAL`), com reino `""` e
@@ -469,6 +494,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Central: Saques, Alarmes e Avisos em cartões; alça de tamanho | 24 |
 | Central: Configurações em cartões | 25 |
 | Janelinhas de aviso e de alarme no visual da Central | 26 |
+| Registro de combate (janela / seção Combates) | 27 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

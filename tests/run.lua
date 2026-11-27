@@ -78,7 +78,7 @@ local SUITES = {
     "test_tasks",
     "test_menu",
     "test_goals",
-    "test_runs",
+    "test_runs", "test_combat",
     "test_minimap", "test_farm", "test_quests", "test_defaults", "test_hearth", "test_menu2", "test_a11y", "test_undo", "test_copy", "test_hardening", "test_completed", "test_realm", "test_forever_real", "test_sources", "test_chat", "test_warnpopup", "test_notes", "test_questvalue", "test_keep", "test_hub", "test_textfit",
     "test_globals",
 }

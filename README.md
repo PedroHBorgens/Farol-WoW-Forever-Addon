@@ -64,6 +64,7 @@ add-on never turns anything on by itself (an automated test checks this).
 | `/farol goal item`  | Farm goals: `/farol goal item [link] 40` (shift-click the item) or by name; `remove`, `clear` |
 | `/farol minimap`    | Show/hide or lock the minimap button (`on`, `off`, `lock`, `unlock`) |
 | `/farol dungeon`    | Your last 10 dungeons and raids: time, XP, gold, loot, deaths (`/farol run`) |
+| `/farol combat`     | Combat log: your last 50 fights, abilities, what hit you, participants (`on`/`off`/`clear`) |
 | `/farol completed`  | Completed quests of each character (list with search and total); `record on\|off` |
 | `/farol chat Name`  | Which chat window Farol writes to (e.g. a tab named "Farol"); `/farol chat main` goes back |
 | `/farol source on\|off` | Show where the session's XP and gold come from (quests, monsters, loot, merchant) |
@@ -389,6 +390,26 @@ last time there. When you leave, a short **summary in your chat** (can be turned
 A `/reload` inside keeps the run; if you are away from the game for more than 15 minutes, it ends at the last moment
 seen. Visits under one minute are not saved. `/farol dungeon summary on|off`, `/farol dungeon clear`. (`/farol lockouts`
 still lists your saved instances.)
+
+## Combat log (since 3.35)
+
+**Off until you turn it on** (`/farol combat on`, or **Turn on** in the **Combat...** window of the Tools tab; in the
+hub, the **Combat** section). It keeps your **last 50 fights**, each one with:
+
+- the title the game gives it (the main enemy, "Duel: ..." in a duel, "+2" when there were more enemies), when,
+  how long, victory or defeat, damage done and taken, healing and deaths;
+- **Positive**: your abilities by name, with their **own icon** — hover one to see the game's own explanation of it —
+  damage, share and a bar; critical hits; dodges and blocks;
+- **Negative**: who hit you and with what (marked **avoidable** or **deadly** when the game says so), your attacks
+  that missed and the hits the target blocked;
+- **Participants**: allies and opponents with name, class (or creature/pet), damage done and taken — every one of
+  them when more than two fight.
+
+The game blocks its own combat log for add-ons (in WoW Forever, as in the modern client), so Farol does not read it.
+The numbers come from the **game's damage meter**, read **after** each fight, and from the combat numbers of you and
+your target. Farol only reads: it never clears the game's fights, never changes the game's combat log and sends
+nothing. **Other players' names are only shown during the session**: in the saved fights they become "another player"
+(creatures keep their names). `/farol combat clear` deletes the saved fights (asks first in the window).
 
 ## Daily and weekly tasks
 

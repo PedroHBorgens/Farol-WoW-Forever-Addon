@@ -177,6 +177,7 @@ function Diag.Report()
         end)
     end
     if ns.Sources then Line(ns.Sources.DiagLine) end
+    if ns.Combat then Line(ns.Combat.DiagLine) end
     Line(function()
         local list = ns.RealmCharacters()
         return string.format(T("dg_saved"), list and #list or 0)

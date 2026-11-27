@@ -64,6 +64,7 @@ o addon nunca liga nada sozinho (um teste automático garante isso).
 | `/farol meta item`  | Metas de farm: `/farol meta item [link] 40` (Shift + clique no item) ou pelo nome; `remover`, `limpar` |
 | `/farol minimapa`   | Mostra/esconde ou trava o botão do minimapa (`on`, `off`, `travar`, `destravar`) |
 | `/farol masmorra`   | Suas 10 últimas masmorras e raides: tempo, XP, ouro, saques, mortes |
+| `/farol combate`    | Registro de combate: suas 50 últimas lutas, habilidades, quem te acertou, participantes (`ligar`/`desligar`/`limpar`) |
 | `/farol concluidas` | Missões concluídas de cada personagem (lista com busca e total); `registrar on\|off` |
 | `/farol chat Nome`  | Em qual janela de chat o Farol escreve (ex.: uma aba "Farol"); `/farol chat principal` volta ao padrão |
 | `/farol origem on\|off` | Mostra de onde vem o XP e o ouro da sessão (missões, monstros, saque, comerciante) |
@@ -395,6 +396,26 @@ personagem.
 Um `/reload` lá dentro continua a corrida; se você ficar mais de 15 minutos fora do jogo, ela termina no último momento
 visto. Visitas de menos de 1 minuto não ficam salvas. `/farol masmorra resumo on|off`, `/farol masmorra limpar`.
 (`/farol instancias` continua listando suas instâncias salvas.)
+
+## Registro de combate (desde a 3.35)
+
+**Desligado até você ligar** (`/farol combate ligar`, ou **Ligar registro** na janela **Combates...** da aba
+Ferramentas; na Central, a seção **Combates**). Guarda as suas **50 últimas lutas**, cada uma com:
+
+- o título que o jogo dá a ela (o inimigo principal, "Duelo: ..." num duelo, "+2" quando eram mais inimigos), quando,
+  quanto durou, vitória ou derrota, dano causado e recebido, cura e mortes;
+- **Positivo**: suas habilidades pelo nome, com o **ícone de cada uma** — passe o mouse para ver a explicação do
+  próprio jogo — dano, porcentagem e barra; acertos críticos; esquivas e bloqueios;
+- **Negativo**: quem te acertou e com o quê (marcado como **evitável** ou **mortal** quando o jogo informa), seus
+  golpes que erraram e os que o alvo bloqueou;
+- **Participantes**: aliados e oponentes com nome, classe (ou monstro/mascote), dano causado e recebido — cada um
+  deles quando mais de dois lutam.
+
+O jogo bloqueia o registro de combate dele para os addons (no WoW Forever, como no cliente moderno), então o Farol não
+o lê. Os números vêm do **medidor de dano do próprio jogo**, lido **depois** de cada luta, e dos números de combate
+seus e do seu alvo. O Farol só lê: nunca apaga as lutas do jogo, nunca mexe no registro de combate dele e não envia
+nada. **Nomes de outros jogadores só aparecem durante a sessão**: nas lutas guardadas eles viram "outro jogador" (os
+monstros mantêm o nome). `/farol combate limpar` apaga as lutas guardadas (na janela, pergunta antes).
 
 ## Tarefas diárias e semanais
 

@@ -15,6 +15,41 @@ local function Real(list)
     return out
 end
 
+-- 3.35: lutas no formato do medidor de dano do jogo (nomes compridos de propósito: monstro, jogador, habilidade).
+local function Fights(H)
+    local ME = "Player-1-0000AAAA"
+    H.spells[1759] = { "Golpe Rápido", 1 }; H.spells[6603] = { "Ataque corpo a corpo", 1 }; H.spells[1752] = { "Estocada", 1 }
+    H.spells[9001] = { "Chuva Venenosa", 1 }
+    H.env.FarolDB.combatLog = true
+    H.ns.Combat.Baseline()
+    for id = 1, 12 do
+        local m = H.meter
+        local pvp = id % 4 == 0
+        local enemy = pvp and { name = "Jogadora Alternativo Longo", sourceGUID = "Player-2-0000BBBB", totalAmount = 123456, classFilename = "MAGE" }
+            or { name = "Guerreiro do Pântano Antigo de nome comprido", sourceGUID = "Creature-0-1-" .. id, totalAmount = 987654 }
+        m.sessions[#m.sessions + 1] = { sessionID = id, name = enemy.name, durationSeconds = 30 * id }
+        m.by[id] = {
+            [0] = { combatSources = { { name = "Oxis", isLocalPlayer = true, sourceGUID = ME, totalAmount = 987654, classFilename = "ROGUE" },
+                { name = "Tobin Alternativo Longo", sourceGUID = "Player-3-1", totalAmount = 54321, classFilename = "PRIEST" } } },
+            [2] = { combatSources = { { isLocalPlayer = true, sourceGUID = ME, totalAmount = 12345 } } },
+            [7] = { combatSources = { { name = "Oxis", isLocalPlayer = true, sourceGUID = ME, totalAmount = 123456 } } },
+            [10] = { combatSources = { enemy, { name = "Lacaio", sourceGUID = "Creature-0-9", totalAmount = 5000 },
+                { name = "Lacaio Dois", sourceGUID = "Creature-0-8", totalAmount = 4000 } } },
+        }
+        m.src[id] = {
+            [0] = { [ME] = { combatSpells = { { spellID = 1759, totalAmount = 500000 }, { spellID = 6603, totalAmount = 300000 },
+                { spellID = 1752, totalAmount = 150000 }, { spellID = 9001, totalAmount = 37654 } } } },
+            [7] = { [ME] = { combatSpells = { { spellID = 9001, totalAmount = 100000, isAvoidable = true, isDeadly = true,
+                combatSpellDetails = { { unitName = enemy.name, amount = 100000, isMob = not pvp } } },
+                { spellID = 6603, totalAmount = 23456, combatSpellDetails = { { unitName = "Lacaio", amount = 20000, isMob = true },
+                { unitName = "Lacaio Dois", amount = 3456, isMob = true } } } } } },
+        }
+        H:event("PLAYER_REGEN_DISABLED"); H:event("UNIT_COMBAT", "target", "WOUND", "CRITICAL", 150, 1)
+        if pvp then H:event("DUEL_FINISHED") end
+        H:event("PLAYER_REGEN_ENABLED"); H.now = H.now + 1; H:update(1)
+    end
+end
+
 local function Scenario(T, Mock, locale)
     local undo = LC.Install()
     local ok, err = pcall(function()
@@ -46,6 +81,8 @@ local function Scenario(T, Mock, locale)
         open("tarefa", "FarolTasks", function() for i = 1, 10 do H:slash("tarefa add " .. (i % 2 == 0 and "semanal " or "") .. "Tarefa de nome bem comprido " .. i) end end)
         open("masmorra", "FarolRuns")
         open("notas", "FarolNotes", function() H:slash("notas nova Rota de farm de couro com nome comprido"); H:slash("notas nova Comprar"); H:slash("notas") end)
+        open("combate", "FarolCombat") -- desligado
+        open("combate", "FarolCombat", function() Fights(H) end)
         open("guardar", "FarolKeep", function()
             H.items[7001] = { "Erva-de-luar com um nome bem comprido", 2, 25 }; H.itemCounts[7001] = 4
             H:slash("guardar |cff1eff00|Hitem:7001::|h[Erva-de-luar com um nome bem comprido]|h|r: receita de Alquimia para o nível alto")
@@ -61,7 +98,7 @@ local function Scenario(T, Mock, locale)
         H:click(H.env.FarolHubNavprofs); check(H, "FarolHub", "hub profs")
         H:click(H.env.FarolHubNavchars); check(H, "FarolHub", "hub chars")
         local SECTIONS = { { "tasks", "FarolTasks" }, { "notes", "FarolNotes" }, { "keep", "FarolKeep" }, { "goals", "FarolGoals" },
-            { "quests", "FarolCompleted" }, { "runs", "FarolRuns" }, { "loot", "FarolLoot" }, { "alarms", "FarolAlarms" },
+            { "quests", "FarolCompleted" }, { "runs", "FarolRuns" }, { "combat", "FarolCombat" }, { "loot", "FarolLoot" }, { "alarms", "FarolAlarms" },
             { "warnings", "FarolWarnHistory" }, { "settings", "FarolOptions" } }
         for _, sec in ipairs(SECTIONS) do H.ns.Hub.Select(sec[1]); check(H, sec[2], "hub " .. sec[1]) end
         -- 3.32: as 4 abas da Configurações em cartões
@@ -96,7 +133,7 @@ end
 local SCREENS = { { 835, 668 }, { 1024, 768 }, { 1365, 768 }, { 1229, 768 }, { 2560, 1080 } }
 local WINDOWS = { { "menu", "FarolOptions" }, { "aparencia", "FarolAppearance" }, { "ordem", "FarolOrder" },
     { "alarme", "FarolAlarms" }, { "saque", "FarolLoot" }, { "meta", "FarolGoals" }, { "tarefa", "FarolTasks" },
-    { "masmorra", "FarolRuns" }, { "notas", "FarolNotes" }, { "guardar", "FarolKeep" }, { "concluidas", "FarolCompleted" } }
+    { "masmorra", "FarolRuns" }, { "combate", "FarolCombat" }, { "notas", "FarolNotes" }, { "guardar", "FarolKeep" }, { "concluidas", "FarolCompleted" } }
 local function Screens(T, Mock, locale)
     local bad = {}
     for _, screen in ipairs(SCREENS) do

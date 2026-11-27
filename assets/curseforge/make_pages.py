@@ -766,4 +766,40 @@ pop_alarm = ('<div class="pop glow" style="width:400px">' + ptop("Alarm", ' <spa
 page("farol-26-hub-popups", '<div style="display:flex;gap:26px;align-items:flex-start;margin-top:70px">'
      f'<div style="display:flex;flex-direction:column;gap:22px">{pop_one}{pop_alarm}</div>{pop_many}</div>',
      "Warnings and alarms in the Farol look", "Avisos e alarmes no visual do Farol (estilo detalhado)", POPCSS)
+# 27. Combat log (3.35)
+CBCSS = """.fc{border:1px solid #5a4520;border-radius:5px;background:#16120b;padding:4px 8px;margin-bottom:5px;font-size:12px}
+.fc.on{border-color:#ffd100;background:linear-gradient(#2c2210,#16120b)}.fc b{color:#fff}.fr{display:flex;justify-content:space-between;font-size:12px;margin:2px 0}
+.cb{height:6px;border:1px solid #000;border-radius:3px;background:#222;overflow:hidden;margin:1px 0 4px}.cb span{display:block;height:100%}
+.sic{font-family:'Noto Color Emoji';font-size:12px;margin-right:5px}.tg2{border:1px solid;border-radius:3px;font-size:10px;padding:0 4px;margin-left:4px}"""
+def cfight(t, sub, res, nums, on=False):
+    return f'<div class="fc{" on" if on else ""}"><b>{t}</b><div class="dim" style="font-size:11px">{sub}</div><div class="fr">{res}<span>{nums}</span></div></div>'
+def cbar(p, c): return f'<div class="cb"><span style="width:{p}%;background:{c}"></span></div>'
+def fr(a, b): return f'<div class="fr"><span>{a}</span><span>{b}</span></div>'
+G, R, Y = "#5fd35f", "#ff6666", "#ffd75a"
+cb_list = ('<div class="hpan" style="width:236px;flex:none"><h4>Recent fights<small>12 saved</small></h4>'
+    + cfight("Swamp Warrior", "Today 15:26 · 6s", f'<span style="color:{G}">victory</span>', "784 / 112", True)
+    + cfight("Duel: Mira", "Today 15:12 · 41s", f'<span style="color:{Y}">duel</span>', "2,310 / 3,020")
+    + cfight("Valley Shaman (+2)", "Today 15:08 · 22s", f'<span style="color:{G}">victory</span>', "1,920 / 640")
+    + cfight("Cave Stalker", "Today 15:03 · 12s", f'<span style="color:{R}">defeat</span>', "930 / 1,204")
+    + '<div class="dim" style="font-size:11px">damage done / damage taken</div></div>')
+cb_head = ('<div class="hpan"><h4>Swamp Warrior<small>Today 15:26 · victory</small></h4>'
+    + gstat([("Duration", "6s"), ("Damage done", f'<span style="color:{G}">784</span>'), ("Damage taken", f'<span style="color:{R}">112</span>'), ("Healing", "0"), ("Deaths", "0")]) + '</div>')
+cb_pos = (f'<div class="hpan" style="flex:1"><h4><span style="color:{G}">▲</span> Positive<small>your abilities</small></h4>'
+    + fr('<span class="sic">🗡️</span>Quick Strike', "375 · 48%") + cbar(48, G) + fr('<span class="sic">⚔️</span>Melee attack', "300 · 38%") + cbar(38, G)
+    + fr('<span class="sic">🔪</span>Thrust', "109 · 14%") + cbar(14, G) + fr("Critical hits", "3 of 11 hits") + fr("Dodges and blocks", "2") + '</div>')
+cb_neg = (f'<div class="hpan" style="flex:1"><h4><span style="color:{R}">▼</span> Negative<small>what hit you</small></h4>'
+    + fr("Swamp Warrior", f'<span class="tg2" style="color:{Y}">avoidable</span>') + fr('<span class="sic">⚔️</span>Melee attack', "112") + cbar(100, R)
+    + fr("Missed attacks", "2") + fr("Blocked by the target", "1") + '</div>')
+cb_part = ('<div class="hpan"><h4>Participants<small>who fought</small></h4><div class="dim" style="font-size:11px">ALLIES</div>'
+    + fr("you · Rogue", "784 done · 112 taken") + '<div class="dim" style="font-size:11px;margin-top:4px">OPPONENTS</div>'
+    + fr("Swamp Warrior · creature", "112 done · 784 taken") + '</div>')
+cb_main = ('<div class="hmain" style="display:flex;gap:8px;align-items:flex-start">' + cb_list + '<div style="flex:1">' + cb_head
+    + '<div style="display:flex;gap:8px">' + cb_pos + cb_neg + '</div>' + cb_part + '</div></div>')
+_navs = navs
+navs = _navs[:9] + [("⚔️", "Combat", 0)] + _navs[9:]
+cb_html = hub_small("Combat", cb_main, scale=.9)
+navs = _navs
+page("farol-27-combat-log", f'<div style="display:flex;justify-content:center;margin-top:54px">{cb_html}</div>',
+     "Combat log: your fights, abilities and what hit you", "Registro de combate: suas lutas, habilidades e o que te acertou",
+     HCSS + TCSS + GCSS + CBCSS)
 print("pages ok")

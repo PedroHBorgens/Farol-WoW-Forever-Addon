@@ -81,6 +81,7 @@ local DEFAULTS = {
     tooltipFull = false, -- false = cada item mostra só o seu tooltip (Shift mostra tudo); true = sempre completo
     runSummary = true,  -- resumo no chat ao sair de uma masmorra ou raide (Runs.lua)
     questRecord = false, -- registrar missões entregues (Completed.lua): regra 8, só o jogador liga
+    combatLog = false, -- registro de combate (Combat.lua, 3.35): regra 8, só o jogador liga
     questShowOld = false, -- janela de missões concluídas: mostrar também as de antes do registro (só o ID)
     chatWindow = "",    -- janela de chat das mensagens do Farol ("" = chat principal; nome de uma aba do jogador)
     sources = false,    -- de onde vem o XP e o ouro (Sources.lua): regra 8, só o jogador liga
@@ -2671,7 +2672,7 @@ end
 -- Novidades em ordem; ao lançar algo novo, acrescente no FIM (quem atualizar vê só o que ainda não viu).
 local NEWS = { "news_rep", "news_reset", "news_lootdates", "news_summary", "news_breaks", "news_remind",
                "news_prof", "news_junk", "news_alts", "news_rested", "news_locks",
-               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes", "news_questvalue", "news_notesbutton", "news_keep", "news_hub" }
+               "news_tooltip", "news_supply", "news_bars", "news_profiles", "news_tasks", "news_menu", "news_goals", "news_runs", "news_minimap", "news_farm", "news_quests", "news_hearth", "news_packs", "news_colors", "news_qdone", "news_qdone_old", "news_qdone_link", "news_qdone_names", "news_diag", "news_sources", "news_chat", "news_notes", "news_questvalue", "news_notesbutton", "news_keep", "news_hub", "news_combat" }
 ns.NEWS = NEWS -- os testes conferem a lista inteira
 local onboarding                -- "welcome", "news" ou nil (decidido ao carregar os dados salvos)
 local onboardingShown = false
@@ -4181,6 +4182,7 @@ local function BuildControls(parent, top)
         { "history", function() ns.Warnings.ToggleHistory() end },
         { "summary", function() ns.SummaryNow() end },
         { "keep", function() ns.Keep.ToggleWindow() end }, -- 3.26 (no fim: os testes contam os botões por posição)
+        { "combat", function() ns.Combat.ToggleWindow() end }, -- 3.35
     }
     for i, entry in ipairs(tools) do
         local button = CreateButton(page, 170, entry[2])
@@ -4740,6 +4742,7 @@ frame:SetScript("OnEvent", function(self, event, arg1, arg2)
         end
         FarolCharDB.supplySeen = seen
         FarolCharDB.runs = ns.Runs.Sanitize(type(savedChar) == "table" and savedChar.runs or nil) -- masmorras
+        FarolCharDB.combat = ns.Combat.Sanitize(type(savedChar) == "table" and savedChar.combat or nil) -- combates (3.35)
         FarolCharDB.goals = ns.Goals.Sanitize(type(savedChar) == "table" and savedChar.goals or nil) -- metas
         FarolCharDB.farm = ns.Farm.Sanitize(type(savedChar) == "table" and savedChar.farm or nil) -- metas de farm
         FarolCharDB.keepSeen = ns.Keep.SanitizeSeen(type(savedChar) == "table" and savedChar.keepSeen or nil) -- itens guardados
@@ -4817,7 +4820,7 @@ end)
 local function ShowHelp()
     Print(T("help_title"))
     for _, key in ipairs({ "help_toggle", "help_menu", "help_lock", "help_reset", "help_show",
-                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_notes", "help_keep", "help_hub", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_qdone", "help_sources", "help_chat", "help_diag", "help_minimap",
+                           "help_hide", "help_items", "help_alarm", "help_alarm2", "help_alarm3", "help_loot", "help_session", "help_summary", "help_gold", "help_locks", "help_news", "help_warn", "help_history", "help_appearance", "help_order", "help_bars", "help_profile", "help_tasks", "help_notes", "help_keep", "help_hub", "help_goals", "help_farm", "help_pack", "help_colors", "help_runs", "help_combat", "help_qdone", "help_sources", "help_chat", "help_diag", "help_minimap",
                            "help_version", "help_lang" }) do
         Print(T(key))
     end
@@ -4884,6 +4887,8 @@ SlashCmdList["FAROL"] = function(msg)
         Profiles.BarCommand(rest)
     elseif cmd == "masmorra" or cmd == "masmorras" or cmd == "dungeon" or cmd == "dungeons" or cmd == "run" or cmd == "runs" then
         ns.Runs.HandleCommand(rest)
+    elseif cmd == "combate" or cmd == "combates" or cmd == "combat" or cmd == "luta" or cmd == "lutas" then
+        ns.Combat.HandleCommand(rest)
     elseif cmd == "minimapa" or cmd == "minimap" or cmd == "mapa" then
         ns.MinimapButton.HandleCommand(rest)
     elseif cmd == "meta" or cmd == "metas" or cmd == "goal" or cmd == "goals" then

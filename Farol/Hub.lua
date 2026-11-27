@@ -248,6 +248,7 @@ local SECTIONS = {
     { key = "notes", icon = "Interface\\Icons\\INV_Misc_Note_02", frame = "FarolNotes", open = function() ns.Notes.ToggleWindow() end },
     { key = "keep", icon = "Interface\\Icons\\INV_Box_01", frame = "FarolKeep", open = function() ns.Keep.ToggleWindow() end },
     { key = "runs", icon = "Interface\\Icons\\INV_Misc_Key_03", frame = "FarolRuns", open = function() ns.Runs.ToggleWindow() end },
+    { key = "combat", icon = "Interface\\Icons\\Ability_DualWield", frame = "FarolCombat", open = function() ns.Combat.ToggleWindow() end },
     { key = "loot", icon = "Interface\\Icons\\INV_Misc_Bag_10", frame = "FarolLoot", open = function() ns.Loot.ToggleWindow() end },
     { key = "alarms", icon = "Interface\\Icons\\INV_Misc_PocketWatch_01", frame = "FarolAlarms", open = function() ns.Alarm.ToggleWindow() end },
     { key = "warnings", icon = "Interface\\Icons\\INV_Misc_Note_06", frame = "FarolWarnHistory", open = function() ns.Warnings.ToggleHistory() end },
@@ -497,6 +498,7 @@ local function SetHome(card, entries, sub)
             local row = card.rows[ri]
             row.left:ClearAllPoints(); row.left:SetPoint("TOPLEFT", 12, y)
             row.right:ClearAllPoints(); row.right:SetPoint("TOPRIGHT", -12, y)
+            row.left:SetFontObject(e.small and "GameFontHighlightSmall" or "GameFontHighlight")
             row.left:SetText(e[1] or ""); row.right:SetText(e[2] or "")
             row.left:Show(); row.right:Show()
             if e.name then -- nome digitado pelo jogador: o valor fica com a largura dele e o nome com o resto ("...")
@@ -751,7 +753,10 @@ end
 
 local function RemindRows()
     local text, when = LastWarning()
-    local rows = { { T("hub_row_last"), when or "" }, { text or Dimmed("hub_row_none"), "" },
+    -- 3.35: só o começo do aviso ("Durabilidade baixa: 15% — ..." -> "Durabilidade baixa"), na fonte pequena:
+    -- o aviso inteiro não cabia no cartão de 248 px. O histórico (clique no cartão) mostra tudo.
+    if text then text = string.match(text, "^(.-): ") or string.match(text, "^(.-) — ") or text end
+    local rows = { { T("hub_row_last"), when or "" }, { text or Dimmed("hub_row_none"), "", small = true },
         { T("hub_row_notes2"), Value("notes") }, { T("hub_row_keep2"), Value("keep") } }
     local clock = ns.Alarm and Call(ns.Alarm.Next)
     if type(clock) == "string" then rows[#rows + 1] = { T("hub_now_alarm"), clock } end

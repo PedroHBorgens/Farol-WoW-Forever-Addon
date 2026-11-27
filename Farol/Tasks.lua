@@ -198,6 +198,21 @@ function Tasks.Counts()
     return done, total, dailyLeft, daily
 end
 
+-- Diárias e semanais separadas (Central, 3.34): feitas/total de cada tipo e segundos até cada reset.
+function Tasks.SplitCounts()
+    local now, daily, weekly = Now(), Resets()
+    local c = { dd = 0, dt = 0, wd = 0, wt = 0, daily = daily, weekly = weekly }
+    for _, task in ipairs(List()) do
+        local done = IsDone(task, now, daily, weekly)
+        if task.w then
+            c.wt = c.wt + 1; if done then c.wd = c.wd + 1 end
+        else
+            c.dt = c.dt + 1; if done then c.dd = c.dd + 1 end
+        end
+    end
+    return c
+end
+
 -- Para o aviso: diárias que faltam e segundos até o reset diário.
 function Tasks.PendingDaily()
     local _, _, dailyLeft, daily = Tasks.Counts()

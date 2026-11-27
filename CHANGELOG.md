@@ -2,6 +2,20 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.34.0 — Hub: new Home page
+- **This session** on top gains "next level in ~42m" at this session's pace, next to the XP bar.
+- New cards, with thin bars:
+  - **Goals**: gold, level and farm goals, each with its bar and the time at this session's pace.
+  - **Now**: the current dungeon/raid run (time, XP, gold, loot); outside a dungeon, the next alarm ("Rings in ...").
+  - **Quests**: ready to turn in, the quest log bar ("log 34/40") and, only with the "value of ready quests" option
+    on (off by default, Menu > Warnings), their XP and gold and "reaches level N" / "level N: X XP short".
+  - **Tasks and resets**: daily and weekly separately ("Daily 2/3"), each with a bar and the time until reset.
+  - **Gear and bags**: durability and used bag slots with bars (good / attention / alert colors), junk, Hearthstone.
+  - **Warnings and reminders**: last warning, pending notes, kept items and the next alarm.
+- Cards with nothing to show say so in a short line ("No goals yet."). Nothing new is saved, nothing is sent and no
+  new server request. The simple style is unchanged.
+- Image 20. `test_textfit` checks the new Home with a run and the quest value on. 814 tests (2 passes).
+
 ## 3.33.0 — Warning and alarm popups in the hub look
 - With the detailed style on, the warning popup gets the Farol frame (dark background, gold border, top bar with the
   icon), a colored stripe for the level (alert, attention, information — colorblind palette respected), an icon for the

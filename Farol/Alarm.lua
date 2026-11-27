@@ -680,6 +680,21 @@ local function UntilText(minutes)
     return string.format(T("al_in"), text)
 end
 
+-- Próximo alarme ligado (Central, 3.34): "07:30", "em 3h 12m", o nome dele e os minutos; nil se não houver.
+function Alarm.Next()
+    local db = DB()
+    if not db or type(db.alarms) ~= "table" then return nil end
+    local best, bestMin
+    for _, alarm in ipairs(db.alarms) do
+        if alarm.enabled then
+            local minutes = MinutesUntil(alarm)
+            if minutes and (not bestMin or minutes < bestMin) then best, bestMin = alarm, minutes end
+        end
+    end
+    if not best then return nil end
+    return string.format("%02d:%02d", best.h, best.m), UntilText(bestMin), best.label or "", bestMin
+end
+
 DetailLayout = function(frame, alarms)
     local Kit = ns.Hub and ns.Hub.Kit
     if not Kit then return end

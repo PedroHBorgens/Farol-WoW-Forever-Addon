@@ -51,6 +51,13 @@ local function Scenario(T, Mock, locale)
             H:slash("guardar |cff1eff00|Hitem:7001::|h[Erva-de-luar com um nome bem comprido]|h|r: receita de Alquimia para o nível alto")
             for i = 1, 11 do H:slash("guardar |cffffffff|Hitem:" .. (7100 + i) .. "::|h[Item " .. i .. "]|h|r: motivo " .. i) end end)
         H.env.FarolDB.hub = true; H.ns.Hub.Open("home"); check(H, "FarolHub", "hub home")
+        -- 3.34: valor das missões prontas ligado e uma corrida de masmorra com nome comprido no cartão "Agora"
+        H.quests = { { title = "Pronta", level = 20, done = true, xp = 123456, money = 987654 } }
+        H.env.FarolDB.warnings.questValue = true
+        H.env.GetInstanceInfo = function() return "Profundezas da Fortaleza de nome comprido", "party" end
+        H.instanceType = "party"; H:event("PLAYER_ENTERING_WORLD"); H.ns.Runs.Update()
+        H.ns.Hub.Refresh(); check(H, "FarolHub", "hub home in a run")
+        H.instanceType = nil; H:event("PLAYER_ENTERING_WORLD"); H.ns.Runs.Update(); H.ns.Hub.Refresh()
         H:click(H.env.FarolHubNavprofs); check(H, "FarolHub", "hub profs")
         H:click(H.env.FarolHubNavchars); check(H, "FarolHub", "hub chars")
         local SECTIONS = { { "tasks", "FarolTasks" }, { "notes", "FarolNotes" }, { "keep", "FarolKeep" }, { "goals", "FarolGoals" },

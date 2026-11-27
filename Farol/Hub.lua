@@ -932,32 +932,20 @@ local function CreateHub()
     frame.backing:SetPoint("TOPLEFT", 10, -10)
     frame.backing:SetPoint("BOTTOMRIGHT", -10, 10)
     Fill(frame.backing, 0.06, 0.05, 0.04, 1)
-    -- Topo: faixa escura com o título; medalhão com o ícone do Farol no canto.
+    -- Topo: faixa escura com o ícone e o título.
     frame.topBack = frame:CreateTexture(nil, "BORDER")
     frame.topBack:SetPoint("TOPLEFT", 12, -12)
     frame.topBack:SetPoint("TOPRIGHT", -12, -12)
     frame.topBack:SetHeight(TOP_H - 12)
     Fill(frame.topBack, 0.16, 0.12, 0.07, 0.95)
-    -- Medalhão (3.31): as mesmas proporções do botão do minimapa (que aparece certo), 3x maior:
-    -- disco escuro + ícone recortado em círculo + anel no canto de cima à esquerda de uma "caixa" de 93x93.
-    -- Centro do anel medido no jogo (3.31.1): 3 px à direita do centro do botão do minimapa ×3 (no ícone pequeno do
-    -- minimapa essa diferença não aparece; aqui, 3x maior, deixava uma faixa escura à direita).
-    local MX, MY = -22 + 49.5, 30 - 43.5
-    frame.medalBack = frame:CreateTexture(nil, "OVERLAY", nil, 1)
-    frame.medalBack:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
-    frame.medalBack:SetSize(64, 64)
-    frame.medalBack:SetPoint("CENTER", frame, "TOPLEFT", MX, MY)
-    frame.medal = frame:CreateTexture(nil, "OVERLAY", nil, 2)
-    frame.medal:SetSize(54, 54)
-    frame.medal:SetPoint("CENTER", frame, "TOPLEFT", MX, MY)
-    frame.medal:SetTexture("Interface\\AddOns\\Farol\\Media\\Farol") -- arquivo do ícone (ns.ICON é o código do chat)
-    if frame.medal.SetMask then pcall(frame.medal.SetMask, frame.medal, "Interface\\CharacterFrame\\TempPortraitAlphaMask") end
-    frame.medalRing = frame:CreateTexture(nil, "OVERLAY", nil, 3)
-    frame.medalRing:SetSize(159, 159)
-    frame.medalRing:SetPoint("TOPLEFT", frame, "TOPLEFT", -22, 30)
-    frame.medalRing:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+    -- Ícone do Farol ao lado do título, dentro da faixa de cima (3.31.1): sem anel nem recorte, que dependiam do
+    -- desenho de texturas do jogo e saíam tortos. Simples, sempre alinhado.
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.title:SetPoint("TOP", 0, -24)
+    frame.title:SetPoint("TOP", 14, -24)
+    frame.medal = frame:CreateTexture(nil, "OVERLAY")
+    frame.medal:SetSize(26, 26)
+    frame.medal:SetPoint("RIGHT", frame.title, "LEFT", -8, 0)
+    frame.medal:SetTexture("Interface\\AddOns\\Farol\\Media\\Farol") -- arquivo do ícone (ns.ICON é o código do chat)
     frame.version = ns.Dim(frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     frame.version:SetPoint("TOPRIGHT", -300, -28)
     frame.lang = ns.CreateDropdown(frame, "FarolHubLang", 86, function()

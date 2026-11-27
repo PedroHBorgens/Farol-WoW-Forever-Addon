@@ -940,10 +940,12 @@ local function CreateHub()
     Fill(frame.topBack, 0.16, 0.12, 0.07, 0.95)
     -- Medalhão (3.31): as mesmas proporções do botão do minimapa (que aparece certo), 3x maior:
     -- disco escuro + ícone recortado em círculo + anel no canto de cima à esquerda de uma "caixa" de 93x93.
-    local MX, MY = -22 + 46.5, 30 - 46.5 + 3 -- centro do ícone (relativo ao canto da Central)
+    -- Centro do anel medido no jogo (3.31.1): 3 px à direita do centro do botão do minimapa ×3 (no ícone pequeno do
+    -- minimapa essa diferença não aparece; aqui, 3x maior, deixava uma faixa escura à direita).
+    local MX, MY = -22 + 49.5, 30 - 43.5
     frame.medalBack = frame:CreateTexture(nil, "OVERLAY", nil, 1)
     frame.medalBack:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
-    frame.medalBack:SetSize(60, 60)
+    frame.medalBack:SetSize(64, 64)
     frame.medalBack:SetPoint("CENTER", frame, "TOPLEFT", MX, MY)
     frame.medal = frame:CreateTexture(nil, "OVERLAY", nil, 2)
     frame.medal:SetSize(54, 54)

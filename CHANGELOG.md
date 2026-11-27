@@ -2,6 +2,10 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.31.1 — Hub icon centered
+- The Farol icon in the hub's top-left medallion is now centered inside the gold ring (it sat a little to the left,
+  leaving a dark strip on the right); the dark disc behind it fills the ring.
+
 ## 3.31.0 — Hub: loot, alarms and warnings in cards; hub size
 - **Loot** (detailed style): filters and a summary on top (items, uncommon or better, latest), one card per item with
   the Keep and + Goal buttons, and Clear at the bottom.

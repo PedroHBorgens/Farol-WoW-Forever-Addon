@@ -24,6 +24,15 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
    opções gerais e padrões `x ~= false`); o teste falha se aparecer outro. Novidade ligada a item/aviso entra em
    `Profiles.NEWS_ITEM`/`NEWS_WARN` (Core) para a mensagem de novidades dizer "desligado (ligue em Menu > ...)".
 
+## Prioridade de design (decisão do dono, 3.32)
+
+- **O estilo detalhado (Central do Farol) vem primeiro.** Toda novidade é desenhada primeiro para a Central: a prévia
+  mostra a tela em cartões (`Hub.Kit`: `Panel`, `Card`, `Text`, `Stat`, `Bar`, `FitPair`) e o visual segue o padrão
+  das telas 3.28–3.32.
+- O **estilo simples** continua funcionando para quem já usa o Farol (é o padrão de quem atualizou): recebe a função,
+  sem precisar do visual novo, e as janelas dele continuam no `test_textfit`.
+- As regras do projeto continuam valendo igual (função nova desligada, PT/EN, nada enviado, texto nunca cortado).
+
 ## WoW Forever: fatos técnicos que custaram descobrir
 
 - Cliente **1.60.1**, **Interface 16001**, família *Mainline* (API moderna, a mesma do Midnight).

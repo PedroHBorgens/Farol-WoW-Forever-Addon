@@ -69,7 +69,7 @@ return {
     end },
 
     { "right-click and drag over an item still reach the bar", function(T, Mock)
-        local H = Mock.new():login(); H:update(1)
+        local H = Mock.new():login({ hub = false }); H:update(1)
         local cell = cellOf(H, "zone")
         cell.hover._scripts.OnMouseUp(cell.hover, "RightButton")
         T.ok(H.env.FarolOptions and H.env.FarolOptions:IsShown(), "right-click over an item opens the options")

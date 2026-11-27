@@ -1383,7 +1383,8 @@ local function CreateHub()
         GameTooltip:Show()
     end)
     frame.grip:SetScript("OnLeave", function() GameTooltip:Hide() end)
-    if frame.SetScale then frame:SetScale(Hub.Scale()) end
+    frame.farolOwnScale = true
+    if frame.SetScale then frame:SetScale(ns.ScreenFit and ns.ScreenFit(frame, Hub.Scale()) or Hub.Scale()) end
 
     -- Atualiza a página Início uma vez por segundo enquanto a Central está aberta.
     local elapsed = 0
@@ -1456,10 +1457,16 @@ function Hub.Select(key)
     Hub.Refresh()
 end
 
+local ApplyScale -- definida mais abaixo (Tamanho da Central)
+
 function Hub.Open(key)
     if not DB() then return end
     hub = hub or CreateHub()
-    if not hub:IsShown() then hub:Show() end
+    if not hub:IsShown() then
+        ApplyScale(Hub.Scale()) -- a tela pode ter mudado (resolução / escala da interface) desde a última vez
+        hub:Show()
+    end
+    Hub.openedThisSession = true
     Hub.Select(key or "home")
 end
 
@@ -1497,8 +1504,9 @@ function Hub.Scale()
 end
 
 -- Muda a escala mantendo o canto de cima à esquerda no mesmo lugar da tela.
-local function ApplyScale(value)
+ApplyScale = function(value)
     if not hub or not hub.SetScale then return end
+    if ns.ScreenFit then value = ns.ScreenFit(hub, value) end -- 3.34.1: nunca maior que a tela do jogador
     local old = hub:GetScale() or 1
     local left, top = hub:GetLeft(), hub:GetTop()
     hub:SetScale(value)

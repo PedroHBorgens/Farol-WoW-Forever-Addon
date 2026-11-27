@@ -91,7 +91,43 @@ local function Scenario(T, Mock, locale)
     if not ok then error(err, 0) end
 end
 
+-- 3.34.1: telas de vários tamanhos. A área útil (UIParent) depende da resolução e da escala da interface: numa tela
+-- 5:4 com a escala no máximo ela tem só ~835 x 668. Toda janela (e a Central, mesmo a 130%) tem de caber nela.
+local SCREENS = { { 835, 668 }, { 1024, 768 }, { 1365, 768 }, { 1229, 768 }, { 2560, 1080 } }
+local WINDOWS = { { "menu", "FarolOptions" }, { "aparencia", "FarolAppearance" }, { "ordem", "FarolOrder" },
+    { "alarme", "FarolAlarms" }, { "saque", "FarolLoot" }, { "meta", "FarolGoals" }, { "tarefa", "FarolTasks" },
+    { "masmorra", "FarolRuns" }, { "notas", "FarolNotes" }, { "guardar", "FarolKeep" }, { "concluidas", "FarolCompleted" } }
+local function Screens(T, Mock, locale)
+    local bad = {}
+    for _, screen in ipairs(SCREENS) do
+        local sw, sh = screen[1], screen[2]
+        local function fits(H, name, title)
+            local f = H.env[name]
+            if not (f and f:IsShown()) then bad[#bad + 1] = title .. ": não abriu" return end
+            local s = f:GetScale()
+            local w, h = f:GetWidth() * s, f:GetHeight() * s
+            if w > sw + 0.5 or h > sh + 0.5 then
+                bad[#bad + 1] = string.format("%s em %dx%d: %.0f x %.0f não cabe", title, sw, sh, w, h)
+            end
+        end
+        local H = Mock.new({ locale = locale }); H.env.UIParent:SetSize(sw, sh); H:login({ hub = false })
+        for _, w in ipairs(WINDOWS) do
+            H:slash(w[1]); fits(H, w[2], w[2])
+            if H.env[w[2]] and H.env[w[2]]:IsShown() then H.env[w[2]]:Hide() end
+        end
+        H.env.FarolDB.hubScale = 1.3
+        H:slash("central"); fits(H, "FarolHub", "Central 130%")
+        H.ns.Hub.Select("settings"); fits(H, "FarolHub", "Central 130% (Configurações)")
+        H.env.FarolHub:Hide(); H:slash("central tamanho 70"); H:slash("central"); fits(H, "FarolHub", "Central 70%")
+        T.ok(H.env.FarolHub:GetScale() <= 0.7 + 1e-9, "the hub never gets bigger than asked")
+        H.env.FarolHub:Hide()
+    end
+    T.eq(#bad, 0, locale .. ": " .. table.concat(bad, "\n    "))
+end
+
 return {
     { "3.31.2: no interface text clipped or leaving its panel (Portuguese)", function(T, Mock) Scenario(T, Mock, "ptBR") end },
     { "3.31.2: no interface text clipped or leaving its panel (English)", function(T, Mock) Scenario(T, Mock, "enUS") end },
+    { "3.34.1: every window and the hub fit small and large screens (Portuguese)", function(T, Mock) Screens(T, Mock, "ptBR") end },
+    { "3.34.1: every window and the hub fit small and large screens (English)", function(T, Mock) Screens(T, Mock, "enUS") end },
 }

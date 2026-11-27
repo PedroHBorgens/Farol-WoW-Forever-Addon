@@ -368,6 +368,16 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   `LONG`). Regras: rótulo + valor numa linha = `FitPair` (Hub; o rótulo fica só com a largura dele); texto de largura
   fixa = `SetWordWrap(false)` só para nomes do jogador; frase-guia de caixa (`ns.Placeholder`) presa às duas bordas
   da caixa. Aumentar a Central (alça ◢) aumenta o texto junto: não resolve corte, o layout é que tem de caber.
+  **3.34.1:** o checker também confere a **borda de baixo** (texto/botão que começa num quadro termina 3 px acima do
+  fim dele; área de clique sem texto pode ir até a borda), o fundo da janela e os quadros das **páginas** dentro da
+  janela (as abas da Configurações), que antes ficavam de fora — foi assim que o botão "Masmorras" passou.
+- **Caber na tela (3.34.1):** a área útil (`UIParent`) depende da resolução e da escala da interface (até ~835 x 668
+  numa tela 5:4 com a escala no máximo). `ns.ScreenFit(frame, escala)` (Core) devolve a escala que cabe (só diminui,
+  mínimo 0,4; leitura inválida/erro = a pedida); `ns.MakeToplevel` aplica no `OnShow` (antes do `Hub.Watch`; janela
+  com `farolOwnScale` cuida da sua) e a Central usa no `ApplyScale` (o `db.hubScale` salvo não muda). O teste
+  `Screens` do `test_textfit` abre todas as janelas e a Central (70%/130%) em 5 tamanhos de tela: janela nova entra
+  na lista `WINDOWS`. Mais um 1º acesso: com a Central ligada, a 1ª abertura da sessão (`Hub.openedThisSession`)
+  é pela Início, inclusive pelo clique direito na barra; testes do menu de sempre fazem login com `hub = false`.
 - **Fechar a Central (3.31.2):** o jogo dispara o `OnHide` das janelas de dentro quando a Central some (elas continuam
   `IsShown()`); o `Hub.Watch` fecha a janela junto (`Release(self, true)`), senão ela se soltava e ficava aberta sozinha.
   O simulador faz o mesmo (filhos primeiro). Dentro da Central o X de cada janela (`frame.farolClose`) fica escondido.

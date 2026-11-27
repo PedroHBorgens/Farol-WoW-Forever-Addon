@@ -1,6 +1,7 @@
 -- Ouro dos seus personagens: registro do personagem atual, total do reino, tooltip, esquecer, dados adulterados.
 -- Gold of your characters: current character record, realm total, tooltip, forget, tampered data.
 
+local function NoHub(saved) saved.hub = false return saved end -- testes do menu de sempre (3.34.1)
 local function savedWithAlts(now)
     return { chars = {
         Azralon = {
@@ -58,7 +59,7 @@ return {
     end },
 
     { "/farol ouro lists; forget one, never the current one; the button needs a second click", function(T, Mock)
-        local H = Mock.new():login(savedWithAlts(os.time())); H:update(1)
+        local H = Mock.new():login(NoHub(savedWithAlts(os.time()))); H:update(1)
         H.msgs = {}; H:slash("ouro")
         T.has(chat(H), "ouro dos seus personagens em Azralon (total 1482g 10s):")
         T.has(chat(H), "Garrosh (30): 123g 45s — este")
@@ -82,7 +83,7 @@ return {
     end },
 
     { "a late second click does not confirm", function(T, Mock)
-        local H = Mock.new():login(savedWithAlts(os.time())); H:update(1)
+        local H = Mock.new():login(NoHub(savedWithAlts(os.time()))); H:update(1)
         H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
         local forget
         for _, b in ipairs(H:framesOf("Button")) do if string.find(H.strip(b._text), "Esquecer personagens", 1, true) then forget = b end end

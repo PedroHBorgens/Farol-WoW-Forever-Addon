@@ -891,6 +891,22 @@ ns.ICON = ICON
 -- Janelas do Farol ficam na mesma camada de desenho; sem isto, uma janela recém-aberta pode
 -- ficar atrás de outra (ex.: Alarmes atrás do menu). Toda janela aberta vem para a frente, e
 -- clicar em qualquer uma a traz para a frente (como as janelas do próprio jogo).
+-- Escala que faz a janela caber na tela do jogador (3.34.1): a área útil depende da resolução e da escala da
+-- interface (até ~835 x 668 numa tela 5:4 com a escala no máximo). Nunca aumenta: só diminui o que não cabe.
+function ns.ScreenFit(frame, want)
+    want = want or 1
+    if not (frame and frame.GetWidth and UIParent and UIParent.GetWidth) then return want end
+    local ok1, sw = pcall(UIParent.GetWidth, UIParent)
+    local ok2, sh = pcall(UIParent.GetHeight, UIParent)
+    local ok3, w = pcall(frame.GetWidth, frame)
+    local ok4, h = pcall(frame.GetHeight, frame)
+    if not (ok1 and ok2 and ok3 and ok4) then return want end
+    for _, v in ipairs({ sw or 0, sh or 0, w or 0, h or 0 }) do -- todos números (o 0 cobre o nil)
+        if type(v) ~= "number" or v ~= v or v <= 0 or v > 1e5 then return want end
+    end
+    return math.max(0.4, math.min(want, sw * 0.96 / w, sh * 0.96 / h))
+end
+
 function ns.MakeToplevel(frame)
     if frame.SetToplevel then frame:SetToplevel(true) end
     -- Fundo opaco por baixo da textura de diálogo: o cenário não aparece através da janela (acessibilidade: contraste).
@@ -902,7 +918,14 @@ function ns.MakeToplevel(frame)
         frame.farolBacking = bg
     end
     if frame.HookScript then
-        frame:HookScript("OnShow", function(self) self:Raise() end)
+        frame:HookScript("OnShow", function(self)
+            -- Antes do Hub.Watch (registrado depois): a Central encaixa a janela com a escala dela.
+            if not self.farolDocked and not self.farolOwnScale and self.SetScale then
+                local s = ns.ScreenFit(self, 1)
+                if s < 1 or self.farolFitted then self:SetScale(s); self.farolFitted = s < 1 end
+            end
+            self:Raise()
+        end)
     end
     if ns.Hub and ns.Hub.Watch then ns.Hub.Watch(frame) end -- estilo detalhado: a janela abre dentro da Central
 end
@@ -4274,11 +4297,12 @@ function Profiles.DetailLayout(set)
     for _, key in ipairs(Profiles.TABS) do set.pages[key]:SetSize(770, 510) end
     -- Barra
     local page = set.pages.bar
-    Card(page, "barcard", 8, -2, 438, 74, T("opt_card_bar"), T("opt_card_bar_sub"))
+    -- 3.34.1: cartões de cima com 84 de altura (a 2ª linha de pacotes e as caixinhas ficavam em cima da borda).
+    Card(page, "barcard", 8, -2, 438, 84, T("opt_card_bar"), T("opt_card_bar_sub"))
     set.barLabel:Hide()
     for n, button in ipairs(set.bars) do Put(button, 20 + (n - 1) * 124, -30) end
     Put(set.shown, 18, -54)
-    Card(page, "packcard", 454, -2, 308, 74, T("pk_card"), T("pk_card_sub"))
+    Card(page, "packcard", 454, -2, 308, 84, T("pk_card"), T("pk_card_sub"))
     set.packBox:Hide(); set.packLabel:Hide()
     for i, button in ipairs(set.packs) do
         button:SetWidth(92)
@@ -4287,7 +4311,7 @@ function Profiles.DetailLayout(set)
     set.packUndo:SetWidth(92); Put(set.packUndo, 466 + (#set.packs % 3) * 96, -30 - math.floor(#set.packs / 3) * 26)
     for g, group in ipairs(Profiles.GROUPS) do
         local col, row = (g - 1) % 3, math.floor((g - 1) / 3)
-        local x, y, h = 8 + col * 254, row == 0 and -84 or -232, row == 0 and 140 or 206
+        local x, y, h = 8 + col * 254, row == 0 and -94 or -240, row == 0 and 140 or 206
         local on = 0
         for _, key in ipairs(group[2]) do if db.items[key] then on = on + 1 end end
         local card = Card(page, "grp" .. g, x, y, 246, h, T(group[1]), string.format(T("warn_card_count"), on, #group[2]))
@@ -4295,15 +4319,15 @@ function Profiles.DetailLayout(set)
         set.groups[g]:Hide()
         for i, key in ipairs(group[2]) do Put(set.items[key], x + 8, y - 26 - (i - 1) * 22) end
     end
-    Card(page, "foot", 8, -446, 754, 36)
+    Card(page, "foot", 8, -452, 754, 36)
     if not (Profiles.packBackup and Profiles.packBackup.name) then
         local on, total = ItemCounts()
         set.hint:SetText(string.format(T("opt_hint_count_short"), on, total))
     end
-    Put(set.hint, 20, -458); set.hint:SetWidth(452); set.hint:SetJustifyH("LEFT")
-    set.appearance:SetWidth(130); Put(set.appearance, 484, -453)
-    set.order:SetWidth(130); Put(set.order, 622, -453)
-    Put(set.info, 12, -488); set.info:SetWidth(746)
+    Put(set.hint, 20, -464); set.hint:SetWidth(452); set.hint:SetJustifyH("LEFT")
+    set.appearance:SetWidth(130); Put(set.appearance, 484, -459)
+    set.order:SetWidth(130); Put(set.order, 622, -459)
+    Put(set.info, 12, -494); set.info:SetWidth(746)
     -- Ferramentas: um cartão por janela (2 colunas)
     page = set.pages.tools
     for i, button in ipairs(set.tools) do
@@ -4496,6 +4520,8 @@ function Profiles.Wire(n)
         if button ~= "RightButton" or not db then return end
         local other = rawget(db, "activeBar") ~= n
         if other then Profiles.Select(n) end
+        -- 3.34.1: com a Central, a 1ª vez que o Farol abre na sessão é sempre pela Início.
+        if ns.Hub and ns.Hub.Enabled() and not ns.Hub.openedThisSession then ns.Hub.Open("home") return end
         -- Aberto na aba "Barra" desta barra: fecha. Senão: abre (ou troca) para a aba "Barra", com esta barra escolhida.
         if not other and optionsWindow and optionsWindow:IsShown() and optionsWindow.controls.tab == "bar" then
             optionsWindow:Hide()

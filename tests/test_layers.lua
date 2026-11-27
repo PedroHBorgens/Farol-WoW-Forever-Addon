@@ -28,7 +28,7 @@ return {
     end },
 
     { "windows opened from the menu appear in front of the menu", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         local menu = openMenu(H)
         T.ok(menu._raisedAt, "menu raised when opened")
         for _, entry in ipairs({ { "Alarmes...", "FarolAlarms" }, { "Saques...", "FarolLoot" },
@@ -41,7 +41,7 @@ return {
     end },
 
     { "reopening the menu brings it back to the front; popups open on top", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         local menu = openMenu(H)
         H:slash("alarme")
         H:slash("menu"); H:slash("menu") -- fecha e reabre o menu

@@ -67,7 +67,7 @@ return {
     end },
 
     { "the options menu has an Order... button", function(T, Mock)
-        local H = Mock.new({ locale = "enUS" }):login()
+        local H = Mock.new({ locale = "enUS" }):login({ hub = false })
         H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
         local button
         for _, frame in ipairs(H:framesOf("Button")) do

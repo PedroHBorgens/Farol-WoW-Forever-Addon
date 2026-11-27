@@ -653,9 +653,9 @@ RefreshWindow = function(typing)
     -- Central do Farol (estilo detalhado, 3.29): dois cartões, a lista à esquerda e a anotação aberta à direita.
     local Kit = window.farolDocked and ns.Hub and ns.Hub.Kit
     if Kit then
-        local left = Kit.Panel(window, "list", 10, -10, 280, 374) -- 3.31.2: "Limpar concluídas" cabe dentro
+        local left = Kit.Panel(window, "list", 10, -10, 280, 380) -- 3.34.1: os botões de baixo ficam inteiros dentro, longe da borda
         left.title:SetText(T("note_title")); left.sub:SetText(total > 0 and string.format(T("note_pending_sub"), pending, total) or "")
-        local right = Kit.Panel(window, "editor", 292, -10, 516, 374)
+        local right = Kit.Panel(window, "editor", 292, -10, 516, 380)
         local open = selected and list[selected]
         right.title:SetText("")
         right.sub:SetText(open and open.m and ns.FormatWhen and string.format(T("note_edited"), ns.FormatWhen(open.m)) or "")

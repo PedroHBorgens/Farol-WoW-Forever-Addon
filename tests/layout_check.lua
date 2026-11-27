@@ -129,7 +129,12 @@ function LC.Check(H, winName, opts)
       panels[#panels + 1] = { name = name, l = bx + p.x, t = by + p.y, w = bg._w, h = bg._h or 0 }
     end
   end
-  for key, p in pairs(win.farolPanels or {}) do if p.bg and not tostring(key):find("^text:") then addPanel(key, p.bg) end end
+  -- 3.34.1: quadros da janela e das páginas dentro dela (as abas da Configurações têm os seus).
+  local holders = { win }
+  for _, f in ipairs(elems) do if f.farolPanels then holders[#holders + 1] = f end end
+  for _, h in ipairs(holders) do
+    for key, p in pairs(h.farolPanels or {}) do if p.bg and not tostring(key):find("^text:") then addPanel(key, p.bg) end end
+  end
   for _, b in ipairs(boxes) do
     local f, r = b[1], b[2]
     if f._kind == "FontString" or f._kind == "Button" or f._kind == "EditBox" or f._kind == "CheckButton" then
@@ -143,11 +148,26 @@ function LC.Check(H, winName, opts)
           report(winName, string.format("sai do cartão: %s (termina em %.0f, cartão até %.0f)", label(f), r[1] + w, pr[1] + pr[3]))
         end
       end
+      if par and par ~= win and par._kind == "Frame" and (par._w or 0) > 0 and par.title and (par._h or 0) > 0 then
+        local pr = rect(par)
+        if r[2] - r[4] < pr[2] - pr[4] - 1 then
+          report(winName, string.format("sai por baixo do cartão: %s (desce até %.0f, cartão até %.0f)", label(f), r[2] - r[4], pr[2] - pr[4]))
+        end
+      end
       for _, p in ipairs(panels) do
         local inside = r[1] >= p.l - 1 and r[1] < p.l + p.w and r[2] <= p.t + 1 and r[2] > p.t - p.h
         if inside and r[1] + w > p.l + p.w + 1 then
           report(winName, string.format("sai do quadro %s: %s (termina em %.0f, quadro até %.0f)", p.name, label(f), r[1] + w, p.l + p.w))
         end
+        -- 3.34.1: também por baixo (a borda do quadro tem ~3 px; um botão encostado nela já fica por cima do fundo)
+        local inset = (f._kind == "FontString" or f._text) and 3 or 0 -- área de clique sem texto pode ir até a borda
+        if inside and r[2] - r[4] < p.t - p.h + inset then
+          report(winName, string.format("sai por baixo do quadro %s: %s (desce até %.0f, quadro até %.0f)", p.name, label(f), r[2] - r[4], p.t - p.h))
+        end
+      end
+      local WH = opts.height or win._h or 0
+      if WH > 0 and r[2] - r[4] < -WH + 4 then
+        report(winName, string.format("passa do fundo da janela: %s (desce até %.0f, janela %.0f)", label(f), r[2] - r[4], WH))
       end
     end
   end

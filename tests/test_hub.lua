@@ -392,6 +392,24 @@ return {
         T.eq(H:text(home.cards[2].title), "Now"); T.eq(H:text(home.cards[6].title), "Warnings and reminders")
     end },
 
+    { "3.34.1: the first time Farol opens in a session it starts on Home (right-click on the bar too)", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true })
+        H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
+        local hub = H.env.FarolHub
+        T.ok(hub and hub:IsShown(), "the hub opens"); T.ok(H.env.FarolHubNavhome.mark:IsShown(), "on Home")
+        T.ok(not (H.env.FarolOptions and H.env.FarolOptions:IsShown()), "not on Settings")
+        hub:Hide()
+        H.env.FarolFrame._scripts.OnMouseUp(H.env.FarolFrame, "RightButton")
+        T.ok(H.env.FarolOptions and H.env.FarolOptions:IsShown(), "after that, right-click opens the settings as before")
+        T.ok(H.env.FarolHubNavsettings.mark:IsShown())
+        -- o botão do minimapa e /farol central também abrem pela Início
+        hub:Hide(); H:slash("central"); T.ok(H.env.FarolHubNavhome.mark:IsShown())
+        -- estilo simples: o clique direito abre o menu, como sempre
+        local S = Mock.new({ locale = "ptBR" }); S:login({ hub = false })
+        S.env.FarolFrame._scripts.OnMouseUp(S.env.FarolFrame, "RightButton")
+        T.ok(S.env.FarolOptions and S.env.FarolOptions:IsShown()); T.eq(S.env.FarolHub, nil)
+    end },
+
     { "3.33: warning and alarm popups in the hub look (title + detail, level stripe, type icon); simple style unchanged", function(T, Mock)
         local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true })
         H:update(1) -- o simulador começa com durabilidade baixa: um aviso

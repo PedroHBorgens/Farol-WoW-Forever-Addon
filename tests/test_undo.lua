@@ -13,7 +13,7 @@ local function all(H) return H.strip(table.concat(H.msgs, "\n")) end
 
 return {
     { "bar buttons only pick the bar (and say so); presets show what changed and a visible Undo", function(T, Mock)
-        local H = Mock.new({ locale = "ptBR" }):login()
+        local H = Mock.new({ locale = "ptBR" }):login({ hub = false })
         local set = open(H)
         T.eq(H:text(set.barLabel), "Editando:"); T.eq(H:text(set.packLabel), "Aplicar pacote:")
         T.ok(not set.packUndo:IsShown(), "Undo hidden while there is nothing to undo")
@@ -32,7 +32,7 @@ return {
         T.ok(set.packUndo:IsShown(), "Undo still available")
         H:click(set.packUndo)
         T.ok(not set.packUndo:IsShown()); T.eq(H.env.FarolDB.items.xp, false)
-        local en = Mock.new({ locale = "enUS" }):login()
+        local en = Mock.new({ locale = "enUS" }):login({ hub = false })
         local s2 = open(en)
         T.eq(en:text(s2.barLabel), "Editing:"); T.eq(en:text(s2.packLabel), "Apply preset:")
     end },

@@ -472,7 +472,11 @@ detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simple
   Farol, faixa colorida do nível (alerta, atenção, informação), ícone do tipo de aviso e o texto em título + detalhe; o
   alarme mostra a hora em destaque, o nome e Local/Servidor, com a borda mais clara enquanto toca.
 - **Tamanho da Central** (3.31): arraste a alça ◢ no canto inferior direito para aumentar ou diminuir a Central
-  inteira (70% a 130%); duplo clique volta a 100%, ou use `/farol central tamanho 85`. Fica salvo na conta.
+  inteira (70% a 130%); duplo clique volta a 100%, ou use `/farol central tamanho 85`. Fica salvo na conta. Numa tela
+  pequena (ou com a escala da interface grande), a Central e todas as janelas do Farol diminuem sozinhas para caber
+  (3.34.1).
+- Na primeira vez que você abre o Farol na sessão (botão do minimapa, clique direito na barra, `/farol central`), a
+  Central começa pela **Início** (3.34.1).
 - As outras seções são as janelas de sempre, encaixadas na Central; arrastá-las move a Central. Com o estilo
   detalhado ligado, qualquer janela do Farol (por comando, pelo menu ou pelo botão do minimapa) abre dentro dela.
 - No topo: idioma e **Estilo simples**; no rodapé: Resumo agora, Barra... e Aparência....

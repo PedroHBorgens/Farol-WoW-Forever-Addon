@@ -463,7 +463,10 @@ hub)"); `/farol hub off` or the **Simple style** button goes back.
   stripe for the level (alert, attention, information), an icon for the kind of warning and the text as title + detail;
   the alarm shows the time in big numbers, the name and Local/Server, with a brighter border while it rings.
 - **Hub size** (3.31): drag the ◢ grip in the bottom-right corner to make the whole hub bigger or smaller (70% to
-  130%); double-click it to go back to 100%, or use `/farol hub size 85`. Saved for your account.
+  130%); double-click it to go back to 100%, or use `/farol hub size 85`. Saved for your account. On a small screen
+  (or with a large UI scale) the hub and every Farol window shrink on their own to fit (3.34.1).
+- The first time you open Farol in a session (minimap button, right-click on the bar, `/farol hub`), the hub starts
+  on **Home** (3.34.1).
 - The other sections are the usual windows, placed inside the hub; dragging them moves the hub. With the detailed
   style on, opening any Farol window (by command, the menu or the minimap button) opens it inside the hub.
 - At the top: language and **Simple style**; at the bottom: Summary now, Bar... and Appearance....

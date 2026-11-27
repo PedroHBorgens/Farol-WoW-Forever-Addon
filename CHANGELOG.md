@@ -2,6 +2,18 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.34.1 — Fits every screen; the hub starts on Home
+- Settings in the hub: the "Dungeons" pack button (2nd row) and the Show/Lock checkboxes no longer sit on the bottom
+  border of their cards (the top cards are taller and the item groups moved down). Notes: the "+ New note" and
+  "Clear done" buttons no longer touch the bottom of the list card.
+- The hub and every Farol window shrink on their own when they do not fit the screen (small resolution or large UI
+  scale, down to ~835 x 668); never bigger than asked, back to normal on a larger screen. The hub size you chose
+  (70%–130%) stays saved.
+- The first time Farol opens in a session (minimap, right-click on the bar, `/farol hub`) the hub starts on Home.
+- `test_textfit` now also checks the bottom edge of every card (including the cards inside the Settings tabs, which
+  were not checked before) and the bottom of each window, and a new test opens every window and the hub at 70% and
+  130% on five screen sizes (835x668 to 2560x1080), in PT and EN. 820 tests (2 passes).
+
 ## 3.34.0 — Hub: new Home page
 - **This session** on top gains "next level in ~42m" at this session's pace, next to the XP bar.
 - New cards, with thin bars:

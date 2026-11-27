@@ -68,7 +68,7 @@ return {
     end },
 
     { "options menu: counter of items on, and each item explains what it shows", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false })
         local _, window = menuChecks(H)
         local hints = {}
         hints[#hints + 1] = H:text(H.env.FarolOptions.controls.hint) -- texto da aba Barra

@@ -325,6 +325,12 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   `Track`/`SetTrack`) para as próximas telas (só no estilo detalhado; o simples fica como está). Profissões: graus pelo
   limite (75/150/225/300/375), ganho da sessão em `profStart` (só memória, anotado no `PLAYER_ENTERING_WORLD`).
   Personagens: `ns.CharDetails()` (Core) = personagens do reino com descanso estimado/real e instâncias ativas.
+  **3.34:** Início refeita: `HomeCard`/`SetHome(card, entries, sub)` (entrada `{rótulo, valor}` = linha, `{bar = 0..1,
+  color}` = barra fina via `Kit.Bar(card, "homeN")`, `name = true` = valor com a largura dele e o nome com o resto);
+  cartões `cards[1..6]` = Metas, Agora, Missões, Tarefas e resets, Equipamento e bolsas, Avisos e lembretes.
+  Leituras só por funções dos módulos: `Tasks.SplitCounts`, `Alarm.Next` (hora, "em ...", nome, minutos),
+  `Runs.Current`, `Quests.Value` (só com `warnings.questValue` ligado), `Goals.*Status`, `Farm.Statuses`; números
+  passam por `Finite`. Cartão de 248 px: valor comprido vai na linha de baixo, nunca ao lado do rótulo.
   **3.29:** janela encaixada com `frame.farolDetail(on)` (+ `frame.farolDetailSize` opcional) ganha o visual em
   cartões só dentro da Central: `Dock` chama `Skin` (fundo/borda transparentes, esconde `farolBacking` e o título),
   aplica o tamanho e chama `farolDetail(true)`; `Release` desfaz e chama `farolDetail(false)` (que volta ao layout

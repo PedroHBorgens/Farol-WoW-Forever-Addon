@@ -519,11 +519,14 @@ HCSS = """.hub{position:relative;width:1060px;height:540px;background:linear-gra
 .hcard{border:1px solid #7a5f2a;border-radius:6px;background:linear-gradient(#1c170f,#120f0a);padding:7px 10px}
 .hcard h3{margin:0 0 4px;font:bold 11px 'DejaVu Sans';color:#ffb347;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid #5a452055;padding-bottom:3px}
 .hrow{display:flex;justify-content:space-between;margin:2px 0;font-size:12.5px}.hbig{font-size:19px;font-weight:bold;color:#fff}
-.hfoot{grid-column:1/3;border-top:2px solid #3e3018;display:flex;align-items:center;gap:6px;padding:0 12px;background:#0f0c08;border-radius:0 0 8px 8px}"""
+.hfoot{grid-column:1/3;border-top:2px solid #3e3018;display:flex;align-items:center;gap:6px;padding:0 12px;background:#0f0c08;border-radius:0 0 8px 8px}
+.hrow>span:first-child:has(>div){flex:1}.hnew{display:inline-block;background:#3a6a2a;color:#d8ffd0;font-size:9px;border-radius:3px;padding:0 4px;margin-left:4px;letter-spacing:0}"""
 navs = [("🏠","Home",True),("👥","Characters",0),("🎯","Goals",0),("📜","Quests",0),("⚒️","Professions",0),("📋","Tasks",0),("📒","Notes",0),("📦","Kept items",0),("🗝️","Dungeons",0),("👜","Loot",0),("⏰","Alarms",0),("🔔","Warnings",0),("⚙️","Settings",0)]
+def hbar(p, c):
+    return f'<div style="width:100%;height:6px;border:1px solid #000;border-radius:3px;background:#222;overflow:hidden;margin:-1px 0 3px"><div style="width:{p}%;height:100%;background:{c}"></div></div>'
 def hcard(title, rows, extra=""):
     return f'<div class="hcard" style="{extra}"><h3>{title}</h3>' + "".join(f'<div class="hrow"><span>{a}</span><span>{b}</span></div>' for a, b in rows) + '</div>'
-hub_html = (f'<div class="hub"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:28px;height:28px;display:block"></div>'
+hub_html = (f'<div class="hub" style="height:610px;transform:scale(.8);margin-top:20px"><div class="hmed"><img src="data:image/png;base64,{logo}" style="width:28px;height:28px;display:block"></div>'
     '<div class="htop"><span class="hban">Farol</span><div class="hmeta"><span>v3.27</span><span class="hpill">English ▾</span><span class="hpill">Simple style</span><span class="btn" style="padding:0 6px">×</span></div></div>'
     '<div class="hside">' + "".join(f'<div class="hnav{" on" if on else ""}"><i>{e}</i>{n}</div>' for e, n, on in navs)
     + '<div class="hwho"><b>Aldric</b><br><span class="dim">Level 26</span></div></div>'
@@ -532,15 +535,15 @@ hub_html = (f'<div class="hub"><div class="hmed"><img src="data:image/png;base64
     '<div><div class="dim" style="font-size:11px">Session gold</div><div class="hbig">+38<span class="gold">g</span> 12<span class="silver">s</span></div></div>'
     '<div><div class="dim" style="font-size:11px">Gold per hour</div><div class="hbig">+31<span class="gold">g</span> 45<span class="silver">s</span></div></div>'
     '<div><div class="dim" style="font-size:11px">Experience</div><div class="hbig">72% <span class="blue" style="font-size:13px">+12%</span></div></div>'
-    '<div><div class="dim" style="font-size:11px">XP per hour</div><div class="hbig">17.8k · 42m</div></div></div>'
+    '<div><div class="dim" style="font-size:11px">XP per hour</div><div class="hbig">17.8k</div></div></div>'
     '<div style="height:9px;border:1px solid #000;border-radius:3px;background:#222;margin:7px 0 2px;position:relative;overflow:hidden"><span style="position:absolute;left:0;top:0;bottom:0;width:72%;background:#7a4dff"></span><span style="position:absolute;left:72%;top:0;bottom:0;width:12%;background:#2a4f8a"></span></div>'
-    '<div class="dim" style="font-size:11px">XP 72% of level 26 · rested +12%</div></div>'
-    + hcard("Quests", [("Quest log", 'Quests 34/40 · <span class="g">5 ready</span>'), ("Completed", "412")])
-    + hcard("Tasks and resets", [("Tasks", '<span class="y">2/4</span>'), ("Resets", "Daily 5h 12m · Weekly 2d 4h")])
-    + hcard("Gear and bags", [("Durability", '<span class="g">86%</span>'), ("Bags", '<span class="y">8</span>/80'), ("Junk", "3g 26s (3)"), ("Hearthstone", "Lighthouse Bay - ready")])
-    + hcard("Notes", [("Pending", '<span class="y">2</span>/5')])
-    + hcard("Kept items", [("Kept", '4 · <span class="g">1</span>')])
-    + hcard("Warnings", [("Last warning", '<span class="dim">Today 21:40</span>'), ('<span class="y">Bags almost full</span>', "")])
+    '<div class="dim" style="font-size:11px">XP 72% of level 26 · rested +12% · next level in ~42m</div></div>'
+    + hcard('Goals <span class="hnew">new</span>', [("Gold 500g", "24% · ~11h 50m"), (hbar(24, "#3fbf3f"), ""), ("Level 30", "45% · ~9h 20m"), (hbar(45, "#7a4dff"), ""), ("🌿 Moonleaf", "38/60 · ~40m"), (hbar(63, "#ffd75a"), "")])
+    + hcard('Now <span class="hnew">new</span>', [('<span class="hbig" style="font-size:15px">Old Crypt</span>', "37m"), ("XP", "+14.2k"), ("Gold", '+6<span class="gold">g</span> 40<span class="silver">s</span>'), ("Loot", "23 (2 rares)"), ('<span class="dim">outside a dungeon: the next alarm</span>', "")])
+    + hcard("Quests", [("Ready to turn in", '<span class="g">5</span>'), ("Value of ready ones", ""), ("12.4k XP · 18s", ""), ('<span class="g">reaches level 27</span>', ""), (hbar(85, "#ffd75a"), ""), ("Completed", "412")])
+    + hcard("Tasks and resets", [("Daily 2/3", "5h 12m"), (hbar(66, "#3fbf3f"), ""), ("Weekly 0/2", "2d 4h"), (hbar(0, "#3fbf3f"), "")])
+    + hcard("Gear and bags", [("Durability", '<span class="y">34%</span>'), (hbar(34, "#ffd75a"), ""), ("Bags", "72/80 used"), (hbar(90, "#ff8a33"), ""), ("Junk", "3g 26s (3)"), ("Hearthstone", "Lighthouse Bay - ready")])
+    + hcard("Warnings and reminders", [("Last warning", '<span class="dim">Today 21:40</span>'), ('<span class="y">Bags almost full</span>', ""), ("Pending notes", "2/5"), ("Kept items", '4 · <span class="g">1 ready</span>'), ("Next alarm", "07:30")])
     + hcard("Characters and professions", [("Account gold (this realm)", "1482g 10s"), ("Characters noted", "3"), ("Professions", "First Aid 133/150 · Fishing 40/75")], "grid-column:1/4")
     + '</div><div class="hfoot"><span class="btn">Summary now</span><span class="btn">Bar...</span><span class="btn">Appearance...</span><span class="dim" style="margin-left:auto;font-size:11px">Click a card to open its section · read-only; nothing is sent</span></div></div>')
 page("farol-20-hub-detailed-style", hub_html, "Two styles: simple, or everything in the Farol hub",

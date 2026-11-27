@@ -322,6 +322,16 @@ function Runs.BarText()
     return string.format("|cffffcc66%s|r %s · |cff4da6ff+%s XP|r · %s", cur.n, Duration(now - cur.t), Short(cur.x), Gold(cur.g))
 end
 
+-- Corrida atual para a Central (3.34): nil fora de masmorra/raide.
+function Runs.Current()
+    local cur = Data().cur
+    local now = Now()
+    if not cur or not now then return nil end
+    local ok, start = pcall(date, "%H:%M", math.floor(cur.t))
+    return { name = cur.n, kind = Kind(cur), since = ok and start or "--", time = Duration(now - cur.t),
+        xp = "+" .. Short(cur.x), gold = Gold(cur.g), loot = LootText(cur) }
+end
+
 local function LastHere(name)
     local list = Data().list
     for i = #list, 1, -1 do

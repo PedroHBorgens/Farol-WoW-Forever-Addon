@@ -439,9 +439,14 @@ detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simple
 
 - Barra lateral com todas as seções: Início · Personagens · Metas · Missões · Profissões · Tarefas · Anotações ·
   Guardados · Masmorras · Saques · Alarmes · Avisos · Configurações, e o nome e o nível do personagem embaixo.
-- **Início** mostra cartões: esta sessão (ouro, ouro por hora, XP, XP por hora e a barra de XP com o descansado),
-  missões, tarefas e resets, equipamento e bolsas, anotações, itens guardados, o último aviso e personagens e
-  profissões. Clique num cartão para abrir a seção.
+- **Início** (refeita na 3.34) mostra esta sessão no topo (ouro, ouro por hora, XP, XP por hora, a barra de XP com o
+  descansado e "próximo nível em ~42m" no ritmo atual) e cartões com barras: **Metas** (ouro, nível e farm, com o tempo
+  no ritmo da sessão), **Agora** (a corrida da masmorra atual: tempo, XP, ouro e saques; fora de masmorra, o próximo
+  alarme), **Missões** (prontas para entregar, a barra do diário e, com a opção "valor das prontas" ligada, o XP e o
+  ouro delas e se entregar sobe de nível), **Tarefas e resets** (diárias e semanais, cada uma com barra e o tempo até o
+  reset), **Equipamento e bolsas** (durabilidade e bolsas com barras, lixo, Pedra de Regresso), **Avisos e lembretes**
+  (último aviso, anotações pendentes, itens guardados, próximo alarme) e **Personagens e profissões**. Clique num
+  cartão para abrir a seção.
 - **Profissões** (3.28): um cartão por profissão com o grau, uma trilha com as marcas 75 · 150 · 225 · 300 (verde = o
   que você tinha, dourado = o que subiu nesta sessão, laranja = o limite do seu treinamento), os pontos ganhos na sessão
   (e por hora) e o próximo passo ("procure um instrutor para treinar Perito") ao chegar no limite.

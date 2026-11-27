@@ -430,9 +430,14 @@ hub)"); `/farol hub off` or the **Simple style** button goes back.
 
 - A side bar with every section: Home · Characters · Goals · Quests · Professions · Tasks · Notes · Kept items ·
   Dungeons · Loot · Alarms · Warnings · Settings, and your character's name and level at the bottom.
-- **Home** shows cards: this session (gold, gold per hour, XP, XP per hour and the XP bar with rested), quests, tasks
-  and resets, gear and bags, notes, kept items, the last warning, and characters and professions. Click a card to open
-  its section.
+- **Home** (redone in 3.34) shows this session on top (gold, gold per hour, XP, XP per hour, the XP bar with rested
+  and "next level in ~42m" at this pace) and cards with bars: **Goals** (gold, level and farm, with the time at this
+  session's pace), **Now** (the current dungeon run: time, XP, gold and loot; outside a dungeon, the next alarm),
+  **Quests** (ready to turn in, the quest log bar and, with the "value of ready quests" option on, their XP and gold
+  and whether turning them in levels you up), **Tasks and resets** (daily and weekly, each with a bar and the time to
+  reset), **Gear and bags** (durability and bags with bars, junk, Hearthstone), **Warnings and reminders** (last
+  warning, pending notes, kept items, next alarm) and **Characters and professions**. Click a card to open its
+  section.
 - **Professions** (3.28): a card per profession with its rank, a track with the 75 · 150 · 225 · 300 marks (green =
   what you had, gold = what you gained this session, orange = your training limit), points gained this session (and
   per hour) and the next step ("find a trainer to learn Expert") when you reach the limit.

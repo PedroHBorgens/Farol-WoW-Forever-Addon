@@ -55,23 +55,26 @@ local STRINGS = {
         hub_card_quests = "Missões",
         hub_card_tasks = "Tarefas e resets",
         hub_card_gear = "Equipamento e bolsas",
-        hub_card_notes = "Anotações",
-        hub_card_keep = "Itens guardados",
-        hub_card_warn = "Avisos",
+        hub_card_goals = "Metas", hub_goals_sub = "ritmo desta sessão", hub_goal_gold = "Ouro %s", hub_goal_level = "Nível %d",
+        hub_goal_done = "alcançada", hub_goals_empty = "Nenhuma meta ainda.",
+        hub_card_now  = "Agora", hub_now_run = "%s · desde %s", hub_row_xp = "XP", hub_row_goldr = "Ouro", hub_row_loot = "Saques",
+        hub_now_alarm = "Próximo alarme", hub_now_out = "fora de masmorra ou raide", hub_now_none = "nenhum alarme ligado", hub_row_rings = "Toca",
+        hub_quests_sub = "diário %d/%d", hub_row_ready = "Prontas para entregar", hub_row_value = "Valor das prontas",
+        hub_value_up  = "sobe para o nível %d", hub_value_short = "nível %d: faltam %s XP",
+        hub_value_off = "ligue em Menu > Avisos", hub_tasks_sub = "até o reset",
+        hub_row_daily_n = "Diárias %d/%d", hub_row_weekly_n = "Semanais %d/%d", hub_tasks_empty = "Nenhuma tarefa ainda.",
+        hub_bags_used = "%d/%d ocupados", hub_card_remind = "Avisos e lembretes", hub_row_notes2 = "Anotações pendentes",
+        hub_row_keep2 = "Itens guardados", hub_xp_next = " · próximo nível em ~%s",
         hub_card_chars = "Personagens e profissões",
         hub_row_log   = "Diário",
         hub_row_done  = "Concluídas",
         hub_row_tasks = "Tarefas",
-        hub_row_reset = "Resets", hub_row_daily = "Reset diário", hub_row_weekly = "Reset semanal",
         hub_row_durab = "Durabilidade",
         hub_row_bags  = "Bolsas",
         hub_row_junk  = "Lixo",
         hub_row_hearth = "Pedra de Regresso",
-        hub_row_notes = "Pendentes",
-        hub_row_keep  = "Guardados",
         hub_row_last  = "Último aviso",
         hub_row_none  = "nenhum aviso recente",
-        hub_row_more  = "Os 10 últimos em Avisos",
         hub_row_gold  = "Ouro da conta (este reino)",
         hub_row_count = "Personagens anotados",
         hub_none      = "--",
@@ -148,23 +151,26 @@ local STRINGS = {
         hub_card_quests = "Quests",
         hub_card_tasks = "Tasks and resets",
         hub_card_gear = "Gear and bags",
-        hub_card_notes = "Notes",
-        hub_card_keep = "Kept items",
-        hub_card_warn = "Warnings",
+        hub_card_goals = "Goals", hub_goals_sub = "pace of this session", hub_goal_gold = "Gold %s", hub_goal_level = "Level %d",
+        hub_goal_done = "reached", hub_goals_empty = "No goals yet.",
+        hub_card_now  = "Now", hub_now_run = "%s · since %s", hub_row_xp = "XP", hub_row_goldr = "Gold", hub_row_loot = "Loot",
+        hub_now_alarm = "Next alarm", hub_now_out = "not in a dungeon or raid", hub_now_none = "no alarm on", hub_row_rings = "Rings",
+        hub_quests_sub = "log %d/%d", hub_row_ready = "Ready to turn in", hub_row_value = "Value of ready ones",
+        hub_value_up  = "reaches level %d", hub_value_short = "level %d: %s XP short",
+        hub_value_off = "turn on in Menu > Warnings", hub_tasks_sub = "until reset",
+        hub_row_daily_n = "Daily %d/%d", hub_row_weekly_n = "Weekly %d/%d", hub_tasks_empty = "No tasks yet.",
+        hub_bags_used = "%d/%d used", hub_card_remind = "Warnings and reminders", hub_row_notes2 = "Pending notes",
+        hub_row_keep2 = "Kept items", hub_xp_next = " · next level in ~%s",
         hub_card_chars = "Characters and professions",
         hub_row_log   = "Quest log",
         hub_row_done  = "Completed",
         hub_row_tasks = "Tasks",
-        hub_row_reset = "Resets", hub_row_daily = "Daily reset", hub_row_weekly = "Weekly reset",
         hub_row_durab = "Durability",
         hub_row_bags  = "Bags",
         hub_row_junk  = "Junk",
         hub_row_hearth = "Hearthstone",
-        hub_row_notes = "Pending",
-        hub_row_keep  = "Kept",
         hub_row_last  = "Last warning",
         hub_row_none  = "no recent warning",
-        hub_row_more  = "The last 10 in Warnings",
         hub_row_gold  = "Account gold (this realm)",
         hub_row_count = "Characters noted",
         hub_none      = "--",
@@ -455,6 +461,90 @@ local function XPBar()
     return math.min(1, xp / max), math.min(1, rested / max), level
 end
 
+-- Página Início (3.34): "Esta sessão" no topo e seis cartões com linhas e barras (Metas, Agora, Missões, Tarefas e
+-- resets, Equipamento e bolsas, Avisos e lembretes) + Personagens e profissões em largura total.
+local HOME_ROWS, HOME_BARS = 6, 3
+
+local function HomeCard(page, x, y, w, h, titleKey, section)
+    local card = Card(page, x, y, w, h, titleKey, section, HOME_ROWS)
+    card.sub = ns.Dim(card:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
+    card.sub:SetPoint("TOPRIGHT", -12, -12)
+    card.sub:SetJustifyH("RIGHT")
+    if card.sub.SetWordWrap then card.sub:SetWordWrap(false) end
+    return card
+end
+
+-- entries: { "rótulo", "valor" } = linha; { bar = 0..1, color = código da paleta ou {r, g, b} } = barra fina.
+local function SetHome(card, entries, sub)
+    local Kit = Hub.Kit
+    local w = card.farolW or card:GetWidth()
+    card.title:SetText(T(card.titleKey))
+    card.sub:SetText(sub or "")
+    FitPair(card.title, card.sub, w)
+    local y, ri, bi = -32, 0, 0
+    for _, e in ipairs(entries) do
+        if e.bar then
+            if bi < HOME_BARS then
+                bi = bi + 1
+                local r, g, b
+                if type(e.color) == "table" then r, g, b = e.color[1], e.color[2], e.color[3]
+                else r, g, b = Kit.ColorOf(e.color) end
+                Kit.SetBar(Kit.Bar(card, "home" .. bi), 12, y + 1, w - 24, e.bar, true, r, g, b)
+                y = y - 10
+            end
+        elseif ri < HOME_ROWS then
+            ri = ri + 1
+            local row = card.rows[ri]
+            row.left:ClearAllPoints(); row.left:SetPoint("TOPLEFT", 12, y)
+            row.right:ClearAllPoints(); row.right:SetPoint("TOPRIGHT", -12, y)
+            row.left:SetText(e[1] or ""); row.right:SetText(e[2] or "")
+            row.left:Show(); row.right:Show()
+            if e.name then -- nome digitado pelo jogador: o valor fica com a largura dele e o nome com o resto ("...")
+                local ok, rw = pcall(row.right.GetStringWidth, row.right)
+                rw = (ok and type(rw) == "number" and rw == rw) and math.ceil(rw * 1.12) + 6 or 80
+                rw = math.max(1, math.min(rw, w - 60))
+                row.right:SetWidth(rw); row.left:SetWidth(math.max(1, w - 34 - rw))
+            else
+                FitPair(row.left, row.right, w)
+            end
+            y = y - 18
+        end
+    end
+    for i = ri + 1, HOME_ROWS do card.rows[i].left:Hide(); card.rows[i].right:Hide() end
+    for i = bi + 1, HOME_BARS do Kit.SetBar(Kit.Bar(card, "home" .. i), 12, -32, w - 24, 0, false) end
+end
+
+local function Dimmed(key, ...) return ns.C.dim .. string.format(T(key), ...) .. "|r" end
+
+local function Short(n)
+    n = math.floor(n)
+    if n >= 10000 then return string.format("%.1fk", n / 1000) end
+    return tostring(n)
+end
+
+local function Eta(seconds)
+    if type(seconds) ~= "number" or seconds ~= seconds or seconds < 0 or seconds > 3650 * 86400 then return nil end
+    seconds = math.floor(seconds)
+    if seconds >= 86400 then
+        return string.format("%dd %dh", math.floor(seconds / 86400), math.floor((seconds % 86400) / 3600))
+    end
+    return ns.FormatDuration and ns.FormatDuration(seconds) or (math.floor(seconds / 60) .. "m")
+end
+
+local function Countdown(seconds)
+    if type(seconds) ~= "number" or seconds ~= seconds or seconds < 0 or seconds > 30 * 86400 then return "--" end
+    return ns.FormatCountdown and ns.FormatCountdown(seconds) or Eta(seconds) or "--"
+end
+
+local function Call(fn, ...)
+    if type(fn) ~= "function" then return nil end
+    local ok, a, b, c = pcall(fn, ...)
+    if ok then return a, b, c end
+    return nil
+end
+
+local XP_COLOR = { 0.45, 0.3, 1 }
+
 local function BuildHome(page)
     local W = WIDTH - SIDE_W - 24
     local colW = math.floor((W - 24) / 3)
@@ -480,23 +570,26 @@ local function BuildHome(page)
     page.xpFill = page.hero:CreateTexture(nil, "OVERLAY")
     page.xpFill:SetPoint("TOPLEFT", page.xpBack, "TOPLEFT", 0, 0)
     page.xpFill:SetHeight(10)
-    Fill(page.xpFill, 0.45, 0.3, 1, 1)
+    Fill(page.xpFill, XP_COLOR[1], XP_COLOR[2], XP_COLOR[3], 1)
     page.xpRest = page.hero:CreateTexture(nil, "OVERLAY")
     page.xpRest:SetPoint("TOPLEFT", page.xpFill, "TOPRIGHT", 0, 0)
     page.xpRest:SetHeight(10)
     Fill(page.xpRest, 0.2, 0.35, 0.65, 1)
     page.xpText = ns.Dim(page.hero:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"))
     page.xpText:SetPoint("TOPLEFT", page.xpBack, "BOTTOMLEFT", 0, -4)
-    local y2, y3, y4 = -118, -226, -334
+    page.xpText:SetWidth(W - 24)
+    page.xpText:SetJustifyH("LEFT")
+    local y2, y3, y4, h = -116, -260, -404, 136
+    local x2, x3 = colW + 12, 2 * (colW + 12)
     page.cards = {
-        Card(page, 0, y2, colW, 100, "hub_card_quests", "quests", 3),
-        Card(page, colW + 12, y2, colW, 100, "hub_card_tasks", "tasks", 3),
-        Card(page, 2 * (colW + 12), y2, colW, 100, "hub_card_gear", nil, 4),
-        Card(page, 0, y3, colW, 100, "hub_card_notes", "notes", 3),
-        Card(page, colW + 12, y3, colW, 100, "hub_card_keep", "keep", 3),
-        Card(page, 2 * (colW + 12), y3, colW, 100, "hub_card_warn", "warnings", 3, colW - 90), -- o aviso ocupa a linha
+        HomeCard(page, 0, y2, colW, h, "hub_card_goals", "goals"),
+        HomeCard(page, x2, y2, colW, h, "hub_card_now", "runs"),
+        HomeCard(page, x3, y2, colW, h, "hub_card_quests", "quests"),
+        HomeCard(page, 0, y3, colW, h, "hub_card_tasks", "tasks"),
+        HomeCard(page, x2, y3, colW, h, "hub_card_gear", nil),
+        HomeCard(page, x3, y3, colW, h, "hub_card_remind", "warnings"),
     }
-    page.chars = Card(page, 0, y4, W, 100, "hub_card_chars", "chars", 3, 240)
+    page.chars = Card(page, 0, y4, W, 84, "hub_card_chars", "chars", 3, 240)
 end
 
 local function LastWarning()
@@ -504,6 +597,165 @@ local function LastWarning()
     local first = type(list) == "table" and list[1]
     if type(first) ~= "table" or type(first.text) ~= "string" then return nil end
     return first.text, ns.FormatWhen and ns.FormatWhen(first.t) or ""
+end
+
+-- Cor de estado pela porcentagem (alto = bom): bom / atenção / alerta, sempre pela paleta.
+local function StateColor(pct, warnAt, badAt)
+    if pct <= badAt then return ns.C.bad end
+    if pct <= warnAt then return ns.C.warn end
+    return ns.C.good
+end
+
+-- Número finito (nada de NaN/infinito) dentro da faixa; nil se não for.
+local function Finite(v, low, high)
+    if type(v) ~= "number" or v ~= v or v < low or v > high then return nil end
+    return v
+end
+
+local function GoalsRows()
+    local Goals, Farm = ns.Goals, ns.Farm
+    local rows = {}
+    local function Add(label, status, color)
+        if not status then return end
+        status.pct = Finite(status.pct, 0, 100)
+        local right
+        if status.done then right = ns.C.good .. T("hub_goal_done") .. "|r"
+        elseif status.pct then
+            local eta = Eta(status.eta)
+            right = status.pct .. "%" .. (eta and (" · ~" .. eta) or "")
+        else right = T("hub_none") end
+        rows[#rows + 1] = { label, right }
+        rows[#rows + 1] = { bar = (status.pct or 0) / 100, color = status.done and ns.C.good or color }
+    end
+    local gold = Goals and Call(Goals.GoldStatus)
+    if type(gold) == "table" and Finite(gold.target, 1, 1e13) then
+        Add(string.format(T("hub_goal_gold"), Short(gold.target / 10000) .. "g"), gold, ns.C.good)
+    end
+    local level = Goals and Call(Goals.LevelStatus)
+    if type(level) == "table" and Finite(level.target, 1, 200) then
+        Add(string.format(T("hub_goal_level"), level.target), level, XP_COLOR)
+    end
+    local farm = Farm and Call(Farm.Statuses)
+    if type(farm) == "table" then
+        for _, status in ipairs(farm) do
+            if #rows >= 2 * HOME_BARS then break end
+            if type(status) == "table" and Finite(status.target, 1, 1e6) then
+                local name = type(status.name) == "string" and status.name or "?"
+                status.have, status.pct = Finite(status.have, 0, 1e9), Finite(status.pct, 0, 100)
+                local right
+                if status.done then right = ns.C.good .. T("hub_goal_done") .. "|r"
+                elseif status.have then
+                    local eta = Eta(status.eta)
+                    right = status.have .. "/" .. status.target .. (eta and (" · ~" .. eta) or "")
+                else right = T("hub_none") end
+                rows[#rows + 1] = { name, right, name = true }
+                rows[#rows + 1] = { bar = (status.pct or 0) / 100, color = status.done and ns.C.good or ns.C.warn }
+            end
+        end
+    end
+    if #rows == 0 then return { { Dimmed("hub_goals_empty"), "" } }, nil end
+    return rows, T("hub_goals_sub")
+end
+
+local function NowRows(card)
+    local run = ns.Runs and Call(ns.Runs.Current)
+    if type(run) == "table" then
+        card.section = "runs"
+        return { { run.name, run.time, name = true }, { T("hub_row_xp"), run.xp }, { T("hub_row_goldr"), run.gold },
+            { T("hub_row_loot"), run.loot } }, string.format(T("hub_now_run"), run.kind, run.since)
+    end
+    local clock, left, label = nil, nil, nil
+    if ns.Alarm then clock, left, label = Call(ns.Alarm.Next) end
+    if type(clock) == "string" then
+        card.section = "alarms"
+        local rows = { { T("hub_now_alarm"), clock }, { T("hub_row_rings"), type(left) == "string" and left or "--" } }
+        if type(label) == "string" and label ~= "" then rows[#rows + 1] = { label, "" } end
+        rows[#rows + 1] = { Dimmed("hub_now_out"), "" }
+        return rows, nil
+    end
+    card.section = "runs"
+    return { { Dimmed("hub_now_out"), "" }, { Dimmed("hub_now_none"), "" } }, nil
+end
+
+local function QuestRows()
+    local Quests = ns.Quests
+    local data = Quests and Call(Quests.Read)
+    local rows, sub = {}, nil
+    if type(data) == "table" then
+        local ready = #data.ready
+        rows[#rows + 1] = { T("hub_row_ready"), (ready > 0 and ns.C.good or "") .. ready .. (ready > 0 and "|r" or "") }
+        local db = DB()
+        if db and db.warnings and db.warnings.questValue == true then
+            local v = Call(Quests.Value, data)
+            if type(v) == "table" and v.known then
+                local parts = { Short(v.readyXP) .. " XP" }
+                if v.readyMoney > 0 and ns.FormatMoney then parts[#parts + 1] = ns.FormatMoney(v.readyMoney) end
+                rows[#rows + 1] = { T("hub_row_value"), "" } -- o valor na linha de baixo: não cabe ao lado do rótulo
+                rows[#rows + 1] = { table.concat(parts, " · "), "" }
+                if v.next then rows[#rows + 1] = { ns.C.good .. string.format(T("hub_value_up"), v.next) .. "|r", "" }
+                elseif v.short and v.level then rows[#rows + 1] = { Dimmed("hub_value_short", v.level + 1, Short(v.short)), "" } end
+            elseif ready > 0 then
+                rows[#rows + 1] = { T("hub_row_value"), T("hub_none") }
+            end
+        else
+            rows[#rows + 1] = { T("hub_row_value"), "" }
+            rows[#rows + 1] = { Dimmed("hub_value_off"), "" }
+        end
+        if data.max and data.max > 0 then
+            local pct = data.count / data.max
+            rows[#rows + 1] = { bar = pct, color = pct >= 0.9 and ns.C.warn or ns.C.good }
+            sub = string.format(T("hub_quests_sub"), data.count, data.max)
+        end
+    else
+        rows[#rows + 1] = { T("hub_row_log"), Value("quests", true) }
+    end
+    rows[#rows + 1] = { T("hub_row_done"), Value("qdone") }
+    return rows, sub
+end
+
+local function TaskRows()
+    local c = ns.Tasks and Call(ns.Tasks.SplitCounts)
+    if type(c) ~= "table" then return { { T("hub_row_tasks"), Value("tasks") } }, nil end
+    local rows = {}
+    if c.dt + c.wt == 0 then rows[#rows + 1] = { Dimmed("hub_tasks_empty"), "" } end
+    rows[#rows + 1] = { string.format(T("hub_row_daily_n"), c.dd, c.dt), Countdown(c.daily) }
+    if c.dt > 0 then rows[#rows + 1] = { bar = c.dd / c.dt, color = c.dd >= c.dt and ns.C.good or ns.C.warn } end
+    rows[#rows + 1] = { string.format(T("hub_row_weekly_n"), c.wd, c.wt), Countdown(c.weekly) }
+    if c.wt > 0 then rows[#rows + 1] = { bar = c.wd / c.wt, color = c.wd >= c.wt and ns.C.good or ns.C.warn } end
+    return rows, T("hub_tasks_sub")
+end
+
+local function GearRows()
+    local rows = {}
+    local pct = ns.GetLowestDurability and Call(ns.GetLowestDurability)
+    if type(pct) == "number" and pct == pct and pct >= 0 and pct <= 100 then
+        local color = StateColor(pct, 50, 20)
+        rows[#rows + 1] = { T("hub_row_durab"), color .. math.floor(pct) .. "%|r" }
+        rows[#rows + 1] = { bar = pct / 100, color = color }
+    else
+        rows[#rows + 1] = { T("hub_row_durab"), T("hub_none") }
+    end
+    local free, total = nil, nil
+    if ns.GetBagSpace then free, total = Call(ns.GetBagSpace) end
+    if type(free) == "number" and type(total) == "number" and total > 0 and free >= 0 and free <= total then
+        local color = free <= 3 and ns.C.bad or (free <= 9 and ns.C.warn or ns.C.good)
+        rows[#rows + 1] = { T("hub_row_bags"), string.format(T("hub_bags_used"), total - free, total) }
+        rows[#rows + 1] = { bar = (total - free) / total, color = color }
+    else
+        rows[#rows + 1] = { T("hub_row_bags"), T("hub_none") }
+    end
+    rows[#rows + 1] = { T("hub_row_junk"), Value("junk") }
+    rows[#rows + 1] = { T("hub_row_hearth"), Value("hearth", true) }
+    return rows
+end
+
+local function RemindRows()
+    local text, when = LastWarning()
+    local rows = { { T("hub_row_last"), when or "" }, { text or Dimmed("hub_row_none"), "" },
+        { T("hub_row_notes2"), Value("notes") }, { T("hub_row_keep2"), Value("keep") } }
+    local clock = ns.Alarm and Call(ns.Alarm.Next)
+    if type(clock) == "string" then rows[#rows + 1] = { T("hub_now_alarm"), clock } end
+    return rows
 end
 
 local function RefreshHome(page)
@@ -517,29 +769,28 @@ local function RefreshHome(page)
     if filled then
         page.xpFill:SetWidth(math.max(1, W * filled))
         page.xpRest:SetWidth(math.max(1, W * math.min(rested, 1 - filled)))
-        page.xpText:SetText(string.format(T("hub_xpbar"), math.floor(filled * 100), level)
-            .. (rested > 0 and string.format(T("hub_rested"), math.floor(rested * 100)) or ""))
+        local text = string.format(T("hub_xpbar"), math.floor(filled * 100), level)
+            .. (rested > 0 and string.format(T("hub_rested"), math.floor(rested * 100)) or "")
+        -- Próximo nível pelo ritmo da sessão (o mesmo XP/hora mostrado acima).
+        local rate = ns.GetXPRate and Call(ns.GetXPRate)
+        local okC, cur = pcall(UnitXP, "player")
+        local okM, max = pcall(UnitXPMax, "player")
+        if type(rate) == "number" and rate > 0 and rate == rate and okC and okM and type(cur) == "number" and type(max) == "number" and max > cur then
+            local eta = Eta((max - cur) / rate * 3600)
+            if eta then text = text .. string.format(T("hub_xp_next"), eta) end
+        end
+        page.xpText:SetText(text)
         page.xpFill:Show(); page.xpRest:Show()
     else
         page.xpFill:Hide(); page.xpRest:Hide(); page.xpText:SetText("")
     end
     local c = page.cards
-    SetRows(c[1], { { T("hub_row_log"), Value("quests", true) }, { T("hub_row_done"), Value("qdone") } })
-    -- Resets em duas linhas (3.31.2): "Diário 5h 12m · Semanal 2d 4h" numa linha só não cabia no cartão.
-    local daily, weekly
-    if ns.GetResetTimes then
-        local ok, d, w = pcall(ns.GetResetTimes)
-        if ok then daily, weekly = d, w end
-    end
-    SetRows(c[2], { { T("hub_row_tasks"), Value("tasks") },
-        { T("hub_row_daily"), type(daily) == "number" and (ns.FormatCountdown and ns.FormatCountdown(daily) or tostring(daily)) or "--" },
-        { T("hub_row_weekly"), type(weekly) == "number" and (ns.FormatCountdown and ns.FormatCountdown(weekly) or tostring(weekly)) or "--" } })
-    SetRows(c[3], { { T("hub_row_durab"), Value("durab") }, { T("hub_row_bags"), Value("bags") },
-        { T("hub_row_junk"), Value("junk") }, { T("hub_row_hearth"), Value("hearth", true) } })
-    SetRows(c[4], { { T("hub_row_notes"), Value("notes") } })
-    SetRows(c[5], { { T("hub_row_keep"), Value("keep") } })
-    local text, when = LastWarning()
-    SetRows(c[6], { { T("hub_row_last"), when or "" }, { text or ns.C.dim .. T("hub_row_none") .. "|r", "" }, { ns.C.dim .. T("hub_row_more") .. "|r", "" } })
+    SetHome(c[1], GoalsRows())
+    SetHome(c[2], NowRows(c[2]))
+    SetHome(c[3], QuestRows())
+    SetHome(c[4], TaskRows())
+    SetHome(c[5], GearRows())
+    SetHome(c[6], RemindRows())
     local list, total = nil, nil
     if ns.RealmCharacters then
         local ok, l, t = pcall(ns.RealmCharacters)

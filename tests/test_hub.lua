@@ -31,7 +31,7 @@ return {
         local home = hub.pages.home
         T.has(H:text(home.hero.title), "Esta sessão"); T.eq(H:text(home.stats[1].label), "Ouro na sessão")
         T.ok(H:text(home.stats[1].value) ~= "", "session gold shown"); T.eq(H:text(home.stats[4].label), "XP por hora")
-        T.eq(H:text(home.cards[3].rows[1].left), "Durabilidade"); T.eq(H:text(home.cards[3].rows[1].right), "15%", "label stripped from the bar text")
+        T.eq(H:text(home.cards[5].rows[1].left), "Durabilidade"); T.has(H:text(home.cards[5].rows[1].right), "15%", "durability shown")
         T.has(H:text(home.xpText), "XP 62% do nível")
         H:slash("central"); T.ok(not hub:IsShown(), "/farol central toggles it closed")
     end },
@@ -57,7 +57,7 @@ return {
         tasks:Hide(); T.eq(tasks:GetScript("OnDragStart"), original, "drag restored")
         -- clique num cartão abre a seção
         H:slash("central"); H:slash("central") -- fecha e abre
-        H:click(hub.pages.home.cards[5]); T.ok(H.env.FarolKeep:IsShown(), "Kept items card opens the section")
+        H:click(hub.pages.home.cards[4]); T.ok(H.env.FarolTasks:IsShown(), "Tasks card opens the section")
     end },
 
     { "own pages: characters and professions; back to simple style; menu checkbox and minimap", function(T, Mock)
@@ -303,9 +303,9 @@ return {
 
     { "3.31.2: Home tasks card shows the daily and weekly reset on their own lines; labels fit their text", function(T, Mock)
         local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true }); H:slash("central")
-        local card = H.env.FarolHub.pages.home.cards[2]
-        T.eq(H:text(card.rows[2].left), "Reset diário"); T.eq(H:text(card.rows[3].left), "Reset semanal")
-        T.ok(H:text(card.rows[2].right) ~= "", "daily countdown shown")
+        local card = H.env.FarolHub.pages.home.cards[4]
+        T.eq(H:text(card.rows[2].left), "Diárias 0/0"); T.eq(H:text(card.rows[3].left), "Semanais 0/0")
+        T.ok(H:text(card.rows[2].right) ~= "" and H:text(card.rows[2].right) ~= "--", "daily countdown shown")
         local row = card.rows[2]
         T.ok(row.left:GetWidth() + row.right:GetWidth() + 34 <= card:GetWidth() + 0.5, "label + value fit the card")
         T.ok(row.left:GetWidth() >= 150, "the label gets the width of its text (simulator: 150)")
@@ -335,6 +335,61 @@ return {
         H:slash("central off"); H:slash("menu")
         T.ok(W:IsShown() and not W.farolDocked); T.ok(simple.tabs.bar:IsShown(), "usual tabs back")
         T.ok(not d.tabs.bar:IsShown() and not d.pages.warnings:IsShown(), "cards hidden outside the hub")
+    end },
+
+    { "3.34: Home in cards: goals, now (run or next alarm), value of ready quests (off until turned on), tasks, gear, reminders", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true })
+        H.env.GetInstanceInfo = function() return "Cripta Antiga", H.instanceType end
+        H:slash("central")
+        local home = H.env.FarolHub.pages.home
+        local function card(i)
+            local c, out = home.cards[i], {}
+            for _, row in ipairs(c.rows) do
+                if row.left:IsShown() then out[#out + 1] = H:text(row.left) .. "=" .. H:text(row.right) end
+            end
+            return table.concat(out, " | "), c
+        end
+        local function bar(c, i) local b = c.farolBars and c.farolBars["home" .. i]; return b and b.back:IsShown() or false end
+        -- vazio: frases curtas, nada de valor das missões (regra 8: a opção vem desligada)
+        T.has(card(1), "Nenhuma meta ainda."); T.eq(H:text(home.cards[1].title), "Metas")
+        T.has(card(2), "fora de masmorra ou raide"); T.has(card(2), "nenhum alarme ligado")
+        T.has(card(3), "Valor das prontas"); T.has(card(3), "ligue em Menu > Avisos")
+        T.has(card(4), "Diárias 0/0"); T.eq(H:text(home.cards[4].sub), "até o reset")
+        T.eq(H:text(home.cards[6].title), "Avisos e lembretes"); T.has(card(6), "Anotações pendentes"); T.has(card(6), "Itens guardados")
+        -- metas de ouro e nível com barras
+        H:slash("meta ouro 500"); H:slash("meta nivel 40"); H.ns.Hub.Refresh()
+        local text, c1 = card(1)
+        T.has(text, "Ouro 500g="); T.has(text, "Nível 40="); T.ok(bar(c1, 1) and bar(c1, 2), "a bar under each goal")
+        T.ok(not bar(c1, 3), "no third bar"); T.eq(H:text(c1.sub), "ritmo desta sessão")
+        -- próximo alarme (fora de masmorra): no Agora e nos lembretes; clique abre Alarmes
+        H:slash("alarme add 07:30 Raide"); H.ns.Hub.Refresh()
+        local now, c2 = card(2)
+        T.has(now, "Próximo alarme=07:30"); T.has(now, "Toca=em "); T.has(now, "Raide"); T.eq(c2.section, "alarms")
+        T.has(card(6), "Próximo alarme=07:30")
+        -- dentro de uma masmorra: a corrida atual
+        H.instanceType = "party"; H:event("PLAYER_ENTERING_WORLD"); H.ns.Runs.Update(); H.ns.Hub.Refresh()
+        now, c2 = card(2)
+        T.has(now, "Cripta Antiga="); T.has(now, "XP=+"); T.has(now, "Saques=0"); T.has(H:text(c2.sub), "masmorra · desde ")
+        T.eq(c2.section, "runs")
+        -- valor das prontas, só com a opção ligada
+        H.quests = { { title = "Pronta", level = 20, done = true, xp = 5000, money = 1800 }, { title = "Andando", level = 20 } }
+        H.env.FarolDB.warnings.questValue = true; H.ns.Hub.Refresh()
+        local q = card(3)
+        T.has(q, "Prontas para entregar="); T.has(q, "5000 XP"); T.ok(not string.find(q, "ligue em", 1, true), "no hint when on")
+        T.ok(string.find(q, "sobe para o nível", 1, true) or string.find(q, ": faltam ", 1, true), "level line")
+        T.has(H:text(home.cards[3].sub), "diário 2/")
+        -- tarefas com barra
+        H:slash("tarefa add Diária"); H:slash("tarefa add semanal Semanal"); H.ns.Hub.Refresh()
+        local t, c4 = card(4)
+        T.has(t, "Diárias 0/1="); T.has(t, "Semanais 0/1="); T.ok(bar(c4, 1) and bar(c4, 2), "a bar for each kind")
+        -- equipamento: durabilidade e bolsas com barras
+        local g, c5 = card(5)
+        T.has(g, "Durabilidade=" ); T.has(g, "ocupados"); T.ok(bar(c5, 1) and bar(c5, 2))
+        -- próximo nível pelo ritmo, quando há XP na sessão
+        T.has(H:text(home.xpText), "XP ")
+        -- inglês
+        H:slash("idioma en"); H.ns.Hub.Refresh()
+        T.eq(H:text(home.cards[2].title), "Now"); T.eq(H:text(home.cards[6].title), "Warnings and reminders")
     end },
 
     { "3.33: warning and alarm popups in the hub look (title + detail, level stripe, type icon); simple style unchanged", function(T, Mock)

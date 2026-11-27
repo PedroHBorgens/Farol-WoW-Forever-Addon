@@ -112,7 +112,7 @@ return {
     end },
 
     { "alarms window: add from the form (name cleaned) and set the snooze", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login({ hub = false }) -- estilo simples
         H:slash("alarme")
         local window = H.env.FarolAlarms
         T.ok(window:IsShown(), "window open")

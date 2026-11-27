@@ -30,6 +30,7 @@ fiéis das janelas do addon, não prints do jogo; por isso cada imagem tem o sel
 | `farol-21-hub-professions-characters.png` | Professions to your limit, and all your characters | Profissões até o seu limite e todos os seus personagens (Central do Farol) |
 | `farol-22-hub-tasks-notes-kept.png` | Tasks, notes and kept items in cards | Tarefas, anotações e guardados em cartões (Central do Farol) |
 | `farol-23-hub-goals-quests-dungeons.png` | Goals, completed quests and dungeons in cards | Metas, missões concluídas e masmorras em cartões (Central do Farol) |
+| `farol-24-hub-loot-alarms-warnings.png` | Loot, alarms and warnings in cards · drag ◢ to resize | Saques, alarmes e avisos em cartões · arraste ◢ para mudar o tamanho |
 | `farol-20-hub-detailed-style.png` | Two styles: simple, or everything in the Farol hub | Dois estilos: simples, ou tudo na Central do Farol (barra lateral e cartões) |
 | `farol-19-kept-items.png` | Kept items: save materials for later, get reminded | Itens guardados: materiais para depois, com lembrete no comerciante e na hora certa |
 

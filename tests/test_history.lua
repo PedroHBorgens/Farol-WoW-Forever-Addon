@@ -32,7 +32,8 @@ return {
     end },
 
     { "warnings are recorded (newest first), up to 10, and survive a reload", function(T, Mock)
-        local H = Mock.new():login(); fixGear(H)
+        local H = Mock.new():login({ hub = false }); -- estilo simples
+        fixGear(H)
         for i = 1, 12 do
             H.talentPoints = i; H:update(1)
             H:slash("aviso silenciar")

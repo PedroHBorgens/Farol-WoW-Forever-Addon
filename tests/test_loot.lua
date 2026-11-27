@@ -94,7 +94,7 @@ return {
     end },
 
     { "resizable window: rows fit the height, mouse wheel scrolls, size saved", function(T, Mock)
-        local H = Mock.new():login({ loot = { count = 20, w = 5000, h = "x" } })
+        local H = Mock.new():login({ hub = false, loot = { count = 20, w = 5000, h = "x" } })
         T.eq(H.env.FarolDB.loot.w, 420, "invalid width -> default")
         lootMany(H, 24)
         H:slash("saque")

@@ -667,4 +667,35 @@ runs_main = ('<div class="hmain" style="display:block"><div style="display:flex;
 page("farol-23-hub-goals-quests-dungeons", '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:64px">'
      f'<div style="display:flex;gap:20px">{hub_small("Goals", goals_main)}{hub_small("Quests", quests_main)}</div>{hub_small("Dungeons", runs_main)}</div>',
      "Goals, completed quests and dungeons in cards", "Metas, missões concluídas e masmorras em cartões (Central do Farol)", HCSS + TCSS + KCSS + GCSS)
+# 24. Hub: loot, alarms and warnings in cards; size grip (3.31)
+LCSS = """.lr{display:grid;grid-template-columns:24px 1fr 40px 90px 64px 64px;gap:8px;align-items:center;padding:3px 6px;font-size:12px;border:1px solid #5a452066;border-radius:4px;background:#15110a;margin-bottom:4px}.lr .ki{font-family:'Noto Color Emoji';font-size:16px}
+.ac{display:grid;grid-template-columns:16px 64px 1fr 90px 22px;gap:8px;align-items:center;padding:5px 8px;border:1px solid #5a452088;border-radius:5px;background:#15110a;margin-bottom:5px;font-size:12px}.atime{font-size:19px;font-weight:bold;color:#fff}
+.day{color:#ffb347;font-weight:bold;font-size:11px;letter-spacing:1px;margin:5px 0 3px}.wh{display:grid;grid-template-columns:46px 1fr;gap:8px;padding:3px 6px;font-size:12px;border-left:2px solid #c9a24a;margin:0 0 4px 4px;background:#15110a}
+.grip{position:absolute;right:8px;bottom:6px;font-size:30px;color:#ffd75a;line-height:1;text-shadow:0 0 6px #000}"""
+def llr(icon, name, cls, qty, when):
+    return f'<div class="lr"><span class="ki">{icon}</span><span class="{cls}">{name}</span><span>×{qty}</span><span class="dim">{when}</span><span class="btn" style="padding:0 4px">Keep</span><span class="btn" style="padding:0 4px;white-space:nowrap">+ Goal</span></div>'
+loot_main = ('<div class="hmain" style="display:block"><div style="display:flex;gap:8px">'
+    '<div class="hpan" style="flex:1.3"><h4>Filters<small>only what you looted</small></h4><div style="display:flex;gap:6px;align-items:center"><span>Show:</span><span class="btn">10 ▾</span><span>Quality:</span><span class="btn">Uncommon+ ▾</span></div></div>'
+    '<div class="hpan" style="flex:1"><h4>Summary<small>in this list</small></h4>' + gstat([("Items", "10"), ("Uncommon+", '<span class="g">3</span>'), ("Latest", "21:42")]) + '</div></div>'
+    '<div class="hpan"><h4>Recent loot<small>hover: details · shift-click: link</small></h4>'
+    + llr("🌿", "Moonleaf herb", "q2", 4, "Today 21:42") + llr("🪨", "Copper ore", "", 6, "Today 21:40") + llr("🗡️", "Watchman's dagger", "q2", 1, "Today 21:31")
+    + llr("🐟", "Lake perch", "q1", 3, "Today 21:10") + llr("💍", "Polished copper ring", "q3", 1, "Yesterday") + '</div></div>')
+def lac(on, t, name, kind, when):
+    return f'<div class="ac"><span class="box" style="width:13px;height:13px;font-size:9px">{"✓" if on else ""}</span><span class="atime" style="{"" if on else "color:#8a8270"}">{t}</span><span>{name}<br><span class="dim" style="font-size:11px">{kind}</span></span><span class="dim" style="text-align:right">{when}</span><span class="btn" style="padding:0 4px">X</span></div>'
+alarms_main = ('<div class="hmain" style="display:flex;gap:8px;align-items:flex-start"><div style="width:270px">'
+    '<div class="hpan" style="border-color:#c9a24a"><h4>Next<small>by your computer clock</small></h4><div class="big" style="font-size:28px">07:30</div><div class="dim">Guild raid · rings in 3h 12m</div></div>'
+    '<div class="hpan"><h4>New alarm<small>up to 10</small></h4><div style="display:flex;gap:6px;align-items:center"><span class="kin" style="width:30px;font-style:normal;color:#fff">21</span>:<span class="kin" style="width:30px;font-style:normal;color:#fff">00</span><span class="btn">Local</span></div>'
+    '<div style="display:flex;gap:6px;margin-top:6px"><span class="btn">Add</span><span class="btn">Test sound</span></div></div></div>'
+    '<div class="hpan" style="flex:1"><h4>Alarms<small>3 of 10 · tick to turn on</small></h4>'
+    + lac(True, "07:30", "Guild raid", "Local", "in 3h 12m") + lac(True, "12:00", "Dailies", "Server", "in 7h 42m") + lac(False, "23:15", "Bedtime", "Local", "off") + '</div></div>')
+def lwh(t, text): return f'<div class="wh"><span class="dim">{t}</span><span>{text}</span></div>'
+warn_main = ('<div class="hmain" style="display:block"><div class="hpan"><h4>Summary<small>this character · the 10 most recent</small></h4>' + gstat([("Saved", "7"), ("Today", "4"), ("Latest", "12m ago")]) + '</div>'
+    '<div class="hpan"><h4>Recent warnings<small>newest first</small></h4><div class="day">TODAY</div>'
+    + lwh("21:40", '<span class="y">Bags almost full: 4 free slots</span>') + lwh("21:12", "Durability at 24%: time to repair") + lwh("20:31", '<span class="g">Quests ready: 3 to turn in</span>')
+    + '<div class="day">YESTERDAY</div>' + lwh("23:05", "Talent point to spend") + '</div></div>')
+grip_hub = hub_small("Warnings", warn_main)
+grip_hub = grip_hub[:-12] + '<span class="grip">◢</span>' + grip_hub[-12:]
+page("farol-24-hub-loot-alarms-warnings", '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:64px">'
+     f'<div style="display:flex;gap:20px">{hub_small("Loot", loot_main)}{hub_small("Alarms", alarms_main)}</div>{grip_hub}</div>',
+     "Loot, alarms and warnings in cards · drag ◢ to resize", "Saques, alarmes e avisos em cartões · arraste ◢ para mudar o tamanho", HCSS + TCSS + KCSS + GCSS + LCSS)
 print("pages ok")

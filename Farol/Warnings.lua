@@ -195,6 +195,9 @@ local STRINGS = {
         warn_bad_remind = "valor inválido: use 2, 5, 10, 15 ou 30 minutos.",
         warn_none       = "nenhum aviso aberto.",
         hist_title      = "Últimos avisos",
+        hist_sum        = "Resumo", hist_sum_sub = "deste personagem · os 10 mais recentes",
+        hist_stat_saved = "Guardados", hist_stat_today = "Hoje", hist_stat_last = "Último",
+        hist_ago        = "há %s", hist_list_sub = "mais novos primeiro", hist_today = "HOJE", hist_yesterday = "ONTEM",
         hist_empty      = "Nenhum aviso ainda.",
         hist_clear      = "Limpar",
         hist_cleared    = "histórico de avisos apagado.",
@@ -358,6 +361,9 @@ local STRINGS = {
         warn_bad_remind = "invalid value: use 2, 5, 10, 15 or 30 minutes.",
         warn_none       = "no open warning.",
         hist_title      = "Recent warnings",
+        hist_sum        = "Summary", hist_sum_sub = "this character · the 10 most recent",
+        hist_stat_saved = "Saved", hist_stat_today = "Today", hist_stat_last = "Latest",
+        hist_ago        = "%s ago", hist_list_sub = "newest first", hist_today = "TODAY", hist_yesterday = "YESTERDAY",
         hist_empty      = "No warnings yet.",
         hist_clear      = "Clear",
         hist_cleared    = "warning history cleared.",
@@ -740,6 +746,7 @@ local unread = 0          -- avisos novos desde a última vez que o histórico f
 local historyButton       -- botão ao lado da barra (criado sob demanda)
 local historyWindow
 local RefreshHistory      -- definida abaixo
+local HistoryDetail       -- Central do Farol (3.31), definida abaixo
 
 local function History()
     if type(FarolCharDB) ~= "table" then return {} end
@@ -1833,6 +1840,20 @@ local function CreateHistoryWindow()
         UpdateButton()
         RefreshHistory()
     end)
+    -- Central do Farol (estilo detalhado, 3.31): resumo e linha do tempo por dia.
+    frame.farolDetailSize = { 770, 486 }
+    frame.farolDetail = function(on)
+        local Kit = ns.Hub and ns.Hub.Kit
+        if Kit then Kit.ShowPanels(frame, on) end
+        if not on then
+            frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 24, -52)
+            frame.clear:ClearAllPoints(); frame.clear:SetPoint("BOTTOMRIGHT", -24, 16)
+            for i, row in ipairs(frame.rows) do
+                row:ClearAllPoints(); row:SetPoint("TOPLEFT", 22, -48 - (i - 1) * 20); row:SetWidth(476)
+            end
+        end
+        RefreshHistory()
+    end
     tinsert(UISpecialFrames, "FarolWarnHistory") -- ESC fecha
     ns.MakeToplevel(frame) -- abre na frente e vem para a frente ao clicar
     frame:Hide()
@@ -1849,10 +1870,70 @@ RefreshHistory = function()
     for i, row in ipairs(historyWindow.rows) do
         local entry = history[#history - i + 1] -- mais novo primeiro
         if entry then
-            row:SetText("|cffaaaaaa" .. (date("%d/%m %H:%M", entry.t) or "--") .. "|r  " .. entry.text)
+            local okd, when = pcall(date, "%d/%m %H:%M", entry.t)
+            row:SetText("|cffaaaaaa" .. (okd and type(when) == "string" and when or "--") .. "|r  " .. entry.text)
             row:Show()
         else
             row:Hide()
+        end
+    end
+    if historyWindow.farolDocked then HistoryDetail(historyWindow, history) end
+end
+
+-- Dia de uma data ("20261127"); nil se inválida.
+local function DayKey(t)
+    if type(t) ~= "number" or t ~= t then return nil end
+    local ok, text = pcall(date, "%Y%m%d", t)
+    return ok and text or nil
+end
+
+HistoryDetail = function(frame, history)
+    local Kit = ns.Hub and ns.Hub.Kit
+    if not Kit then return end
+    local ok, now = pcall(time)
+    if not ok or type(now) ~= "number" then now = nil end
+    local today, yesterday = now and DayKey(now), now and DayKey(now - 86400)
+    local sum = Kit.Panel(frame, "sum", 8, -6, 754, 70)
+    sum.title:SetText(T("hist_sum")); sum.sub:SetText(T("hist_sum_sub"))
+    local todayCount = 0
+    for _, entry in ipairs(history) do if today and DayKey(entry.t) == today then todayCount = todayCount + 1 end end
+    local newest = history[#history]
+    local last = "--"
+    if newest and now and type(newest.t) == "number" and now >= newest.t then
+        local secs = math.max(60, now - newest.t)
+        last = string.format(T("hist_ago"), ns.FormatDuration and ns.FormatDuration(secs) or tostring(secs))
+    end
+    Kit.Stat(frame, "sum1", 20, -30, 110, T("hist_stat_saved"), tostring(#history))
+    Kit.Stat(frame, "sum2", 140, -30, 80, T("hist_stat_today"), tostring(todayCount))
+    Kit.Stat(frame, "sum3", 230, -30, 200, T("hist_stat_last"), last)
+    frame.clear:ClearAllPoints(); frame.clear:SetPoint("TOPRIGHT", -20, -36)
+    local list = Kit.Panel(frame, "list", 8, -84, 754, 394)
+    list.title:SetText(T("hist_title")); list.sub:SetText(T("hist_list_sub"))
+    frame.empty:ClearAllPoints(); frame.empty:SetPoint("TOPLEFT", 22, -114)
+    local y, lastDay = -112, nil
+    for i, row in ipairs(frame.rows) do
+        local entry = history[#history - i + 1]
+        local head = Kit.Text(frame, "day" .. i, "GameFontNormalSmall", 22, y, 200)
+        local at = ns.Dim(Kit.Text(frame, "at" .. i, "GameFontHighlightSmall", 30, y, 50))
+        head:SetText(""); at:SetText("")
+        if entry then
+            local day = DayKey(entry.t)
+            if day ~= lastDay then
+                lastDay = day
+                local label = (day and day == today and T("hist_today")) or (day and day == yesterday and T("hist_yesterday"))
+                if not label then
+                    local okd, text = pcall(date, "%d/%m", entry.t)
+                    label = okd and text or "--"
+                end
+                head:SetText(label)
+                y = y - 16
+            end
+            at:ClearAllPoints(); at:SetPoint("TOPLEFT", 30, y)
+            local okt, hm = pcall(date, "%H:%M", entry.t)
+            at:SetText(okt and hm or "--")
+            row:ClearAllPoints(); row:SetPoint("TOPLEFT", 84, y); row:SetWidth(664)
+            row:SetText(entry.text)
+            y = y - 20
         end
     end
 end

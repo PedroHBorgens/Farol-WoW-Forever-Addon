@@ -2,6 +2,19 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.31.0 — Hub: loot, alarms and warnings in cards; hub size
+- **Loot** (detailed style): filters and a summary on top (items, uncommon or better, latest), one card per item with
+  the Keep and + Goal buttons, and Clear at the bottom.
+- **Alarms**: the next alarm in big numbers ("rings in 3h 12m", updates live), the "New alarm" form and snooze on the
+  left, and one card per alarm (time, name, Local/Server, time left or "off").
+- **Warnings history**: a summary (saved, today, latest) and a timeline by day (TODAY, YESTERDAY, date).
+- **Hub size**: drag the ◢ grip in the corner to resize the whole hub (70% to 130%, in proportion); double-click =
+  100%; `/farol hub size 85` (PT `/farol central tamanho 85`). Saved and checked on load (`hubScale`).
+- Fixes: the hub icon now sits inside its ring (same proportions as the minimap button, round); the hub background is
+  opaque (the game could be seen through it); long item names in the Kept items cards no longer overlap the count.
+- Date readings in the history windows never break a window if the game clock fails.
+- Image 24 (loot, alarms and warnings in the hub). 800 tests (2 passes).
+
 ## 3.30.0 — Hub: goals, completed quests and dungeons in cards
 - **Goals** (detailed style): Gold and Level cards side by side ("You have" / "Now", "Left", time at this pace, a
   progress bar and the Set/Clear boxes); farm goals as cards in two columns (item icon, count, progress bar, gain

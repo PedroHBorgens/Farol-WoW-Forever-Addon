@@ -463,6 +463,9 @@ detalhado (Central do Farol)"); `/farol central off` ou o botão **Estilo simple
   por grupo de itens ("3 de 8" ligados), Avisos em cartões por grupo com os números na própria linha, um cartão por
   ferramenta e Geral em cartões (Idioma, Perfis, Chat, Barra e relógio, Minimapa e acessibilidade; "Restaurar e
   apagar" à parte, em vermelho). As mesmas opções do menu de sempre, sincronizadas; fora da Central o menu fica igual.
+- **Janelinhas de aviso e de alarme** (3.33) no visual da Central quando o estilo detalhado está ligado: moldura do
+  Farol, faixa colorida do nível (alerta, atenção, informação), ícone do tipo de aviso e o texto em título + detalhe; o
+  alarme mostra a hora em destaque, o nome e Local/Servidor, com a borda mais clara enquanto toca.
 - **Tamanho da Central** (3.31): arraste a alça ◢ no canto inferior direito para aumentar ou diminuir a Central
   inteira (70% a 130%); duplo clique volta a 100%, ou use `/farol central tamanho 85`. Fica salvo na conta.
 - As outras seções são as janelas de sempre, encaixadas na Central; arrastá-las move a Central. Com o estilo

@@ -24,6 +24,15 @@ personalizável, alarmes, janela de saques e avisos. Publicado no CurseForge: <h
    opções gerais e padrões `x ~= false`); o teste falha se aparecer outro. Novidade ligada a item/aviso entra em
    `Profiles.NEWS_ITEM`/`NEWS_WARN` (Core) para a mensagem de novidades dizer "desligado (ligue em Menu > ...)".
 
+## Prioridade de design (decisão do dono, 3.32)
+
+- **O estilo detalhado (Central do Farol) vem primeiro.** Toda novidade é desenhada primeiro para a Central: a prévia
+  mostra a tela em cartões (`Hub.Kit`: `Panel`, `Card`, `Text`, `Stat`, `Bar`, `FitPair`) e o visual segue o padrão
+  das telas 3.28–3.32.
+- O **estilo simples** continua funcionando para quem já usa o Farol (é o padrão de quem atualizou): recebe a função,
+  sem precisar do visual novo, e as janelas dele continuam no `test_textfit`.
+- As regras do projeto continuam valendo igual (função nova desligada, PT/EN, nada enviado, texto nunca cortado).
+
 ## WoW Forever: fatos técnicos que custaram descobrir
 
 - Cliente **1.60.1**, **Interface 16001**, família *Mainline* (API moderna, a mesma do Midnight).
@@ -339,6 +348,12 @@ assets/             ícones, texto do CurseForge, imagens de divulgação (asset
   `Warnings.DetailSet(set)`; o conjunto de sempre (`window.controls`) só é escondido. `window.farolDetail(on)` troca um
   pelo outro; `ns.OpenOptions` usa o da Central quando a janela está encaixada. `Profiles.Section` guarda
   `farolBox`/`farolLine` para a Central esconder. Testes de menu no estilo simples fazem login com `hub = false`.
+- **Janelinhas no visual da Central (3.33):** com `db.hub` ligado, a de avisos (`Render` → `StylePopup`/`Mark` em
+  Warnings.lua) e a de alarme (`UpdatePopup` em Alarm.lua) usam `Hub.Kit.Popup(frame, on, w, h, brilho)` (moldura +
+  faixa de cima com o ícone), a faixa do nível (`KIND_LEVEL` → `ns.C.bad/warn`, o resto dourado; `Kit.ColorOf` lê a cor
+  da paleta) e o ícone do tipo (`KIND_ICON`); o texto vira título + detalhe (`TitleAndDetail`: corta no primeiro ": "
+  ou " — "). Desligado, tudo volta ao lugar de sempre a cada `Render`. Testes das janelinhas no estilo simples usam
+  `NoHub(saved)` no login.
 - **Texto nunca cortado (3.31.2):** `tests/test_textfit.lua` (com `tests/layout_check.lua`) mede todas as janelas e
   páginas da Central como o jogo — larguras de letra medidas em prints do WoW Forever, fonte normal +15% de folga — e
   falha se um texto da interface for cortado (largura fixa sem quebra), sair do quadro (`Kit.Panel`), do cartão
@@ -437,6 +452,7 @@ Ao mudar uma janela do addon, atualize a ilustração correspondente:
 | Central: Metas, Missões concluídas e Masmorras em cartões | 23 |
 | Central: Saques, Alarmes e Avisos em cartões; alça de tamanho | 24 |
 | Central: Configurações em cartões | 25 |
+| Janelinhas de aviso e de alarme no visual da Central | 26 |
 
 As imagens saem idênticas quando não mudam (o gerador é determinístico): suba no CurseForge só as que mudaram
 e apague lá as versões antigas.

@@ -2,13 +2,14 @@
 -- Junk in bags: vendor value of gray items, tooltip, hint in the bag warning, modern and old APIs.
 -- O Farol só MOSTRA: nunca vende (test_toc proíbe as funções de vender/mover/destruir itens).
 
+local function NoHub(saved) saved = saved or {}; if saved.hub == nil then saved.hub = false end; return saved end -- estilo simples (a Central tem teste próprio)
 local function fixGear(H)
     H.durability = { [1] = { 100, 100 } }
     H:event("UPDATE_INVENTORY_DURABILITY")
 end
 
 local function setup(Mock, opts)
-    local H = Mock.new(opts):login(); fixGear(H)
+    local H = Mock.new(opts):login(NoHub()); fixGear(H)
     H:slash("show lixo"); H:update(1)
     return H
 end
@@ -21,7 +22,7 @@ end
 
 return {
     { "off by default; shows the vendor value of gray items and the slots they take", function(T, Mock)
-        local H = Mock.new():login(); H:update(1)
+        local H = Mock.new():login(NoHub()); H:update(1)
         T.hasnt(H:bar(), "Lixo", "off by default")
         H:slash("show lixo"); H:update(1)
         -- 8 couros x 8s = 64s, garra 12s 50c, espada 2g 50s = 3g 26s 50c; pão (branco) e pedra (sem valor) fora
@@ -65,14 +66,14 @@ return {
     end },
 
     { "the bag warning says how much junk can be sold (plain text in the history)", function(T, Mock)
-        local H = Mock.new():login(); fixGear(H)
+        local H = Mock.new():login(NoHub()); fixGear(H)
         H.bagFree = { [0] = 1, 0, 0, 0, 0 }; H:update(1)
         local text = H:text(H.env.FarolWarnPopup.text)
         T.has(text, "Bolsas quase cheias: 1 espaço livre. Há 3 espaços com lixo (3g 26s) para vender.")
         local history = H.env.FarolCharDB.warnHistory
         T.has(history[#history].text, "(3g 26s)"); T.hasnt(history[#history].text, "|")
         H:click(H.env.FarolWarnSilence)
-        local N = Mock.new():login(); fixGear(N)
+        local N = Mock.new():login(NoHub()); fixGear(N)
         N.bagItems = {}; N.bagFree = { [0] = 1, 0, 0, 0, 0 }; N:update(1)
         T.eq(N:text(N.env.FarolWarnPopup.text), "Bolsas quase cheias: 1 espaço livre.", "no junk: no hint")
     end },

@@ -736,4 +736,31 @@ set_gen = ('<div class="hmain" style="display:block">' + sseg("General") + '<div
 page("farol-25-hub-settings", '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:64px">'
      f'<div style="display:flex;gap:20px">{hub_small("Settings", set_bar)}{hub_small("Settings", set_warn)}</div>{hub_small("Settings", set_gen)}</div>',
      "Settings in cards, inside the hub", "Configurações em cartões, dentro da Central do Farol", HCSS + TCSS + KCSS + GCSS + SCSS)
+# 26. Warning and alarm popups in the hub look (3.33)
+POPCSS = """.pop{position:relative;width:440px;border:2px solid #7a5f2a;border-radius:8px;background:linear-gradient(#1c170f,#100d09);box-shadow:0 0 0 2px #000,0 10px 30px #000a;font:13px/1.35 'DejaVu Sans';color:#e8e2d0}
+.ptop{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #5a4520;background:linear-gradient(#2a2112,#16120b);border-radius:6px 6px 0 0}
+.ptop img{width:20px;height:20px}.ptop b{color:#ffd75a;font:bold 14px 'DejaVu Serif',serif}
+.wrow{display:grid;grid-template-columns:4px 30px 1fr;gap:10px;padding:8px 10px;border-bottom:1px solid #ffffff10;align-items:center}
+.stripe{align-self:stretch;border-radius:2px}.ic{font-family:'Noto Color Emoji';font-size:22px;text-align:center}
+.wt{font-weight:bold;color:#fff}.wd{color:#b8af96;font-size:12px}.bt{display:flex;gap:6px;margin-top:5px}
+.b2{white-space:nowrap;background:linear-gradient(#8a1a10,#5a0f08);border:1px solid #c33;color:#ffd75a;font-weight:bold;font-size:11px;padding:2px 9px;border-radius:3px}
+.pfoot{display:flex;align-items:center;gap:6px;padding:6px 10px}.gr{margin-left:auto;color:#ffd75a}.bigt{font-size:32px;font-weight:bold;color:#fff;line-height:1}
+.tg{display:inline-block;border:1px solid #6e5b2e;border-radius:9px;padding:0 7px;font-size:10.5px;color:#e8dcb8}.glow{border-color:#c9a24a;box-shadow:0 0 0 2px #000,0 0 18px #ffd75a66}"""
+def ptop(t, extra=""): return f'<div class="ptop"><img src="data:image/png;base64,{logo}"><b>{t}</b>{extra}</div>'
+def prow(color, icon, title, detail, buttons=True):
+    b = '<div class="bt"><span class="b2">Silence</span><span class="b2">Remind in 30 min ▾</span></div>' if buttons else ""
+    return f'<div class="wrow"><span class="stripe" style="background:{color}"></span><span class="ic">{icon}</span><div><div class="wt">{title}</div><div class="wd">{detail}</div>{b}</div></div>'
+pop_one = ('<div class="pop">' + ptop("Warning") + prow("#ffd75a", "🎒", "Bags almost full", "2 free slots · 13 slots with junk (38s 14c) to sell.")
+    + '<div class="pfoot"></div></div>')
+pop_many = ('<div class="pop" style="width:520px">' + ptop("Warnings (3)")
+    + prow("#ff6666", "🔨", "Low durability", "18% — time to repair!") + prow("#ffd75a", "🎒", "Bags almost full", "2 free slots.")
+    + prow("#ffd75a", "⭐", "Talent point to spend", "You have 1 unspent point.")
+    + '<div class="pfoot"><span class="b2">Silence all</span><span class="b2">Remind all in 30 min</span><span class="gr">◢</span></div></div>')
+pop_alarm = ('<div class="pop glow" style="width:400px">' + ptop("Alarm", ' <span class="tg">+1 ringing</span>')
+    + '<div style="display:grid;grid-template-columns:4px 1fr;gap:12px;padding:12px"><span class="stripe" style="background:#ffd75a"></span><div>'
+    + '<div style="display:flex;align-items:baseline;gap:12px"><span class="bigt">07:30</span><span><span class="wt">Guild raid</span><br><span class="wd">Local · ringing now</span></span></div>'
+    + '<div class="bt" style="margin-top:10px"><span class="b2">Snooze (5 min)</span><span class="b2">Stop</span></div></div></div></div>')
+page("farol-26-hub-popups", '<div style="display:flex;gap:26px;align-items:flex-start;margin-top:70px">'
+     f'<div style="display:flex;flex-direction:column;gap:22px">{pop_one}{pop_alarm}</div>{pop_many}</div>',
+     "Warnings and alarms in the Farol look", "Avisos e alarmes no visual do Farol (estilo detalhado)", POPCSS)
 print("pages ok")

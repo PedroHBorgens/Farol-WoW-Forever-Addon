@@ -454,6 +454,9 @@ hub)"); `/farol hub off` or the **Simple style** button goes back.
   ("3 of 8" on), Warnings in cards per group with the numbers on each line, one card per tool, and General in cards
   (Language, Profiles, Chat, Bar and clock, Minimap and accessibility; "Restore and delete" apart, in red). Same options
   as the usual menu, kept in sync; outside the hub the menu stays as always.
+- **Warning and alarm popups** (3.33) in the hub look when the detailed style is on: the Farol frame, a colored
+  stripe for the level (alert, attention, information), an icon for the kind of warning and the text as title + detail;
+  the alarm shows the time in big numbers, the name and Local/Server, with a brighter border while it rings.
 - **Hub size** (3.31): drag the ◢ grip in the bottom-right corner to make the whole hub bigger or smaller (70% to
   130%); double-click it to go back to 100%, or use `/farol hub size 85`. Saved for your account.
 - The other sections are the usual windows, placed inside the hub; dragging them moves the hub. With the detailed

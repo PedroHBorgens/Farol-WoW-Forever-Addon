@@ -2,6 +2,16 @@
 
 All notable changes to Farol. Versions follow the `## Version:` line of the `.toc` files.
 
+## 3.33.0 — Warning and alarm popups in the hub look
+- With the detailed style on, the warning popup gets the Farol frame (dark background, gold border, top bar with the
+  icon), a colored stripe for the level (alert, attention, information — colorblind palette respected), an icon for the
+  kind of warning and the text split into title + detail. Several warnings together: one row each, with its stripe and
+  icon; "Silence all", "Remind all" and the ◢ width grip as before.
+- The alarm popup shows the time in big numbers, the name, Local/Server · "ringing now", "+1 ringing" when there are
+  more, and a brighter border while it rings.
+- The simple style keeps the usual popups. Nothing new is saved and nothing is sent.
+- Image 26. `test_textfit` checks the popups too. 812 tests (2 passes).
+
 ## 3.32.0 — Hub: settings in cards
 - **Settings** inside the hub (detailed style), tab by tab:
   - **Bar**: a "Bar" card (Bar 1/2/3, Show, Lock), a "Packs" card, one card per item group with how many are on

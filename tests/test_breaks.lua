@@ -1,13 +1,14 @@
 -- Lembretes de pausa e de beber água: desligados por padrão, intervalo escolhido, espera em lutas/masmorras.
 -- Break and drink-water reminders: off by default, chosen interval, wait during fights/dungeons.
 
+local function NoHub(saved) saved = saved or {}; if saved.hub == nil then saved.hub = false end; return saved end -- estilo simples (a Central tem teste próprio)
 local function fixGear(H) -- tira a durabilidade baixa padrão do simulador, para isolar os testes
     H.durability = { [1] = { 100, 100 } }
     H:event("UPDATE_INVENTORY_DURABILITY")
 end
 
 local function setup(Mock, warnings, opts)
-    local H = Mock.new(opts):login({ warnings = warnings }); fixGear(H)
+    local H = Mock.new(opts):login(NoHub({ warnings = warnings })); fixGear(H)
     H:update(1)
     return H
 end

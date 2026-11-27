@@ -1,6 +1,7 @@
 -- Talentos não gastos, magias de grau antigo na barra e a janelinha "Silenciar / Lembrar em 30 min".
 -- Unspent talents, lower-rank spells on the bars and the "Silence / Remind in 30 min" popup.
 
+local function NoHub(saved) saved = saved or {}; if saved.hub == nil then saved.hub = false end; return saved end -- estilo simples (a Central tem teste próprio)
 local function popupText(H) return H:text(H.env.FarolWarnPopup.text) end
 
 local function fixGear(H) -- tira a durabilidade baixa padrão do simulador, para isolar os testes
@@ -10,7 +11,7 @@ end
 
 return {
     { "unspent talent points: warns once per new point, never in combat", function(T, Mock)
-        local H = Mock.new():login(); fixGear(H)
+        local H = Mock.new():login(NoHub()); fixGear(H)
         H.talentPoints = 1; H.inCombat = true; H:update(1)
         T.eq(H.warnSounds, 0, "waits for combat to end")
         H.inCombat = false; H:update(1)
@@ -21,10 +22,10 @@ return {
     end },
 
     { "talents work with the classic API (3.3.5a style) and the modern trait API", function(T, Mock)
-        local H = Mock.new({ mode = "wotlk", locale = "enUS" }):login(); fixGear(H)
+        local H = Mock.new({ mode = "wotlk", locale = "enUS" }):login(NoHub()); fixGear(H)
         H.talentPoints = 3; H:update(1)
         T.has(H:lastMsg(), "You have 3 unspent talent points.")
-        local H2 = Mock.new():login(); fixGear(H2)
+        local H2 = Mock.new():login(NoHub()); fixGear(H2)
         H2.env.GetUnspentTalentPoints = nil
         H2.env.C_ClassTalents = { GetActiveConfigID = function() return 7 end }
         H2.env.C_Traits = {
@@ -39,7 +40,7 @@ return {
 
     { "a talent function that always returns 0 no longer hides real unspent points", function(T, Mock)
         -- Cenário provável do WoW Forever: existe uma função de outro sistema que sempre devolve 0.
-        local H = Mock.new():login(); fixGear(H)
+        local H = Mock.new():login(NoHub()); fixGear(H)
         H.env.GetUnspentTalentPoints = function() return 0 end
         H.env.GetNumTalentTabs = function() return 3 end
         local spent = { 10, 8, 0 } -- 18 pontos gastos no nível 30 (21 esperados) = 3 sobrando
@@ -56,14 +57,14 @@ return {
     end },
 
     { "talent estimate reads both GetTalentTabInfo layouts and never goes negative", function(T, Mock)
-        local H = Mock.new({ locale = "enUS" }):login(); fixGear(H)
+        local H = Mock.new({ locale = "enUS" }):login(NoHub()); fixGear(H)
         H.env.GetUnspentTalentPoints = nil
         H.env.GetNumTalentTabs = function() return 3 end
         -- formato Wrath+: id, nome, descrição, ícone, pontosGastos
         H.env.GetTalentTabInfo = function(tab) return 160 + tab, "Tree", "desc", 135, ({ 5, 5, 5 })[tab] end
         H:update(1)
         T.has(H:lastMsg(), "You have 6 unspent talent points.", "21 expected - 15 spent")
-        local H2 = Mock.new():login(); fixGear(H2)
+        local H2 = Mock.new():login(NoHub()); fixGear(H2)
         H2.env.GetUnspentTalentPoints = nil
         H2.env.GetNumTalentTabs = function() return 3 end
         H2.env.GetTalentTabInfo = function() return "Árvore", 135, 20 end -- 60 gastos (bônus do Forever)
@@ -72,7 +73,7 @@ return {
     end },
 
     { "lower-rank spell on the bar is reported with the best known rank", function(T, Mock)
-        local H = Mock.new():login(); fixGear(H)
+        local H = Mock.new():login(NoHub()); fixGear(H)
         H.actions = { [1] = { "spell", 143 }, [2] = { "spell", 116 }, [3] = { "spell", 118 }, [4] = { "macro", 5 } }
         H:event("ACTIONBAR_SLOT_CHANGED"); H:update(1)
         T.eq(H.warnSounds, 1)
@@ -86,14 +87,14 @@ return {
     end },
 
     { "spell ranks also work with the 3.3.5a spellbook API", function(T, Mock)
-        local H = Mock.new({ mode = "wotlk", locale = "enUS" }):login(); fixGear(H)
+        local H = Mock.new({ mode = "wotlk", locale = "enUS" }):login(NoHub()); fixGear(H)
         H.actions = { [10] = { "spell", 133 } }
         H:event("SPELLS_CHANGED"); H:update(1)
         T.has(H:lastMsg(), "Bola de Fogo (Rank 1) — you already know Rank 3")
     end },
 
     { "learning a new rank triggers the warning (level up)", function(T, Mock)
-        local H = Mock.new():login(); fixGear(H)
+        local H = Mock.new():login(NoHub()); fixGear(H)
         H.actions = { [1] = { "spell", 116 } }
         H:update(1); T.eq(H.warnSounds, 0)
         H.spells[117] = { "Seta de Gelo", 2 }; H.book[#H.book + 1] = 117
@@ -102,7 +103,7 @@ return {
     end },
 
     { "popup: Silence keeps it quiet until the situation changes", function(T, Mock)
-        local H = Mock.new():login(); fixGear(H)
+        local H = Mock.new():login(NoHub()); fixGear(H)
         H.talentPoints = 1; H:update(1)
         T.ok(H.env.FarolWarnPopup:IsShown())
         T.eq(H:text(H.env.FarolWarnSilence), "Silenciar"); T.eq(H:text(H.env.FarolWarnRemind), "Lembrar em 30 min")
@@ -113,7 +114,7 @@ return {
     end },
 
     { "popup: Remind in 30 min warns again only if still a problem", function(T, Mock)
-        local H = Mock.new():login(); fixGear(H)
+        local H = Mock.new():login(NoHub()); fixGear(H)
         H.talentPoints = 1; H:update(1)
         H:click(H.env.FarolWarnRemind); T.has(H:lastMsg(), "volto a avisar às")
         for _ = 1, 29 do H:update(60) end; T.eq(H.warnSounds, 1, "not before 30 min")
@@ -124,7 +125,7 @@ return {
     end },
 
     { "remind works for durability, bags and spell ranks too", function(T, Mock)
-        local H = Mock.new():login()
+        local H = Mock.new():login(NoHub())
         H:update(1) -- durabilidade 15% do simulador avisa no primeiro segundo
         T.has(popupText(H), "Durabilidade baixa: 15%")
         H:click(H.env.FarolWarnRemind)
@@ -143,7 +144,7 @@ return {
     end },
 
     { "several warnings at once appear together in one window", function(T, Mock)
-        local H = Mock.new():login() -- durabilidade baixa já está na fila
+        local H = Mock.new():login(NoHub()) -- durabilidade baixa já está na fila
         H.talentPoints = 2; H:update(1)
         local popup = H.env.FarolWarnPopup
         T.eq(H:text(popup.title), "Avisos (2)")
@@ -160,7 +161,7 @@ return {
     end },
 
     { "each warning chooses its own remind time (2, 5, 10, 15 or 30 min)", function(T, Mock)
-        local H = Mock.new():login(); fixGear(H)
+        local H = Mock.new():login(NoHub()); fixGear(H)
         H.talentPoints = 1; H:update(1)
         H:click(H.env.FarolWarnRemindTime)
         local list = H.env.FarolWarnRemindTimeList
@@ -178,7 +179,7 @@ return {
     end },
 
     { "remind all at once, one reminder per warning type, default time is configurable", function(T, Mock)
-        local H = Mock.new():login({ warnings = { remindMin = 10 } })
+        local H = Mock.new():login(NoHub({ warnings = { remindMin = 10 } }))
         H.talentPoints = 2; H:update(1)
         T.eq(H:text(H.env.FarolWarnRemind), "Lembrar todos em 10 min", "default from the settings")
         T.eq(H:text(H.env.FarolWarnRow1Remind), "Lembrar em 10 min")
@@ -189,12 +190,12 @@ return {
         T.eq(H:text(H.env.FarolWarnPopup.title), "Avisos (2)", "both come back together")
         H:slash("aviso padrao 15"); T.eq(H.env.FarolDB.warnings.remindMin, 15)
         H:slash("aviso padrao 4"); T.has(H:lastMsg(), "use 2, 5, 10, 15 ou 30")
-        local B = Mock.new():login({ warnings = { remindMin = 7 } })
+        local B = Mock.new():login(NoHub({ warnings = { remindMin = 7 } }))
         T.eq(B.env.FarolDB.warnings.remindMin, 30, "invalid saved default falls back to 30")
     end },
 
     { "talent and rank warnings can be turned off", function(T, Mock)
-        local H = Mock.new():login({ warnings = { talents = false, ranks = false } }); fixGear(H)
+        local H = Mock.new():login(NoHub({ warnings = { talents = false, ranks = false } })); fixGear(H)
         H.talentPoints = 3; H.actions = { [1] = { "spell", 133 } }
         H:event("ACTIONBAR_SLOT_CHANGED"); H:update(6)
         T.eq(H.warnSounds, 0)

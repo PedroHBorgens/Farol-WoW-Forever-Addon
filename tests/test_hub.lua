@@ -337,6 +337,32 @@ return {
         T.ok(not d.tabs.bar:IsShown() and not d.pages.warnings:IsShown(), "cards hidden outside the hub")
     end },
 
+    { "3.33: warning and alarm popups in the hub look (title + detail, level stripe, type icon); simple style unchanged", function(T, Mock)
+        local H = Mock.new({ locale = "ptBR" }); H:login({ hub = true })
+        H:update(1) -- o simulador começa com durabilidade baixa: um aviso
+        local P = H.env.FarolWarnPopup
+        T.ok(P and P:IsShown(), "warning shown")
+        T.ok(P.farolPanels and P.farolPanels.pbg.bg:IsShown(), "Farol frame drawn"); T.ok(P.farolPopupIcon:IsShown())
+        T.ok(P.farolStripe:IsShown() and P.farolKind:IsShown(), "level stripe and type icon")
+        T.eq(P.farolKind._texture, "Interface\\Icons\\Trade_BlackSmithing")
+        T.has(H:text(P.text), "\n", "title and detail on two lines")
+        T.eq(P.title._anchorPoint, "TOPLEFT")
+        H.talentPoints = 1; H:update(1)
+        T.has(H:text(P.title), "(2)", "two warnings together")
+        local row = P.rows[2]
+        T.ok(row.farolStripe:IsShown() and row.farolKind:IsShown(), "each row has its stripe and icon")
+        H:slash("central off"); H:update(1); H.talentPoints = 2; H:update(1)
+        T.ok(not P.farolPanels.pbg.bg:IsShown(), "simple style: the usual popup"); T.ok(not row.farolStripe:IsShown())
+        T.eq(P.title._anchorPoint, "TOP")
+        -- alarme
+        local A = Mock.new({ locale = "ptBR" }); A:login({ hub = true }); A:slash("alarme add 07:30 Raide da guilda")
+        A:update(1); A.clock.hour, A.clock.min = 7, 30; A:update(1)
+        local AP = A.env.FarolAlarmPopup
+        T.ok(AP and AP:IsShown(), "alarm ringing")
+        T.eq(A:text(AP.farolPanels["text:time"].fs), "07:30"); T.eq(A:text(AP.text), "Raide da guilda")
+        T.has(A:text(AP.farolPanels["text:kind"].fs), "tocando agora"); T.ok(AP.farolPanels.pbg.bg:IsShown())
+    end },
+
     { "saved value is validated; English texts; language dropdown", function(T, Mock)
         for _, bad in ipairs({ "sim", 1, 0 / 0, {} }) do
             local X = Mock.new():login({ hub = bad })

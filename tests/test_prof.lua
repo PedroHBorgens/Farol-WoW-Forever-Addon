@@ -1,6 +1,7 @@
 -- Profissões: item da barra, tooltip, aviso "procure um instrutor", API moderna e clássica, valores ruins.
 -- Professions: bar item, tooltip, "find a trainer" warning, modern and classic APIs, bad values.
 
+local function NoHub(saved) saved = saved or {}; if saved.hub == nil then saved.hub = false end; return saved end -- estilo simples (a Central tem teste próprio)
 local function fixGear(H)
     H.durability = { [1] = { 100, 100 } }
     H:event("UPDATE_INVENTORY_DURABILITY")
@@ -9,7 +10,7 @@ end
 local function setup(Mock, opts, saved)
     local H = Mock.new(opts)
     if opts and opts.profs then H.profs = opts.profs end
-    H:login(saved); fixGear(H)
+    H:login(NoHub(saved)); fixGear(H)
     H:update(1)
     return H
 end

@@ -2,6 +2,7 @@
 -- Ammo and reagents: count per class, colors from the chosen limits, optional warning, validation.
 -- O Farol só CONTA (test_toc proíbe comprar, usar ou mover itens).
 
+local function NoHub(saved) saved = saved or {}; if saved.hub == nil then saved.hub = false end; return saved end -- estilo simples (a Central tem teste próprio)
 local function fixGear(H)
     H.durability = { [1] = { 100, 100 } }
     H:event("UPDATE_INVENTORY_DURABILITY")
@@ -10,7 +11,7 @@ end
 local function setup(Mock, class, saved, opts)
     local H = Mock.new(opts)
     H.class = class
-    H:login(saved); fixGear(H)
+    H:login(NoHub(saved)); fixGear(H)
     H:slash("show municao"); H:update(1)
     return H
 end
@@ -36,7 +37,7 @@ end
 return {
     { "hunter: ammo count with colors from the limits (normal, yellow, red)", function(T, Mock)
         local H = Mock.new(); H.class = "HUNTER"; H.ammo = 842
-        H:login(); fixGear(H); H:update(1)
+        H:login(NoHub()); fixGear(H); H:update(1)
         T.hasnt(H:bar(), "Munição", "off by default")
         H:slash("show municao"); H:update(1)
         T.has(H:bar(), "Munição 842"); T.hasnt(cellText(H), "|cff", "normal color above 400")
@@ -49,7 +50,7 @@ return {
 
     { "mage: each reagent with its own color; classes without reagents hide the item", function(T, Mock)
         local H = Mock.new(); H.class = "MAGE"; H.itemCounts = { [17020] = 8, [17031] = 2, [17032] = 1 }
-        H:login(); fixGear(H); H:slash("show municao"); H:update(1)
+        H:login(NoHub()); fixGear(H); H:slash("show municao"); H:update(1)
         T.has(H:barRaw(), "Pó Arcano |cffffff3a8|r · Runas |cffff66663|r")
         local W = setup(Mock, "WARRIOR")
         T.hasnt(W:bar(), "Munição"); T.hasnt(W:bar(), "Pó")
@@ -118,7 +119,7 @@ return {
         local w = H.env.FarolDB.warnings
         T.eq(w.ammoYellow, 400); T.eq(w.ammoRed, 200); T.eq(w.reagYellow, 10); T.eq(w.reagRed, 5); T.eq(w.ammo, false)
         local C = Mock.new(); C.class = "MAGE"
-        C:login(nil, { supplySeen = { powder = true, evil = true, runes = "sim" } })
+        C:login(NoHub(nil), { supplySeen = { powder = true, evil = true, runes = "sim" } })
         T.eq(C.env.FarolCharDB.supplySeen.powder, true)
         T.eq(C.env.FarolCharDB.supplySeen.evil, nil); T.eq(C.env.FarolCharDB.supplySeen.runes, nil)
         H.ammo = 0 / 0; H:update(1); T.hasnt(H:bar(), "nan")

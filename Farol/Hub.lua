@@ -646,6 +646,45 @@ end
 
 Kit.FitPair = FitPair
 
+-- Moldura das janelinhas (aviso e alarme, 3.33): fundo escuro, borda dourada e faixa de cima com o ícone do Farol,
+-- como a Central. on = false devolve o visual de sempre (fundo de diálogo do jogo).
+function Kit.Popup(frame, on, w, h, glow)
+    if frame.SetBackdropColor then pcall(frame.SetBackdropColor, frame, 1, 1, 1, on and 0 or 1) end
+    if frame.SetBackdropBorderColor then pcall(frame.SetBackdropBorderColor, frame, 1, 1, 1, on and 0 or 1) end
+    if frame.farolBacking then if on then frame.farolBacking:Hide() else frame.farolBacking:Show() end end
+    if not frame.farolPopupIcon then
+        frame.farolPopupIcon = frame:CreateTexture(nil, "OVERLAY")
+        frame.farolPopupIcon:SetSize(20, 20)
+        frame.farolPopupIcon:SetTexture("Interface\\AddOns\\Farol\\Media\\Farol")
+    end
+    if not on then
+        frame.farolPopupIcon:Hide()
+        Kit.ShowPanels(frame, false)
+        return
+    end
+    local back = Kit.Panel(frame, "pbg", 0, 0, w, h)
+    back.title:SetText(""); back.sub:SetText("")
+    Fill(back.bg, 0.07, 0.06, 0.045, 0.97)
+    local r, g, b = 0.6, 0.47, 0.2
+    if glow then r, g, b = 1, 0.82, 0.2 end -- alarme tocando: borda mais clara
+    for _, edge in ipairs({ back.top, back.bottom, back.left, back.right }) do Fill(edge, r, g, b, 1) end
+    local top = Kit.Panel(frame, "ptop", 0, 0, w, 32)
+    top.title:SetText(""); top.sub:SetText("")
+    Fill(top.bg, 0.16, 0.12, 0.07, 0.95)
+    if top.bg.SetDrawLayer then pcall(top.bg.SetDrawLayer, top.bg, "BACKGROUND", 2) end -- por cima do fundo
+    Kit.ShowPanels(frame, true)
+    frame.farolPopupIcon:ClearAllPoints(); frame.farolPopupIcon:SetPoint("TOPLEFT", 10, -6)
+    frame.farolPopupIcon:Show()
+end
+
+-- Faixa colorida do nível do aviso (cor tirada da paleta ns.C, que respeita a opção de daltonismo).
+function Kit.ColorOf(code)
+    local hex = type(code) == "string" and string.match(code, "^|c%x%x(%x%x%x%x%x%x)")
+    if not hex then return 1, 0.82, 0.2 end
+    return tonumber(string.sub(hex, 1, 2), 16) / 255, tonumber(string.sub(hex, 3, 4), 16) / 255, tonumber(string.sub(hex, 5, 6), 16) / 255
+end
+Kit.Fill = Fill
+
 -- Texto solto de um painel (some junto com os painéis fora da Central). justify: "LEFT" (padrão) ou "RIGHT".
 function Kit.Text(frame, key, template, x, y, w, justify)
     frame.farolPanels = frame.farolPanels or {}
